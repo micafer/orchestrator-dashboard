@@ -54,7 +54,7 @@
         capabilities:
           admin_endpoint:
             properties:
-              port: 9890
+              port: 9880
               protocol: tcp
         requirements:
           - host: obm_server 
@@ -120,4 +120,4 @@
 
     outputs:
       obm_url:
-        value: { concat: [ 'http://', get_attribute: [ obm_server, public_address, 0 ], ':9890/' ] }
+        value: { concat: [ 'http://', get_attribute: [ obm_server, public_address, 0 ], ':9880/' ] }
