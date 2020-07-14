@@ -34,10 +34,23 @@
                 <tr>
                   <td>{{ field }}</td>
                   <td>
-                    {% if value and "a href=" in value  %}
-                    {{ value }}
+                    {% if value %}
+                      {% if 'token' in value and 'user' in value and 'token_type' in value and value['token_type'] == 'private_key' %}
+
+                      <p><strong>Username</strong>: {{ value['user'] }}</p>
+                      <div class="d-none text-val">{{ value['token'] | replace("\\n", "\n") }}</div>
+                      <button class="btn btn-primary btn-sm" id="downloadBtn"><i class="fa fa-download"></i> Download</button>
+                      <button class="btn btn-success btn-sm" id="copyBtn"><i class="fa fa-copy"></i> Copy to clipboard</button>
+
+                      {% else %}
+                        {% if "{" in value %}
+                        <pre>{{ value | tojson_pretty() | safe | replace("\\n", "\n") }}</pre>
+                        {% else %}
+                        {{ value }}
+                        {% endif %}
+                      {% endif %}
                     {% else %}
-                    <pre>{{ value | tojson_pretty() | safe | replace("\\n", "\n") }}</pre>
+                    Empty
                     {% endif %}
                   </td>
                 </tr>
@@ -61,5 +74,48 @@
     }],
     "order": [[ 1, "asc" ]]
 });
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+document.getElementById("downloadBtn").addEventListener("click", function(){
+    var text = document.getElementById("text-val").innerHTML;
+    var filename = "key.pem";
+
+    download(filename, text);
+}, false);
+
+
+function copyToClipBoard(text) {
+  // Create a new textarea element and give it id='temp_element'
+  var textarea = document.createElement('textarea');
+  textarea.id = 'temp_element';
+  textarea.style.height = 0;
+  document.body.appendChild(textarea);
+  textarea.value = text
+  var selector = document.querySelector('#temp_element')
+  selector.select()
+  document.execCommand('copy')
+  // Remove the textarea
+  document.body.removeChild(textarea)
+}
+
+document.getElementById("copyBtn").addEventListener("click", function(){
+  var text = document.getElementById("text-val").innerHTML;
+
+
+  copyToClipBoard(text);
+}, false);
+
 </script>
 {% endblock %}
