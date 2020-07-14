@@ -107,6 +107,8 @@
                       <br> Key: 
                       <div class="d-none" id="text-val">{{ vminfo['disk.0.os.credentials.private_key'] }}</div>
                       <button class="btn btn-primary btn-sm" id="downloadBtn"><i class="fa fa-download"></i> Download</button>
+                      <button class="btn btn-success btn-sm" id="copyBtn"><i class="fa fa-copy"></i> Copy to clipboard</button>
+
                       {% set _dummy=vminfo.pop('disk.0.os.credentials.private_key') %}
                     {% endif %}
                   </td>
@@ -267,6 +269,29 @@ document.getElementById("downloadBtn").addEventListener("click", function(){
 
     download(filename, text);
 }, false);
+
+
+function copyToClipBoard(text) {
+  // Create a new textarea element and give it id='temp_element'
+  var textarea = document.createElement('textarea');
+  textarea.id = 'temp_element';
+  textarea.style.height = 0;
+  document.body.appendChild(textarea);
+  textarea.value = text
+  var selector = document.querySelector('#temp_element')
+  selector.select()
+  document.execCommand('copy')
+  // Remove the textarea
+  document.body.removeChild(textarea)
+}
+
+document.getElementById("copyBtn").addEventListener("click", function(){
+  var text = document.getElementById("text-val").innerHTML;
+
+
+  copyToClipBoard(text);
+}, false);
+
 
 $('#tableFields').dataTable( {
     "paging": false,
