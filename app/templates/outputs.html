@@ -38,7 +38,7 @@
                       {% if 'token' in value and 'user' in value and 'token_type' in value and value['token_type'] == 'private_key' %}
 
                       <p><strong>Username</strong>: {{ value['user'] }}</p>
-                      <div class="d-none text-val">{{ value['token'] | replace("\\n", "\n") }}</div>
+                      <div class="d-none" id="text-val">{{ value['token'] | replace("\\n", "\n") }}</div>
                       <button class="btn btn-primary btn-sm" id="downloadBtn"><i class="fa fa-download"></i> Download</button>
                       <button class="btn btn-success btn-sm" id="copyBtn"><i class="fa fa-copy"></i> Copy to clipboard</button>
 
