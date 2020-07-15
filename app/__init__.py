@@ -429,8 +429,8 @@ def create_app(oidc_blueprint=None):
     @app.route('/sites/<vo>')
     def getsites(vo=None):
         res = ""
-        appdb_sites = appdb.get_sites(vo).items()
-        for site_name, (_, critical, _) in appdb_sites:
+        appdb_sites = appdb.get_sites(vo)
+        for site_name, (_, critical, _) in appdb_sites.items():
             if critical:
                 critical = " (WARNING: %s state!)" % critical
             res += '<option name="selectedSite" value=%s>%s%s</option>' % (site_name, site_name, critical)
