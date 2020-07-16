@@ -54,12 +54,12 @@ def _getStaticSitesInfo():
     if g.settings.static_sites_url:
         response = requests.get(g.settings.static_sites_url)
         if not response.ok:
-            return {}
+            return []
         else:
             try:
                 sites = response.json()
             except Exception:
-                sites = {}
+                sites = []
             g.settings.static_sites = sites
             return sites
 
