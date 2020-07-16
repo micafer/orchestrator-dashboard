@@ -1,0 +1,64 @@
+[
+    {
+        "name": "CESNET-MCC",
+        "url": "https://identity.cloud.muni.cz",
+        "id": "11478G0",
+        "vos": {
+            "eosc-synergy.eu": "d85ca93c937a4a97adf134ec2593296d",
+            "demo.fedcloud.egi.eu": "demo.fedcloud.egi.eu",
+            "biomed": "biomed",
+            "vo.indigo-datacloud.eu": "vo.indigo-datacloud.eu"
+        }
+    },
+    {
+        "name": "NCG-INGRID-PT",
+        "url": "https://stratus.ncg.ingrid.pt:5000",
+        "id": "12005G0",
+        "vos": {
+            "eosc-synergy.eu": "ddf0c468c8af4e0bbb9808bfc0288381",
+            "covid19.eosc-synergy.eu": "05e52356addc44e18ef2bd14f2e2f67d"
+        }
+    },
+    {
+        "name": "CESGA",
+        "url": "https://fedcloud-osservices.egi.cesga.es:5000",
+        "id": "11548G0",
+        "vos": {
+            "eosc-synergy.eu": "57bcb0efcba4467fa225add92fdc194c",
+            "covid19.eosc-synergy.eu": "972298c557184a2192ebc861f3184da8"
+        }
+    },
+    {
+        "name": "IISAS-FedCloud",
+        "url": "https://nova.ui.savba.sk:5000",
+        "id": "10963G0",
+        "vos": {},
+        "api_version": "1.1"
+    },
+    {
+        "name": "IFCA-LCG2",
+        "url": "https://api.cloud.ifca.es:5000",
+        "id": "7513G0",
+        "vos": {
+            "vo.lifewatch.eu": "ac7bc26131d248ecb6add521e648c331",
+            "eosc-synergy.eu": "VO:eosc-synergy.eu",
+            "demo.fedcloud.egi.eu": "VO:demo.fedcloud.egi.eu"
+        }
+    },
+    {
+        "name": "IISAS-GPUCloud",
+        "url": "https://keystone3.ui.savba.sk:5000",
+        "id": "10961G0",
+        "vos": {},
+        "api_version": "1.1"
+    },
+    {
+        "name": "BIFI",
+        "url": "https://colossus.cesar.unizar.es:5000",
+        "id": "12249G0",
+        "vos": {
+            "eosc-synergy.eu": "fdfa9b81582447729f16de6cf61b16e4",
+            "covid19.eosc-synergy.eu": "36b6d10a0c194fa8991e7e8d15297478"
+        }
+    }
+]
