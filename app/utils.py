@@ -52,8 +52,16 @@ def _getStaticSitesInfo():
     if g.settings.static_sites:
         return g.settings.static_sites
     if g.settings.static_sites_url:
-        # TODO: Donwload and parse
-        return {}
+        response = requests.get(g.settings.static_sites_url)
+        if not response.ok:
+            return {}
+        else:
+            try:
+                sites = response.json()
+            except Exception:
+                sites = {}
+            g.settings.static_sites = sites
+            return sites
 
 
 def getStaticSitesProjectIDs(serviceid):
