@@ -15,9 +15,9 @@
       number_cpus:
         type: integer
         description: number of cpus required for the instance
-        default: 1
+        default: 4
         constraints:
-        - valid_values: [ 1, 2, 4, 8, 16, 32 ]
+        - valid_values: [ 2, 4, 8, 16, 32 ]
       memory_size:
         type: string
         description: ram memory required for the instance
@@ -27,10 +27,25 @@
       disk_size:
         type: string
         #type: scalar-unit.size
-        description: Size of the disk to be attached to the instance
+        description: Size of the first disk to be attached to the instance
         default: 10 GB
         constraints:
         - valid_values: [ 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+      volume_id:
+        type: string
+        description: "Or URL of the first disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
+        default: ""
+      disk_size2:
+        type: string
+        #type: scalar-unit.size
+        description: Size of the second disk to be attached to the instance
+        default: 10 GB
+        constraints:
+        - valid_values: [ 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+      volume_id2:
+        type: string
+        description: "Or URL of the second disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
+        default: ""
 
     node_templates:
 
@@ -62,6 +77,12 @@
                 ssh_port:
                   protocol: tcp
                   source: 22
+                https_port:
+                  protocol: tcp
+                  source: 443
+                postgres_port:
+                  protocol: tcp
+                  source: 5432
           host:
            properties:
              num_cpus: { get_input: number_cpus }
@@ -71,17 +92,31 @@
               type: linux
         requirements:
         - local_storage:
-            node: my_block_storage           
+            node: my_block_storage
             relationship:
               type: AttachesTo
               properties:
                 location: /mnt/disk
                 # device: hdb
-
+        - local_storage:
+            node: my_block_storage2    
+            relationship:
+              type: AttachesTo
+              properties:
+                location: /mnt/disk2
+                # device: hdc
+  
       my_block_storage:
         type: tosca.nodes.BlockStorage
         properties:
          size: { get_input: disk_size }
+         volume_id: { get_input: volume_id }
+
+      my_block_storage2:
+        type: tosca.nodes.BlockStorage
+        properties:
+         size: { get_input: disk_size2 }
+         volume_id: { get_input: volume_id2 }
 
     outputs:
       obm_url:

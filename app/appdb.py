@@ -135,7 +135,7 @@ def get_images(name, vo):
 
 
 def get_project_ids(service_id):
-    projects = []
+    projects = {}
     # Until it is on the prod instance use the Devel one
 
     deb_url = "https://appdb-dev.marie.hellasgrid.gr"
@@ -147,6 +147,6 @@ def get_project_ids(service_id):
             shares = [data['virtualization:provider']['provider:shares']['vo:vo']]
 
         for vo in shares:
-            projects.append((vo["#text"], vo['@projectid']))
+            projects[vo["#text"]] = vo['@projectid']
 
     return projects

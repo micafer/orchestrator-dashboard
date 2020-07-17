@@ -25,22 +25,34 @@ class TestUtils(unittest.TestCase):
     """Class to test the Utils functions."""
 
     def test_getUserVOs(self):
-        entitlements = ['urn:mace:egi.eu:group:vo.test.egi.eu:role=member#aai.egi.eu']
+        entitlements = ['urn:mace:egi.eu:group:vo.test.egi.eu:role=member#aai.egi.eu',
+                        'urn:mace:egi.eu:group:vo.test2.egi.eu:role=member#aai.egi.eu']
         res = utils.getUserVOs(entitlements)
-        self.assertEquals(res, ['vo.test.egi.eu'])
+        self.assertEquals(res, ['vo.test.egi.eu', 'vo.test2.egi.eu'])
 
+    @patch("app.utils.getStaticSitesProjectIDs")
     @patch("app.utils.getCachedSiteList")
     @patch("app.utils._getStaticSitesInfo")
-    def test_getUserAuthData(self, getStaticSitesInfo, getCachedSiteList):
+    @patch("app.appdb.get_project_ids")
+    def test_getUserAuthData(self, get_project_ids, getStaticSitesInfo, getCachedSiteList, getStaticSitesProjectIDs):
         cred = MagicMock()
         cred.get_cred.return_value = {"project": "project_name"}
         getCachedSiteList.return_value = {'CESGA': ('https://fedcloud-osservices.egi.cesga.es:5000', '', '11548G0')}
         getStaticSitesInfo.return_value = [{"name": "static_site_name", "api_version": "1.1"}]
+        get_project_ids.return_value = {"vo_name": "project_id"}
+        getStaticSitesProjectIDs.return_value = {"vo_name_st": "project_id_st"}
+
         res = utils.getUserAuthData("token", cred, "user")
         self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = ost1; type = OpenStack;"
                                 " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
                                 " host = https://fedcloud-osservices.egi.cesga.es:5000; password = 'token';"
                                 " domain = project_name"))
+
+        res = utils.getUserAuthData("token", cred, "user", "vo_name", "CESGA")
+        self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = ost1; type = OpenStack;"
+                                " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
+                                " host = https://fedcloud-osservices.egi.cesga.es:5000; password = 'token';"
+                                " domain = project_id"))
 
     @patch("app.utils.getCachedSiteList")
     @patch('libcloud.compute.drivers.openstack.OpenStackNodeDriver')

@@ -136,7 +136,9 @@ class IMDashboardTests(unittest.TestCase):
         self.oauth.session.token = {'expires_in': 500, 'access_token': 'token'}
         account_info = MagicMock()
         account_info.ok = True
-        account_info.json.return_value = {"sub": "userid", "name": "username"}
+        account_info.json.return_value = {"sub": "userid", "name": "username",
+                                          "eduperson_entitlement": ["urn:mace:egi.eu:group:VO_NAME:role=r#aai.egi.eu",
+                                                                    "urn:mace:egi.eu:group:vo:role=r#aai.egi.eu"]}
         self.oauth.session.get.return_value = account_info
         avatar.return_value = ""
         return self.client.get('/')
@@ -349,7 +351,7 @@ class IMDashboardTests(unittest.TestCase):
     def test_write_creds(self, get_project_ids, flash, get_cred, avatar):
         self.login(avatar)
         get_cred.return_value = {"project": "PROJECT_NAME"}
-        get_project_ids.return_value = [("VO_NAME", "PROJECT_ID")]
+        get_project_ids.return_value = {"VO_NAME": "PROJECT_ID"}
         res = self.client.get('/write_creds?service_id=static_id')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'PROJECT_NAME', res.data)

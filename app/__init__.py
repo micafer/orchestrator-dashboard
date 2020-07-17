@@ -503,15 +503,17 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def createdep():
 
+        form_data = request.form.to_dict()
+        vo = form_data['extra_opts.selectedVO']
+        site = form_data['extra_opts.selectedSite']
+
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"], vo, site)
 
         app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
-
-            form_data = request.form.to_dict()
 
             if form_data['extra_opts.selectedImage'] != "":
                 image = "appdb://%s/%s?%s" % (form_data['extra_opts.selectedSite'],
@@ -573,14 +575,18 @@ def create_app(oidc_blueprint=None):
 
         if request.method == 'GET':
             res = {}
-            projects = []
+            projects = {}
             try:
                 res = cred.get_cred(servicename, session["userid"])
                 projects = utils.getStaticSitesProjectIDs(serviceid)
-                projects.extend(appdb.get_project_ids(serviceid))
+                projects.update(appdb.get_project_ids(serviceid))
 
                 if session["vos"]:
-                    projects = [project for project in projects if project[0] in session["vos"]]
+                    filter_projects = {}
+                    for vo, project in projects.items():
+                        if vo in session["vos"]:
+                            filter_projects[vo] = project
+                    projects = filter_projects
             except Exception as ex:
                 flash("Error reading credentials %s!" % ex, 'error')
 

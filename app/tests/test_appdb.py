@@ -117,8 +117,8 @@ class TestAppDB(unittest.TestCase):
                     </virtualization:provider>"""
         appdb_call.return_value = xmltodict.parse(shares.replace('\n', ''))
         res = appdb.get_project_ids("11548G0")
-        self.assertEquals(res, [("vo.access.egi.eu", "3a8e9d966e644405bf19b536adf7743d"),
-                                ("covid-19.eosc-synergy.eu", "972298c557184a2192ebc861f3184da8")])
+        self.assertEquals(res, {"vo.access.egi.eu": "3a8e9d966e644405bf19b536adf7743d",
+                                "covid-19.eosc-synergy.eu": "972298c557184a2192ebc861f3184da8"})
 
 
 if __name__ == '__main__':

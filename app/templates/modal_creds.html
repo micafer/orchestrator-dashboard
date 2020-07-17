@@ -15,7 +15,7 @@
           {% if projects %}
           <button type="button" class="col-sm-1 btn dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <div class="dropdown-menu" aria-labelledby="myInputId">
-            {% for vo, project_id in projects %}
+            {% for vo, project_id in projects.items() %}
             <a class="dropdown-item" data-value="{{project_id}}" href="#">{{vo}}</a>
             {% endfor %}
           </div>
