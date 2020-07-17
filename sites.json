@@ -42,7 +42,8 @@
         "vos": {
             "vo.lifewatch.eu": "ac7bc26131d248ecb6add521e648c331",
             "eosc-synergy.eu": "VO:eosc-synergy.eu",
-            "demo.fedcloud.egi.eu": "VO:demo.fedcloud.egi.eu"
+            "demo.fedcloud.egi.eu": "VO:demo.fedcloud.egi.eu",
+            "vo.access.egi.eu": "999f045cb1ff4684a15ebb338af69460"
         }
     },
     {

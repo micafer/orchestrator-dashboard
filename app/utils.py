@@ -51,7 +51,7 @@ CACHE_DELAY = 3600
 def _getStaticSitesInfo():
     if g.settings.static_sites:
         return g.settings.static_sites
-    if g.settings.static_sites_url:
+    elif g.settings.static_sites_url:
         response = requests.get(g.settings.static_sites_url)
         if not response.ok:
             return []
@@ -62,6 +62,8 @@ def _getStaticSitesInfo():
                 sites = []
             g.settings.static_sites = sites
             return sites
+    else:
+        return []
 
 
 def getStaticSitesProjectIDs(serviceid):
@@ -100,12 +102,17 @@ def get_ost_image_url(site_name):
 def get_site_images(site_name, vo, access_token, cred, userid):
     try:
         domain = None
+        sites = getCachedSiteList()
+        site_url, _, site_id = sites[site_name]
+
         creds = cred.get_cred(site_name, userid)
         if creds and "project" in creds and creds["project"]:
             domain = creds["project"]
-
-        sites = getCachedSiteList()
-        site_url, _, _ = sites[site_name]
+        else:
+            project_ids = getStaticSitesProjectIDs(site_id)
+            project_ids.update(appdb.get_project_ids(site_id))
+            if vo in project_ids:
+                domain = project_ids[vo]
 
         OpenStack = get_driver(Provider.OPENSTACK)
         driver = OpenStack('egi.eu', access_token,

@@ -53,6 +53,7 @@ class TestUtils(unittest.TestCase):
                                 " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
                                 " host = https://fedcloud-osservices.egi.cesga.es:5000; password = 'token';"
                                 " domain = project_id"))
+        self.assertEqual(cred.write_creds.call_args_list[0][0], ('CESGA', 'user', {'project': 'project_id'}))
 
     @patch("app.utils.getCachedSiteList")
     @patch('libcloud.compute.drivers.openstack.OpenStackNodeDriver')
