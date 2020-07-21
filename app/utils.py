@@ -189,7 +189,8 @@ def getUserAuthData(access_token, cred, userid, vo=None, selected_site=None):
         if not projectid and creds and "project" in creds and creds["project"]:
             projectid = creds["project"]
 
-        res += "; domain = %s" % projectid
+        if projectid:
+            res += "; domain = %s" % projectid
         if site_name in api_versions:
             res += "; api_version  = %s" % api_versions[site_name]
 
