@@ -1,0 +1,28 @@
+inputs:
+    wn_num:
+      tab: HW Data
+
+    fe_cpus:
+      tab: HW Data
+
+    fe_mem:
+      tab: HW Data
+
+    wn_cpus:
+      tab: HW Data
+
+    wn_mem:
+      tab: HW Data
+
+    admin_token:
+      tab: Kubernetes Data
+
+    kube_version:
+      tab: Kubernetes Data
+
+    install_kubeapps:
+      tab: Kubernetes Data
+
+tabs:
+  - HW Data
+  - Kubernetes Data
