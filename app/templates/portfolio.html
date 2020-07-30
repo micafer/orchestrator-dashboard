@@ -21,8 +21,12 @@
             </div>
             <div class="wrapper">
                 <img class="card-img-bottom img-fluid" src="{{tosca['metadata']['icon']}}" alt="Card image cap">
-		{% if tosca['metadata']['tag'] is defined %}
-                   <div class="corner-ribbon bottom-right sticky green shadow">{{tosca['metadata']['tag']}}</div>
+                {% if tosca['metadata']['tag'] is defined %}
+                  {% if tosca['metadata']['tag'] == "elastic" %}
+                    <div class="corner-ribbon bottom-right sticky orange shadow">{{tosca['metadata']['tag']}}</div>
+                  {% else %}
+                    <div class="corner-ribbon bottom-right sticky green shadow">{{tosca['metadata']['tag']}}</div>
+                  {% endif %}
                 {% endif %}
             </div>
             <div class="card-img-overlay text-center">
