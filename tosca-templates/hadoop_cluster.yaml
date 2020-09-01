@@ -65,7 +65,7 @@ topology_template:
                 source: 8088
               dfs_port:
                 protocol: tcp
-                source: 50070
+                source: 9870
         host:
           properties:
             num_cpus: { get_input: fe_cpus }
@@ -101,6 +101,6 @@ topology_template:
     cluster_creds:
       value: { get_attribute: [ hadoop_server, endpoint, credential, 0 ] }
     dfs_url:
-      value: { concat: [ 'http://', get_attribute: [ hadoop_server, public_address, 0 ], ':50070' ] }
+      value: { concat: [ 'http://', get_attribute: [ hadoop_server, public_address, 0 ], ':9870' ] }
     yarn_url:
       value: { concat: [ 'http://', get_attribute: [ hadoop_server, public_address, 0 ], ':8088' ] }
