@@ -5,7 +5,7 @@ imports:
 
 metadata:
   display_name: Launch a Hadoop Virtual Cluster
-  icon: https://github.com/grycap/im-dashboard/raw/master/tosca-templates/images/hadoop.jpg
+  icon: https://github.com/grycap/im-dashboard/raw/master/app/static/images/hadoop.jpg
  
 description: TOSCA template for launching a Hadoop Cluster.
 
