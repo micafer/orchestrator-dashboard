@@ -116,7 +116,7 @@ def create_app(oidc_blueprint=None):
     @app.route('/login')
     def login():
         session.clear()
-        return render_template('home.html')
+        return render_template('home.html', oidc_name=settings.oidcName)
 
     @app.route('/')
     def home():
@@ -168,7 +168,7 @@ def create_app(oidc_blueprint=None):
             return render_template('portfolio.html', templates=toscaInfo)
         else:
             flash("Error getting User info: \n" + account_info.text, 'error')
-            return render_template('home.html')
+            return render_template('home.html', oidc_name=settings.oidcName)
 
     @app.route('/vminfo/<infid>/<vmid>')
     @authorized_with_valid_token

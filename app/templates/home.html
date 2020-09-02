@@ -29,7 +29,7 @@ hr.style-seven:before { /* Not really supposed to work, but does */
      <div class="col-lg-8">
      <h1 class="display-4">Infrastructure Manager Dashboard.</p>
      <p>
-        <a class="btn btn-primary btn-lg" role="button" href="{{ url_for("oidc.login") }}">Login with OIDC <i class="fas fa-sign-in-alt"></i></a>
+        <a class="btn btn-primary btn-lg" role="button" href="{{ url_for("oidc.login") }}">Login with {{oidc_name}} <i class="fas fa-sign-in-alt"></i></a>
      </p>
      </div>
      <div class="col-lg-4">
@@ -44,7 +44,7 @@ hr.style-seven:before { /* Not really supposed to work, but does */
             <div class="col-lg-3"></div>
             <div class="col-lg-6">
             <h2 class="section-heading text-center">
-                Topologies
+                Available Topologies
             </h2>
             <hr class="style-seven"/>
             </div>
@@ -61,8 +61,8 @@ hr.style-seven:before { /* Not really supposed to work, but does */
             </ul>
             <ul class="list-group list-group-horizontal mx-auto">
                 <li class="list-group-item"><a href="https://galaxyproject.org/" target="_blank"><img src="{{ url_for('static', filename='images/galaxy.png') }}" alt="Galaxy"></a></li>
-                <li class="list-group-item"><a href="https://openbiomaps.org/" target="_blank"><img src="{{ url_for('static', filename='images/obm.png') }}" alt="OpenBioMaps"></a></li>
                 <li class="list-group-item"><a href="http://ophidia.cmcc.it/" target="_blank"><img src="{{ url_for('static', filename='images/ophidia.png') }}" alt="Ophidia"></a></li>
+                <li class="list-group-item" style="width: 291px; text-align: center; font-size: x-large;"><br/>and more ...</li>
             </ul>
             </div>
             <div class="col-lg-1"></div>
@@ -99,7 +99,8 @@ hr.style-seven:before { /* Not really supposed to work, but does */
                     in <a href="http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html" target="_blank">
                     TOSCA (Simple Profile in YAML version 1.0)</a>. Then the IM service orchestrates the whole process: deployment of
                     cloud resources, configuration, software installation, monitoring and update of the virtual infrastructures.
-                    If you want to know how to use it see <a href="https://youtu.be/y2MWG52oI9w" target="_blank">this video</a>.
+                    If you want to know how to use it see <a href="https://youtu.be/y2MWG52oI9w" target="_blank">this video</a>. More
+                    information about IM at <a href="https://www.grycap.upv.es/im" target="_blank">IM Webpage</a>
                 </h5>
                 </div>
             </div>
