@@ -1,28 +1,112 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!--style>
-.jumbotron{
- border: 2px solid black;
- padding: 25px;
+<style>
+hr.style-seven {
+    overflow: visible; /* For IE */
+    height: 30px;
+    border-style: solid;
+    border-color: darkgrey;
+    border-width: 1px 0 0 0;
+    border-radius: 20px;
 }
-</style-->
+hr.style-seven:before { /* Not really supposed to work, but does */
+    display: block;
+    content: "";
+    height: 30px;
+    margin-top: -31px;
+    border-style: solid;
+    border-color: darkgrey;
+    border-width: 0 0 1px 0;
+    border-radius: 20px;
+}
+</style>
 
 <div class = "jumbotron jumbotron-fluid">
   <div class="container">
     {% include 'flashed_messages.html' %}
-    <div class="row">
-     <div class="col-lg-7">
-     <h1 class="display-3">Welcome!</h1>
-     <p>This is the Infrastructure Manager Dashboard.</p>
+    <div class="row p-5 ">
+     <div class="col-lg-8">
+     <h1 class="display-4">Infrastructure Manager Dashboard.</p>
      <p>
-        <a class="btn btn-primary btn-lg" role="button" href="{{ url_for("oidc.login") }}">Login with OIDC &raquo;</a>
+        <a class="btn btn-primary btn-lg" role="button" href="{{ url_for("oidc.login") }}">Login with {{oidc_name}} <i class="fas fa-sign-in-alt"></i></a>
      </p>
      </div>
-     <div class="col-lg-5">
+     <div class="col-lg-4">
 	    <img src="static/images/im-logo.png" width="350px">
      </div>
   </div>
 </div>
+
+<section id="about" class="p-4 bg-dark">
+    <div class="container text-light">
+        <div class="row">
+            <div class="col-lg-3"></div>
+            <div class="col-lg-6">
+            <h2 class="section-heading text-center">
+                Available Topologies
+            </h2>
+            <hr class="style-seven"/>
+            </div>
+            <div class="col-lg-3"></div>
+        </div>
+
+        <div class="row text-dark">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-10">
+            <ul class="list-group list-group-horizontal mx-auto">
+                <li class="list-group-item"><a href="https://kubernetes.io/" target="_blank"><img src="{{ url_for('static', filename='images/kubernetes.png') }}" alt="Kubernetes"></a></li>
+                <li class="list-group-item"><a href="http://mesos.apache.org/" target="_blank"><img src="{{ url_for('static', filename='images/mesos.png') }}" alt="Mesos"></a></li>
+                <li class="list-group-item"><a href="https://slurm.schedmd.com/" target="_blank"><img src="{{ url_for('static', filename='images/slurm.png') }}" alt="SLURM"></a></li>
+            </ul>
+            <ul class="list-group list-group-horizontal mx-auto">
+                <li class="list-group-item"><a href="https://galaxyproject.org/" target="_blank"><img src="{{ url_for('static', filename='images/galaxy.png') }}" alt="Galaxy"></a></li>
+                <li class="list-group-item"><a href="http://ophidia.cmcc.it/" target="_blank"><img src="{{ url_for('static', filename='images/ophidia.png') }}" alt="Ophidia"></a></li>
+                <li class="list-group-item" style="width: 291px; text-align: center; font-size: x-large;"><br/>and more ...</li>
+            </ul>
+            </div>
+            <div class="col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3"></div>
+            <div class="col-lg-6">
+            <h5 class="text-center">
+                <br/>
+                If you need a new topology please contact us
+                (<a href="mailto:products@grycap.upv.es?subject=[IM Dashboard]" target="_self"><i class="fa fa-envelope"></i></a>)
+            </h5>
+            </div>
+            <div class="col-lg-3"></div>
+        </div>
+
+</section>
+
+
+       <!-- About Section -->
+
+      <section id="about" class="p-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3"></div>
+                <div class="col-lg-6">
+                <h2 class="section-heading text-center">About</h2>
+                <hr class="style-seven"/>
+                <h5 class="text-justify">
+                    The IM Dashboard is designed to enable non advanced users to launch complex virtual infrastructures on top of
+                    <a href="https://www.egi.eu/services/cloud-compute/" target="_blank">EGI Cloud Computing</a> resources.
+                    Only with a few clicks the user can deploy the set of available topologies expressed through templates written
+                    in <a href="http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html" target="_blank">
+                    TOSCA (Simple Profile in YAML version 1.0)</a>. Then the IM service orchestrates the whole process: deployment of
+                    cloud resources, configuration, software installation, monitoring and update of the virtual infrastructures.
+                    If you want to know how to use it see <a href="https://youtu.be/y2MWG52oI9w" target="_blank">this video</a>. More
+                    information about IM at <a href="https://www.grycap.upv.es/im" target="_blank">IM Webpage</a>
+                </h5>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
 {% endblock %}
 

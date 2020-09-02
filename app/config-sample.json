@@ -1,4 +1,5 @@
 {
+    "OIDC_NAME": "OIDC",
     "OIDC_CLIENT_ID": "my_client_id",
     "OIDC_CLIENT_SECRET": "my_client_secret",
     "OIDC_BASE_URL": "https://aai-dev.egi.eu/oidc",

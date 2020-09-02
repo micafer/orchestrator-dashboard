@@ -27,6 +27,7 @@ class Settings:
         self.toscaDir = config.get('TOSCA_TEMPLATES_DIR', '') + "/"
         self.toscaParamsDir = config.get('TOSCA_PARAMETERS_DIR', '') + "/"
         self.imUrl = config['IM_URL']
+        self.oidcName = config['OIDC_NAME']
         self.oidcUrl = config['OIDC_BASE_URL']
         self.tempSlamUrl = config.get('SLAM_URL') if config.get('SLAM_URL') else ""
         self.imConf = {'im_url': config.get('IM_URL')}
