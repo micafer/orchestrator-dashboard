@@ -8,7 +8,7 @@ description: >
 
 metadata:
   display_name: Deploy a Galaxy portal in a SLURM cluster
-  icon: https://github.com/grycap/im-dashboard/raw/master/tosca-templates/images/galaxy_slurm.png
+  icon: images/galaxy_slurm.png
 
 
 topology_template:

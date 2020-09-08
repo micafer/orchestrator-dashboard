@@ -7,7 +7,7 @@ description: Deploy a Mesos Cluster (with Marathon and Chronos frameworks) on to
 
 metadata:
   display_name: Deploy a Mesos cluster
-  icon: https://indigo-paas.cloud.ba.infn.it/public/images/apache-mesos-icon.png
+  icon: images/mesos.png
 
 topology_template:
 

@@ -8,7 +8,7 @@ description: >
 
 metadata:
   display_name: Deploy a Galaxy portal
-  icon: https://github.com/grycap/im-dashboard/raw/master/tosca-templates/images/galaxy.png
+  icon: images/galaxy.png
   tag: VM
 
 topology_template:

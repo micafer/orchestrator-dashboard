@@ -5,7 +5,7 @@ imports:
 
 metadata:
   display_name: Launch a OSCAR Virtual Cluster
-  icon: https://raw.githubusercontent.com/grycap/oscar/master/docs/source/images/oscar-logo.png
+  icon: images/oscar.png
 
 description: TOSCA template for launching a OSCAR Virtual Cluster.
 

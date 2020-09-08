@@ -4,12 +4,11 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 description: >
-  Launch a compute node getting the IP and SSH credentials to access via ssh and with pre-created users 
-  (Search passwords in /var/tmp/passwordfile_userXX)
+  Launch a compute node getting the IP and SSH credentials to access via ssh with an extra HD disk.
 
 metadata:
-  display_name: Start a virtual machine with users 
-  icon: images/vm-user-icon.png
+  display_name: Start a virtual machine with extra HD
+  icon: images/vm-icon-disk.png
   tag: VM
 
 topology_template:
@@ -31,23 +30,19 @@ topology_template:
       type: integer
       description: Number of VMs to be spawned
       default: 1
-    user_num:
-      type: integer
-      description: Number of users to be created in the VM
-      default: 1
+
+    storage_size:
+      type: scalar-unit.size
+      description: Size of the extra HD added to the instance
+      default: 30 GB
+      constraints:
+      - valid_values: [ 30 GB, 50 GB, 100 GB ]
+    mount_path:
+      type: string
+      description: Path to mount the extra disk
+      default: /mnt/disk
 
   node_templates:
-
-    create_users:
-      type: tosca.nodes.SoftwareComponent
-      requirements:
-        - host: simple_node 
-      interfaces:
-        Standard:
-          configure:
-            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/create_users.yml
-            inputs:
-              user_num: { get_input: user_num }
 
     simple_node:
       type: tosca.nodes.indigo.Compute
@@ -65,6 +60,25 @@ topology_template:
         os:
           properties:
             type: linux
+      # Add dummy task to activate context
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/dummy.yml
+      requirements:
+        - local_storage:
+            node: my_block_storage
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: { get_input: mount_path }
+                device: hdb
+
+    my_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: storage_size }
 
   outputs:
     node_ip:

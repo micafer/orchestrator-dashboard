@@ -9,7 +9,7 @@ description: >
 
 metadata:
   display_name: Start a EOSC-Synergy benchmark virtual machine
-  icon: https://github.com/grycap/im-dashboard/raw/master/tosca-templates/images/synergy-bnech.png
+  icon: images/synergy-bnech.png
   tag: VM
 
 topology_template:
