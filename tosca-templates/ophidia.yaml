@@ -7,7 +7,7 @@ description: TOSCA template for deploying an instance for Ophidia (on CentOS 7)
   
 metadata:
   display_name: Deploy a Ophidia cluster
-  icon: https://github.com/grycap/im-dashboard/raw/master/tosca-templates/images/ophidia.png
+  icon: images/ophidia.png
 
 topology_template:
   inputs:

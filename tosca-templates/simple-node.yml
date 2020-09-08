@@ -8,7 +8,7 @@ description: >
 
 metadata:
   display_name: Start a virtual machine
-  icon: https://indigo-paas.cloud.ba.infn.it/public/images/vm-icon.png
+  icon: images/vm-icon.png
   tag: VM
 
 topology_template:

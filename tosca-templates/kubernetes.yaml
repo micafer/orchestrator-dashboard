@@ -5,7 +5,7 @@ imports:
 
 metadata:
   display_name: Launch a Kubernetes Virtual Cluster
-  icon: https://github.com/grycap/im-dashboard/raw/master/tosca-templates/images/kubernetes.png
+  icon: images/kubernetes.png
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 

@@ -9,7 +9,7 @@ description: >
 
 metadata:
   display_name: SLURM virtual cluster
-  icon: https://github.com/grycap/im-dashboard/raw/master/tosca-templates/images/slurm.png
+  icon: images/slurm.png
 
 
 topology_template:

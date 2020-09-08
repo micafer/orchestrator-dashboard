@@ -9,7 +9,7 @@ description: >
 
 metadata:
   display_name: Start a virtual machine with users 
-  icon: https://github.com/grycap/im-dashboard/raw/master/tosca-templates/images/vm-user-icon.png
+  icon: images/vm-user-icon.png
   tag: VM
 
 topology_template:

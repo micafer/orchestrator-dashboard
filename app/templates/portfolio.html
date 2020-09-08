@@ -20,7 +20,7 @@
 		</h5>
             </div>
             <div class="wrapper">
-                <img class="card-img-bottom img-fluid" src="{{tosca['metadata']['icon']}}" alt="Card image cap">
+                <img class="card-img-bottom img-fluid" src="{% if tosca['metadata']['icon'].startswith('http') %}{{tosca['metadata']['icon']}}{% else %}{{ url_for('static', filename=tosca['metadata']['icon']) }}{% endif %}" alt="Card image cap">
                 {% if tosca['metadata']['tag'] is defined %}
                   {% if tosca['metadata']['tag'] == "elastic" %}
                     <div class="corner-ribbon bottom-right sticky orange shadow">{{tosca['metadata']['tag']}}</div>
