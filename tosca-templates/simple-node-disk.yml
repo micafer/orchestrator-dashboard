@@ -60,6 +60,11 @@ topology_template:
         os:
           properties:
             type: linux
+      # Add dummy task to activate context
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/dummy.yml
       requirements:
         - local_storage:
             node: my_block_storage
