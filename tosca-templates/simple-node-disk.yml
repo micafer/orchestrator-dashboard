@@ -1,0 +1,82 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: >
+  Launch a compute node getting the IP and SSH credentials to access via ssh with an extra HD disk.
+
+metadata:
+  display_name: Start a virtual machine with extra HD
+  icon: images/vm-icon-disk.png
+  tag: VM
+
+topology_template:
+
+  inputs:        
+    num_cpus:
+      type: integer
+      description: Number of virtual cpus for the VM
+      default: 1
+      constraints:
+      - valid_values: [ 1, 2, 4, 8, 16, 32, 64 ]
+    mem_size:
+      type: scalar-unit.size
+      description: Amount of memory for the VM
+      default: 2 GB
+      constraints:
+      - valid_values: [ 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    num_instances:
+      type: integer
+      description: Number of VMs to be spawned
+      default: 1
+
+    storage_size:
+      type: scalar-unit.size
+      description: Size of the extra HD added to the instance
+      default: 30 GB
+      constraints:
+      - valid_values: [ 30 GB, 50 GB, 100 GB ]
+    mount_path:
+      type: string
+      description: Path to mount the extra disk
+      default: /mnt/disk
+
+  node_templates:
+
+    simple_node:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            network_name: PUBLIC
+        scalable:
+          properties:
+            count: { get_input: num_instances }
+        host:
+          properties:
+            num_cpus: { get_input: num_cpus }
+            mem_size: { get_input: mem_size }
+        os:
+          properties:
+            type: linux
+      requirements:
+        - local_storage:
+            node: my_block_storage
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: { get_input: mount_path }
+                device: hdb
+
+    my_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: storage_size }
+
+  outputs:
+    node_ip:
+      value: { get_attribute: [ simple_node, public_address, 0 ] }
+    node_creds:
+      value: { get_attribute: [ simple_node, endpoint, credential, 0 ] }
