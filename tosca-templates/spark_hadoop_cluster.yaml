@@ -1,0 +1,132 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  display_name: Launch a Hadoop Virtual Cluster with Spark
+  icon: images/hadoop_spark.png
+ 
+description: TOSCA template for launching a Hadoop Cluster with Spark.
+
+topology_template:
+  inputs:
+    wn_num:
+      type: integer
+      description: Number of WNs in the cluster
+      default: 1
+      required: yes
+    fe_cpus:
+      type: integer
+      description: Number of CPUs for the front-end node
+      default: 2
+      required: yes
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+    fe_mem:
+      type: scalar-unit.size
+      description: Amount of Memory for the front-end node
+      default: 4 GB
+      required: yes
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    wn_cpus:
+      type: integer
+      description: Number of CPUs for the WNs
+      default: 2
+      required: yes
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+    wn_mem:
+      type: scalar-unit.size
+      description: Amount of Memory for the WNs
+      default: 4 GB
+      required: yes
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+
+
+  node_templates:
+
+    spark_wn:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: hadoop_wn 
+      artifacts:
+        docker_role:
+          file: grycap.spark
+          type: tosca.artifacts.AnsibleGalaxy.role
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/spark/spark_install.yml
+
+    spark_master:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: hadoop_server 
+      artifacts:
+        docker_role:
+          file: grycap.spark
+          type: tosca.artifacts.AnsibleGalaxy.role
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/spark/spark_install.yml
+
+    hadoop_master:
+      type: tosca.nodes.indigo.HadoopMaster
+      requirements:
+        - host: hadoop_server
+
+    hadoop_server:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            network_name: PUBLIC
+            ports:
+              yarn_port:
+                protocol: tcp
+                source: 8088
+              dfs_port:
+                protocol: tcp
+                source: 9870
+        host:
+          properties:
+            num_cpus: { get_input: fe_cpus }
+            mem_size: { get_input: fe_mem }
+        os:
+          properties:
+            type: linux 
+
+    hadoop_slave:
+      type: tosca.nodes.indigo.HadoopSlave
+      properties:
+        master_ip: { get_attribute: [ hadoop_server, private_address, 0 ] }
+      requirements:
+        - host: hadoop_wn
+
+    hadoop_wn:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        scalable:
+          properties:
+            count:  { get_input: wn_num }
+        host:
+          properties:
+            num_cpus: { get_input: wn_cpus }
+            mem_size: { get_input: wn_mem }
+        os:
+          properties:
+            type: linux 
+
+  outputs:
+    cluster_ip:
+      value: { get_attribute: [ hadoop_server, public_address, 0 ] }
+    cluster_creds:
+      value: { get_attribute: [ hadoop_server, endpoint, credential, 0 ] }
+    dfs_url:
+      value: { concat: [ 'http://', get_attribute: [ hadoop_server, public_address, 0 ], ':9870' ] }
+    yarn_url:
+      value: { concat: [ 'http://', get_attribute: [ hadoop_server, public_address, 0 ], ':8088' ] }
