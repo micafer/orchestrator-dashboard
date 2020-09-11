@@ -140,7 +140,11 @@ def get_project_ids(service_id):
 
     deb_url = "https://appdb-dev.marie.hellasgrid.gr"
     data = appdb_call('/rest/1.0/va_providers/%s' % service_id, url=deb_url)
-    if data and 'virtualization:provider' in data and 'provider:shares' in data['virtualization:provider']:
+    if (data and 'virtualization:provider' in data and data['virtualization:provider'] and
+            'provider:shares' in data['virtualization:provider'] and
+            data['virtualization:provider']['provider:shares'] and
+            'vo:vo' in data['virtualization:provider']['provider:shares'] and
+            data['virtualization:provider']['provider:shares']['vo:vo']):
         if isinstance(data['virtualization:provider']['provider:shares']['vo:vo'], list):
             shares = data['virtualization:provider']['provider:shares']['vo:vo']
         else:
