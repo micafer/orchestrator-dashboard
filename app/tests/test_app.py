@@ -327,7 +327,8 @@ class IMDashboardTests(unittest.TestCase):
         params = {'extra_opts.selectedSite': 'site',
                   'extra_opts.selectedImage': 'image',
                   'extra_opts.selectedVO': 'vo',
-                  'num_cpus': '4'}
+                  'num_cpus': '4',
+                  'ports': '22,80,443'}
         res = self.client.post('/submit?template=simple-node.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])

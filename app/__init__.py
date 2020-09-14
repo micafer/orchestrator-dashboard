@@ -492,11 +492,19 @@ def create_app(oidc_blueprint=None):
                         value["default"] = True
                     else:
                         value["default"] = False
+                # Special case for ports, convert a comma separated list of ints
+                # to a PortSpec map
+                elif value["type"] == "map" and name == "ports":
+                    ports = inputs[name].split(",")
+                    ports_value = {}
+                    for port in ports:
+                        # Should we also open UDP?
+                        ports_value["port_%s" % port] = {"protocol": "tcp", "source": int(port)}
+                    value["default"] = ports_value
                 else:
                     value["default"] = inputs[name]
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
-
         return template
 
     @app.route('/submit', methods=['POST'])
