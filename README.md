@@ -1,13 +1,14 @@
 # im-dashboard
+
 Infrastructure Manager - Simple Graphical UI (based on [INDIGO PaaS Orchestrator Dashboard](https://github.com/indigo-dc/orchestrator-dashboard))
 
 Functionalities:
 
-  - OIDC authentication
-  - Display user's infrastructures
-  - Display infrastructure details, template and log
-  - Delete infrastructure
-  - Create new infrastructure
+- OIDC authentication
+- Display user's infrastructures
+- Display infrastructure details, template and log
+- Delete infrastructure
+- Create new infrastructure
 
 The im-dashboard is a Python application built with the [Flask](http://flask.pocoo.org/) microframework; [Flask-Dance](https://flask-dance.readthedocs.io/en/latest/) is used for Openid-Connect/OAuth2 integration.
 
@@ -17,9 +18,9 @@ The docker image uses [Gunicorn](https://gunicorn.org/) as WSGI HTTP server to s
 
 Register a client in an OIDC server with the following properties:
 
-  - redirect uri: `https://<DASHBOARD_HOST>:<PORT>/login/oidc/authorized`
-  - scopes: 'openid', 'email', 'profile', 'offline_access' ('eduperson_entitlement' in EGI Check-In optional)
-  - introspection endpoint enabled
+- redirect uri: `https://<DASHBOARD_HOST>:<PORT>/login/oidc/authorized`
+- scopes: 'openid', 'email', 'profile', 'offline_access' ('eduperson_entitlement' in EGI Check-In optional)
+- introspection endpoint enabled
 
 Create the `config.json` file (see the [example](app/config-sample.json)) setting the following variables:
 
@@ -39,11 +40,12 @@ Create the `config.json` file (see the [example](app/config-sample.json)) settin
 | CRED_DB_URL | URL to the DB to store site project IDs | N | sqlite:///tmp/creds.db |
 | ANALYTICS_TAG | Google Analytic Tag | N | "" |
 | STATIC_SITES | List of static sites added to the AppDB ones ([{"name": "static_site_name", "url": "static_site_url", "id": "static_id", "vos": {"vo": "stprojectid"}}]) | N | [] |
+| STATIC_SITES_URL | URL of a JSON file with the list of static sites added to the AppDB ones | N | "" |
 
 You need to run the IM dashboard on HTTPS (otherwise you will get an error); you can choose between
 
-  - enabling the HTTPS support
-  - using an HTTPS proxy
+- enabling the HTTPS support
+- using an HTTPS proxy
 
 Details are provided in the next paragraphs.
 
