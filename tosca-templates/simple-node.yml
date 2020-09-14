@@ -36,7 +36,7 @@ topology_template:
       entry_schema:
         type: PortSpec
       description: Comma separated list of ports to be Opened in the Cloud site (eg. 22,80,443)
-      default: {ssh_port: {protocol: tcp, source: 22}}
+      default: 22
 
   node_templates:
 
