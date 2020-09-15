@@ -69,8 +69,13 @@ topology_template:
       capabilities:
         endpoint:
           properties:
-            port: 443
-            protocol: tcp
+            ports:
+              https_port:
+                protocol: tcp
+                source: 443
+              kube_port:
+                protocol: tcp
+                source: 6443
       properties:
         admin_username:  kubeuser
         install_nfs_client: false
@@ -122,5 +127,7 @@ topology_template:
   outputs:
     dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
+    api_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
     kubeapps_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
