@@ -33,7 +33,9 @@
         "name": "IISAS-FedCloud",
         "url": "https://nova.ui.savba.sk:5000",
         "id": "10963G0",
-        "vos": {},
+        "vos": {
+            "eosc-synergy.eu": "d09a0c28397f4b41ad4bd62e7d63b51e"
+        },
         "api_version": "1.1"
     },
     {
