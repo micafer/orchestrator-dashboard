@@ -51,7 +51,9 @@
         "name": "IISAS-GPUCloud",
         "url": "https://keystone3.ui.savba.sk:5000",
         "id": "10961G0",
-        "vos": {},
+        "vos": {
+            "eosc-synergy.eu": "0f1a9bfa6693460987355a7d25ae90c6"
+        },
         "api_version": "1.1"
     },
     {
