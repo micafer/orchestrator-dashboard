@@ -30,6 +30,10 @@ topology_template:
       required: yes
       constraints:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    fe_instance_type:
+      type: string
+      description: Flavor name of the front-end node
+      default: ""
     wn_cpus:
       type: integer
       description: Number of CPUs for the WNs
@@ -44,6 +48,10 @@ topology_template:
       required: yes
       constraints:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    wn_instance_type:
+      type: string
+      description: Flavor name for the WNs
+      default: ""
 
     admin_token:
       type: string
@@ -52,15 +60,21 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.18.3"
+      default: "1.18.8"
       constraints:
-      - valid_values: [ "1.18.3", "1.15.12", "1.16.10", "1.17.6" ]
+      - valid_values: [ "1.18.8", "1.16.14", "1.17.11" ]
     install_kubeapps:
       type: boolean
       description: Flag to set the kubeapps UI to be installed
       default: true
       constraints:
       - valid_values: [ true, false ]
+    kube_nvidia_support:
+      type: boolean
+      description: Flag to add NVIDIA support
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
 
   node_templates:
 
@@ -77,6 +91,7 @@ topology_template:
         admin_token: { get_input: admin_token }
         install_kubeapps:  { get_input: install_kubeapps }
         version: { get_input: kube_version }
+        nvidia_support: { get_input: kube_nvidia_support }
       requirements:
         - host: front
 
@@ -91,6 +106,7 @@ topology_template:
           properties:
             num_cpus: { get_input: fe_cpus }
             mem_size: { get_input: fe_mem }
+            instance_type: { get_input: fe_instance_type }
         os:
           properties:
             distribution: ubuntu
@@ -101,6 +117,7 @@ topology_template:
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
         version: { get_input: kube_version }
+        nvidia_support: { get_input: kube_nvidia_support }
       requirements:
         - host: wn
             
@@ -114,6 +131,7 @@ topology_template:
           properties:
             num_cpus: { get_input: wn_cpus }
             mem_size: { get_input: wn_mem }
+            instance_type: { get_input: wn_instance_type }
         os:
           properties:
             distribution: ubuntu

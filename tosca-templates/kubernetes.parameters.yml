@@ -8,10 +8,16 @@ inputs:
     fe_mem:
       tab: HW Data
 
+    fe_instance_type:
+      tab: HW Data
+
     wn_cpus:
       tab: HW Data
 
     wn_mem:
+      tab: HW Data
+
+    wn_instance_type:
       tab: HW Data
 
     admin_token:
@@ -21,6 +27,9 @@ inputs:
       tab: Kubernetes Data
 
     install_kubeapps:
+      tab: Kubernetes Data
+
+    kube_nvidia_support:
       tab: Kubernetes Data
 
 tabs:
