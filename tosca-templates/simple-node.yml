@@ -26,6 +26,10 @@ topology_template:
       default: 2 GB
       constraints:
       - valid_values: [ 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    instance_type:
+      type: string
+      description: If you already know the flavor name set it here
+      default: ""
     num_instances:
       type: integer
       description: Number of VMs to be spawned
@@ -54,6 +58,7 @@ topology_template:
           properties:
             num_cpus: { get_input: num_cpus }
             mem_size: { get_input: mem_size }
+            instance_type: { get_input: instance_type }
         os:
           properties:
             type: linux
