@@ -27,6 +27,7 @@ APPDB_URL = "https://appdb.egi.eu"
 VO_LIST = []
 APPDB_TIMEOUT = 5
 
+
 def appdb_call(path, retries=3, url=APPDB_URL):
     """Basic AppDB REST API call."""
     data = None
