@@ -24,6 +24,8 @@ import xmltodict
 from urllib.parse import urlparse
 
 APPDB_URL = "https://appdb.egi.eu"
+VO_LIST = []
+APPDB_TIMEOUT = 5
 
 
 def appdb_call(path, retries=3, url=APPDB_URL):
@@ -33,7 +35,7 @@ def appdb_call(path, retries=3, url=APPDB_URL):
         cont = 0
         while data is None and cont < retries:
             cont += 1
-            resp = requests.request("GET", url + path, verify=False)
+            resp = requests.request("GET", url + path, verify=False, timeout=APPDB_TIMEOUT)
             if resp.status_code == 200:
                 data = xmltodict.parse(resp.text.replace('\n', ''))['appdb:appdb']
     except Exception:
@@ -43,15 +45,18 @@ def appdb_call(path, retries=3, url=APPDB_URL):
 
 
 def get_vo_list():
-    vos = []
-    data = appdb_call('/rest/1.0/vos')
-    if data:
-        if isinstance(data['vo:vo'], list):
-            for vo in data['vo:vo']:
-                vos.append(vo['@name'])
-        else:
-            vos.append(data['vo:vo']['@name'])
-    return vos
+    global VO_LIST
+    if not VO_LIST:
+        vos = []
+        data = appdb_call('/rest/1.0/vos')
+        if data:
+            if isinstance(data['vo:vo'], list):
+                for vo in data['vo:vo']:
+                    vos.append(vo['@name'])
+            else:
+                vos.append(data['vo:vo']['@name'])
+        VO_LIST = vos
+    return VO_LIST
 
 
 def check_supported_VOs(site, vo):

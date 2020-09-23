@@ -65,6 +65,7 @@ class TestAppDB(unittest.TestCase):
         appdb_call.return_value = xmltodict.parse(vos.replace('\n', ''))
         res = appdb.get_vo_list()
         self.assertEquals(res, ['acc-comp.egi.eu'])
+        appdb.VO_LIST = []
 
         vos = '<appdb:appdb><vo:vo id="15551" name="acc-comp.egi.eu"></vo:vo>'
         vos += '<vo:vo id="15527" name="vo.access.egi.eu"></vo:vo></appdb:appdb>'
