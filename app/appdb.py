@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 
 APPDB_URL = "https://appdb.egi.eu"
 VO_LIST = []
+APPDB_TIMEOUT = 5
 
 def appdb_call(path, retries=3, url=APPDB_URL):
     """Basic AppDB REST API call."""
@@ -33,7 +34,7 @@ def appdb_call(path, retries=3, url=APPDB_URL):
         cont = 0
         while data is None and cont < retries:
             cont += 1
-            resp = requests.request("GET", url + path, verify=False)
+            resp = requests.request("GET", url + path, verify=False, timeout=APPDB_TIMEOUT)
             if resp.status_code == 200:
                 data = xmltodict.parse(resp.text.replace('\n', ''))['appdb:appdb']
     except Exception:
