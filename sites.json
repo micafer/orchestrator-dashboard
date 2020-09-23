@@ -5,9 +5,9 @@
         "id": "11478G0",
         "vos": {
             "eosc-synergy.eu": "d85ca93c937a4a97adf134ec2593296d",
-            "demo.fedcloud.egi.eu": "demo.fedcloud.egi.eu",
-            "biomed": "biomed",
-            "vo.indigo-datacloud.eu": "vo.indigo-datacloud.eu"
+            "demo.fedcloud.egi.eu": "10b972eed97940089b234f6257d7db72",
+            "biomed": "eca73ad6a84d4c0088063505c36349ab",
+            "vo.indigo-datacloud.eu": "25cb49baedbf40a194729ff6802c8491"
         }
     },
     {
@@ -45,8 +45,8 @@
         "id": "7513G0",
         "vos": {
             "vo.lifewatch.eu": "ac7bc26131d248ecb6add521e648c331",
-            "eosc-synergy.eu": "VO:eosc-synergy.eu",
-            "demo.fedcloud.egi.eu": "VO:demo.fedcloud.egi.eu",
+            "eosc-synergy.eu": "3b9754ad8c6046b4aec43ec21abe7d8c",
+            "demo.fedcloud.egi.eu": "2a7e2cd4b6dc4e609dd934964c1715c6",
             "vo.access.egi.eu": "999f045cb1ff4684a15ebb338af69460"
         }
     },
