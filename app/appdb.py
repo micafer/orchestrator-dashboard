@@ -24,7 +24,7 @@ import xmltodict
 from urllib.parse import urlparse
 
 APPDB_URL = "https://appdb.egi.eu"
-
+VO_LIST = []
 
 def appdb_call(path, retries=3, url=APPDB_URL):
     """Basic AppDB REST API call."""
@@ -43,15 +43,18 @@ def appdb_call(path, retries=3, url=APPDB_URL):
 
 
 def get_vo_list():
-    vos = []
-    data = appdb_call('/rest/1.0/vos')
-    if data:
-        if isinstance(data['vo:vo'], list):
-            for vo in data['vo:vo']:
-                vos.append(vo['@name'])
-        else:
-            vos.append(data['vo:vo']['@name'])
-    return vos
+    global VO_LIST
+    if not VO_LIST:
+        vos = []
+        data = appdb_call('/rest/1.0/vos')
+        if data:
+            if isinstance(data['vo:vo'], list):
+                for vo in data['vo:vo']:
+                    vos.append(vo['@name'])
+            else:
+                vos.append(data['vo:vo']['@name'])
+        VO_LIST = vos
+    return VO_LIST
 
 
 def check_supported_VOs(site, vo):
