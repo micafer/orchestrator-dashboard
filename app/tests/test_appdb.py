@@ -61,6 +61,7 @@ class TestAppDB(unittest.TestCase):
 
     @patch('app.appdb.appdb_call')
     def test_vo_list(self, appdb_call):
+        appdb.VO_LIST = []
         vos = '<vo:vo id="15551" name="acc-comp.egi.eu"></vo:vo>'
         appdb_call.return_value = xmltodict.parse(vos.replace('\n', ''))
         res = appdb.get_vo_list()
