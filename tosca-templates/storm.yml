@@ -100,4 +100,4 @@ topology_template:
 
   outputs:
     storm_ui:
-      value: { concat: [ 'https://', get_attribute: [ fe, public_address, 0 ], ':8080/' ] }
+      value: { concat: [ 'http://', get_attribute: [ fe, public_address, 0 ], ':8080/' ] }
