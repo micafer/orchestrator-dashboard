@@ -64,7 +64,11 @@ def check_supported_VOs(site, vo):
         return True
 
     if 'provider:image' in site:
-        for os_tpl in site['provider:image']:
+        if isinstance(site['provider:image'], list):
+            images = site['provider:image']
+        else:
+            images = [site['provider:image']]
+        for os_tpl in images:
             if '@voname' in os_tpl and vo in os_tpl['@voname']:
                 return True
     return False
