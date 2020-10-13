@@ -80,5 +80,14 @@
             "worsica.vo.indc.pt": "38414631e27c485eae87f6dcb3082873",
             "fedcloud.egi.eu": "aa7f62b244c946038c093d0bf05827a1"
         }
+    },
+    {
+        "name": "IISAS-Cloud",
+        "url": "https://cloud.ui.savba.sk:5000",
+        "id": "12355G0",
+        "vos": {
+            "eosc-synergy.eu": "51f736d36ce34b9ebdf196cfcabd24ee",
+            "covid19.eosc-synergy.eu": "a22bbffb007745b2934bf308b0a4d186"
+        }
     }
 ]
