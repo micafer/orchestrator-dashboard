@@ -65,7 +65,19 @@
                     </td>
                     <td>
                     {% for vmId, vmState in infState["vm_states"].items() %}
-                      <a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo', infid=infId, vmid=vmId) }}">
+
+                      {% set vmStateToolTip = vmState %}
+                      {% if vmState == "configured" %}
+                      {% set vmStateToolTip = "<span class='btn btn-success btn-sm'>" + vmState %}
+                      {% elif vmState in ["stopped", "off"] %}
+                      {% set vmStateToolTip = "<span class='btn btn-warning btn-sm text-white'>" + vmState %}
+                      {% elif vmState in ["failed", "unconfigured", "unknown"] %}
+                      {% set vmStateToolTip = "<span class='btn btn-danger btn-sm'>" + vmState %}
+                        {% else %}
+                      {% set vmStateToolTip = "<span class='btn btn-warning btn-sm text-white'><span class='spinner-grow spinner-grow-sm'></span>" + vmState %}
+                      {% endif %}
+
+                      <a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo', infid=infId, vmid=vmId) }}" data-toggle="tooltip" data-placement="top" data-html="true" title="{{vmStateToolTip}}">
                         <span class="fas fa-server mr-2"></span>{{vmId}}
                       </a>
                     {% endfor %}
@@ -167,6 +179,10 @@
 {% endif %}
 
 <script>
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
 $(document).ready(function () {
     $(".deleteBtn").click(function () {
         // add spinner to button
