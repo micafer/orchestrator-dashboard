@@ -638,12 +638,14 @@ def create_app(oidc_blueprint=None):
         response = requests.get(url, headers=headers)
 
         if response.ok:
+            systems = []
             try:
                 radl = radl_parse.parse_radl(response.text)
+                systems = radl.systems
             except Exception as ex:
                 flash("Error parsing RADL: \n%s" % str(ex), 'error')
 
-            return render_template('addresource.html', infid=infid, systems=radl.systems)
+            return render_template('addresource.html', infid=infid, systems=systems)
         else:
             flash("Error getting RADL: \n%s" % (response.text), 'error')
             return redirect(url_for('showinfrastructures'))
