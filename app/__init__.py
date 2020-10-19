@@ -665,6 +665,7 @@ def create_app(oidc_blueprint=None):
         response = requests.get(url, headers=headers)
 
         if response.ok:
+            radl = None
             try:
                 radl = radl_parse.parse_radl(response.text)
                 radl.deploys = []
@@ -676,15 +677,16 @@ def create_app(oidc_blueprint=None):
             except Exception as ex:
                 flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
 
-            headers = {"Authorization": auth_data, "Accept": "application/json"}
-            url = "%s/infrastructures/%s" % (settings.imUrl, infid)
-            response = requests.post(url, headers=headers, data=str(radl))
+            if radl:
+                headers = {"Authorization": auth_data, "Accept": "application/json"}
+                url = "%s/infrastructures/%s" % (settings.imUrl, infid)
+                response = requests.post(url, headers=headers, data=str(radl))
 
-            if response.ok:
-                num = len(response.json()["uri-list"])
-                flash("%d nodes added successfully" % num, 'info')
-            else:
-                flash("Error adding nodesL: \n%s" % (response.text), 'error')
+                if response.ok:
+                    num = len(response.json()["uri-list"])
+                    flash("%d nodes added successfully" % num, 'info')
+                else:
+                    flash("Error adding nodesL: \n%s" % (response.text), 'error')
 
             return redirect(url_for('showinfrastructures'))
         else:
