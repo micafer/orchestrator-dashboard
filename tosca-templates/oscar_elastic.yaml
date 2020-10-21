@@ -4,17 +4,17 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 metadata:
-  display_name: Launch an Elastic Kubernetes Virtual Cluster
-  icon: images/kubernetes.png
-  tag: elastic
+  display_name: Launch an Elastic OSCAR Virtual Cluster
+  icon: images/oscar.png
+  tag: beta
 
-description: TOSCA template for launching an Elastic Kubernetes Virtual Cluster.
+description: TOSCA template for launching an Elastic OSCAR Virtual Cluster.
 
 topology_template:
   inputs:
     wn_num:
       type: integer
-      description: Maximum number of WNs in the cluster
+      description: Maximum Number of WNs in the OSCAR cluster
       default: 1
       required: yes
     fe_cpus:
@@ -46,22 +46,18 @@ topology_template:
       constraints:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
 
+    storage_size:
+      type: string
+      description: Size of the extra HD added to the instance
+      default: 50 GB
+      required: yes
+      constraints:
+      - valid_values: [ 30 GB, 50 GB, 100 GB ]
+
     admin_token:
       type: string
       description: Access Token for the Kubernetes admin user
       default: not_very_secret_token
-    kube_version:
-      type: string
-      description: Version of Kubernetes to install
-      default: "1.18.6"
-      constraints:
-      - valid_values: [ "1.18.6", "1.16.13", "1.17.9" ]
-    install_kubeapps:
-      type: boolean
-      description: Flag to set the kubeapps UI to be installed
-      default: true
-      constraints:
-      - valid_values: [ true, false ]
 
   node_templates:
 
@@ -88,19 +84,38 @@ topology_template:
           start:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/use_external_im.yml
 
+    oscar:
+      type: tosca.nodes.indigo.OSCAR
+      properties:
+        minio_secretkey:  minio123
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              http_port:
+                protocol: tcp
+                source: 80
+              https_port:
+                protocol: tcp
+                source: 443
+      requirements:
+        - host: lrms_front_end
+
     lrms_front_end:
       type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes
       capabilities:
         endpoint:
           properties:
-            port: 443
+            port: 30443
             protocol: tcp
       properties:
         admin_username:  kubeuser
-        install_nfs_client: false
         admin_token: { get_input: admin_token }
-        install_kubeapps:  { get_input: install_kubeapps }
-        version: { get_input: kube_version }
+        install_kubeapps:  false
+        install_metrics: true
+        install_nfs_client: true
+        install_ingress: true
+        version: 1.18.8
       requirements:
         - host: front
 
@@ -119,12 +134,26 @@ topology_template:
           properties:
             distribution: ubuntu
             type: linux
+      requirements:
+        - local_storage:
+            node: my_block_storage
+            capability: tosca.capabilities.Attachment
+            relationship:
+              type: tosca.relationships.AttachesTo
+              properties:
+                location: /pv
+                device: hdb
+
+    my_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: storage_size }
 
     wn_node:
       type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
-        version: { get_input: kube_version }
+        version: 1.18.3
       capabilities:
         wn:
           properties:
@@ -132,7 +161,7 @@ topology_template:
             min_instances: 0
       requirements:
         - host: wn
-
+  
     wn:
       type: tosca.nodes.indigo.Compute
       capabilities:
@@ -154,6 +183,5 @@ topology_template:
   outputs:
     dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
-    kubeapps_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
-
+    oscarui_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/' ] }
