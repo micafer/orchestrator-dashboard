@@ -443,6 +443,7 @@ def create_app(oidc_blueprint=None):
         return res
 
     @app.route('/images/<site>/<vo>')
+    @authorized_with_valid_token
     def getimages(site=None, vo=None):
         res = ""
         if vo == "local":
@@ -452,6 +453,31 @@ def create_app(oidc_blueprint=None):
         else:
             for image in appdb.get_images(site, vo):
                 res += '<option name="selectedImage" value=%s>%s</option>' % (image, image)
+        return res
+
+    @app.route('/usage/<site>/<vo>')
+#    @authorized_with_valid_token
+    def getusage(site=None, vo=None):
+        try:
+            #access_token = oidc_blueprint.session.token['access_token']
+            access_token = "eyJraWQiOiJvaWRjIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhNjdmZmY5YzA2ZTYyNDAxOTc1YWViMjlhZDM1YjhmYWY3YzRmYzc0YjQ1MjZhNTUwNGU1MTMyYjAxNDk2ODMxQGVnaS5ldSIsImF6cCI6ImYzM2U4MjRhLTA3OGQtNDk3Yi1iNzAwLTI1YjBkZjdmYzViNyIsImlzcyI6Imh0dHBzOlwvXC9hYWkuZWdpLmV1XC9vaWRjXC8iLCJleHAiOjE2MDMzNzAzMDMsImlhdCI6MTYwMzM2NjcwMywianRpIjoiYTRmZjI4MjAtYTg4Yy00OTIzLTg5YjctZDVlZWFkMGE1NmM0In0.ev9fJlFx4_kW8wx-0ccLKW33fOoIlNuONNnANudDv9mpEygw33dy4pPrmP_IQFKTZRa0kQdSnpQGBQF9dnWAyJHql8s2IOVtaTyq3smAc3eeJklkkpmFcg2XzSe0NAavlxyFcAzX5SP_ubpTKRacpUZYlXI9WBOC7u2kIpPJ2vSY2gfZZLUfN6QHLH1s-t_KrCWL-jMg0mZyLGXI3dg042ngjhVoTCyskmQyc4Rz-cEU_SzzC5S6PnIJno4qRClK6AhQ-7juUWFJKo0iqZ3d2wtTnpqLcMXIRwzmP0Iyyjr_9sMS57GJINZKrdLRl0PrGRKDEMZ5Q3MNgZ3WWYZKsw"
+            #quotas = utils.get_site_usage(site, vo, access_token, cred, session["userid"])
+            quotas = utils.get_site_usage(site, vo, access_token, cred, "userid")
+
+            res = "<table>"
+            res += "<tr>"
+            res += "<td>Cores</td><td>Instances</td><td>RAM</td><td>Float IPs</td><td>SGs</td>"
+            res += "</tr></tr>"
+            res += "<td>%s/%s</td>" % (quotas.cores.in_use, quotas.cores.limit)
+            res += "<td>%s/%s</td>" % (quotas.instances.in_use, quotas.instances.limit)
+            res += "<td>%s/%s</td>" % (quotas.ram.in_use, quotas.ram.limit)
+            res += "<td>%s/%s</td>" % (quotas.floating_ips.in_use, quotas.floating_ips.limit)
+            res += "<td>%s/%s</td>" % (quotas.security_groups.in_use, quotas.security_groups.limit)
+            res += "</tr>"
+            res += "</table>"
+        except Exception as ex:
+            res = "Error loading site quotas: %s!" % str(ex)
+
         return res
 
     def add_image_to_template(template, image):

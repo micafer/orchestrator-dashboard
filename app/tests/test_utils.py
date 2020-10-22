@@ -70,6 +70,19 @@ class TestUtils(unittest.TestCase):
         res = utils.get_site_images("CESGA", "vo.access.egi.eu", "token", cred, "user")
         self.assertEquals(res, [('imagename1', 'imageid1')])
 
+    @patch("app.utils.getCachedSiteList")
+    @patch('libcloud.compute.drivers.openstack.OpenStackNodeDriver')
+    def test_get_site_usage(self, get_driver, getCachedSiteList):
+        cred = MagicMock()
+        cred.get_cred.return_value = {"project": "project_name"}
+        getCachedSiteList.return_value = {'CESGA': ('https://fedcloud-osservices.egi.cesga.es:5000', '', '11548G0')}
+        driver = MagicMock()
+        get_driver.return_value = driver
+        quotas = MagicMock()
+        driver.ex_get_quota_set.return_value = quotas
+        res = utils.get_site_usage("CESGA", "vo.access.egi.eu", "token", cred, "user")
+        self.assertEquals(res, quotas)
+
 
 if __name__ == '__main__':
     unittest.main()

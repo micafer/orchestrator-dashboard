@@ -60,6 +60,18 @@
         });
     }
 
+    function loadSiteInfo() {
+        $('#divSiteInfo').innerHTML = "";
+        $.ajax({
+            method: "GET",
+            url: "{{ url_for('home') }}usage/" + $("#selectedSite").val() + "/" + $('#selectedVO').val(),
+            success : function(text)
+            {
+                $('#divSiteInfo').innerHTML = text;
+            }
+        });
+    }
+
     function activateSubmit() {
         $(".submitBtn").attr("disabled", false);
     }
@@ -74,10 +86,21 @@
            <option name="selectedVO" value={{vo}}>{{vo}}</option>
        {% endfor %}
        </select>
-       <label>Select provider:</label>
-       <select class="js-example-basic-single js-states form-control" id="selectedSite" name="extra_opts.selectedSite" onchange="loadImages();loadSiteImages();">
-        <option name="selectedImage" value="">Select VO</option>
-       </select>
+
+       <div class="form-row">
+        <div class="form-group col-md-6">
+        <label>Select provider:</label>
+        <select class="js-example-basic-single js-states form-control" id="selectedSite" name="extra_opts.selectedSite" onchange="loadImages();loadSiteImages();loadSiteInfo();">
+            <option name="selectedImage" value="">Select VO</option>
+        </select>
+        </div>
+        <div class="form-group col-md-6">
+        <label>Site Info:</label>
+            <div id="divSiteInfo">
+            </div>        
+        </div>
+       </div>
+
        <label>Select only one of this options AppDB or Site image:</label>
        <div class="form-row">
         <div class="form-group col-md-6">

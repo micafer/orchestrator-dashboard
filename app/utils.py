@@ -99,36 +99,53 @@ def get_ost_image_url(site_name):
     return urlparse(site_url)[1]
 
 
+def get_site_connect_info(site_name, vo, cred, userid):
+    domain = None
+    sites = getCachedSiteList()
+    site_url, _, site_id = sites[site_name]
+
+    creds = cred.get_cred(site_name, userid)
+    if creds and "project" in creds and creds["project"]:
+        domain = creds["project"]
+    else:
+        project_ids = getStaticSitesProjectIDs(site_id)
+        project_ids.update(appdb.get_project_ids(site_id))
+        if vo in project_ids:
+            domain = project_ids[vo]
+
+    return site_url, domain
+
+
+def get_site_driver(site_name, site_url, domain, access_token):
+    OpenStack = get_driver(Provider.OPENSTACK)
+    driver = OpenStack('egi.eu', access_token,
+                        api_version='2.0',
+                        ex_tenant_name='openid',
+                        ex_force_auth_url=site_url,
+                        ex_force_auth_version='3.x_oidc_access_token',
+                        ex_domain_name=domain)
+
+    # Workaround to unset default service_region (RegionOne)
+    driver.connection.service_region = None
+
+    return driver
+
+
 def get_site_images(site_name, vo, access_token, cred, userid):
     try:
-        domain = None
-        sites = getCachedSiteList()
-        site_url, _, site_id = sites[site_name]
-
-        creds = cred.get_cred(site_name, userid)
-        if creds and "project" in creds and creds["project"]:
-            domain = creds["project"]
-        else:
-            project_ids = getStaticSitesProjectIDs(site_id)
-            project_ids.update(appdb.get_project_ids(site_id))
-            if vo in project_ids:
-                domain = project_ids[vo]
-
-        OpenStack = get_driver(Provider.OPENSTACK)
-        driver = OpenStack('egi.eu', access_token,
-                           ex_tenant_name='openid',
-                           ex_force_auth_url=site_url,
-                           ex_force_auth_version='3.x_oidc_access_token',
-                           ex_domain_name=domain)
-
-        # Workaround to unset default service_region (RegionOne)
-        driver.connection.service_region = None
-
+        site_url, domain = get_site_connect_info(site_name, vo, cred, userid)
+        driver = get_site_driver(site_name, site_url, domain, access_token)
         images = driver.list_images()
         return [(image.name, image.id) for image in images]
     except Exception as ex:
         msg = "Error loading site images: %s!" % str(ex)
         return [(msg, msg)]
+
+
+def get_site_usage(site_name, vo, access_token, cred, userid):
+    site_url, domain = get_site_connect_info(site_name, vo, cred, userid)
+    driver = get_site_driver(site_name, site_url, domain, access_token)
+    return driver.ex_get_quota_set(domain)
 
 
 def getUserVOs(entitlements):
