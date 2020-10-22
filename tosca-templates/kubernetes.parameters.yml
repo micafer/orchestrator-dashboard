@@ -20,6 +20,12 @@ inputs:
     wn_instance_type:
       tab: HW Data
 
+    disk_size:
+      tab: HW Data
+
+    volume_id:
+      tab: HW Data
+
     admin_token:
       tab: Kubernetes Data
 

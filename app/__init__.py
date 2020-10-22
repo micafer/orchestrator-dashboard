@@ -418,7 +418,7 @@ def create_app(oidc_blueprint=None):
         vos = utils.getStaticVOs()
         vos.extend(appdb.get_vo_list())
         vos = list(set(vos))
-        if session["vos"]:
+        if "vos" in session and session["vos"]:
             vos = [vo for vo in vos if vo in session["vos"]]
 
         return render_template('createdep.html',
@@ -456,25 +456,31 @@ def create_app(oidc_blueprint=None):
         return res
 
     @app.route('/usage/<site>/<vo>')
-#    @authorized_with_valid_token
+    @authorized_with_valid_token
     def getusage(site=None, vo=None):
         try:
-            #access_token = oidc_blueprint.session.token['access_token']
-            access_token = "eyJraWQiOiJvaWRjIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhNjdmZmY5YzA2ZTYyNDAxOTc1YWViMjlhZDM1YjhmYWY3YzRmYzc0YjQ1MjZhNTUwNGU1MTMyYjAxNDk2ODMxQGVnaS5ldSIsImF6cCI6ImYzM2U4MjRhLTA3OGQtNDk3Yi1iNzAwLTI1YjBkZjdmYzViNyIsImlzcyI6Imh0dHBzOlwvXC9hYWkuZWdpLmV1XC9vaWRjXC8iLCJleHAiOjE2MDMzNzAzMDMsImlhdCI6MTYwMzM2NjcwMywianRpIjoiYTRmZjI4MjAtYTg4Yy00OTIzLTg5YjctZDVlZWFkMGE1NmM0In0.ev9fJlFx4_kW8wx-0ccLKW33fOoIlNuONNnANudDv9mpEygw33dy4pPrmP_IQFKTZRa0kQdSnpQGBQF9dnWAyJHql8s2IOVtaTyq3smAc3eeJklkkpmFcg2XzSe0NAavlxyFcAzX5SP_ubpTKRacpUZYlXI9WBOC7u2kIpPJ2vSY2gfZZLUfN6QHLH1s-t_KrCWL-jMg0mZyLGXI3dg042ngjhVoTCyskmQyc4Rz-cEU_SzzC5S6PnIJno4qRClK6AhQ-7juUWFJKo0iqZ3d2wtTnpqLcMXIRwzmP0Iyyjr_9sMS57GJINZKrdLRl0PrGRKDEMZ5Q3MNgZ3WWYZKsw"
-            #quotas = utils.get_site_usage(site, vo, access_token, cred, session["userid"])
+            access_token = oidc_blueprint.session.token['access_token']
+            quotas = utils.get_site_usage(site, vo, access_token, cred, session["userid"])
             quotas = utils.get_site_usage(site, vo, access_token, cred, "userid")
 
-            res = "<table>"
-            res += "<tr>"
-            res += "<td>Cores</td><td>Instances</td><td>RAM</td><td>Float IPs</td><td>SGs</td>"
-            res += "</tr></tr>"
-            res += "<td>%s/%s</td>" % (quotas.cores.in_use, quotas.cores.limit)
-            res += "<td>%s/%s</td>" % (quotas.instances.in_use, quotas.instances.limit)
-            res += "<td>%s/%s</td>" % (quotas.ram.in_use, quotas.ram.limit)
-            res += "<td>%s/%s</td>" % (quotas.floating_ips.in_use, quotas.floating_ips.limit)
-            res += "<td>%s/%s</td>" % (quotas.security_groups.in_use, quotas.security_groups.limit)
-            res += "</tr>"
-            res += "</table>"
+            res = '<table class="table table-striped table-hover" cellspacing="0">'
+            res += '<thead><tr>'
+            res += '<th>Cores</th><th>Instances</th><th>RAM (GB)</th><th>Float IPs</th><th>SGs</th>'
+            res += '</tr></thead><tbody></tr>'
+            quotas.ram.in_use /= 1024
+            quotas.ram.limit /= 1024
+            for item in [quotas.cores, quotas.instances, quotas.ram, quotas.floating_ips, quotas.security_groups]:
+                usage = item.in_use/item.limit
+                color = "success"
+                if item.in_use > 0:
+                    if usage >= 0.7 and usage < 0.95:
+                        color = "warning"
+                    elif usage >= 0.95:
+                        color = "danger"
+                res += '<td><p class="text-center text-%s">%d/%d</p></td>' % (color, item.in_use, item.limit)
+            res += '</tr></tbody>'
+            res += '</table>'
+
         except Exception as ex:
             res = "Error loading site quotas: %s!" % str(ex)
 

@@ -52,6 +52,16 @@ topology_template:
       type: string
       description: Flavor name for the WNs
       default: ""
+    disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the FE instance
+      default: 10 GB
+      constraints:
+      - valid_values: [ 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    volume_id:
+      type: string
+      description: "Or URL of the disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
+      default: ""
 
     admin_token:
       type: string
@@ -60,9 +70,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.18.8"
+      default: "1.19.3"
       constraints:
-      - valid_values: [ "1.18.8", "1.16.14", "1.17.11" ]
+      - valid_values: [ "1.19.3", "1.18.10", "1.16.15", "1.17.13" ]
     install_kubeapps:
       type: boolean
       description: Flag to set the kubeapps UI to be installed
@@ -116,6 +126,19 @@ topology_template:
           properties:
             distribution: ubuntu
             type: linux
+      requirements:
+      - local_storage:
+          node: fe_block_storage
+          relationship:
+            type: AttachesTo
+            properties:
+              location: /pv
+
+    fe_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: disk_size }
+        volume_id: { get_input: volume_id }
 
     wn_node:
       type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes
