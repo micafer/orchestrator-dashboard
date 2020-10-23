@@ -462,23 +462,13 @@ def create_app(oidc_blueprint=None):
             access_token = oidc_blueprint.session.token['access_token']
             quotas = utils.get_site_usage(site, vo, access_token, cred, session["userid"])
 
-            res = '<table class="table table-striped table-hover" cellspacing="0">'
-            res += '<thead><tr>'
-            res += '<th>Cores</th><th>Instances</th><th>RAM (GB)</th><th>Float IPs</th><th>SGs</th>'
-            res += '</tr></thead><tbody></tr>'
-            quotas.ram.in_use /= 1024
-            quotas.ram.limit /= 1024
-            for item in [quotas.cores, quotas.instances, quotas.ram, quotas.floating_ips, quotas.security_groups]:
-                usage = item.in_use / item.limit
-                color = "success"
-                if item.in_use > 0:
-                    if usage >= 0.7 and usage < 0.95:
-                        color = "warning"
-                    elif usage >= 0.95:
-                        color = "danger"
-                res += '<td><p class="text-center text-%s">%d/%d</p></td>' % (color, item.in_use, item.limit)
-            res += '</tr></tbody>'
-            res += '</table>'
+            quotas_dict = {}
+            quotas_dict["cores"] = {"used": quotas.cores.in_use,"limit": quotas.cores.limit}
+            quotas_dict["ram"] = {"used": quotas.ram.in_use / 1024,"limit": quotas.ram.limit / 1024}
+            quotas_dict["instances"] = {"used": quotas.instances.in_use,"limit": quotas.instances.limit}
+            quotas_dict["floating_ips"] = {"used": quotas.floating_ips.in_use,"limit": quotas.floating_ips.limit}
+            quotas_dict["security_groups"] = {"used": quotas.security_groups.in_use,"limit": quotas.security_groups.limit}
+            res = json.dumps(quotas_dict)
 
         except Exception as ex:
             res = "Error loading site quotas: %s!" % str(ex)
