@@ -65,6 +65,7 @@ def _getStaticSitesInfo():
     else:
         return []
 
+
 def getCachedProjectIDs(site_id):
     res = {}
     for site in getCachedSiteList().values():
@@ -125,11 +126,11 @@ def get_site_connect_info(site_name, vo, cred, userid):
 def get_site_driver(site_name, site_url, domain, access_token):
     OpenStack = get_driver(Provider.OPENSTACK)
     driver = OpenStack('egi.eu', access_token,
-                        api_version='2.0',
-                        ex_tenant_name='openid',
-                        ex_force_auth_url=site_url,
-                        ex_force_auth_version='3.x_oidc_access_token',
-                        ex_domain_name=domain)
+                       api_version='2.0',
+                       ex_tenant_name='openid',
+                       ex_force_auth_url=site_url,
+                       ex_force_auth_version='3.x_oidc_access_token',
+                       ex_domain_name=domain)
 
     # Workaround to unset default service_region (RegionOne)
     driver.connection.service_region = None
@@ -175,7 +176,7 @@ def getCachedSiteList():
             # in case of error do not update time
             LAST_UPDATE = now
         except Exception as ex:
-            flash("Error retrieving site list from AppDB: %s" % ex, 'warning')    
+            flash("Error retrieving site list from AppDB: %s" % ex, 'warning')
 
         SITE_LIST.update(getStaticSites())
 

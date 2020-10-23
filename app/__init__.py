@@ -470,7 +470,7 @@ def create_app(oidc_blueprint=None):
             quotas.ram.in_use /= 1024
             quotas.ram.limit /= 1024
             for item in [quotas.cores, quotas.instances, quotas.ram, quotas.floating_ips, quotas.security_groups]:
-                usage = item.in_use/item.limit
+                usage = item.in_use / item.limit
                 color = "success"
                 if item.in_use > 0:
                     if usage >= 0.7 and usage < 0.95:
