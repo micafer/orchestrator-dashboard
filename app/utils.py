@@ -46,7 +46,6 @@ urllib3.disable_warnings(InsecureRequestWarning)
 
 SITE_LIST = {}
 LAST_UPDATE = 0
-CACHE_DELAY = 3600
 
 
 def _getStaticSitesInfo():
@@ -168,19 +167,19 @@ def getUserVOs(entitlements):
 def getCachedSiteList():
     global SITE_LIST
     global LAST_UPDATE
-    global CACHE_DELAY
 
     now = int(time.time())
-    if not SITE_LIST or now - LAST_UPDATE > CACHE_DELAY:
-        LAST_UPDATE = now
-        SITE_LIST = appdb.get_sites()
+    if not SITE_LIST or now - LAST_UPDATE > g.settings.appdb_cache_timeout:
+        try:
+            SITE_LIST = appdb.get_sites()
+            # in case of error do not update time
+            LAST_UPDATE = now
+        except Exception as ex:
+            flash("Error retrieving site list from AppDB: %s" % ex, 'warning')    
+
         SITE_LIST.update(getStaticSites())
 
-    if not SITE_LIST:
-        flash("Error retrieving site list", 'warning')
-        return {}
-    else:
-        return SITE_LIST
+    return SITE_LIST
 
 
 def getUserAuthData(access_token, cred, userid, vo=None, selected_site=None):
