@@ -106,7 +106,7 @@ class TestAppDB(unittest.TestCase):
         va_provider = read_file_as_string("files/va_provider.xml")
         appdb_call.return_value = xmltodict.parse(va_provider.replace('\n', ''))["appdb:appdb"]
         res = appdb.get_sites("vo.access.egi.eu")
-        self.assertEquals(res, {'CESGA': ('https://fedcloud-osservices.egi.cesga.es:5000', '', '1')})
+        self.assertEquals(res, {'CESGA': {'url':'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '1'}})
         self.assertEquals(appdb_call.call_args_list[0][0][0], "/rest/1.0/va_providers/1")
 
     @patch('app.appdb.appdb_call')

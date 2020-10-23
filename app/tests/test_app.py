@@ -1,6 +1,6 @@
 import unittest
-from urllib.parse import urlparse
 from app import create_app
+from urllib.parse import urlparse
 from mock import patch, MagicMock
 
 
@@ -337,7 +337,7 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.appdb.get_sites")
     def test_manage_creds(self, get_sites, avatar):
         self.login(avatar)
-        get_sites.return_value = {"SITE_NAME": ("SITE_URL", "SITE_STATUS", "SITE_ID")}
+        get_sites.return_value = {"SITE_NAME": {"url": "SITE_URL", "state": "SITE_STATUS", "id": "SITE_ID"}}
         res = self.client.get('/manage_creds')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'SITE_NAME', res.data)
@@ -358,6 +358,16 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'PROJECT_NAME', res.data)
         self.assertIn(b'PROJECT_ID', res.data)
         self.assertIn(b'stprojectid', res.data)
+        self.assertEqual(get_project_ids.call_count, 1)
+
+        # Test that cache works and get_project_ids is not called again
+        res = self.client.get('/write_creds?service_id=static_id')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b'PROJECT_NAME', res.data)
+        self.assertIn(b'PROJECT_ID', res.data)
+        self.assertIn(b'stprojectid', res.data)
+        self.assertEqual(get_project_ids.call_count, 1)
+
         res = self.client.post('/write_creds?service_id=SERVICE_ID', data={"project": "PROJECT_NAME"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])

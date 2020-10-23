@@ -30,17 +30,16 @@ class TestUtils(unittest.TestCase):
         res = utils.getUserVOs(entitlements)
         self.assertEquals(res, ['vo.test.egi.eu', 'vo.test2.egi.eu'])
 
-    @patch("app.utils.getStaticSitesProjectIDs")
+    @patch("app.utils.getCachedProjectIDs")
     @patch("app.utils.getCachedSiteList")
     @patch("app.utils._getStaticSitesInfo")
-    @patch("app.appdb.get_project_ids")
-    def test_getUserAuthData(self, get_project_ids, getStaticSitesInfo, getCachedSiteList, getStaticSitesProjectIDs):
+    def test_getUserAuthData(self, getStaticSitesInfo, getCachedSiteList, getCachedProjectIDs):
         cred = MagicMock()
         cred.get_cred.return_value = {"project": "project_name"}
-        getCachedSiteList.return_value = {'CESGA': ('https://fedcloud-osservices.egi.cesga.es:5000', '', '11548G0')}
+        getCachedSiteList.return_value = {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
+                                          'state': '', 'id': '11548G0'}}
         getStaticSitesInfo.return_value = [{"name": "static_site_name", "api_version": "1.1"}]
-        get_project_ids.return_value = {"vo_name": "project_id"}
-        getStaticSitesProjectIDs.return_value = {"vo_name_st": "project_id_st"}
+        getCachedProjectIDs.return_value = {"vo_name_st": "project_id_st", "vo_name": "project_id"}
 
         res = utils.getUserAuthData("token", cred, "user")
         self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = ost1; type = OpenStack;"
@@ -60,7 +59,8 @@ class TestUtils(unittest.TestCase):
     def test_get_site_images(self, get_driver, getCachedSiteList):
         cred = MagicMock()
         cred.get_cred.return_value = {"project": "project_name"}
-        getCachedSiteList.return_value = {'CESGA': ('https://fedcloud-osservices.egi.cesga.es:5000', '', '11548G0')}
+        getCachedSiteList.return_value = {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
+                                          'state': '', 'id': '11548G0'}}
         driver = MagicMock()
         get_driver.return_value = driver
         image1 = MagicMock()
@@ -75,7 +75,8 @@ class TestUtils(unittest.TestCase):
     def test_get_site_usage(self, get_driver, getCachedSiteList):
         cred = MagicMock()
         cred.get_cred.return_value = {"project": "project_name"}
-        getCachedSiteList.return_value = {'CESGA': ('https://fedcloud-osservices.egi.cesga.es:5000', '', '11548G0')}
+        getCachedSiteList.return_value = {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
+                                          'state': '', 'id': '11548G0'}}
         driver = MagicMock()
         get_driver.return_value = driver
         quotas = MagicMock()

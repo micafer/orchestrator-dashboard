@@ -117,7 +117,9 @@ def get_sites(vo=None):
                         critical = "CRITICAL"
                     provider_endpoint_url = site['provider:url']
                     url = urlparse(provider_endpoint_url)
-                    endpoints[provider_name] = ("%s://%s" % url[0:2], critical, ID)
+                    endpoints[provider_name] = {"url": "%s://%s" % url[0:2],
+                                                "state": critical,
+                                                "id": ID}
 
     return endpoints
 

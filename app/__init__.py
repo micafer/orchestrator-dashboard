@@ -618,8 +618,8 @@ def create_app(oidc_blueprint=None):
             projects = {}
             try:
                 res = cred.get_cred(servicename, session["userid"])
-                projects = utils.getStaticSitesProjectIDs(serviceid)
-                projects.update(appdb.get_project_ids(serviceid))
+                projects = utils.getCachedProjectIDs(serviceid)
+                app.logger.debug("projects={}".format(projects))
 
                 if session["vos"]:
                     filter_projects = {}
