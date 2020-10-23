@@ -15,9 +15,7 @@
     config["gen"] = {
         type: 'pie',
         data: {
-            labels: [
-            'Unknown'
-            ],
+            labels: ['Unknown'],
             datasets: [{
                 data: [100],
                 backgroundColor: [
@@ -57,9 +55,25 @@
         }
     };
 
+    function resetPies() {
+        for (var i = 0; i < resource_types.length; i++) {
+            config[resource_types[i]].data = {
+                labels: ['Unknown'],
+                datasets: [{
+                    data: [100],
+                    backgroundColor: [
+                        window.chartColors.grey
+                    ]
+                }]
+            };
+            window.myPies[resource_types[i]].update();
+        }
+    }
+
     function loadSites() {
         $('#selectedSite').empty();
         $('#selectedSite').append("<option value=''>Loading Sites ...</option>");
+        resetPies();
         $.ajax({
             method: "GET",
             url: "{{ url_for('home') }}sites/" + $('#selectedVO').val(),
@@ -109,11 +123,7 @@
             url: "{{ url_for('home') }}usage/" + $("#selectedSite").val() + "/" + $('#selectedVO').val(),
             success : function(text)
             {
-                try {
-                    data = JSON.parse(text);
-                } catch {
-                    alert(text)
-                }
+                data = JSON.parse(text);
 
                 for (var i = 0; i < resource_types.length; i++) {
                     config[resource_types[i]].data = {
@@ -142,7 +152,8 @@
             error : function(error)
             {
                 $('#divLoadingUsage').hide();
-                alert(error);
+                resetPies();
+                alert(error.responseText);
             }
         });
     }
