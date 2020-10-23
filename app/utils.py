@@ -112,13 +112,14 @@ def get_site_connect_info(site_name, vo, cred, userid):
     domain = None
     site = getCachedSiteList()[site_name]
 
-    creds = cred.get_cred(site_name, userid)
-    if creds and "project" in creds and creds["project"]:
-        domain = creds["project"]
-    else:
-        project_ids = getCachedProjectIDs(site["id"])
-        if vo in project_ids:
-            domain = project_ids[vo]
+    project_ids = getCachedProjectIDs(site["id"])
+    if vo in project_ids:
+        domain = project_ids[vo]
+
+    if not domain:
+        creds = cred.get_cred(site_name, userid)
+        if creds and "project" in creds and creds["project"]:
+            domain = creds["project"]
 
     return site["url"], domain
 
