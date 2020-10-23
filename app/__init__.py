@@ -430,10 +430,10 @@ def create_app(oidc_blueprint=None):
     def getsites(vo=None):
         res = ""
         appdb_sites = appdb.get_sites(vo)
-        for site_name, (_, critical, _) in appdb_sites.items():
-            if critical:
-                critical = " (WARNING: %s state!)" % critical
-            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site_name, site_name, critical)
+        for site_name, site in appdb_sites.items():
+            if site["state"]:
+                site["state"] = " (WARNING: %s state!)" % site["state"]
+            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site_name, site_name, site["state"])
 
         for site_name, _ in utils.getStaticSites(vo).items():
             # avoid site duplication
@@ -461,7 +461,6 @@ def create_app(oidc_blueprint=None):
         try:
             access_token = oidc_blueprint.session.token['access_token']
             quotas = utils.get_site_usage(site, vo, access_token, cred, session["userid"])
-            quotas = utils.get_site_usage(site, vo, access_token, cred, "userid")
 
             res = '<table class="table table-striped table-hover" cellspacing="0">'
             res += '<thead><tr>'
