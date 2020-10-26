@@ -29,13 +29,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for site_name, (site_url, site_status, site_id) in sites.items() %}
+                    {% for site_name, site in sites.items() %}
                     <tr>
                       <td>{{site_name}}</td>
-                      <td>{{site_url}}</td>
+                      <td>{{site["url"]}}</td>
                       <td>
-                        <button type=button id="updateBtn" data-id="{{site_id}}" data-name="{{site_name}}" class="btn btn-small btn-success" data-toggle="modal" data-target="#newModal">EDIT</button>
-                        <button type=button id="deleteBtn" data-id="{{site_id}}" data-name="{{site_name}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false">DELETE</button>
+                        <button type=button id="updateBtn" data-id="{{site['id']}}" data-name="{{site_name}}" class="btn btn-small btn-success" data-toggle="modal" data-target="#newModal">EDIT</button>
+                        <button type=button id="deleteBtn" data-id="{{site['id']}}" data-name="{{site_name}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false">DELETE</button>
                       </td>
                     </tr>
                     {% endfor %}

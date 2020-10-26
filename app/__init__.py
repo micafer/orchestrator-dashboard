@@ -418,7 +418,7 @@ def create_app(oidc_blueprint=None):
         vos = utils.getStaticVOs()
         vos.extend(appdb.get_vo_list())
         vos = list(set(vos))
-        if session["vos"]:
+        if "vos" in session and session["vos"]:
             vos = [vo for vo in vos if vo in session["vos"]]
 
         return render_template('createdep.html',
@@ -430,10 +430,10 @@ def create_app(oidc_blueprint=None):
     def getsites(vo=None):
         res = ""
         appdb_sites = appdb.get_sites(vo)
-        for site_name, (_, critical, _) in appdb_sites.items():
-            if critical:
-                critical = " (WARNING: %s state!)" % critical
-            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site_name, site_name, critical)
+        for site_name, site in appdb_sites.items():
+            if site["state"]:
+                site["state"] = " (WARNING: %s state!)" % site["state"]
+            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site_name, site_name, site["state"])
 
         for site_name, _ in utils.getStaticSites(vo).items():
             # avoid site duplication
@@ -443,6 +443,7 @@ def create_app(oidc_blueprint=None):
         return res
 
     @app.route('/images/<site>/<vo>')
+    @authorized_with_valid_token
     def getimages(site=None, vo=None):
         res = ""
         if vo == "local":
@@ -453,6 +454,16 @@ def create_app(oidc_blueprint=None):
             for image in appdb.get_images(site, vo):
                 res += '<option name="selectedImage" value=%s>%s</option>' % (image, image)
         return res
+
+    @app.route('/usage/<site>/<vo>')
+    @authorized_with_valid_token
+    def getusage(site=None, vo=None):
+        try:
+            access_token = oidc_blueprint.session.token['access_token']
+            quotas_dict = utils.get_site_usage(site, vo, access_token, cred, session["userid"])
+            return json.dumps(quotas_dict)
+        except Exception as ex:
+            return "Error loading site quotas: %s!" % str(ex), 400
 
     def add_image_to_template(template, image):
         # Add the image to all compute nodes
@@ -586,8 +597,8 @@ def create_app(oidc_blueprint=None):
             projects = {}
             try:
                 res = cred.get_cred(servicename, session["userid"])
-                projects = utils.getStaticSitesProjectIDs(serviceid)
-                projects.update(appdb.get_project_ids(serviceid))
+                projects = utils.getCachedProjectIDs(serviceid)
+                app.logger.debug("projects={}".format(projects))
 
                 if session["vos"]:
                     filter_projects = {}
