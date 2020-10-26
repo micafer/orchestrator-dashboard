@@ -80,9 +80,38 @@ class TestUtils(unittest.TestCase):
         driver = MagicMock()
         get_driver.return_value = driver
         quotas = MagicMock()
+        quotas.cores.in_use = 1
+        quotas.cores.reserved = 0
+        quotas.cores.limit = 10
+        quotas.ram.in_use = 10240
+        quotas.ram.reserved = 0
+        quotas.ram.limit = 102400
+        quotas.instances.in_use = 1
+        quotas.instances.reserved = 0
+        quotas.instances.limit = 10
+        quotas.floating_ips.in_use = 1
+        quotas.floating_ips.reserved = 0
+        quotas.floating_ips.limit = 10
+        quotas.security_groups.in_use = 1
+        quotas.security_groups.reserved = 0
+        quotas.security_groups.limit = 10
         driver.ex_get_quota_set.return_value = quotas
+        net_quotas = MagicMock()
+        net_quotas.floatingip.in_use = 2
+        net_quotas.floatingip.reserved = 0
+        net_quotas.floatingip.limit = 4
+        net_quotas.security_group.in_use = 2
+        net_quotas.security_group.reserved = 0
+        net_quotas.security_group.limit = 10
+        driver.ex_get_network_quotas.return_value = net_quotas
         res = utils.get_site_usage("CESGA", "vo.access.egi.eu", "token", cred, "user")
-        self.assertEquals(res, quotas)
+        quotas_dict = {}
+        quotas_dict["cores"] = {"used": 1,"limit": 10}
+        quotas_dict["ram"] = {"used": 10,"limit": 100}
+        quotas_dict["instances"] = {"used": 1,"limit": 10}
+        quotas_dict["floating_ips"] = {"used": 2,"limit": 4}
+        quotas_dict["security_groups"] = {"used": 2,"limit": 10}
+        self.assertEquals(res, quotas_dict)
 
 
 if __name__ == '__main__':
