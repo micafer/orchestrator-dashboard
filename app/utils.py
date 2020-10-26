@@ -156,7 +156,7 @@ def get_site_usage(site_name, vo, access_token, cred, userid):
     quotas = driver.ex_get_quota_set(domain)
     try:
         net_quotas = driver.ex_get_network_quotas(domain)
-    except Exception as ex:
+    except Exception:
         net_quotas = None
 
     quotas_dict = {}
