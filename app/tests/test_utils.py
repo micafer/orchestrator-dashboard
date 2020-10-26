@@ -106,11 +106,11 @@ class TestUtils(unittest.TestCase):
         driver.ex_get_network_quotas.return_value = net_quotas
         res = utils.get_site_usage("CESGA", "vo.access.egi.eu", "token", cred, "user")
         quotas_dict = {}
-        quotas_dict["cores"] = {"used": 1,"limit": 10}
-        quotas_dict["ram"] = {"used": 10,"limit": 100}
-        quotas_dict["instances"] = {"used": 1,"limit": 10}
-        quotas_dict["floating_ips"] = {"used": 2,"limit": 4}
-        quotas_dict["security_groups"] = {"used": 2,"limit": 10}
+        quotas_dict["cores"] = {"used": 1, "limit": 10}
+        quotas_dict["ram"] = {"used": 10, "limit": 100}
+        quotas_dict["instances"] = {"used": 1, "limit": 10}
+        quotas_dict["floating_ips"] = {"used": 2, "limit": 4}
+        quotas_dict["security_groups"] = {"used": 2, "limit": 10}
         self.assertEquals(res, quotas_dict)
 
 

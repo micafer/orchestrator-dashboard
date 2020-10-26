@@ -160,15 +160,22 @@ def get_site_usage(site_name, vo, access_token, cred, userid):
         net_quotas = None
 
     quotas_dict = {}
-    quotas_dict["cores"] = {"used": quotas.cores.in_use + quotas.cores.reserved,"limit": quotas.cores.limit}
-    quotas_dict["ram"] = {"used": (quotas.ram.in_use + quotas.ram.reserved) / 1024,"limit": quotas.ram.limit / 1024}
-    quotas_dict["instances"] = {"used": quotas.instances.in_use + quotas.instances.reserved,"limit": quotas.instances.limit}
-    quotas_dict["floating_ips"] = {"used": quotas.floating_ips.in_use + quotas.floating_ips.reserved,"limit": quotas.floating_ips.limit}
-    quotas_dict["security_groups"] = {"used": quotas.security_groups.in_use + quotas.security_groups.reserved,"limit": quotas.security_groups.limit}
+    quotas_dict["cores"] = {"used": quotas.cores.in_use + quotas.cores.reserved,
+                            "limit": quotas.cores.limit}
+    quotas_dict["ram"] = {"used": (quotas.ram.in_use + quotas.ram.reserved) / 1024,
+                          "limit": quotas.ram.limit / 1024}
+    quotas_dict["instances"] = {"used": quotas.instances.in_use + quotas.instances.reserved,
+                                "limit": quotas.instances.limit}
+    quotas_dict["floating_ips"] = {"used": quotas.floating_ips.in_use + quotas.floating_ips.reserved,
+                                   "limit": quotas.floating_ips.limit}
+    quotas_dict["security_groups"] = {"used": quotas.security_groups.in_use + quotas.security_groups.reserved,
+                                      "limit": quotas.security_groups.limit}
 
     if net_quotas:
-        quotas_dict["floating_ips"] = {"used": net_quotas.floatingip.in_use + net_quotas.floatingip.reserved,"limit": net_quotas.floatingip.limit}
-        quotas_dict["security_groups"] = {"used": net_quotas.security_group.in_use + net_quotas.security_group.reserved,"limit": net_quotas.security_group.limit}
+        quotas_dict["floating_ips"] = {"used": net_quotas.floatingip.in_use + net_quotas.floatingip.reserved,
+                                       "limit": net_quotas.floatingip.limit}
+        quotas_dict["security_groups"] = {"used": net_quotas.security_group.in_use + net_quotas.security_group.reserved,
+                                          "limit": net_quotas.security_group.limit}
     return quotas_dict
 
 
