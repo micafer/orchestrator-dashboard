@@ -89,7 +89,6 @@
         "vos": {
             "eosc-synergy.eu": "51f736d36ce34b9ebdf196cfcabd24ee",
             "covid19.eosc-synergy.eu": "a22bbffb007745b2934bf308b0a4d186"
-        },
-        "api_version": "1.1"
+        }
     }
 ]
