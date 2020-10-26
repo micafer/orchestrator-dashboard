@@ -77,7 +77,7 @@ def getCachedProjectIDs(site_id):
                     site["vos"].update(appdb.get_project_ids(site_id))
                     site["vos_updated"] = True
                 except Exception as ex:
-                    print("Error loading project IDs from AppDB.", file=sys.stderr)
+                    print("Error loading project IDs from AppDB: %s" % ex, file=sys.stderr)
 
             for vo, projectid in site["vos"].items():
                 res[vo] = projectid
