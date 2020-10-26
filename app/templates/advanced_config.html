@@ -137,7 +137,8 @@
                         'Free'
                         ],
                         datasets: [{
-                            data: [data[resource_types[i]]["used"], data[resource_types[i]]["limit"] - data[resource_types[i]]["used"]],
+                            data: [Math.round(data[resource_types[i]]["used"]),
+                                   Math.round(data[resource_types[i]]["limit"] - data[resource_types[i]]["used"])],
                             backgroundColor: [
                                 window.chartColors.green,
                                 window.chartColors.grey
