@@ -108,3 +108,7 @@ topology_template:
   outputs:
     storm_ui:
       value: {concat: [ 'http://', { get_attribute: [ fe, public_address, 0 ] }, ':8080' ] }
+    cluster_ip:
+      value: { get_attribute: [ fe, public_address, 0 ] }
+    cluster_creds:
+      value: { get_attribute: [ fe, endpoint, credential, 0 ] }
