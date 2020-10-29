@@ -149,8 +149,7 @@ def get_project_ids(service_id):
     projects = {}
     # Until it is on the prod instance use the Devel one
 
-    deb_url = "https://appdb-dev.marie.hellasgrid.gr"
-    data = appdb_call('/rest/1.0/va_providers/%s' % service_id, url=deb_url)
+    data = appdb_call('/rest/1.0/va_providers/%s' % service_id)
     if (data and 'virtualization:provider' in data and data['virtualization:provider'] and
             'provider:shares' in data['virtualization:provider'] and
             data['virtualization:provider']['provider:shares'] and
