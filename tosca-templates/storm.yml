@@ -6,15 +6,14 @@ imports:
 metadata:
   display_name: Launch a Storm Virtual Cluster
   icon: images/storm.png
-  tag: beta
 
-description: Deploys an Apache Storm cluster with one Nimbus and between 1 and 100 Supervisors
+description: Deploys an Apache Storm cluster
 
 topology_template:
   inputs:
     wn_num:
       type: integer
-      description: Maximum number of WNs in the elastic cluster
+      description: Number of WNs in the cluster
       default: 1
       required: yes
 
