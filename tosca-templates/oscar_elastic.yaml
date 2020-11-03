@@ -58,6 +58,10 @@ topology_template:
       type: string
       description: Access Token for the Kubernetes admin user
       default: not_very_secret_token
+    oscar_password:
+      type: string
+      description: OSCAR password
+      default: oscar123
 
   node_templates:
 
@@ -88,6 +92,7 @@ topology_template:
       type: tosca.nodes.indigo.OSCAR
       properties:
         minio_secretkey:  minio123
+        password: { get_input: oscar_password }
       capabilities:
         endpoint:
           properties:
