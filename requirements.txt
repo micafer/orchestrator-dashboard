@@ -6,4 +6,5 @@ PyYAML==5.1.2
 packaging==19.2
 xmltodict==0.12.0
 radl==1.1.3
-apache-libcloud==3.0.0
+#apache-libcloud==3.0.0
+git+git://github.com/apache/libcloud
