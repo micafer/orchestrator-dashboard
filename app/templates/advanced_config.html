@@ -111,7 +111,7 @@
         $('#selectedSiteImage').append("<option value=''>Loading Images ...</option>");
         $.ajax({
             method: "GET",
-            url: "{{ url_for('home') }}images/" + $("#selectedSite").val() + "/local",
+            url: "{{ url_for('home') }}images/" + $("#selectedSite").val() + "/" + $('#selectedVO').val() + "?local=1",
             success : function(text)
             {
                 $('#selectedSiteImage').empty();

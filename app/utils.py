@@ -28,7 +28,7 @@ import io
 import ast
 import time
 import sys
-from flask import flash, g
+from flask import flash, g, escape
 from app import appdb
 from fnmatch import fnmatch
 from hashlib import md5
@@ -147,7 +147,7 @@ def get_site_images(site_name, vo, access_token, cred, userid):
         return [(image.name, image.id) for image in images]
     except Exception as ex:
         msg = "Error loading site images: %s!" % str(ex)
-        return [(msg, msg)]
+        return [(escape(msg), escape(msg))]
 
 
 def get_site_usage(site_name, vo, access_token, cred, userid):

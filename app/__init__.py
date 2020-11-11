@@ -25,7 +25,7 @@ import yaml
 import io
 import os
 import logging
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
 from app.settings import Settings
 from app.cred import Credentials
@@ -446,7 +446,8 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def getimages(site=None, vo=None):
         res = ""
-        if vo == "local":
+        local = request.args.get('local', None)
+        if local:
             access_token = oidc_blueprint.session.token['access_token']
             for image_name, image_id in utils.get_site_images(site, vo, access_token, cred, session["userid"]):
                 res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image_id, image_name)
