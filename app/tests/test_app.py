@@ -311,7 +311,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         get_images.return_value = ["IMAGE"]
         get_site_images.return_value = [("IMAGE_NAME", "IMAGE_ID")]
-        res = self.client.get('/images/sitename/local')
+        res = self.client.get('/images/sitename/vo?local=1')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'<option name="selectedSiteImage" value=IMAGE_ID>IMAGE_NAME</option>', res.data)
         res = self.client.get('/images/sitename/vo')
