@@ -93,7 +93,9 @@ def create_app(oidc_blueprint=None):
         @wraps(f)
         def decorated_function(*args, **kwargs):
 
-            if not settings.debug_oidc_token:
+            if settings.debug_oidc_token:
+                oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
+            else:
                 try:
                     if not oidc_blueprint.session.authorized or 'username' not in session:
                         return redirect(url_for('login'))
