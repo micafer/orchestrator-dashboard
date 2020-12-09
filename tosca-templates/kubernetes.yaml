@@ -102,7 +102,7 @@ topology_template:
                 source: 6443
       properties:
         admin_username:  kubeuser
-        install_nfs_client: false
+        install_nfs_client: true
         admin_token: { get_input: admin_token }
         install_kubeapps:  { get_input: install_kubeapps }
         version: { get_input: kube_version }
