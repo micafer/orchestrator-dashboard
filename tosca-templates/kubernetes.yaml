@@ -85,6 +85,16 @@ topology_template:
       default: false
       constraints:
       - valid_values: [ false, true ]
+    kube_cert_manager:
+      type: boolean
+      description: Flag to install Cert-Manager
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
+    kube_cert_user_email:
+      type: string
+      description: Email to be used in the Let's Encrypt issuer
+      default: "jhondoe@server.com"
 
   node_templates:
 
@@ -107,6 +117,8 @@ topology_template:
         install_kubeapps:  { get_input: install_kubeapps }
         version: { get_input: kube_version }
         nvidia_support: { get_input: kube_nvidia_support }
+        cert_manager: { get_input: kube_cert_manager }
+        cert_user_email: { get_input: kube_cert_user_email }
       requirements:
         - host: front
 
