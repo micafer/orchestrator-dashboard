@@ -92,5 +92,14 @@
             "eosc-synergy.eu": "51f736d36ce34b9ebdf196cfcabd24ee",
             "covid19.eosc-synergy.eu": "a22bbffb007745b2934bf308b0a4d186"
         }
+    },
+    {
+        "name": "UPV-GRyCAP",
+        "url": "https://horsemen.i3m.upv.es:5000",
+        "id": "upvgrycap",
+        "vos": {
+            "EOServices-vo.indra.es": "392beb802d024d469ee85e6a92425656",
+            "saps-vo.i3m.upv.es": "e363b1b9f92d42b6944d64338edf7479"
+        }
     }
 ]
