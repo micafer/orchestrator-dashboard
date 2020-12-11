@@ -27,7 +27,8 @@ import os
 import io
 import ast
 import time
-from flask import flash, g
+import sys
+from flask import flash, g, escape
 from app import appdb
 from fnmatch import fnmatch
 from hashlib import md5
@@ -45,7 +46,6 @@ urllib3.disable_warnings(InsecureRequestWarning)
 
 SITE_LIST = {}
 LAST_UPDATE = 0
-CACHE_DELAY = 3600
 
 
 def _getStaticSitesInfo():
@@ -66,13 +66,21 @@ def _getStaticSitesInfo():
         return []
 
 
-def getStaticSitesProjectIDs(serviceid):
+def getCachedProjectIDs(site_id):
     res = {}
-    for site in _getStaticSitesInfo():
-        if serviceid == site["id"]:
+    for site in getCachedSiteList().values():
+        if site_id == site["id"]:
+            if "vos" not in site:
+                site["vos"] = {}
+            if "vos_updated" not in site or not site["vos_updated"]:
+                try:
+                    site["vos"].update(appdb.get_project_ids(site_id))
+                    site["vos_updated"] = True
+                except Exception as ex:
+                    print("Error loading project IDs from AppDB: %s" % ex, file=sys.stderr)
+
             for vo, projectid in site["vos"].items():
                 res[vo] = projectid
-
     return res
 
 
@@ -80,7 +88,8 @@ def getStaticSites(vo=None):
     res = {}
     for site in _getStaticSitesInfo():
         if vo is None or vo in site["vos"]:
-            res[site["name"]] = (site["url"], "", site["id"])
+            res[site["name"]] = site
+            site["state"] = ""
 
     return res
 
@@ -95,40 +104,79 @@ def getStaticVOs():
 
 def get_ost_image_url(site_name):
     sites = getCachedSiteList()
-    site_url, _, _ = sites[site_name]
+    site_url = sites[site_name]["url"]
     return urlparse(site_url)[1]
+
+
+def get_site_connect_info(site_name, vo, cred, userid):
+    domain = None
+    site = getCachedSiteList()[site_name]
+
+    project_ids = getCachedProjectIDs(site["id"])
+    if vo in project_ids:
+        domain = project_ids[vo]
+
+    if not domain:
+        creds = cred.get_cred(site_name, userid)
+        if creds and "project" in creds and creds["project"]:
+            domain = creds["project"]
+
+    return site["url"], domain
+
+
+def get_site_driver(site_name, site_url, domain, access_token):
+    OpenStack = get_driver(Provider.OPENSTACK)
+    driver = OpenStack('egi.eu', access_token,
+                       api_version='2.0',
+                       ex_tenant_name='openid',
+                       ex_force_auth_url=site_url,
+                       ex_force_auth_version='3.x_oidc_access_token',
+                       ex_domain_name=domain)
+
+    # Workaround to unset default service_region (RegionOne)
+    driver.connection.service_region = None
+
+    return driver
 
 
 def get_site_images(site_name, vo, access_token, cred, userid):
     try:
-        domain = None
-        sites = getCachedSiteList()
-        site_url, _, site_id = sites[site_name]
-
-        creds = cred.get_cred(site_name, userid)
-        if creds and "project" in creds and creds["project"]:
-            domain = creds["project"]
-        else:
-            project_ids = getStaticSitesProjectIDs(site_id)
-            project_ids.update(appdb.get_project_ids(site_id))
-            if vo in project_ids:
-                domain = project_ids[vo]
-
-        OpenStack = get_driver(Provider.OPENSTACK)
-        driver = OpenStack('egi.eu', access_token,
-                           ex_tenant_name='openid',
-                           ex_force_auth_url=site_url,
-                           ex_force_auth_version='3.x_oidc_access_token',
-                           ex_domain_name=domain)
-
-        # Workaround to unset default service_region (RegionOne)
-        driver.connection.service_region = None
-
+        site_url, domain = get_site_connect_info(site_name, vo, cred, userid)
+        driver = get_site_driver(site_name, site_url, domain, access_token)
         images = driver.list_images()
         return [(image.name, image.id) for image in images]
     except Exception as ex:
         msg = "Error loading site images: %s!" % str(ex)
-        return [(msg, msg)]
+        return [(escape(msg), escape(msg))]
+
+
+def get_site_usage(site_name, vo, access_token, cred, userid):
+    site_url, domain = get_site_connect_info(site_name, vo, cred, userid)
+    driver = get_site_driver(site_name, site_url, domain, access_token)
+    quotas = driver.ex_get_quota_set(domain)
+    try:
+        net_quotas = driver.ex_get_network_quotas(domain)
+    except Exception:
+        net_quotas = None
+
+    quotas_dict = {}
+    quotas_dict["cores"] = {"used": quotas.cores.in_use + quotas.cores.reserved,
+                            "limit": quotas.cores.limit}
+    quotas_dict["ram"] = {"used": (quotas.ram.in_use + quotas.ram.reserved) / 1024,
+                          "limit": quotas.ram.limit / 1024}
+    quotas_dict["instances"] = {"used": quotas.instances.in_use + quotas.instances.reserved,
+                                "limit": quotas.instances.limit}
+    quotas_dict["floating_ips"] = {"used": quotas.floating_ips.in_use + quotas.floating_ips.reserved,
+                                   "limit": quotas.floating_ips.limit}
+    quotas_dict["security_groups"] = {"used": quotas.security_groups.in_use + quotas.security_groups.reserved,
+                                      "limit": quotas.security_groups.limit}
+
+    if net_quotas:
+        quotas_dict["floating_ips"] = {"used": net_quotas.floatingip.in_use + net_quotas.floatingip.reserved,
+                                       "limit": net_quotas.floatingip.limit}
+        quotas_dict["security_groups"] = {"used": net_quotas.security_group.in_use + net_quotas.security_group.reserved,
+                                          "limit": net_quotas.security_group.limit}
+    return quotas_dict
 
 
 def getUserVOs(entitlements):
@@ -144,19 +192,19 @@ def getUserVOs(entitlements):
 def getCachedSiteList():
     global SITE_LIST
     global LAST_UPDATE
-    global CACHE_DELAY
 
     now = int(time.time())
-    if not SITE_LIST or now - LAST_UPDATE > CACHE_DELAY:
-        LAST_UPDATE = now
-        SITE_LIST = getStaticSites()
-        SITE_LIST.update(appdb.get_sites())
+    if not SITE_LIST or now - LAST_UPDATE > g.settings.appdb_cache_timeout:
+        try:
+            SITE_LIST = appdb.get_sites()
+            # in case of error do not update time
+            LAST_UPDATE = now
+        except Exception as ex:
+            flash("Error retrieving site list from AppDB: %s" % ex, 'warning')
 
-    if not SITE_LIST:
-        flash("Error retrieving site list", 'warning')
-        return []
-    else:
-        return SITE_LIST
+        SITE_LIST.update(getStaticSites())
+
+    return SITE_LIST
 
 
 def getUserAuthData(access_token, cred, userid, vo=None, selected_site=None):
@@ -168,16 +216,15 @@ def getUserAuthData(access_token, cred, userid, vo=None, selected_site=None):
             api_versions[site["name"]] = site["api_version"]
 
     cont = 0
-    for site_name, (site_url, _, site_id) in getCachedSiteList().items():
+    for site_name, site in getCachedSiteList().items():
         cont += 1
         creds = cred.get_cred(site_name, userid)
         res += "\\nid = ost%s; type = OpenStack; username = egi.eu; " % cont
         res += "tenant = openid; auth_version = 3.x_oidc_access_token;"
-        res += " host = %s; password = '%s'" % (site_url, access_token)
+        res += " host = %s; password = '%s'" % (site["url"], access_token)
         projectid = None
         if vo and selected_site and selected_site == site_name:
-            project_ids = getStaticSitesProjectIDs(site_id)
-            project_ids.update(appdb.get_project_ids(site_id))
+            project_ids = getCachedProjectIDs(site["id"])
             if vo in project_ids:
                 projectid = project_ids[vo]
                 # Update the creds with the new projectid

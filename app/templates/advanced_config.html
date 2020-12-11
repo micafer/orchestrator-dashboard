@@ -3,21 +3,82 @@
  <div id="confScheduling">
    <div class="form-group">
        <h5>Configure scheduling:</h5>
-<!--
-       <label class="radio-inline">
-           <input id="autosched" type="radio" name="extra_opts.schedtype" value="auto"> Auto
-       </label>
-       <label class="radio-inline">
-           <input id="mansched" type="radio" name="extra_opts.schedtype" value="man" checked> Manual
-       </label>
--->
    </div>
 
+   
+   <script src="{{ url_for('static', filename='chart/Chart.min.js') }}"></script>
+   <script src="{{ url_for('static', filename='chart/utils.js') }}"></script>
+
    <script>
+
+    var config = {};
+    config["gen"] = {
+        type: 'pie',
+        data: {
+            labels: ['Unknown'],
+            datasets: [{
+                data: [100],
+                backgroundColor: [
+                    window.chartColors.grey
+                ]
+            }]
+        },
+        options: {
+            elements: {
+                arc: {
+                  borderWidth: 0
+                }
+            },
+            legend: {
+                display: false
+            },
+            responsive: false,
+            title: {
+                display: true,
+                text: 'VCPUs',
+                padding: 0
+            }
+        }
+    };
+
+    var resource_types = ["cores", "ram", "instances", "floating_ips", "security_groups"];
+
+    for (var i = 0; i < resource_types.length; i++) {
+        config[resource_types[i]] = JSON.parse(JSON.stringify(config["gen"]));;    
+    }
+
+    config["ram"].options.title.text = "RAM (GB)"
+    config["instances"].options.title.text = "Instances"
+    config["floating_ips"].options.title.text = "Float IPs"
+    config["security_groups"].options.title.text = "SGs"
+
+    window.onload = function() {
+        window.myPies = {};
+        for (var i = 0; i < resource_types.length; i++) {
+            var ctx = document.getElementById('chart-area-' + resource_types[i]).getContext('2d');
+            window.myPies[resource_types[i]] = new Chart(ctx, config[resource_types[i]]);
+        }
+    };
+
+    function resetPies() {
+        for (var i = 0; i < resource_types.length; i++) {
+            config[resource_types[i]].data = {
+                labels: ['Unknown'],
+                datasets: [{
+                    data: [100],
+                    backgroundColor: [
+                        window.chartColors.grey
+                    ]
+                }]
+            };
+            window.myPies[resource_types[i]].update();
+        }
+    }
 
     function loadSites() {
         $('#selectedSite').empty();
         $('#selectedSite').append("<option value=''>Loading Sites ...</option>");
+        resetPies();
         $.ajax({
             method: "GET",
             url: "{{ url_for('home') }}sites/" + $('#selectedVO').val(),
@@ -50,12 +111,55 @@
         $('#selectedSiteImage').append("<option value=''>Loading Images ...</option>");
         $.ajax({
             method: "GET",
-            url: "{{ url_for('home') }}images/" + $("#selectedSite").val() + "/local",
+            url: "{{ url_for('home') }}images/" + $("#selectedSite").val() + "/" + $('#selectedVO').val() + "?local=1",
             success : function(text)
             {
                 $('#selectedSiteImage').empty();
                 $('#selectedSiteImage').append("<option value=''> - Select one image - </option>");
                 $('#selectedSiteImage').append(text);
+            }
+        });
+    }
+
+    function loadSiteInfo() {
+        $('#divLoadingUsage').show();
+        $.ajax({
+            method: "GET",
+            url: "{{ url_for('home') }}usage/" + $("#selectedSite").val() + "/" + $('#selectedVO').val(),
+            success : function(text)
+            {
+                data = JSON.parse(text);
+
+                for (var i = 0; i < resource_types.length; i++) {
+                    config[resource_types[i]].data = {
+                        labels: [
+                        'Used',
+                        'Free'
+                        ],
+                        datasets: [{
+                            data: [Math.round(data[resource_types[i]]["used"]),
+                                   Math.round(data[resource_types[i]]["limit"] - data[resource_types[i]]["used"])],
+                            backgroundColor: [
+                                window.chartColors.green,
+                                window.chartColors.grey
+                            ]
+                        }]
+                    };
+                    var usage = data[resource_types[i]]["used"] / data[resource_types[i]]["limit"];
+                    if (usage >= 0.7 && usage < 0.9) {
+                        config[resource_types[i]].data.datasets[0].backgroundColor[0] = window.chartColors.orange;
+                    } else if (usage >= 0.9) {
+                        config[resource_types[i]].data.datasets[0].backgroundColor[0] = window.chartColors.red;
+                    }
+                    window.myPies[resource_types[i]].update();
+                }
+                $('#divLoadingUsage').hide();
+            },
+            error : function(error)
+            {
+                $('#divLoadingUsage').hide();
+                resetPies();
+                alert(error.responseText);
             }
         });
     }
@@ -74,10 +178,41 @@
            <option name="selectedVO" value={{vo}}>{{vo}}</option>
        {% endfor %}
        </select>
-       <label>Select provider:</label>
-       <select class="js-example-basic-single js-states form-control" id="selectedSite" name="extra_opts.selectedSite" onchange="loadImages();loadSiteImages();">
-        <option name="selectedImage" value="">Select VO</option>
-       </select>
+
+       <div class="form-row">
+        <div class="form-group col-md-6">
+        <label>Select provider:</label>
+        <select class="js-example-basic-single js-states form-control" id="selectedSite" name="extra_opts.selectedSite" onchange="loadImages();loadSiteImages();loadSiteInfo();">
+            <option name="selectedImage" value="">Select VO</option>
+        </select>
+        </div>
+        <div class="form-group col-md-6">
+            <label>Site Resource Usage:</label>
+            <div id="divLoadingUsage" style="display: none; position: absolute; margin-left: 40px; margin-top: 30px; padding:10px; background-color:white; z-index: 3;">
+                Loading Site Resource Usage Data <span class='spinner-grow spinner-grow-sm'></span>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-1">
+                </div>
+                <div class="form-group col-md-2">
+                    <canvas id="chart-area-cores" width="100px" height="100px"></canvas>
+                </div>
+                <div class="form-group col-md-2">
+                    <canvas id="chart-area-ram" width="100px" height="100px"></canvas>
+                </div>
+                <div class="form-group col-md-2">
+                    <canvas id="chart-area-instances" width="100px" height="100px"></canvas>
+                </div>
+                <div class="form-group col-md-2">
+                    <canvas id="chart-area-floating_ips" width="100px" height="100px"></canvas>
+                </div>
+                <div class="form-group col-md-2">
+                    <canvas id="chart-area-security_groups" width="100px" height="100px"></canvas>
+                </div>
+            </div>
+        </div>
+       </div>
+
        <label>Select only one of this options AppDB or Site image:</label>
        <div class="form-row">
         <div class="form-group col-md-6">

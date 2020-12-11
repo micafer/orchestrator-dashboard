@@ -37,7 +37,7 @@ Create the `config.json` file (see the [example](app/config-sample.json)) settin
 | SUPPORT_EMAIL | Email address that will be shown in case of errors | N | "" |
 | EXTERNAL_LINKS | List of dictionaries ({ "url": "example.com" , "menu_item_name": "Example link"}) specifying links that will be shown under the "External Links" menu | N | [] |
 | LOG_LEVEL | Set Logging level | N | info |
-| CRED_DB_URL | URL to the DB to store site project IDs | N | sqlite:///tmp/creds.db |
+| DB_URL | URL to the DB to store dashboard data | N | sqlite:///creds.db |
 | ANALYTICS_TAG | Google Analytic Tag | N | "" |
 | STATIC_SITES | List of static sites added to the AppDB ones ([{"name": "static_site_name", "url": "static_site_url", "id": "static_id", "vos": {"vo": "stprojectid"}}]) | N | [] |
 | STATIC_SITES_URL | URL of a JSON file with the list of static sites added to the AppDB ones | N | "" |

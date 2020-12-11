@@ -24,6 +24,8 @@ import xmltodict
 from urllib.parse import urlparse
 
 APPDB_URL = "https://appdb.egi.eu"
+VO_LIST = []
+APPDB_TIMEOUT = 5
 
 
 def appdb_call(path, retries=3, url=APPDB_URL):
@@ -33,7 +35,7 @@ def appdb_call(path, retries=3, url=APPDB_URL):
         cont = 0
         while data is None and cont < retries:
             cont += 1
-            resp = requests.request("GET", url + path, verify=False)
+            resp = requests.request("GET", url + path, verify=False, timeout=APPDB_TIMEOUT)
             if resp.status_code == 200:
                 data = xmltodict.parse(resp.text.replace('\n', ''))['appdb:appdb']
     except Exception:
@@ -43,15 +45,18 @@ def appdb_call(path, retries=3, url=APPDB_URL):
 
 
 def get_vo_list():
-    vos = []
-    data = appdb_call('/rest/1.0/vos')
-    if data:
-        if isinstance(data['vo:vo'], list):
-            for vo in data['vo:vo']:
-                vos.append(vo['@name'])
-        else:
-            vos.append(data['vo:vo']['@name'])
-    return vos
+    global VO_LIST
+    if not VO_LIST:
+        vos = []
+        data = appdb_call('/rest/1.0/vos')
+        if data:
+            if isinstance(data['vo:vo'], list):
+                for vo in data['vo:vo']:
+                    vos.append(vo['@name'])
+            else:
+                vos.append(data['vo:vo']['@name'])
+        VO_LIST = vos
+    return VO_LIST
 
 
 def check_supported_VOs(site, vo):
@@ -59,7 +64,11 @@ def check_supported_VOs(site, vo):
         return True
 
     if 'provider:image' in site:
-        for os_tpl in site['provider:image']:
+        if isinstance(site['provider:image'], list):
+            images = site['provider:image']
+        else:
+            images = [site['provider:image']]
+        for os_tpl in images:
             if '@voname' in os_tpl and vo in os_tpl['@voname']:
                 return True
     return False
@@ -108,7 +117,9 @@ def get_sites(vo=None):
                         critical = "CRITICAL"
                     provider_endpoint_url = site['provider:url']
                     url = urlparse(provider_endpoint_url)
-                    endpoints[provider_name] = ("%s://%s" % url[0:2], critical, ID)
+                    endpoints[provider_name] = {"url": "%s://%s" % url[0:2],
+                                                "state": critical,
+                                                "id": ID}
 
     return endpoints
 
@@ -138,8 +149,7 @@ def get_project_ids(service_id):
     projects = {}
     # Until it is on the prod instance use the Devel one
 
-    deb_url = "https://appdb-dev.marie.hellasgrid.gr"
-    data = appdb_call('/rest/1.0/va_providers/%s' % service_id, url=deb_url)
+    data = appdb_call('/rest/1.0/va_providers/%s' % service_id)
     if (data and 'virtualization:provider' in data and data['virtualization:provider'] and
             'provider:shares' in data['virtualization:provider'] and
             data['virtualization:provider']['provider:shares'] and

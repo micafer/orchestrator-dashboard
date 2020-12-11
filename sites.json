@@ -5,9 +5,9 @@
         "id": "11478G0",
         "vos": {
             "eosc-synergy.eu": "d85ca93c937a4a97adf134ec2593296d",
-            "demo.fedcloud.egi.eu": "demo.fedcloud.egi.eu",
-            "biomed": "biomed",
-            "vo.indigo-datacloud.eu": "vo.indigo-datacloud.eu"
+            "demo.fedcloud.egi.eu": "10b972eed97940089b234f6257d7db72",
+            "biomed": "eca73ad6a84d4c0088063505c36349ab",
+            "vo.indigo-datacloud.eu": "25cb49baedbf40a194729ff6802c8491"
         }
     },
     {
@@ -27,7 +27,8 @@
         "vos": {
             "eosc-synergy.eu": "57bcb0efcba4467fa225add92fdc194c",
             "covid19.eosc-synergy.eu": "972298c557184a2192ebc861f3184da8",
-            "o3as.data.kit.edu": "4a22f140a5fb4678aa1599fbf0b44b2f"
+            "o3as.data.kit.edu": "4a22f140a5fb4678aa1599fbf0b44b2f",
+            "vo.access.egi.eu": "3a8e9d966e644405bf19b536adf7743d"
         }
     },
     {
@@ -45,8 +46,9 @@
         "id": "7513G0",
         "vos": {
             "vo.lifewatch.eu": "ac7bc26131d248ecb6add521e648c331",
-            "eosc-synergy.eu": "VO:eosc-synergy.eu",
-            "demo.fedcloud.egi.eu": "VO:demo.fedcloud.egi.eu",
+            "eosc-synergy.eu": "3b9754ad8c6046b4aec43ec21abe7d8c",
+            "demo.fedcloud.egi.eu": "2a7e2cd4b6dc4e609dd934964c1715c6",
+            "o3as.data.kit.edu": "352db003073549749351fad26cd55074",
             "vo.access.egi.eu": "999f045cb1ff4684a15ebb338af69460"
         }
     },
@@ -65,7 +67,9 @@
         "id": "12249G0",
         "vos": {
             "eosc-synergy.eu": "fdfa9b81582447729f16de6cf61b16e4",
-            "covid19.eosc-synergy.eu": "36b6d10a0c194fa8991e7e8d15297478"
+            "covid19.eosc-synergy.eu": "36b6d10a0c194fa8991e7e8d15297478",
+            "o3as.data.kit.edu": "621b1977bb384beab1519713c7e695f0",
+            "worsica.vo.incd.pt": "fce23a2c4eca447a9d5b9c2bdab55e26"
         }
     },
     {
@@ -76,8 +80,26 @@
             "eosc-synergy.eu": "0819ebde41fd4c0d95560fc23dc575a4",
             "covid19.eosc-synergy.eu": "e3716e9fb6a241fd91469a6ee05358a1",
             "o3as.data.kit.edu": "91b83525d63c48d78740e6799cfed2c4",
-            "worsica.vo.indc.pt": "38414631e27c485eae87f6dcb3082873",
+            "worsica.vo.incd.pt": "38414631e27c485eae87f6dcb3082873",
             "fedcloud.egi.eu": "aa7f62b244c946038c093d0bf05827a1"
+        }
+    },
+    {
+        "name": "IISAS-Cloud",
+        "url": "https://cloud.ui.savba.sk:5000",
+        "id": "12355G0",
+        "vos": {
+            "eosc-synergy.eu": "51f736d36ce34b9ebdf196cfcabd24ee",
+            "covid19.eosc-synergy.eu": "a22bbffb007745b2934bf308b0a4d186"
+        }
+    },
+    {
+        "name": "UPV-GRyCAP",
+        "url": "https://horsemen.i3m.upv.es:5000",
+        "id": "upvgrycap",
+        "vos": {
+            "EOServices-vo.indra.es": "392beb802d024d469ee85e6a92425656",
+            "saps-vo.i3m.upv.es": "e363b1b9f92d42b6944d64338edf7479"
         }
     }
 ]

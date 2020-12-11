@@ -20,6 +20,12 @@ inputs:
     wn_instance_type:
       tab: HW Data
 
+    disk_size:
+      tab: HW Data
+
+    volume_id:
+      tab: HW Data
+
     admin_token:
       tab: Kubernetes Data
 
@@ -30,6 +36,12 @@ inputs:
       tab: Kubernetes Data
 
     kube_nvidia_support:
+      tab: Kubernetes Data
+
+    kube_cert_manager:
+      tab: Kubernetes Data
+
+    kube_cert_user_email:
       tab: Kubernetes Data
 
 tabs:

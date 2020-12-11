@@ -138,7 +138,7 @@ topology_template:
       capabilities:
         endpoint:
           properties:
-            dns_name: vnode-1.localdomain
+            dns_name: vnode-#N#.localdomain
         scalable:
           properties:
             count:  1
