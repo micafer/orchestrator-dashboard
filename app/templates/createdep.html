@@ -19,7 +19,7 @@
                 <strong>Description:</strong> {{template['description']}}
             </div>
 
-            <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post">
+            <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post" onsubmit="return onSubmit();">
                 <div class="form-group">
                     <label for="additional_description">Infrastructure Name</label>
                     <input type="text" class="form-control" id="infra_name" name="infra_name" placeholder="description" value="" maxlength="20" required>
