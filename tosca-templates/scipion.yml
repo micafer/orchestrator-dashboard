@@ -6,7 +6,7 @@ imports:
 description: Launch a master node with Scipion via VNC
 
 metadata:
-  display_name: TEST - Scipion on SLURM cluster
+  display_name: Deploy a Scipion installation
   icon: images/scipion.png
   tag: beta
 
