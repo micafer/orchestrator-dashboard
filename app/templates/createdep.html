@@ -49,7 +49,7 @@
 <script>
 function onSubmit() {
 {% if g.analytics_tag %}
-    ga('send', 'event', 'submit', '{{selectedTemplate}}');
+    gtag('event', 'submit', {'event_category' : '{{selectedTemplate}}', 'event_label' : 'Submit'});
 {% endif %}
     return true;
 }
