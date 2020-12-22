@@ -38,6 +38,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
+from libcloud.compute.drivers.openstack import OpenStack_2_NodeDriver
 
 import libcloud.security
 libcloud.security.VERIFY_SSL_CERT = False
@@ -135,7 +136,11 @@ def get_site_driver(site_name, site_url, domain, access_token):
 
     # Workaround to unset default service_region (RegionOne)
     driver.connection.service_region = None
-
+    if isinstance(driver, OpenStack_2_NodeDriver):
+        driver.connection.service_region = None
+        driver.image_connection.service_region = None
+        driver.network_connection.service_region = None
+        driver.volumev2_connection.service_region = None
     return driver
 
 
