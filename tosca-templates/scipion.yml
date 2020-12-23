@@ -3,25 +3,22 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - indigo_custom_types: https://raw.githubusercontent.com/indigo-dc/tosca-types/master/custom_types.yaml
 
-description: Launch a master node with Scipion via VNC
+description: Launch a node with Scipion via VNC
 
 metadata:
+
   display_name: Deploy a Scipion installation
   icon: images/scipion.png
   tag: beta
 
 topology_template:
+
   inputs:
     vnc_pass:
       type: string
       description: VNC password
       required: yes
       default: Scipion4u
-    project_local_location:
-      type: string
-      description: Local path where existing Scipion project exists
-      required: no
-      default: /project_location
     instance_type:
       type: string
       description: Instance type of Scipion Node
@@ -37,7 +34,7 @@ topology_template:
       interfaces:
         Standard:
           configure:
-            implementation: https://gitlab.ics.muni.cz/eosc-synergy/scipion-docker/-/raw/dev/ansible.yaml
+            implementation: https://raw.githubusercontent.com/CERIT-SC/scipion-docker/video_laura/ansible.yaml
             inputs:
               vnc_pass: { get_input: vnc_pass }
 
@@ -60,8 +57,6 @@ topology_template:
         os:
           properties:
             type: linux
-
-
   outputs:
     master_node_ip:
       value: { concat: [ 'https://', get_attribute: [ master_node, public_address, 0 ], ':5904/?resize=remote' ] }
