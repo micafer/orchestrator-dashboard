@@ -36,8 +36,10 @@ class TestUtils(unittest.TestCase):
     def test_getUserAuthData(self, getStaticSitesInfo, getCachedSiteList, getCachedProjectIDs):
         cred = MagicMock()
         cred.get_cred.return_value = {"project": "project_name"}
-        getCachedSiteList.return_value = {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
-                                          'state': '', 'id': '11548G0'}}
+        getCachedSiteList.return_value = {
+            'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '11548G0'},
+            'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca'}
+        }
         getStaticSitesInfo.return_value = [{"name": "static_site_name", "api_version": "1.1"}]
         getCachedProjectIDs.return_value = {"vo_name_st": "project_id_st", "vo_name": "project_id"}
 
@@ -45,7 +47,9 @@ class TestUtils(unittest.TestCase):
         self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = ost1; type = OpenStack;"
                                 " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
                                 " host = https://fedcloud-osservices.egi.cesga.es:5000; password = 'token';"
-                                " domain = project_name"))
+                                " domain = project_name\\nid = ost2; type = OpenStack; username = egi.eu;"
+                                " tenant = openid; auth_version = 3.x_oidc_access_token; host ="
+                                " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_name"))
 
         res = utils.getUserAuthData("token", cred, "user", "vo_name", "CESGA")
         self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = ost1; type = OpenStack;"

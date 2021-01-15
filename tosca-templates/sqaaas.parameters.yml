@@ -32,18 +32,19 @@ inputs:
     kube_version:
       tab: Kubernetes Data
 
-    install_kubeapps:
-      tab: Kubernetes Data
-
-    kube_nvidia_support:
-      tab: Kubernetes Data
-
     kube_cert_manager:
       tab: Kubernetes Data
 
     kube_cert_user_email:
       tab: Kubernetes Data
 
+    sqaaas_jk_token:
+      tab: SQAaaS Data
+
+    sqaaas_gh_token:
+      tab: SQAaaS Data
+
 tabs:
   - HW Data
   - Kubernetes Data
+  - SQAaaS Data

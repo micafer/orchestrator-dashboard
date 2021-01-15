@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% block title %}Configure Deployment{% endblock %}
 {% block content %}
 
 <div class="container">
@@ -19,7 +19,7 @@
                 <strong>Description:</strong> {{template['description']}}
             </div>
 
-            <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post">
+            <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post" onsubmit="return onSubmit();">
                 <div class="form-group">
                     <label for="additional_description">Infrastructure Name</label>
                     <input type="text" class="form-control" id="infra_name" name="infra_name" placeholder="description" value="" maxlength="20" required>
@@ -47,6 +47,12 @@
 -->
 
 <script>
+function onSubmit() {
+{% if g.analytics_tag %}
+    gtag('event', 'submit', {'event_category' : '{{selectedTemplate}}', 'event_label' : 'Submit'});
+{% endif %}
+    return true;
+}
 $(document).ready(function() {
     $('.js-example-basic-single').select2({
       width: '100%' // https://github.com/select2/select2/issues/4220

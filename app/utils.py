@@ -38,6 +38,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
+from libcloud.compute.drivers.openstack import OpenStack_2_NodeDriver
 
 import libcloud.security
 libcloud.security.VERIFY_SSL_CERT = False
@@ -138,7 +139,11 @@ def get_site_driver(site_name, site_url, domain, access_token):
 
     # Workaround to unset default service_region (RegionOne)
     driver.connection.service_region = None
-
+    if isinstance(driver, OpenStack_2_NodeDriver):
+        driver.connection.service_region = None
+        driver.image_connection.service_region = None
+        driver.network_connection.service_region = None
+        driver.volumev2_connection.service_region = None
     return driver
 
 
@@ -220,29 +225,30 @@ def getUserAuthData(access_token, cred, userid, vo=None, selected_site=None):
 
     cont = 0
     for site_name, site in getCachedSiteList().items():
-        cont += 1
-        creds = cred.get_cred(site_name, userid)
-        res += "\\nid = ost%s; type = OpenStack; username = egi.eu; " % cont
-        res += "tenant = openid; auth_version = 3.x_oidc_access_token;"
-        res += " host = %s; password = '%s'" % (site["url"], access_token)
-        projectid = None
-        if vo and selected_site and selected_site == site_name:
-            project_ids = getCachedProjectIDs(site["id"])
-            if vo in project_ids:
-                projectid = project_ids[vo]
-                # Update the creds with the new projectid
-                try:
-                    cred.write_creds(site_name, userid, {"project": projectid})
-                except Exception:
-                    flash("Error updating Service Credentials for site %s" % site_name, 'warning')
+        if selected_site is None or selected_site == site_name:
+            cont += 1
+            creds = cred.get_cred(site_name, userid)
+            res += "\\nid = ost%s; type = OpenStack; username = egi.eu; " % cont
+            res += "tenant = openid; auth_version = 3.x_oidc_access_token;"
+            res += " host = %s; password = '%s'" % (site["url"], access_token)
+            projectid = None
+            if vo and selected_site and selected_site == site_name:
+                project_ids = getCachedProjectIDs(site["id"])
+                if vo in project_ids:
+                    projectid = project_ids[vo]
+                    # Update the creds with the new projectid
+                    try:
+                        cred.write_creds(site_name, userid, {"project": projectid})
+                    except Exception:
+                        flash("Error updating Service Credentials for site %s" % site_name, 'warning')
 
-        if not projectid and creds and "project" in creds and creds["project"]:
-            projectid = creds["project"]
+            if not projectid and creds and "project" in creds and creds["project"]:
+                projectid = creds["project"]
 
-        if projectid:
-            res += "; domain = %s" % projectid
-        if site_name in api_versions:
-            res += "; api_version  = %s" % api_versions[site_name]
+            if projectid:
+                res += "; domain = %s" % projectid
+            if site_name in api_versions:
+                res += "; api_version  = %s" % api_versions[site_name]
 
     return res
 
