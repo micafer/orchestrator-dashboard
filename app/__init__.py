@@ -587,41 +587,42 @@ def create_app(oidc_blueprint=None):
     @app.route('/manage_creds')
     @authorized_with_valid_token
     def manage_creds():
-        sites = {}
+        creds = {}
 
         try:
-            sites = utils.getCachedSiteList()
+            creds = cred.get_creds(session["userid"])
         except Exception as e:
             flash("Error retrieving sites list: \n" + str(e), 'warning')
 
-        return render_template('service_creds.html', sites=sites)
+        return render_template('service_creds.html', creds=creds)
 
     @app.route('/write_creds', methods=['GET', 'POST'])
     @authorized_with_valid_token
     def write_creds():
-        serviceid = request.args.get('service_id', "")
-        servicename = request.args.get('service_name', "")
-        app.logger.debug("service_id={}".format(serviceid))
+        cred_id = request.args.get('cred_id', "")
+        cred_type = request.args.get('cred_type', "")
+        app.logger.debug("service_id={}".format(cred_id))
 
         if request.method == 'GET':
             res = {}
             projects = {}
             try:
-                res = cred.get_cred(servicename, session["userid"])
-                projects = utils.getCachedProjectIDs(serviceid)
-                app.logger.debug("projects={}".format(projects))
+                if cred_id:
+                    res = cred.get_cred(cred_id, session["userid"])
+                    projects = utils.getCachedProjectIDs(serviceid)
+                    app.logger.debug("projects={}".format(projects))
 
-                if session["vos"]:
-                    filter_projects = {}
-                    for vo, project in projects.items():
-                        if vo in session["vos"]:
-                            filter_projects[vo] = project
-                    projects = filter_projects
+                    if session["vos"]:
+                        filter_projects = {}
+                        for vo, project in projects.items():
+                            if vo in session["vos"]:
+                                filter_projects[vo] = project
+                        projects = filter_projects
             except Exception as ex:
                 flash("Error reading credentials %s!" % ex, 'error')
 
-            return render_template('modal_creds.html', service_creds=res, service_id=serviceid,
-                                   service_name=servicename, projects=projects)
+            return render_template('modal_creds.html', service_creds=res, cred_id=cred_id,
+                                   cred_type=cred_type, projects=projects)
         else:
             app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 

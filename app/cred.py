@@ -20,13 +20,25 @@
 # under the License.
 """Class to manage user credentials."""
 from flask import json
+from cryptography.fernet import Fernet
 from app.db import DataBase
 
 
 class Credentials:
 
-    def __init__(self, cred_db_url):
+    def __init__(self, cred_db_url, key=None):
         self.cred_db_url = cred_db_url
+        self.key = None
+        if key:
+            self.key = Fernet(key)
+
+    def _encrypt(self, message):
+        if self.key:
+            return self.key.encrypt(message.encode()) 
+
+    def _decrypt(self, message):
+        if self.key:
+            return self.key.decrypt(message) 
 
     def _get_creds_db(self):
         db = DataBase(self.cred_db_url)
@@ -38,6 +50,18 @@ class Credentials:
             raise Exception("Error connecting DB: %s" % self.cred_db_url)
         return db
 
+    def get_creds(self, userid):
+        db = self._get_creds_db()
+        res = db.select("select serviceid, data from credentials where userid = %s", (userid,))
+        db.close()
+
+        data = {}
+        if len(res) > 0:
+            for elem in res:
+                data[elem[0]] = json.loads(self._decrypt(elem[1]))
+
+        return data
+
     def get_cred(self, serviceid, userid):
         db = self._get_creds_db()
         res = db.select("select data from credentials where userid = %s and serviceid = %s",
@@ -46,13 +70,13 @@ class Credentials:
 
         data = {}
         if len(res) > 0:
-            data = json.loads(res[0][0])
+            data = json.loads(self._decrypt(res[0][0]))
 
         return data
 
     def write_creds(self, serviceid, userid, data):
         db = self._get_creds_db()
-        str_data = json.dumps(data)
+        str_data = self._encrypt(json.dumps(data))
         db.execute("replace into credentials (data, userid, serviceid) values (%s, %s, %s)",
                    (str_data, userid, serviceid))
         db.close()

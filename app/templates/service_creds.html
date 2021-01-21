@@ -15,6 +15,15 @@
               <h4 class="font-weight-bold text-primary">Service Credentials</h4>
             </div>
             <div class="col-md-6 text-right">
+              <button type=button id="addBtn"class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"><span class='fas fa-plus mr-2'></span>New Credential
+                  <span class="sr-only">Toggle Dropdown</span>
+              </button>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" data-id="" data-type="ec2" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/ec2Row.png') }}"/></a>
+                  <a class="dropdown-item" data-id="" data-type="GCE" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/GCERow.png') }}"/></a>
+                  <a class="dropdown-item" data-id="" data-type="openstack" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/openstackRow.png') }}"/></a>
+
+              </div>
             </div>
           </div> <!-- / .row -->
         </div>
@@ -24,19 +33,21 @@
             <table id="tableCreds" class="table table-bordered table-striped table-hover" width="100%" cellspacing="0">
                 <thead>
                     <tr>
-                        <th>Site</th>
-                        <th>Endpoint</th>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Host</th>
                         <th>Manage your credentials</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for site_name, site in sites.items() %}
+                    {% for cred_id, cred in creds.items() %}
                     <tr>
-                      <td>{{site_name}}</td>
-                      <td>{{site["url"]}}</td>
+                      <td>{{cred_id}}</td>
+                      <td>{{cred[tyoe]}}</td>
+                      <td>{{cred["host"]}}</td>
                       <td>
-                        <button type=button id="updateBtn" data-id="{{site['id']}}" data-name="{{site_name}}" class="btn btn-small btn-success" data-toggle="modal" data-target="#newModal">EDIT</button>
-                        <button type=button id="deleteBtn" data-id="{{site['id']}}" data-name="{{site_name}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false">DELETE</button>
+                        <button type=button id="updateBtn" data-id="{{cred_id}}" data-type="{{cred['host']}}" class="btn btn-small btn-success" data-toggle="modal" data-target="#newModal">EDIT</button>
+                        <button type=button id="deleteBtn" data-id="{{cred_id}}" data-type="{{cred['host']}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false">DELETE</button>
                       </td>
                     </tr>
                     {% endfor %}
@@ -49,7 +60,7 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="get_secret">Project</h5>
+                <h5 class="modal-title" id="get_secret">Credential</h5>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
               </div>
               <div class="modal-body">
@@ -104,11 +115,14 @@ $(document).ready(function () {
 $(document).ready(function () {
   $('#newModal').on('show.bs.modal', function (event) {
      var button = $(event.relatedTarget) // Button that triggered the modal
-     var service_id = button.data('id')
-     var service_name = button.data('name')
+     var cred_id = button.data('id')
+     var cred_type = button.data('type')
      var modal = $(this)
-     modal.find('.modal-body').html('Loading...').load("{{url_for('write_creds')}}?service_name=" + service_name + "&service_id=" + service_id);
+     modal.find('.modal-body').html('Loading...').load("{{url_for('write_creds')}}?cred_type=" + cred_type + "&cred_id=" + cred_id);
      modal.find(".updateBtn")[0].setAttribute("href", "#");
+     if (cred_id == "") {
+       modal.find(".updateBtn")[0].firstChild.data = "Add";
+     }
      modal.find(".updateBtn")[0].setAttribute("onclick", "document.getElementById('credForm').submit();");
   });
 });
@@ -135,9 +149,9 @@ $(document).ready(function () {
 $(document).ready(function () {
   $('#deleteModal').on('show.bs.modal', function (event) {
      var button = $(event.relatedTarget) // Button that triggered the modal
-     var service_id = button.data('name')
+     var cred_id = button.data('id')
      var modal = $(this)
-     modal.find(".deleteBtn")[0].setAttribute("href", "{{url_for('delete_creds')}}?service_id="+service_id);
+     modal.find(".deleteBtn")[0].setAttribute("href", "{{url_for('delete_creds')}}?cred_id="+cred_id);
   });
 });
 </script>

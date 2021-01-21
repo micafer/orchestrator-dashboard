@@ -6,21 +6,83 @@
       });
     });
 </script>
-  <form id="credForm" action="{{ url_for('write_creds') }}?service_id={{service_id}}&service_name={{service_name}}" method="post">
-      <div class="form-group">
-	      <label for="project"><strong>Project</strong></label>
-
-        <div>
-          <input name="project" class="col-sm-10" type="text" id="myInputId" value="{{ service_creds['project'] if service_creds else '' }}"/>
-          {% if projects %}
-          <button type="button" class="col-sm-1 btn dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <div class="dropdown-menu" aria-labelledby="myInputId">
-            {% for vo, project_id in projects.items() %}
-            <a class="dropdown-item" data-value="{{project_id}}" href="#">{{vo}}</a>
-            {% endfor %}
+<img src="{{ url_for('static', filename='images/' + cred_type + '.png') }}"/><br/><br/>
+  <form id="credForm" action="{{ url_for('write_creds') }}?cred_id={{cred_id}}&cred_type={{cred_type}}" method="post">
+      <div class="row form-group">
+        <div class="col">
+        <input placeholder="ID" name="id" class="col-sm-12" type="text" id="id" value="{{ cred_id if cred_id else '' }}"/>
+        </div>
+        <div class="col">
+        </div>
+      </div>
+{% if cred_type == "ec2" %}
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Access Key" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
           </div>
-          {% endif %}
+          <div class="col">
+              <input placeholder="Secret Key" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}"/>
+          </div>
+        </div>
+{% elif cred_type == "GCE" %}
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+          </div>
+          <div class="col">
+              <input placeholder="Project" name="project" class="col-sm-12" type="project" id="project" value="{{ creds['project'] if creds else '' }}"/>
+          </div>
+        </div>
+        <div class="row form-group">
+            <div class="col">
+            <label for="certificate"><strong>Server Certificate</strong></label>
+            <div>
+              <input name="certificate" type="file" class="form-control form-control-sm" id="certificate" />
+            </div>
+          </div>
+      </div>
+{% elif cred_type == "openstack" %}
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+          </div>
+          <div class="col">
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}"/>
+          </div>
         </div>
 
-      </div>
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Tenant" name="tenant" class="col-sm-12" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}"/>
+          </div>
+          <div class="col">
+              <input placeholder="Domain" name="domain" class="col-sm-12" type="text" id="domain" value="{{ creds['domain'] if creds else '' }}"/>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Region" name="service_region" class="col-sm-12" type="text" id="service_region" value="{{ creds['service_region'] if creds else '' }}"/>
+          </div>
+          <div class="col">
+              <input placeholder="Auth Version" name="auth_version" class="col-sm-12" type="text" id="auth_version" value="{{ creds['auth_version'] if creds else '' }}"/>
+          </div>
+        </div>
+
+{% else %}
+
+          <label for="project"><strong>Project</strong></label>
+          <div>
+            <input name="project" class="col-sm-10" type="text" id="myInputId" value="{{ service_creds['project'] if service_creds else '' }}"/>
+            {% if projects %}
+            <button type="button" class="col-sm-1 btn dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="dropdown-menu" aria-labelledby="myInputId">
+              {% for vo, project_id in projects.items() %}
+              <a class="dropdown-item" data-value="{{project_id}}" href="#">{{vo}}</a>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+{% endif %}
+
     </form>
