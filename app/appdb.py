@@ -131,12 +131,13 @@ def get_images(site_id, vo):
         va_data = appdb_call('/rest/1.0/va_providers/%s' % site_id)
 
         images = []
-        if 'provider:image' in va_data['virtualization:provider'] and va_data['virtualization:provider']['provider:image']:
+        if ('provider:image' in va_data['virtualization:provider'] and
+                va_data['virtualization:provider']['provider:image']):
             if isinstance(va_data['virtualization:provider']['provider:image'], list):
                 images = va_data['virtualization:provider']['provider:image']
             else:
                 images = [va_data['virtualization:provider']['provider:image']]
-    
+
         for os_tpl in images:
             try:
                 if '@voname' in os_tpl and vo in os_tpl['@voname'] and os_tpl['@archived'] == "false":
@@ -144,7 +145,7 @@ def get_images(site_id, vo):
             except Exception:
                 continue
     except Exception:
-        pass
+        oss = []
 
     return oss
 
