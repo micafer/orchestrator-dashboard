@@ -452,7 +452,8 @@ def create_app(oidc_blueprint=None):
             for image_name, image_id in utils.get_site_images(site, vo, access_token, cred, session["userid"]):
                 res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image_id, image_name)
         else:
-            for image in appdb.get_images(site, vo):
+            site_id = utils.getCachedSiteList()[site_name]['id']
+            for image in appdb.get_images(site_id, vo):
                 res += '<option name="selectedImage" value=%s>%s</option>' % (image, image)
         return res
 
