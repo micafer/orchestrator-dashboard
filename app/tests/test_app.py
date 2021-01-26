@@ -307,10 +307,12 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.avatar")
     @patch("app.utils.get_site_images")
     @patch("app.appdb.get_images")
-    def test_images(self, get_images, get_site_images, avatar):
+    @patch("app.appdb.get_sites")
+    def test_images(self, get_sites, get_images, get_site_images, avatar):
         self.login(avatar)
         get_images.return_value = ["IMAGE"]
         get_site_images.return_value = [("IMAGE_NAME", "IMAGE_ID")]
+        get_sites.return_value = {"SITE_NAME": {"url": "SITE_URL", "state": "SITE_STATUS", "id": "SITE_ID"}}
         res = self.client.get('/images/static_site_name/vo?local=1')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'<option name="selectedSiteImage" value=IMAGE_ID>IMAGE_NAME</option>', res.data)
