@@ -32,7 +32,7 @@
         }
     },
     {
-        "name": "IISAS-FedCloud",
+        "name": "IISAS-FedCloud-Old",
         "url": "https://nova.ui.savba.sk:5000",
         "id": "10963G0",
         "vos": {
@@ -86,7 +86,7 @@
         }
     },
     {
-        "name": "IISAS-Cloud",
+        "name": "IISAS-FedCloud",
         "url": "https://cloud.ui.savba.sk:5000",
         "id": "12355G0",
         "vos": {
