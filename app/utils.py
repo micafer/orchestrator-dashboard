@@ -98,7 +98,8 @@ def getStaticSites(vo=None):
 def getStaticVOs():
     res = []
     for site in _getStaticSitesInfo():
-        res.extend(list(site["vos"].keys()))
+        if "vos" in site and site["vos"]:
+            res.extend(list(site["vos"].keys()))
 
     return list(set(res))
 
