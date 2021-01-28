@@ -48,7 +48,7 @@
                     {% for cred_id, cred in creds.items() %}
                     <tr>
                       <td>{{cred_id}}</td>
-                      <td>{{cred[tyoe]}}</td>
+                      <td><img src="{{ url_for('static', filename='images/' + cred['type'] + 'Row.png') }}"/></td>
                       <td>{{cred["host"]}}</td>
                       <td>
                         <button type=button id="updateBtn" data-id="{{cred_id}}" data-type="{{cred['host']}}" class="btn btn-small btn-success" data-toggle="modal" data-target="#newModal">EDIT</button>
@@ -62,6 +62,7 @@
 
 	      <!-- Modal Retrieve/Update Credentials-->
         <div class="modal fade" id="newModal">
+          <form id="credForm" action="{{ url_for('write_creds') }}" method="post" enctype="multipart/form-data">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -72,10 +73,11 @@
               </div>
               <div class="modal-footer">
                 <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                <a class="btn btn-success updateBtn" role="button" href="">Update</a>
+                <button type="submit" class="btn btn-success updateBtn">Update</button>
               </div>
             </div>
           </div>
+          </form>
         </div>
         <!-- Modal to delete credentials -->
 	      <div class="modal fade" id="deleteModal" role="dialog">
@@ -124,23 +126,11 @@ $(document).ready(function () {
      var cred_type = button.data('type')
      var modal = $(this)
      modal.find('.modal-body').html('Loading...').load("{{url_for('write_creds')}}?cred_type=" + cred_type + "&cred_id=" + cred_id);
-     modal.find(".updateBtn")[0].setAttribute("href", "#");
      if (cred_id == "") {
        modal.find(".updateBtn")[0].firstChild.data = "Add";
      }
-     modal.find(".updateBtn")[0].setAttribute("onclick", "document.getElementById('credForm').submit();");
   });
 });
-
-$(document).ready(function () {
-    $(".updateBtn").click(function () {
-        // add spinner to button
-        $(this).parent().find(".cancelBtn").addClass("disabled", true);
-        $(this).addClass("disabled", true);
-        $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...` );
-    });
-});
-
 
 $(document).ready(function () {
     $(".deleteBtn").click(function () {

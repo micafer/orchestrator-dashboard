@@ -5,12 +5,44 @@
         $('#myInputId').val($(this).attr('data-value'));
       });
     });
+
+    function loadVOs() {
+       $('#selectedVO').empty();
+       $('#selectedVO').append("<option value=''>Loading VOs ...</option>");
+       $.ajax({
+           method: "GET",
+           url: "{{ url_for('home') }}vos",
+           success : function(text)
+           {
+               $('#selectedVO').empty();
+               $('#selectedVO').append("<option value=''> - Select one VO - </option>");
+               $('#selectedVO').append(text);
+           }
+       });
+   }
+
+    function loadSites() {
+       $('#selectedSite').empty();
+       $('#selectedSite').append("<option value=''>Loading Sites ...</option>");
+       $.ajax({
+           method: "GET",
+           url: "{{ url_for('home') }}sites/" + $('#selectedVO').val(),
+           success : function(text)
+           {
+               $('#selectedSite').empty();
+               $('#selectedSite').append("<option value=''> - Select one site - </option>");
+               $('#selectedSite').append(text);
+           }
+       });
+   }
+
 </script>
 <img src="{{ url_for('static', filename='images/' + cred_type + '.png') }}"/><br/><br/>
-  <form id="credForm" action="{{ url_for('write_creds') }}?cred_id={{cred_id}}&cred_type={{cred_type}}" method="post">
+
+      <input name="type" type="hidden" value="{{ cred_type }}"/>
       <div class="row form-group">
         <div class="col">
-        <input placeholder="ID" name="id" class="col-sm-12" type="text" id="id" value="{{ cred_id if cred_id else '' }}"/>
+        <input placeholder="ID" name="id" class="col-sm-12" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required/>
         </div>
         <div class="col">
         </div>
@@ -18,42 +50,42 @@
 {% if cred_type == "ec2" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Access Key" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+              <input placeholder="Access Key" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Secret Key" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}"/>
+              <input placeholder="Secret Key" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
           </div>
         </div>
 {% elif cred_type == "GCE" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Project" name="project" class="col-sm-12" type="project" id="project" value="{{ creds['project'] if creds else '' }}"/>
+              <input placeholder="Project" name="project" class="col-sm-12" type="project" id="project" value="{{ creds['project'] if creds else '' }}" required/>
           </div>
         </div>
         <div class="row form-group">
             <div class="col">
             <label for="certificate"><strong>Server Certificate</strong></label>
             <div>
-              <input name="certificate" type="file" class="form-control form-control-sm" id="certificate" />
+              <input name="certificate" type="file" class="form-control form-control-sm" id="certificate" required/>
             </div>
           </div>
       </div>
 {% elif cred_type == "openstack" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}"/>
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Tenant" name="tenant" class="col-sm-12" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}"/>
+              <input placeholder="Tenant" name="tenant" class="col-sm-12" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}" required/>
           </div>
           <div class="col">
               <input placeholder="Domain" name="domain" class="col-sm-12" type="text" id="domain" value="{{ creds['domain'] if creds else '' }}"/>
@@ -72,16 +104,16 @@
 {% elif cred_type == "OpenNebula" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}"/>
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Host" name="host" class="col-sm-12" type="text" id="host" value="{{ creds['host'] if creds else '' }}"/>
+              <input placeholder="Host" name="host" class="col-sm-12" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
@@ -90,16 +122,16 @@
 {% elif cred_type == "Azure" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}"/>
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Subscription ID" name="subscription_id" class="col-sm-12" type="text" id="subscription_id" value="{{ creds['subscription_id'] if creds else '' }}"/>
+              <input placeholder="Subscription ID" name="subscription_id" class="col-sm-12" type="text" id="subscription_id" value="{{ creds['subscription_id'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
@@ -108,25 +140,25 @@
 {% elif cred_type == "Orange" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}"/>
-          </div>
-        </div>
-
-        <div class="row form-group">
-          <div class="col">
-              <input placeholder="Tenant" name="tenant" class="col-sm-12" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}"/>
-          </div>
-          <div class="col">
-              <input placeholder="Domain" name="domain" class="col-sm-12" type="text" id="domain" value="{{ creds['domain'] if creds else '' }}"/>
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Region" name="region" class="col-sm-12" type="text" id="region" value="{{ creds['region'] if creds else '' }}"/>
+              <input placeholder="Tenant" name="tenant" class="col-sm-12" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+              <input placeholder="Domain" name="domain" class="col-sm-12" type="text" id="domain" value="{{ creds['domain'] if creds else '' }}" required/>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Region" name="region" class="col-sm-12" type="text" id="region" value="{{ creds['region'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
@@ -135,7 +167,7 @@
 {% elif cred_type == "Linode" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="API Token" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
+              <input placeholder="API Token" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
@@ -145,26 +177,34 @@
 {% elif cred_type == "Kubernetes" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Token" name="token" class="col-sm-12" type="text" id="token" value="{{ creds['token'] if creds else '' }}"/>
+              <input placeholder="Token" name="token" class="col-sm-12" type="text" id="token" value="{{ creds['token'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
         </div>
 
+{% elif cred_type == "fedcloud" %}
+        <script>
+          loadVOs();
+        </script>
+
+        <div class="row form-group">
+          <div class="col">
+            <label>Select VO:</label>
+            <select class="js-example-basic-single js-states form-control" id="selectedVO" name="vo" onchange="loadSites()" required>
+                <option name="selectedVO" value="">  </option>
+            </select>
+
+            <label>Select provider:</label>
+            <select class="js-example-basic-single js-states form-control" id="selectedSite" name="host" required>
+                <option name="selectedImage" value="">Select VO</option>
+            </select>
+          </div>
+        </div>
+
 {% else %}
 
-          <label for="project"><strong>Project</strong></label>
-          <div>
-            <input name="project" class="col-sm-10" type="text" id="myInputId" value="{{ service_creds['project'] if service_creds else '' }}"/>
-            {% if projects %}
-            <button type="button" class="col-sm-1 btn dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <div class="dropdown-menu" aria-labelledby="myInputId">
-              {% for vo, project_id in projects.items() %}
-              <a class="dropdown-item" data-value="{{project_id}}" href="#">{{vo}}</a>
-              {% endfor %}
-            </div>
-            {% endif %}
-          </div>
+
 {% endif %}
 
-    </form>
+

@@ -35,10 +35,14 @@ class Credentials:
     def _encrypt(self, message):
         if self.key:
             return self.key.encrypt(message.encode()) 
+        else:
+            return message
 
     def _decrypt(self, message):
         if self.key:
-            return self.key.decrypt(message) 
+            return self.key.decrypt(message)
+        else:
+            return message
 
     def _get_creds_db(self):
         db = DataBase(self.cred_db_url)
@@ -74,10 +78,13 @@ class Credentials:
 
         return data
 
-    def write_creds(self, serviceid, userid, data):
+    def write_creds(self, serviceid, userid, data, insert=False):
         db = self._get_creds_db()
         str_data = self._encrypt(json.dumps(data))
-        db.execute("replace into credentials (data, userid, serviceid) values (%s, %s, %s)",
+        op = "replace"
+        if insert:
+            op = "insert"
+        db.execute(op + " into credentials (data, userid, serviceid) values (%s, %s, %s)",
                    (str_data, userid, serviceid))
         db.close()
 

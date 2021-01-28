@@ -436,6 +436,18 @@ def create_app(oidc_blueprint=None):
                                selectedTemplate=selected_tosca,
                                vos=vos)
 
+    @app.route('/vos')
+    def getvos():
+        res = ""
+        vos = utils.getStaticVOs()
+        vos.extend(appdb.get_vo_list())
+        vos = list(set(vos))
+        if "vos" in session and session["vos"]:
+            vos = [vo for vo in vos if vo in session["vos"]]
+        for vo in vos:
+            res += '<option name="selectedVO" value=%s>%s</option>' % (vo, vo)
+        return res
+
     @app.route('/sites/<vo>')
     def getsites(vo=None):
         res = ""
@@ -443,12 +455,12 @@ def create_app(oidc_blueprint=None):
         for site_name, site in appdb_sites.items():
             if site["state"]:
                 site["state"] = " (WARNING: %s state!)" % site["state"]
-            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site_name, site_name, site["state"])
+            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site['url'], site_name, site["state"])
 
-        for site_name, _ in utils.getStaticSites(vo).items():
+        for site_name, site in utils.getStaticSites(vo).items():
             # avoid site duplication
             if site_name not in appdb_sites:
-                res += '<option name="selectedSite" value=%s>%s</option>' % (site_name, site_name)
+                res += '<option name="selectedSite" value=%s>%s</option>' % (site['url'], site_name)
 
         return res
 
@@ -606,33 +618,28 @@ def create_app(oidc_blueprint=None):
 
         if request.method == 'GET':
             res = {}
-            projects = {}
             try:
                 if cred_id:
                     res = cred.get_cred(cred_id, session["userid"])
-                    projects = utils.getCachedProjectIDs(serviceid)
-                    app.logger.debug("projects={}".format(projects))
-
-                    if session["vos"]:
-                        filter_projects = {}
-                        for vo, project in projects.items():
-                            if vo in session["vos"]:
-                                filter_projects[vo] = project
-                        projects = filter_projects
+                    cred_type = res['type']
             except Exception as ex:
                 flash("Error reading credentials %s!" % ex, 'error')
 
-            return render_template('modal_creds.html', service_creds=res, cred_id=cred_id,
-                                   cred_type=cred_type, projects=projects)
+            return render_template('modal_creds.html', creds=res, cred_id=cred_id, cred_type=cred_type)
         else:
             app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
             creds = request.form.to_dict()
+            if 'certificate' in request.files:
+                if request.files['certificate'].filename != "":
+                    creds['certificate'] = request.files['certificate'].read().decode()
             try:
-                cred.write_creds(servicename, session["userid"], creds)
+                cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
                 flash("Credentials successfully written!", 'info')
+            except db.IntegrityError as iex:
+                flash("Error writing credentials: Duplicated Credential ID!", 'error')
             except Exception as ex:
-                flash("Error writing credentials %s!" % ex, 'error')
+                flash("Error writing credentials: %s!" % ex, 'error')
 
             return redirect(url_for('manage_creds'))
 
@@ -640,9 +647,9 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def delete_creds():
 
-        serviceid = request.args.get('service_id', "")
+        cred_id = request.args.get('cred_id', "")
         try:
-            cred.delete_cred(serviceid, session["userid"])
+            cred.delete_cred(cred_id, session["userid"])
             flash("Credentials successfully deleted!", 'info')
         except Exception as ex:
             flash("Error deleting credentials %s!" % ex, 'error')
