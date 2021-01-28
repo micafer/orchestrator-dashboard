@@ -59,21 +59,6 @@ def get_vo_list():
     return VO_LIST
 
 
-def check_supported_VOs(site, vo):
-    if not vo:
-        return True
-
-    if 'provider:image' in site:
-        if isinstance(site['provider:image'], list):
-            images = site['provider:image']
-        else:
-            images = [site['provider:image']]
-        for os_tpl in images:
-            if '@voname' in os_tpl and vo in os_tpl['@voname']:
-                return True
-    return False
-
-
 def _get_services(vo=None):
     appdburl = '/rest/1.0/sites'
     if vo:
@@ -109,17 +94,16 @@ def get_sites(vo=None):
         data = appdb_call('/rest/1.0/va_providers/%s' % ID)
         if data and 'virtualization:provider' in data:
             site = data['virtualization:provider']
-            if check_supported_VOs(site, vo):
-                if ('provider:url' in site and site['@service_type'] == 'org.openstack.nova'):
-                    provider_name = site['provider:name']
-                    critical = ""
-                    if '@service_status' in site and site['@service_status'] == "CRITICAL":
-                        critical = "CRITICAL"
-                    provider_endpoint_url = site['provider:url']
-                    url = urlparse(provider_endpoint_url)
-                    endpoints[provider_name] = {"url": "%s://%s" % url[0:2],
-                                                "state": critical,
-                                                "id": ID}
+            if ('provider:url' in site and site['@service_type'] == 'org.openstack.nova'):
+                provider_name = site['provider:name']
+                critical = ""
+                if '@service_status' in site and site['@service_status'] == "CRITICAL":
+                    critical = "CRITICAL"
+                provider_endpoint_url = site['provider:url']
+                url = urlparse(provider_endpoint_url)
+                endpoints[provider_name] = {"url": "%s://%s" % url[0:2],
+                                            "state": critical,
+                                            "id": ID}
 
     return endpoints
 
