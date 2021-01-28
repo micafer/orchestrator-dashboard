@@ -91,7 +91,7 @@ def getCachedProjectIDs(site_id):
 def getStaticSites(vo=None):
     res = {}
     for site in _getStaticSitesInfo():
-        if vo is None or vo in site["vos"]:
+        if vo is None or ("vos" in site and site["vos"] and vo in site["vos"]):
             res[site["name"]] = site
             site["state"] = ""
 
