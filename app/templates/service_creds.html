@@ -45,14 +45,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for cred_id, cred in creds.items() %}
+                    {% for cred in creds %}
                     <tr>
-                      <td>{{cred_id}}</td>
+                      <td>{{cred['id']}}</td>
                       <td><img src="{{ url_for('static', filename='images/' + cred['type'] + 'Row.png') }}"/></td>
                       <td>{{cred["host"]}}</td>
                       <td>
-                        <button type=button id="updateBtn" data-id="{{cred_id}}" data-type="{{cred['host']}}" class="btn btn-small btn-success" data-toggle="modal" data-target="#newModal">EDIT</button>
-                        <button type=button id="deleteBtn" data-id="{{cred_id}}" data-type="{{cred['host']}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false">DELETE</button>
+                        <button type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-success" data-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
+                        <button type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                        {% if cred['prev_priority'] is not none %}
+                        <a id="upBtn" data-id="{{cred['id']}}" class="btn btn-primary text-white" href="{{ url_for('priority_creds', cred_id=cred['id'], op='up', prio=cred['priority'], new_prio=cred['prev_priority']) }}"><i class='fas fa-arrow-up m-1'></i></a>
+                        {% endif %}
+                        {% if cred['next_priority'] is not none %}
+                        <a id="downBtn" data-id="{{cred['id']}}" class="btn btn-primary text-white" href="{{ url_for('priority_creds', cred_id=cred['id'], op='down', prio=cred['priority'], new_prio=cred['next_priority']) }}"><i class='fas fa-arrow-down m-1'></i></a>
+                        {% endif %}
                       </td>
                     </tr>
                     {% endfor %}
@@ -102,15 +108,7 @@
 </div>
 
 <script>
-$('#tableCreds').dataTable( {
-    "responsive": true,
-    "order": [],
-    "columnDefs": [ {
-      "targets"  : 'no-sort',
-      "orderable": false,
-    }],
-    "order": [[ 0, "asc" ]]
-});
+
 
 $(document).ready(function () {
   $('#newModal').on('hidden.bs.modal', function () {
@@ -149,6 +147,7 @@ $(document).ready(function () {
      modal.find(".deleteBtn")[0].setAttribute("href", "{{url_for('delete_creds')}}?cred_id="+cred_id);
   });
 });
+
 </script>
 {% endblock %}
 

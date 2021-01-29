@@ -425,16 +425,12 @@ def create_app(oidc_blueprint=None):
 
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
-        vos = utils.getStaticVOs()
-        vos.extend(appdb.get_vo_list())
-        vos = list(set(vos))
-        if "vos" in session and session["vos"]:
-            vos = [vo for vo in vos if vo in session["vos"]]
+        creds = cred.get_creds(session['userid'])
 
         return render_template('createdep.html',
                                template=toscaInfo[selected_tosca],
                                selectedTemplate=selected_tosca,
-                               vos=vos)
+                               creds=creds)
 
     @app.route('/vos')
     def getvos():
@@ -551,7 +547,7 @@ def create_app(oidc_blueprint=None):
         site = form_data['extra_opts.selectedSite']
 
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"], vo, site)
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
 
         app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
@@ -604,8 +600,18 @@ def create_app(oidc_blueprint=None):
 
         try:
             creds = cred.get_creds(session["userid"])
+            for cont, elem in enumerate(creds):
+                if cont == 0:
+                    elem['prev_priority'] = None
+                else:
+                    elem['prev_priority'] = creds[cont-1]['priority']
+                if cont == len(creds) - 1:
+                    elem['next_priority'] = None
+                else:
+                    elem['next_priority'] = creds[cont+1]['priority']
+
         except Exception as e:
-            flash("Error retrieving sites list: \n" + str(e), 'warning')
+            flash("Error retrieving credentials: \n" + str(e), 'warning')
 
         return render_template('service_creds.html', creds=creds)
 
@@ -630,13 +636,18 @@ def create_app(oidc_blueprint=None):
             app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
             creds = request.form.to_dict()
+            if 'cred_id' in creds:
+                cred_id = creds['cred_id']
+                del creds['cred_id']
             if 'certificate' in request.files:
                 if request.files['certificate'].filename != "":
                     creds['certificate'] = request.files['certificate'].read().decode()
             try:
+                if 'password' in creds and creds['password'] in [None, '']:
+                    del creds['password']
                 cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
                 flash("Credentials successfully written!", 'info')
-            except db.IntegrityError as iex:
+            except db.IntegrityError:
                 flash("Error writing credentials: Duplicated Credential ID!", 'error')
             except Exception as ex:
                 flash("Error writing credentials: %s!" % ex, 'error')
@@ -654,6 +665,21 @@ def create_app(oidc_blueprint=None):
         except Exception as ex:
             flash("Error deleting credentials %s!" % ex, 'error')
 
+        return redirect(url_for('manage_creds'))
+
+    @app.route('/priority_creds')
+    @authorized_with_valid_token
+    def priority_creds():
+        cred_id = request.args.get('cred_id', "")
+        op = request.args.get('op', "")
+        prio = request.args.get('prio', "")
+        new_prio = request.args.get('new_prio', "")
+
+        if cred_id:
+            try:
+                cred.update_priority(cred_id, session["userid"], prio, new_prio)
+            except Exception as ex:
+                flash("Error writing credentials: %s!" % ex, 'error')
         return redirect(url_for('manage_creds'))
 
     @app.route('/addresourcesform/<infid>')

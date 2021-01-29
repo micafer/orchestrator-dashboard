@@ -216,40 +216,35 @@ def getCachedSiteList():
     return SITE_LIST
 
 
-def getUserAuthData(access_token, cred, userid, vo=None, selected_site=None):
+def getUserAuthData(access_token, cred, userid):
     res = "type = InfrastructureManager; token = %s" % access_token
 
-    api_versions = {}
-    for site in _getStaticSitesInfo():
-        if "api_version" in site:
-            api_versions[site["name"]] = site["api_version"]
+    fedcloud_sites = None
+    for cred in cred.get_creds(userid):
+        res += "\\nid = %s; type = %s" % (cred['id'], cred['type'])
+        if type != "fedcloud":
+            for key, value in cred.items():
+                res += "; %s = %s" % (key, value)
+        else:
+            res += "; username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
+            res += " host = %s; password = '%s'" % (cred['host'], access_token)
+            # only load this data if a EGI Cloud site appears
+            if fedcloud_sites is None:
+                fedcloud_sites = {}
+                for site in getCachedSiteList():
+                    fedcloud_sites[site['url']] = site
 
-    cont = 0
-    for site_name, site in getCachedSiteList().items():
-        if selected_site is None or selected_site == site_name:
-            cont += 1
-            creds = cred.get_cred(site_name, userid)
-            res += "\\nid = ost%s; type = OpenStack; username = egi.eu; " % cont
-            res += "tenant = openid; auth_version = 3.x_oidc_access_token;"
-            res += " host = %s; password = '%s'" % (site["url"], access_token)
+            site_info = fedcloud_sites[cred['host']]
+            if 'api_version' in site_info:
+                res += "; api_version  = %s" % site_info['api_version']
+
             projectid = None
-            if vo and selected_site and selected_site == site_name:
-                project_ids = getCachedProjectIDs(site["id"])
-                if vo in project_ids:
-                    projectid = project_ids[vo]
-                    # Update the creds with the new projectid
-                    try:
-                        cred.write_creds(site_name, userid, {"project": projectid})
-                    except Exception:
-                        flash("Error updating Service Credentials for site %s" % site_name, 'warning')
-
-            if not projectid and creds and "project" in creds and creds["project"]:
-                projectid = creds["project"]
+            project_ids = getCachedProjectIDs(site_info["id"])
+            if cred['vo'] in project_ids:
+                projectid = project_ids[cred['vo']]
 
             if projectid:
                 res += "; domain = %s" % projectid
-            if site_name in api_versions:
-                res += "; api_version  = %s" % api_versions[site_name]
 
     return res
 

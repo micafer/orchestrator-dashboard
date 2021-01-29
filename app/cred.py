@@ -48,7 +48,7 @@ class Credentials:
         db = DataBase(self.cred_db_url)
         if db.connect():
             if not db.table_exists("credentials"):
-                db.execute("CREATE TABLE credentials(userid VARCHAR(255), serviceid VARCHAR(255), data LONGBLOB,"
+                db.execute("CREATE TABLE credentials(userid VARCHAR(255), serviceid VARCHAR(255), priority INTEGER, data LONGBLOB,"
                            " PRIMARY KEY (userid, serviceid))")
         else:
             raise Exception("Error connecting DB: %s" % self.cred_db_url)
@@ -56,39 +56,62 @@ class Credentials:
 
     def get_creds(self, userid):
         db = self._get_creds_db()
-        res = db.select("select serviceid, data from credentials where userid = %s", (userid,))
+        res = db.select("select serviceid, priority, data from credentials where userid = %s order by priority", (userid,))
         db.close()
 
-        data = {}
+        data = []
         if len(res) > 0:
             for elem in res:
-                data[elem[0]] = json.loads(self._decrypt(elem[1]))
+                new_item = json.loads(self._decrypt(elem[2]))
+                new_item['priority'] = elem[1]
+                data.append(new_item)
 
         return data
 
     def get_cred(self, serviceid, userid):
         db = self._get_creds_db()
-        res = db.select("select data from credentials where userid = %s and serviceid = %s",
+        res = db.select("select data, priority from credentials where userid = %s and serviceid = %s",
                         (userid, serviceid))
         db.close()
 
         data = {}
         if len(res) > 0:
             data = json.loads(self._decrypt(res[0][0]))
+            data['priority'] = res[0][1]
 
         return data
 
     def write_creds(self, serviceid, userid, data, insert=False):
         db = self._get_creds_db()
-        str_data = self._encrypt(json.dumps(data))
         op = "replace"
         if insert:
             op = "insert"
-        db.execute(op + " into credentials (data, userid, serviceid) values (%s, %s, %s)",
-                   (str_data, userid, serviceid))
+            old_data = data
+        else:
+            old_data = self.get_cred(serviceid, userid)
+            old_data.update(data)
+    
+        if 'priority' in old_data:
+            priority = old_data['priority']
+            del old_data['priority']
+        else:
+            res = db.select('select max(priority) from credentials')
+            if res[0][0]:
+                priority = res[0][0] + 1
+            else:
+                priority = 1
+        str_data = self._encrypt(json.dumps(old_data))
+        db.execute(op + " into credentials (data, userid, serviceid, priority) values (%s, %s, %s, %s)",
+                   (str_data, userid, serviceid, priority))
         db.close()
 
     def delete_cred(self, serviceid, userid):
         db = self._get_creds_db()
         db.execute("delete from credentials where userid = %s and serviceid = %s", (userid, serviceid))
+        db.close()
+
+    def update_priority(self, serviceid, userid, prio, new_prio):
+        db = self._get_creds_db()
+        db.execute("update credentials set priority = %s where userid = %s and priority = %s", (prio, userid, new_prio))
+        db.execute("update credentials set priority = %s where userid = %s and serviceid = %s", (new_prio, userid, serviceid))
         db.close()

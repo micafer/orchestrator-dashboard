@@ -39,6 +39,7 @@
 </script>
 <img src="{{ url_for('static', filename='images/' + cred_type + '.png') }}"/><br/><br/>
 
+      <input name="cred_id" type="hidden" value="{{ cred_id }}"/>
       <input name="type" type="hidden" value="{{ cred_type }}"/>
       <div class="row form-group">
         <div class="col">
@@ -53,7 +54,7 @@
               <input placeholder="Access Key" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Secret Key" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
+              <input placeholder="Secret Key" name="password" class="col-sm-12" type="password" id="password"/>
           </div>
         </div>
 {% elif cred_type == "GCE" %}
@@ -69,7 +70,7 @@
             <div class="col">
             <label for="certificate"><strong>Server Certificate</strong></label>
             <div>
-              <input name="certificate" type="file" class="form-control form-control-sm" id="certificate" required/>
+              <input name="certificate" type="file" class="form-control form-control-sm" id="certificate"/>
             </div>
           </div>
       </div>
@@ -79,7 +80,7 @@
               <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
           </div>
         </div>
 
@@ -107,7 +108,7 @@
               <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
           </div>
         </div>
 
@@ -125,7 +126,7 @@
               <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
           </div>
         </div>
 
@@ -143,7 +144,7 @@
               <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password" value="{{ creds['password'] if creds else '' }}" required/>
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
           </div>
         </div>
 
