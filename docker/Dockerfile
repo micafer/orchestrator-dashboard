@@ -9,9 +9,9 @@ COPY ./tosca-templates /opt/tosca-templates
 
 ENV PYTHONPATH=/app
 
-RUN apk add --no-cache --virtual .build-deps gcc libc-dev git \
+RUN apk add --no-cache --virtual .build-deps gcc libc-dev git libffi-dev openssl-dev\
     && pip3 install meinheld==1.0.2 gunicorn==20.0.4 && pip3 install -r /app/requirements.txt \
-    && apk del .build-deps gcc libc-dev git
+    && apk del .build-deps gcc libc-dev git libffi-dev openssl-dev
 
 EXPOSE 5001
 

@@ -46,7 +46,11 @@ def create_app(oidc_blueprint=None):
     app.secret_key = "8210f566-4981-11ea-92d1-f079596e599b"
     app.config.from_json('config.json')
     settings = Settings(app.config)
-    cred = Credentials(settings.db_url)
+    if 'CREDS_KEY' in os.environ:
+        key = os.environ['CREDS_KEY']
+    else:
+        key = None
+    cred = Credentials(settings.db_url, key)
     infra = Infrastructures(settings.db_url)
 
     toscaTemplates = utils.loadToscaTemplates(settings.toscaDir)
