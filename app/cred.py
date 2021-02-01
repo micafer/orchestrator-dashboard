@@ -54,7 +54,7 @@ class Credentials:
             raise Exception("Error connecting DB: %s" % self.cred_db_url)
         return db
 
-    def get_creds(self, userid):
+    def get_creds(self, userid, enabled=None):
         db = self._get_creds_db()
         res = db.select("select serviceid, priority, enabled, data from credentials where userid = %s order by priority", (userid,))
         db.close()
@@ -65,7 +65,8 @@ class Credentials:
                 new_item = json.loads(self._decrypt(elem[3]))
                 new_item['priority'] = elem[1]
                 new_item['enabled'] = elem[2]
-                data.append(new_item)
+                if enabled is None or enabled == new_item['enabled']:
+                    data.append(new_item)
 
         return data
 

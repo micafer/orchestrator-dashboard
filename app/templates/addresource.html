@@ -30,6 +30,7 @@
                     <!-- <th>id</th>-->
                     <th>Node type</th>
                     <th>Num. of nodes</th>
+                    <th>Cloud Provider</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,6 +39,14 @@
                     <td>{{ system.name }}</td>
                     <td>
                         <input type="text" class="form-control" id="{{system.name}}_num" name="{{system.name}}_num" value="0" aria-describedby="Numner of nodes to add"/>
+                    </td>
+                    <td>
+                        <select class="form-control" id="{{system.name}}_cred" name="{{system.name}}_cred">
+                            <option name="selectedCred" value="">Current Cloud</option>
+                        {% for cred in creds %}
+                            <option name="selectedCred" value={{ cred['id'] }}>{{ cred['id'] }}</option>
+                        {% endfor %}
+                        </select>
                     </td>
                 </tr>
                 {% endfor %}

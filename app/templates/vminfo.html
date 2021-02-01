@@ -79,10 +79,14 @@
                     HW Features:
                   </th>
                   <td>
+                    {% if 'cpu.count' in vminfo %}
+                      {% set _dummy=vminfo.pop('cpu.count') %}
                     {{ vminfo['cpu.count'] }} CPUs, 
-                    {{ vminfo['memory.size'] }} of RAM
-                    {% set _dummy=vminfo.pop('cpu.count') %}
-                    {% set _dummy=vminfo.pop('memory.size') %}
+                    {% endif %}
+                    {% if 'memory.size' in vminfo %}
+                      {% set _dummy=vminfo.pop('memory.size') %}
+                      {{ vminfo['memory.size'] }} of RAM
+                      {% endif %}
                     {% if 'disks.free_size' in vminfo %}
                       , {{ vminfo['disks.free_size'] }} of HD
                       {% set _dummy=vminfo.pop('disks.free_size') %}
@@ -97,8 +101,10 @@
                     Credentials:
                   </th>
                   <td>
-                    Username: {{ vminfo['disk.0.os.credentials.username'] }}
-                    {% set _dummy=vminfo.pop('disk.0.os.credentials.username') %}
+                    {% if 'disk.0.os.credentials.username' in vminfo %}
+                      Username: {{ vminfo['disk.0.os.credentials.username'] }}
+                      {% set _dummy=vminfo.pop('disk.0.os.credentials.username') %}
+                    {% endif %}
                     {% if 'disk.0.os.credentials.password' in vminfo %}
                       <br> Password: {{ vminfo['disk.0.os.credentials.password'] }}
                       {% set _dummy=vminfo.pop('disk.0.os.credentials.password') %}

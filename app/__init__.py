@@ -425,7 +425,7 @@ def create_app(oidc_blueprint=None):
 
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
-        creds = cred.get_creds(session['userid'])
+        creds = cred.get_creds(session['userid'], 1)
 
         return render_template('createdep.html',
                                template=toscaInfo[selected_tosca],
@@ -565,7 +565,10 @@ def create_app(oidc_blueprint=None):
                 'Kubernetes': 'docker'
             }
             if cred_data['type'] in ['OpenStack', 'OpenNebula']:
-                image = "%s://%s/%s" % (protocol_map.get(cred_data['type']), cred_data['host'], image_id)
+                host = urlparse(cred_data['host'])[2]
+                if ":" in host:
+                    host = host[:host.find(":")]
+                image = "%s://%s/%s" % (protocol_map.get(cred_data['type']), host, image_id)
             elif cred_data['type'] == 'Linode':
                 image = "%s://linode/%s" % (protocol_map.get(cred_data['type']), image_id)
             elif cred_data['type'] in ['GCE', 'EC2', 'Azure']:
@@ -737,7 +740,8 @@ def create_app(oidc_blueprint=None):
             except Exception as ex:
                 flash("Error parsing RADL: \n%s" % str(ex), 'error')
 
-            return render_template('addresource.html', infid=infid, systems=systems)
+            creds = cred.get_creds(session["userid"], 1)
+            return render_template('addresource.html', infid=infid, systems=systems, creds=creds)
         else:
             flash("Error getting RADL: \n%s" % (response.text), 'error')
             return redirect(url_for('showinfrastructures'))
@@ -762,10 +766,16 @@ def create_app(oidc_blueprint=None):
                 radl = radl_parse.parse_radl(response.text)
                 radl.deploys = []
                 for system in radl.systems:
+                    sys_dep = deploy(system.name, 0)
                     if "%s_num" % system.name in form_data:
                         vm_num = int(form_data["%s_num" % system.name])
                         if vm_num > 0:
-                            radl.deploys.append(deploy(system.name, vm_num))
+                            sys_dep.vm_number = vm_num
+                    if "%s_cred" % system.name in form_data:
+                        cloud_id = form_data["%s_cred" % system.name]
+                        if cloud_id:
+                            sys_dep.cloud_id = cloud_id
+                    radl.deploys.append(sys_dep)
             except Exception as ex:
                 flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
 
