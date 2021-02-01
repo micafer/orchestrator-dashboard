@@ -32,7 +32,6 @@ from flask import flash, g, escape
 from app import appdb
 from fnmatch import fnmatch
 from hashlib import md5
-from urllib.parse import urlparse
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -107,29 +106,24 @@ def getStaticVOs():
     return list(set(res))
 
 
-def get_ost_image_url(site_name):
-    sites = getCachedSiteList()
-    site_url = sites[site_name]["url"]
-    return urlparse(site_url)[1]
-
-
-def get_site_connect_info(site_name, vo, cred, userid):
+def get_site_connect_info(cred_id, cred, userid):
     domain = None
-    site = getCachedSiteList()[site_name]
+
+    cred_data = cred.get_cred(cred_id, userid)
+    vo = cred_data['vo']
+
+    for site in list(getCachedSiteList().values()):
+        if site['url'] == cred_data['host']:
+            break
 
     project_ids = getCachedProjectIDs(site["id"])
     if vo in project_ids:
         domain = project_ids[vo]
 
-    if not domain:
-        creds = cred.get_cred(site_name, userid)
-        if creds and "project" in creds and creds["project"]:
-            domain = creds["project"]
-
-    return site["url"], domain
+    return site, domain, vo
 
 
-def get_site_driver(site_name, site_url, domain, access_token):
+def get_site_driver(site_url, domain, access_token):
     OpenStack = get_driver(Provider.OPENSTACK)
     driver = OpenStack('egi.eu', access_token,
                        api_version='2.0',
@@ -148,10 +142,10 @@ def get_site_driver(site_name, site_url, domain, access_token):
     return driver
 
 
-def get_site_images(site_name, vo, access_token, cred, userid):
+def get_site_images(cred_id, access_token, cred, userid):
     try:
-        site_url, domain = get_site_connect_info(site_name, vo, cred, userid)
-        driver = get_site_driver(site_name, site_url, domain, access_token)
+        site, domain, _ = get_site_connect_info(cred_id, cred, userid)
+        driver = get_site_driver(site['url'], domain, access_token)
         images = driver.list_images()
         return [(image.name, image.id) for image in images]
     except Exception as ex:
@@ -159,9 +153,9 @@ def get_site_images(site_name, vo, access_token, cred, userid):
         return [(escape(msg), escape(msg))]
 
 
-def get_site_usage(site_name, vo, access_token, cred, userid):
-    site_url, domain = get_site_connect_info(site_name, vo, cred, userid)
-    driver = get_site_driver(site_name, site_url, domain, access_token)
+def get_site_usage(cred_id, access_token, cred, userid):
+    site, domain, _ = get_site_connect_info(cred_id, cred, userid)
+    driver = get_site_driver(site['url'], domain, access_token)
     quotas = driver.ex_get_quota_set(domain)
     try:
         net_quotas = driver.ex_get_network_quotas(domain)
@@ -221,30 +215,33 @@ def getUserAuthData(access_token, cred, userid):
 
     fedcloud_sites = None
     for cred in cred.get_creds(userid):
-        res += "\\nid = %s; type = %s" % (cred['id'], cred['type'])
-        if type != "fedcloud":
-            for key, value in cred.items():
-                res += "; %s = %s" % (key, value)
-        else:
-            res += "; username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
-            res += " host = %s; password = '%s'" % (cred['host'], access_token)
-            # only load this data if a EGI Cloud site appears
-            if fedcloud_sites is None:
-                fedcloud_sites = {}
-                for site in getCachedSiteList():
-                    fedcloud_sites[site['url']] = site
+        if cred['enabled']:
+            res += "\\n"
+            if type != "fedcloud":
+                for key, value in cred.items():
+                    if key not in ['priority', 'enabled']:
+                        res += "; %s = %s" % (key, value)
+            else:
+                res += "id = %s; type = OpenStack;" % cred['id']
+                res += " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
+                res += " host = %s; password = '%s'" % (cred['host'], access_token)
+                # only load this data if a EGI Cloud site appears
+                if fedcloud_sites is None:
+                    fedcloud_sites = {}
+                    for site in getCachedSiteList():
+                        fedcloud_sites[site['url']] = site
 
-            site_info = fedcloud_sites[cred['host']]
-            if 'api_version' in site_info:
-                res += "; api_version  = %s" % site_info['api_version']
+                site_info = fedcloud_sites[cred['host']]
+                if 'api_version' in site_info:
+                    res += "; api_version  = %s" % site_info['api_version']
 
-            projectid = None
-            project_ids = getCachedProjectIDs(site_info["id"])
-            if cred['vo'] in project_ids:
-                projectid = project_ids[cred['vo']]
+                projectid = None
+                project_ids = getCachedProjectIDs(site_info["id"])
+                if cred['vo'] in project_ids:
+                    projectid = project_ids[cred['vo']]
 
-            if projectid:
-                res += "; domain = %s" % projectid
+                if projectid:
+                    res += "; domain = %s" % projectid
 
     return res
 

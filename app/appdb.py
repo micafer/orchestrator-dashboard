@@ -103,7 +103,8 @@ def get_sites(vo=None):
                 url = urlparse(provider_endpoint_url)
                 endpoints[provider_name] = {"url": "%s://%s" % url[0:2],
                                             "state": critical,
-                                            "id": ID}
+                                            "id": ID,
+                                            "name": provider_name}
 
     return endpoints
 

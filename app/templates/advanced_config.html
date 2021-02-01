@@ -75,77 +75,101 @@
        }
    }
 
+   function changedCred() {
+        var select = document.getElementById('selectedCred');
+        var cred_type = select.options[select.selectedIndex].getAttribute("data-type");
+        if (cred_type == 'fedcloud') {
+            $('#cloudImages').hide();
+            $('#fedcloudImages').show();
+            $('#fedcloudUsage').show();
+            loadImages();
+            loadSiteImages();
+            loadSiteInfo();
+        } else {
+            if (cred_type == 'GCE' || cred_type == 'EC2') {
+                document.getElementById('imageID').setAttribute("placeholder", "Region / Image ID");
+            } else if (cred_type == 'Azure') {
+                document.getElementById('imageID').setAttribute("placeholder", "Publisher / Offer / SKU / Version");
+            } else {
+                document.getElementById('imageID').setAttribute("placeholder", "Image ID");
+            }
+            $('#cloudImages').show();
+            $('#fedcloudImages').hide();
+            $('#fedcloudUsage').hide();
+        }
+   }
+
    function loadImages() {
-       $('#selectedImage').empty();
-       $('#selectedImage').append("<option value=''>Loading Images ...</option>");
-       $.ajax({
-           method: "GET",
-           url: "{{ url_for('home') }}images/" + $("#selectedSite").val() + "/" + $('#selectedVO').val(),
-           success : function(text)
-           {
-               $('#selectedImage').empty();
-               $('#selectedImage').append("<option value=''> - Select one image - </option>");
-               $('#selectedImage').append(text);
-           }
-       });
+        $('#selectedImage').empty();
+        $('#selectedImage').append("<option value=''>Loading Images ...</option>");
+        $.ajax({
+            method: "GET",
+            url: "{{ url_for('home') }}images/" + $("#selectedCred").val(),
+            success : function(text)
+            {
+                $('#selectedImage').empty();
+                $('#selectedImage').append("<option value=''> - Select one image - </option>");
+                $('#selectedImage').append(text);
+            }
+        });
    }
 
    function loadSiteImages() {
-       $('#selectedSiteImage').empty();
-       $('#selectedSiteImage').append("<option value=''>Loading Images ...</option>");
-       $.ajax({
-           method: "GET",
-           url: "{{ url_for('home') }}images/" + $("#selectedSite").val() + "/" + $('#selectedVO').val() + "?local=1",
-           success : function(text)
-           {
-               $('#selectedSiteImage').empty();
-               $('#selectedSiteImage').append("<option value=''> - Select one image - </option>");
-               $('#selectedSiteImage').append(text);
-           }
-       });
+        $('#selectedSiteImage').empty();
+        $('#selectedSiteImage').append("<option value=''>Loading Images ...</option>");
+        $.ajax({
+            method: "GET",
+            url: "{{ url_for('home') }}images/" + $("#selectedCred").val() + "?local=1",
+            success : function(text)
+            {
+                $('#selectedSiteImage').empty();
+                $('#selectedSiteImage').append("<option value=''> - Select one image - </option>");
+                $('#selectedSiteImage').append(text);
+            }
+        });
    }
 
    function loadSiteInfo() {
-       $('#divLoadingUsage').show();
-       $.ajax({
-           method: "GET",
-           url: "{{ url_for('home') }}usage/" + $("#selectedSite").val() + "/" + $('#selectedVO').val(),
-           success : function(text)
-           {
-               data = JSON.parse(text);
+        $('#divLoadingUsage').show();
+        $.ajax({
+            method: "GET",
+            url: "{{ url_for('home') }}usage/" + $("#selectedCred").val(),
+            success : function(text)
+            {
+                data = JSON.parse(text);
 
-               for (var i = 0; i < resource_types.length; i++) {
-                   config[resource_types[i]].data = {
-                       labels: [
-                       'Used',
-                       'Free'
-                       ],
-                       datasets: [{
-                           data: [Math.round(data[resource_types[i]]["used"]),
-                                  Math.round(data[resource_types[i]]["limit"] - data[resource_types[i]]["used"])],
-                           backgroundColor: [
-                               window.chartColors.green,
-                               window.chartColors.grey
-                           ]
-                       }]
-                   };
-                   var usage = data[resource_types[i]]["used"] / data[resource_types[i]]["limit"];
-                   if (usage >= 0.7 && usage < 0.9) {
-                       config[resource_types[i]].data.datasets[0].backgroundColor[0] = window.chartColors.orange;
-                   } else if (usage >= 0.9) {
-                       config[resource_types[i]].data.datasets[0].backgroundColor[0] = window.chartColors.red;
-                   }
-                   window.myPies[resource_types[i]].update();
-               }
-               $('#divLoadingUsage').hide();
-           },
-           error : function(error)
-           {
-               $('#divLoadingUsage').hide();
-               resetPies();
-               alert(error.responseText);
-           }
-       });
+                for (var i = 0; i < resource_types.length; i++) {
+                    config[resource_types[i]].data = {
+                        labels: [
+                        'Used',
+                        'Free'
+                        ],
+                        datasets: [{
+                            data: [Math.round(data[resource_types[i]]["used"]),
+                                    Math.round(data[resource_types[i]]["limit"] - data[resource_types[i]]["used"])],
+                            backgroundColor: [
+                                window.chartColors.green,
+                                window.chartColors.grey
+                            ]
+                        }]
+                    };
+                    var usage = data[resource_types[i]]["used"] / data[resource_types[i]]["limit"];
+                    if (usage >= 0.7 && usage < 0.9) {
+                        config[resource_types[i]].data.datasets[0].backgroundColor[0] = window.chartColors.orange;
+                    } else if (usage >= 0.9) {
+                        config[resource_types[i]].data.datasets[0].backgroundColor[0] = window.chartColors.red;
+                    }
+                    window.myPies[resource_types[i]].update();
+                }
+                $('#divLoadingUsage').hide();
+            },
+            error : function(error)
+            {
+                $('#divLoadingUsage').hide();
+                resetPies();
+                alert(error.responseText);
+            }
+        });
    }
 
    function activateSubmit() {
@@ -162,18 +186,38 @@
 
            <div class="form-group">
                <label>Select Cloud Provider:</label>
-               <select class="js-example-basic-single js-states form-control" id="selectedCred" name="extra_opts.selectedCred" onchange="loadImages();loadSiteImages();loadSiteInfo();">
+               <select class="js-example-basic-single js-states form-control" id="selectedCred" name="extra_opts.selectedCred" onchange="changedCred();">
                    <option name="selectedCred" value=""> - Select Cloud site - </option>
                {% for cred in creds %}
-                   <option name="selectedCred" value={{ cred['id'] }}>{{ cred['id'] }}</option>
+                   <option data-type="{{ cred['type'] }}" name="selectedCred" value={{ cred['id'] }}>{{ cred['id'] }}</option>
                {% endfor %}
                </select>
+           </div>
+
+           <div class="form-group" id="cloudImages" style="display: none;">
+            <label>Set image ID:</label>
+            <input placeholder="Image ID" type="text" class="form-control" id="imageID" name="extra_opts.imageID" value="" oninput="activateSubmit()">
+            <br/>
+           </div>
+
+           <div class="form-group" id="fedcloudImages" style="display: none;">
+              <label>Select only one of this options AppDB or Site image:</label>
+              <br/>
+              <label>Select AppDB image:</label>
+              <select class="js-example-basic-single js-states form-control" id="selectedImage" name="extra_opts.selectedImage" onchange="activateSubmit()">
+                  <option name="selectedImage" value="">Select provider</option>
+              </select>
+              <br/>
+              <label>Select Site image:</label>
+              <select class="js-example-basic-single js-states form-control" id="selectedSiteImage" name="extra_opts.selectedSiteImage" onchange="activateSubmit()">
+                  <option name="selectedSiteImage" value="">Select provider</option>
+              </select>
            </div>
 
        </div>
        <div class="form-group col-md-6">
 
-           <div class="form-group">
+           <div class="form-group" id="fedcloudUsage" style="display: none;">
                <label>Site Resource Usage:</label>
                <div id="divLoadingUsage" style="display: none; position: absolute; margin-left: 40px; margin-top: 30px; padding:10px; background-color:white; z-index: 3;">
                    Loading Site Resource Usage Data <span class='spinner-grow spinner-grow-sm'></span>
@@ -202,23 +246,7 @@
        </div>
       </div>
 
-      <div class="form-row">
-       <div class="form-group col-md-12 text-center">
-           <label>Select only one of this options AppDB or Site image:</label>
-       </div>
-       <div class="form-group col-md-6">
-           <label>Select AppDB image:</label>
-           <select class="js-example-basic-single js-states form-control" id="selectedImage" name="extra_opts.selectedImage" onchange="activateSubmit()">
-               <option name="selectedImage" value="">Select provider</option>
-           </select>
-       </div>
-       <div class="form-group col-md-6">
-           <label>Select Site image:</label>
-           <select class="js-example-basic-single js-states form-control" id="selectedSiteImage" name="extra_opts.selectedSiteImage" onchange="activateSubmit()">
-               <option name="selectedSiteImage" value="">Select provider</option>
-           </select>
-       </div>
-      </div>
+
 
   </div>
   <br>

@@ -19,12 +19,12 @@
                   <span class="sr-only">Toggle Dropdown</span>
               </button>
                 <div class="dropdown-menu">
-                  <a class="dropdown-item" data-id="" data-type="ec2" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/ec2Row.png') }}"/></a>
+                  <a class="dropdown-item" data-id="" data-type="EC2" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/EC2Row.png') }}"/></a>
                   <a class="dropdown-item" data-id="" data-type="GCE" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/GCERow.png') }}"/></a>
                   <a class="dropdown-item" data-id="" data-type="Azure" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/AzureRow.png') }}"/></a>
                   <a class="dropdown-item" data-id="" data-type="fedcloud" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/fedcloudRow.png') }}"/></a>
                   <a class="dropdown-item" data-id="" data-type="OpenNebula" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OpenNebulaRow.png') }}"/></a>
-                  <a class="dropdown-item" data-id="" data-type="openstack" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/openstackRow.png') }}"/></a>
+                  <a class="dropdown-item" data-id="" data-type="OpenStack" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OpenStackRow.png') }}"/></a>
                   <a class="dropdown-item" data-id="" data-type="Orange" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OrangeRow.png') }}"/></a>
                   <a class="dropdown-item" data-id="" data-type="Linode" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/LinodeRow.png') }}"/></a>
                   <a class="dropdown-item" data-id="" data-type="Kubernetes" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/KubernetesRow.png') }}"/></a>
@@ -51,13 +51,18 @@
                       <td><img src="{{ url_for('static', filename='images/' + cred['type'] + 'Row.png') }}"/></td>
                       <td>{{cred["host"]}}</td>
                       <td>
-                        <button type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-success" data-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
-                        <button type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                        <button type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-info" data-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
+                        <button type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-secondary" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                        {% if cred['enabled'] == 1 %}
+                        <a data-toggle="tooltip" data-placement="top" title="Disable" id="disableBtn" class="btn btn-success text-white" href="{{ url_for('enable_creds', cred_id=cred['id'], enable=0) }}"><i class='far fa-check-circle m-1'></i></a>
+                        {% else %}
+                        <a data-toggle="tooltip" data-placement="top" title="Enable" id="enableBtn" class="btn btn-danger text-white" href="{{ url_for('enable_creds', cred_id=cred['id'], enable=1) }}"><i class='fas fa-ban m-1'></i></a>
+                        {% endif %}
                         {% if cred['prev_priority'] is not none %}
-                        <a id="upBtn" data-id="{{cred['id']}}" class="btn btn-primary text-white" href="{{ url_for('priority_creds', cred_id=cred['id'], op='up', prio=cred['priority'], new_prio=cred['prev_priority']) }}"><i class='fas fa-arrow-up m-1'></i></a>
+                        <a id="upBtn" class="btn btn-primary text-white" href="{{ url_for('priority_creds', cred_id=cred['id'], prio=cred['priority'], new_prio=cred['prev_priority']) }}"><i class='fas fa-arrow-up m-1'></i></a>
                         {% endif %}
                         {% if cred['next_priority'] is not none %}
-                        <a id="downBtn" data-id="{{cred['id']}}" class="btn btn-primary text-white" href="{{ url_for('priority_creds', cred_id=cred['id'], op='down', prio=cred['priority'], new_prio=cred['next_priority']) }}"><i class='fas fa-arrow-down m-1'></i></a>
+                        <a id="downBtn" class="btn btn-primary text-white" href="{{ url_for('priority_creds', cred_id=cred['id'], prio=cred['priority'], new_prio=cred['next_priority']) }}"><i class='fas fa-arrow-down m-1'></i></a>
                         {% endif %}
                       </td>
                     </tr>
@@ -109,6 +114,9 @@
 
 <script>
 
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 
 $(document).ready(function () {
   $('#newModal').on('hidden.bs.modal', function () {

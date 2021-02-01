@@ -460,27 +460,28 @@ def create_app(oidc_blueprint=None):
 
         return res
 
-    @app.route('/images/<site>/<vo>')
+    @app.route('/images/<cred_id>')
     @authorized_with_valid_token
-    def getimages(site=None, vo=None):
+    def getimages(cred_id=None):
         res = ""
         local = request.args.get('local', None)
+
         if local:
             access_token = oidc_blueprint.session.token['access_token']
-            for image_name, image_id in utils.get_site_images(site, vo, access_token, cred, session["userid"]):
+            for image_name, image_id in utils.get_site_images(cred_id, access_token, cred, session["userid"]):
                 res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image_id, image_name)
         else:
-            site_id = utils.getCachedSiteList()[site]['id']
-            for image in appdb.get_images(site_id, vo):
+            site, _, vo = utils.get_site_connect_info(cred_id, cred, session["userid"])
+            for image in appdb.get_images(site['id'], vo):
                 res += '<option name="selectedImage" value=%s>%s</option>' % (image, image)
         return res
 
-    @app.route('/usage/<site>/<vo>')
+    @app.route('/usage/<cred_id>')
     @authorized_with_valid_token
-    def getusage(site=None, vo=None):
+    def getusage(cred_id=None):
         try:
             access_token = oidc_blueprint.session.token['access_token']
-            quotas_dict = utils.get_site_usage(site, vo, access_token, cred, session["userid"])
+            quotas_dict = utils.get_site_usage(cred_id, access_token, cred, session["userid"])
             return json.dumps(quotas_dict)
         except Exception as ex:
             return "Error loading site quotas: %s!" % str(ex), 400
@@ -543,28 +544,51 @@ def create_app(oidc_blueprint=None):
     def createdep():
 
         form_data = request.form.to_dict()
-        vo = form_data['extra_opts.selectedVO']
-        site = form_data['extra_opts.selectedSite']
-
-        access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
 
         app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
-        with io.open(settings.toscaDir + request.args.get('template')) as stream:
-            template = yaml.full_load(stream)
+        cred_id = form_data['extra_opts.selectedCred']
+        cred_data = cred.get_cred(cred_id, session["userid"])
+        access_token = oidc_blueprint.session.token['access_token']
+
+        image = None
+        if cred_data['type'] != 'fedcloud':
+            image_id = form_data['extra_opts.imageID']
+            protocol_map = {
+                'EC2': 'aws',
+                'GCE': 'gce',
+                'OpenStack': 'ost',
+                'OpenNebula': 'one',
+                'Azure': 'azr',
+                'Orange': 'ora',
+                'Linode': 'lin',
+                'Kubernetes': 'docker'
+            }
+            if cred_data['type'] in ['OpenStack', 'OpenNebula']:
+                image = "%s://%s/%s" % (protocol_map.get(cred_data['type']), cred_data['host'], image_id)
+            elif cred_data['type'] == 'Linode':
+                image = "%s://linode/%s" % (protocol_map.get(cred_data['type']), image_id)
+            elif cred_data['type'] in ['GCE', 'EC2', 'Azure']:
+                image = "%s://%s" % (protocol_map.get(cred_data['type']), image_id)
+            elif cred_data['type'] == "Orange":
+                image = "%s://%s/%s" % (protocol_map.get(cred_data['type']), cred_data['region'], image_id)
+
+        else:
+            site, _, vo = utils.get_site_connect_info(cred_id, cred, session["userid"])
 
             if form_data['extra_opts.selectedImage'] != "":
-                image = "appdb://%s/%s?%s" % (form_data['extra_opts.selectedSite'],
-                                              form_data['extra_opts.selectedImage'],
-                                              form_data['extra_opts.selectedVO'])
+                image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
             elif form_data['extra_opts.selectedSiteImage'] != "":
-                site_url = utils.get_ost_image_url(form_data['extra_opts.selectedSite'])
-                image = "ost://%s/%s" % (site_url, form_data['extra_opts.selectedSiteImage'])
-            else:
-                flash("No correct image selected.", "error")
-                return redirect(url_for('showinfrastructures'))
+                image = "ost://%s/%s" % (urlparse(site['url'])[1], form_data['extra_opts.selectedSiteImage'])
 
+        if not image:
+            flash("No correct image specified.", "error")
+            return redirect(url_for('showinfrastructures'))
+
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+
+        with io.open(settings.toscaDir + request.args.get('template')) as stream:
+            template = yaml.full_load(stream)
             template = add_image_to_template(template, image)
 
             template = add_auth_to_template(template, auth_data)
@@ -671,7 +695,6 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def priority_creds():
         cred_id = request.args.get('cred_id', "")
-        op = request.args.get('op', "")
         prio = request.args.get('prio', "")
         new_prio = request.args.get('new_prio', "")
 
@@ -680,6 +703,18 @@ def create_app(oidc_blueprint=None):
                 cred.update_priority(cred_id, session["userid"], prio, new_prio)
             except Exception as ex:
                 flash("Error writing credentials: %s!" % ex, 'error')
+        return redirect(url_for('manage_creds'))
+
+    @app.route('/enable_creds')
+    @authorized_with_valid_token
+    def enable_creds():
+        cred_id = request.args.get('cred_id', "")
+        enable = request.args.get('enable', 0)
+        try:
+            cred.enable_cred(cred_id, session["userid"], enable)
+        except Exception as ex:
+            flash("Error updating credentials %s!" % ex, 'error')
+
         return redirect(url_for('manage_creds'))
 
     @app.route('/addresourcesform/<infid>')

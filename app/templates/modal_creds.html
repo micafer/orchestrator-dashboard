@@ -48,7 +48,7 @@
         <div class="col">
         </div>
       </div>
-{% if cred_type == "ec2" %}
+{% if cred_type == "EC2" %}
         <div class="row form-group">
           <div class="col">
               <input placeholder="Access Key" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
@@ -74,7 +74,7 @@
             </div>
           </div>
       </div>
-{% elif cred_type == "openstack" %}
+{% elif cred_type == "OpenStack" %}
         <div class="row form-group">
           <div class="col">
               <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
@@ -99,6 +99,14 @@
           </div>
           <div class="col">
               <input placeholder="Auth Version" name="auth_version" class="col-sm-12" type="text" id="auth_version" value="{{ creds['auth_version'] if creds else '' }}"/>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Host" name="host" class="col-sm-12" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
           </div>
         </div>
 
