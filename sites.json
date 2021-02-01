@@ -46,11 +46,25 @@
         "url": "https://api.cloud.ifca.es:5000",
         "id": "7513G0",
         "vos": {
+	    "acc-comp.egi.eu": "403847ab342247b89b0ba2ede2c82b39",
+	    "biinsight.eosc-hub.eu": "d602bda767b4490a82b2f62f9347a0f5",
+	    "covid19.eosc-synergy.eu": "e14972ead3154810a5941e511afc208c",
+	    "cryoem.instruct-eric.eu": "c7db08b907ef4f0fae73bdd6587bc79e",
+	    "d4science.org": "9170e65775964a3ba6b18d83a2ad1968",
+	    "demo.fedcloud.egi.eu": "2a7e2cd4b6dc4e609dd934964c1715c6",
+	    "dteam": "5eb8959a799240a98f4f303f5fbd80be",
+	    "ec-meloa.eu": "6b8f8974b27247adb4cc2990b81e6019",
+	    "enmr.eu": "b6b1c395b7da4e8aa1d0895bd695b0ba",
+	    "eosc-synergy.eu": "3b9754ad8c6046b4aec43ec21abe7d8c",
+	    "o3as.data.kit.edu": "352db003073549749351fad26cd55074",
+	    "opencoast.eosc-hub.eu": "4ebc1727dbed465c8ef72617a9075b4f",
+	    "seadatanet-pilot.eosc-hub.eu": "ccb3f2fe96a44c86b564a17dca9a326c",
+	    "training.egi.eu": "f1d0308880134d04964097524eace710",
+	    "vo.access.egi.eu": "999f045cb1ff4684a15ebb338af69460",
             "vo.lifewatch.eu": "ac7bc26131d248ecb6add521e648c331",
-            "eosc-synergy.eu": "3b9754ad8c6046b4aec43ec21abe7d8c",
-            "demo.fedcloud.egi.eu": "2a7e2cd4b6dc4e609dd934964c1715c6",
-            "o3as.data.kit.edu": "352db003073549749351fad26cd55074",
-            "vo.access.egi.eu": "999f045cb1ff4684a15ebb338af69460"
+	    "vo.nextgeoss.eu": "13c11c4073f4456fac7df84c4eb8f85b",
+	    "vo.openbiomap.lifewatch.eu": "ac7bc26131d248ecb6add521e648c331",
+            "worsica.eosc.eu": "7bb9c2694f9040c68cd72cb994f5ce89"
         }
     },
     {
