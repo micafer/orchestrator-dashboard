@@ -217,9 +217,9 @@ def getUserAuthData(access_token, cred, userid):
     for cred in cred.get_creds(userid):
         if cred['enabled']:
             res += "\\n"
-            if type != "fedcloud":
+            if cred['type'] != "fedcloud":
                 for key, value in cred.items():
-                    if key not in ['priority', 'enabled']:
+                    if value and key not in ['priority', 'enabled']:
                         res += "; %s = %s" % (key, value)
             else:
                 res += "id = %s; type = OpenStack;" % cred['id']
@@ -228,7 +228,7 @@ def getUserAuthData(access_token, cred, userid):
                 # only load this data if a EGI Cloud site appears
                 if fedcloud_sites is None:
                     fedcloud_sites = {}
-                    for site in getCachedSiteList():
+                    for site in list(getCachedSiteList().values()):
                         fedcloud_sites[site['url']] = site
 
                 site_info = fedcloud_sites[cred['host']]
