@@ -48,7 +48,7 @@ class Credentials:
         db = DataBase(self.cred_db_url)
         if db.connect():
             if not db.table_exists("credentials"):
-                db.execute("CREATE TABLE credentials(userid VARCHAR(255), serviceid VARCHAR(255), priority INTEGER,"
+                db.execute("CREATE TABLE credentials(userid VARCHAR(255), serviceid VARCHAR(255),"
                            "enabled INTEGER ,data LONGBLOB, PRIMARY KEY (userid, serviceid))")
         else:
             raise Exception("Error connecting DB: %s" % self.cred_db_url)
@@ -56,15 +56,14 @@ class Credentials:
 
     def get_creds(self, userid, enabled=None):
         db = self._get_creds_db()
-        res = db.select("select serviceid, priority, enabled, data from credentials where userid = %s order by priority", (userid,))
+        res = db.select("select serviceid, enabled, data from credentials where userid = %s", (userid,))
         db.close()
 
         data = []
         if len(res) > 0:
             for elem in res:
-                new_item = json.loads(self._decrypt(elem[3]))
-                new_item['priority'] = elem[1]
-                new_item['enabled'] = elem[2]
+                new_item = json.loads(self._decrypt(elem[2]))
+                new_item['enabled'] = elem[1]
                 if enabled is None or enabled == new_item['enabled']:
                     data.append(new_item)
 
@@ -72,15 +71,14 @@ class Credentials:
 
     def get_cred(self, serviceid, userid):
         db = self._get_creds_db()
-        res = db.select("select data, priority, enabled from credentials where userid = %s and serviceid = %s",
+        res = db.select("select data, enabled from credentials where userid = %s and serviceid = %s",
                         (userid, serviceid))
         db.close()
 
         data = {}
         if len(res) > 0:
             data = json.loads(self._decrypt(res[0][0]))
-            data['priority'] = res[0][1]
-            data['enabled'] = res[0][2]
+            data['enabled'] = res[0][1]
 
         return data
 
@@ -100,29 +98,15 @@ class Credentials:
         else:
             enabled = 1
 
-        if 'priority' in old_data:
-            priority = old_data['priority']
-            del old_data['priority']
-        else:
-            res = db.select('select max(priority) from credentials')
-            if res[0][0]:
-                priority = res[0][0] + 1
-            else:
-                priority = 1
+
         str_data = self._encrypt(json.dumps(old_data))
-        db.execute(op + " into credentials (data, userid, serviceid, priority, enabled) values (%s, %s, %s, %s, %s)",
-                   (str_data, userid, serviceid, priority, enabled))
+        db.execute(op + " into credentials (data, userid, serviceid, enabled) values (%s, %s, %s, %s)",
+                   (str_data, userid, serviceid, enabled))
         db.close()
 
     def delete_cred(self, serviceid, userid):
         db = self._get_creds_db()
         db.execute("delete from credentials where userid = %s and serviceid = %s", (userid, serviceid))
-        db.close()
-
-    def update_priority(self, serviceid, userid, prio, new_prio):
-        db = self._get_creds_db()
-        db.execute("update credentials set priority = %s where userid = %s and priority = %s", (prio, userid, new_prio))
-        db.execute("update credentials set priority = %s where userid = %s and serviceid = %s", (new_prio, userid, serviceid))
         db.close()
 
     def enable_cred(self, serviceid, userid, enable=1):

@@ -627,15 +627,6 @@ def create_app(oidc_blueprint=None):
 
         try:
             creds = cred.get_creds(session["userid"])
-            for cont, elem in enumerate(creds):
-                if cont == 0:
-                    elem['prev_priority'] = None
-                else:
-                    elem['prev_priority'] = creds[cont-1]['priority']
-                if cont == len(creds) - 1:
-                    elem['next_priority'] = None
-                else:
-                    elem['next_priority'] = creds[cont+1]['priority']
 
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
@@ -694,20 +685,6 @@ def create_app(oidc_blueprint=None):
 
         return redirect(url_for('manage_creds'))
 
-    @app.route('/priority_creds')
-    @authorized_with_valid_token
-    def priority_creds():
-        cred_id = request.args.get('cred_id', "")
-        prio = request.args.get('prio', "")
-        new_prio = request.args.get('new_prio', "")
-
-        if cred_id:
-            try:
-                cred.update_priority(cred_id, session["userid"], prio, new_prio)
-            except Exception as ex:
-                flash("Error writing credentials: %s!" % ex, 'error')
-        return redirect(url_for('manage_creds'))
-
     @app.route('/enable_creds')
     @authorized_with_valid_token
     def enable_creds():
@@ -740,8 +717,7 @@ def create_app(oidc_blueprint=None):
             except Exception as ex:
                 flash("Error parsing RADL: \n%s" % str(ex), 'error')
 
-            creds = cred.get_creds(session["userid"], 1)
-            return render_template('addresource.html', infid=infid, systems=systems, creds=creds)
+            return render_template('addresource.html', infid=infid, systems=systems)
         else:
             flash("Error getting RADL: \n%s" % (response.text), 'error')
             return redirect(url_for('showinfrastructures'))
@@ -771,10 +747,6 @@ def create_app(oidc_blueprint=None):
                         vm_num = int(form_data["%s_num" % system.name])
                         if vm_num > 0:
                             sys_dep.vm_number = vm_num
-                    if "%s_cred" % system.name in form_data:
-                        cloud_id = form_data["%s_cred" % system.name]
-                        if cloud_id:
-                            sys_dep.cloud_id = cloud_id
                     radl.deploys.append(sys_dep)
             except Exception as ex:
                 flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')

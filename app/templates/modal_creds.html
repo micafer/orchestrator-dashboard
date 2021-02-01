@@ -43,7 +43,7 @@
       <input name="type" type="hidden" value="{{ cred_type }}"/>
       <div class="row form-group">
         <div class="col">
-        <input placeholder="ID" name="id" class="col-sm-12" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required/>
+        <input placeholder="ID" name="id" class="col-sm-12" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required {{ 'readonly' if cred_id else '' }}/>
         </div>
         <div class="col">
         </div>

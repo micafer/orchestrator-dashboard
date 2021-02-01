@@ -51,18 +51,12 @@
                       <td><img src="{{ url_for('static', filename='images/' + cred['type'] + 'Row.png') }}"/></td>
                       <td>{{cred["host"]}}</td>
                       <td>
-                        <button type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-info" data-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
-                        <button type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-secondary" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                        <button data-toggle="tooltip" data-placement="top" title="Edit" {{ 'disabled' if cred['type']=='fedcloud' else '' }} type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-info" data-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
+                        <button data-toggle="tooltip" data-placement="top" title="Delete" type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-secondary" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
                         {% if cred['enabled'] == 1 %}
                         <a data-toggle="tooltip" data-placement="top" title="Disable" id="disableBtn" class="btn btn-success text-white" href="{{ url_for('enable_creds', cred_id=cred['id'], enable=0) }}"><i class='far fa-check-circle m-1'></i></a>
                         {% else %}
                         <a data-toggle="tooltip" data-placement="top" title="Enable" id="enableBtn" class="btn btn-danger text-white" href="{{ url_for('enable_creds', cred_id=cred['id'], enable=1) }}"><i class='fas fa-ban m-1'></i></a>
-                        {% endif %}
-                        {% if cred['prev_priority'] is not none %}
-                        <a id="upBtn" class="btn btn-primary text-white" href="{{ url_for('priority_creds', cred_id=cred['id'], prio=cred['priority'], new_prio=cred['prev_priority']) }}"><i class='fas fa-arrow-up m-1'></i></a>
-                        {% endif %}
-                        {% if cred['next_priority'] is not none %}
-                        <a id="downBtn" class="btn btn-primary text-white" href="{{ url_for('priority_creds', cred_id=cred['id'], prio=cred['priority'], new_prio=cred['next_priority']) }}"><i class='fas fa-arrow-down m-1'></i></a>
                         {% endif %}
                       </td>
                     </tr>
@@ -134,6 +128,8 @@ $(document).ready(function () {
      modal.find('.modal-body').html('Loading...').load("{{url_for('write_creds')}}?cred_type=" + cred_type + "&cred_id=" + cred_id);
      if (cred_id == "") {
        modal.find(".updateBtn")[0].firstChild.data = "Add";
+     } else {
+      modal.find(".updateBtn")[0].firstChild.data = "Update";
      }
   });
 });
