@@ -125,7 +125,7 @@
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ session['username'] }}<span class="caret"></span>
             </a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" href="{{ url_for("manage_creds") }}">Service Credentials</a>
+              <a class="dropdown-item" href="{{ url_for("manage_creds") }}">Cloud Credentials</a>
               <a class="dropdown-item" href="{{ url_for("logout") }}">Logout</a>
             </div>
           </li>
@@ -141,6 +141,10 @@
 </html>
 
 <style>
+.dropdown-item:hover {
+    background-color: #dee2e6;
+}
+
   body {
     margin-bottom: 70px
   }
