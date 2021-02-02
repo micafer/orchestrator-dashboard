@@ -51,8 +51,8 @@
                       <td><img src="{{ url_for('static', filename='images/' + cred['type'] + 'Row.png') }}"/></td>
                       <td>{{cred["host"]}}</td>
                       <td>
-                        <button data-toggle="tooltip" data-placement="top" title="Edit" {{ 'disabled' if cred['type']=='fedcloud' else '' }} type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-info" data-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
-                        <button data-toggle="tooltip" data-placement="top" title="Delete" type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-secondary" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                        <button {{ 'disabled' if cred['type']=='fedcloud' else '' }} type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-info" data-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
+                        <button type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-secondary" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
                         {% if cred['enabled'] == 1 %}
                         <a data-toggle="tooltip" data-placement="top" title="Disable" id="disableBtn" class="btn btn-success text-white" href="{{ url_for('enable_creds', cred_id=cred['id'], enable=0) }}"><i class='far fa-check-circle m-1'></i></a>
                         {% else %}
