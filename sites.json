@@ -29,7 +29,8 @@
             "eosc-synergy.eu": "57bcb0efcba4467fa225add92fdc194c",
             "covid19.eosc-synergy.eu": "972298c557184a2192ebc861f3184da8",
             "o3as.data.kit.edu": "4a22f140a5fb4678aa1599fbf0b44b2f",
-            "vo.access.egi.eu": "3a8e9d966e644405bf19b536adf7743d"
+            "vo.access.egi.eu": "3a8e9d966e644405bf19b536adf7743d",
+	    "mswss.ui.savba.sk": "a91154f2803b4414a4f34039539833fa"
         }
     },
     {
@@ -107,6 +108,7 @@
         "vos": {
             "eosc-synergy.eu": "51f736d36ce34b9ebdf196cfcabd24ee",
             "covid19.eosc-synergy.eu": "a22bbffb007745b2934bf308b0a4d186"
+	    "mswss.ui.savba.sk": "a3684e7440aa42f287cf5e9e85ea4cae" 
         }
     },
     {
