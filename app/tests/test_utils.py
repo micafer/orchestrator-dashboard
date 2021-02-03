@@ -32,90 +32,24 @@ class TestUtils(unittest.TestCase):
 
     @patch("app.utils.getCachedProjectIDs")
     @patch("app.utils.getCachedSiteList")
-    @patch("app.utils._getStaticSitesInfo")
-    def test_getUserAuthData(self, getStaticSitesInfo, getCachedSiteList, getCachedProjectIDs):
+    def test_getUserAuthData(self, getCachedSiteList, getCachedProjectIDs):
         cred = MagicMock()
-        cred.get_cred.return_value = {"project": "project_name"}
+        cred.get_creds.return_value = [{'enabled': 1, 'type': 'OpenNebula', 'id': 'one',
+                                        'username': 'user', 'password': 'pass'},
+                                       {'enabled': 1, 'type': 'fedcloud', 'id': 'fed',
+                                        'host': 'https://api.cloud.ifca.es:5000', 'vo': 'vo_name'}]
         getCachedSiteList.return_value = {
             'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '11548G0'},
             'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca'}
         }
-        getStaticSitesInfo.return_value = [{"name": "static_site_name", "api_version": "1.1"}]
         getCachedProjectIDs.return_value = {"vo_name_st": "project_id_st", "vo_name": "project_id"}
 
         res = utils.getUserAuthData("token", cred, "user")
-        self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = ost1; type = OpenStack;"
-                                " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
-                                " host = https://fedcloud-osservices.egi.cesga.es:5000; password = 'token';"
-                                " domain = project_name\\nid = ost2; type = OpenStack; username = egi.eu;"
+        self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = one; type = OpenNebula;"
+                                " username = user; password = pass\\n"
+                                "id = fed; type = OpenStack; username = egi.eu;"
                                 " tenant = openid; auth_version = 3.x_oidc_access_token; host ="
-                                " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_name"))
-
-        res = utils.getUserAuthData("token", cred, "user", "vo_name", "CESGA")
-        self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = ost1; type = OpenStack;"
-                                " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
-                                " host = https://fedcloud-osservices.egi.cesga.es:5000; password = 'token';"
-                                " domain = project_id"))
-        self.assertEqual(cred.write_creds.call_args_list[0][0], ('CESGA', 'user', {'project': 'project_id'}))
-
-    @patch("app.utils.getCachedSiteList")
-    @patch('libcloud.compute.drivers.openstack.OpenStackNodeDriver')
-    def test_get_site_images(self, get_driver, getCachedSiteList):
-        cred = MagicMock()
-        cred.get_cred.return_value = {"project": "project_name"}
-        getCachedSiteList.return_value = {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
-                                          'state': '', 'id': '11548G0'}}
-        driver = MagicMock()
-        get_driver.return_value = driver
-        image1 = MagicMock()
-        image1.id = "imageid1"
-        image1.name = "imagename1"
-        driver.list_images.return_value = [image1]
-        res = utils.get_site_images("CESGA", "vo.access.egi.eu", "token", cred, "user")
-        self.assertEquals(res, [('imagename1', 'imageid1')])
-
-    @patch("app.utils.getCachedSiteList")
-    @patch('libcloud.compute.drivers.openstack.OpenStackNodeDriver')
-    def test_get_site_usage(self, get_driver, getCachedSiteList):
-        cred = MagicMock()
-        cred.get_cred.return_value = {"project": "project_name"}
-        getCachedSiteList.return_value = {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
-                                          'state': '', 'id': '11548G0'}}
-        driver = MagicMock()
-        get_driver.return_value = driver
-        quotas = MagicMock()
-        quotas.cores.in_use = 1
-        quotas.cores.reserved = 0
-        quotas.cores.limit = 10
-        quotas.ram.in_use = 10240
-        quotas.ram.reserved = 0
-        quotas.ram.limit = 102400
-        quotas.instances.in_use = 1
-        quotas.instances.reserved = 0
-        quotas.instances.limit = 10
-        quotas.floating_ips.in_use = 1
-        quotas.floating_ips.reserved = 0
-        quotas.floating_ips.limit = 10
-        quotas.security_groups.in_use = 1
-        quotas.security_groups.reserved = 0
-        quotas.security_groups.limit = 10
-        driver.ex_get_quota_set.return_value = quotas
-        net_quotas = MagicMock()
-        net_quotas.floatingip.in_use = 2
-        net_quotas.floatingip.reserved = 0
-        net_quotas.floatingip.limit = 4
-        net_quotas.security_group.in_use = 2
-        net_quotas.security_group.reserved = 0
-        net_quotas.security_group.limit = 10
-        driver.ex_get_network_quotas.return_value = net_quotas
-        res = utils.get_site_usage("CESGA", "vo.access.egi.eu", "token", cred, "user")
-        quotas_dict = {}
-        quotas_dict["cores"] = {"used": 1, "limit": 10}
-        quotas_dict["ram"] = {"used": 10, "limit": 100}
-        quotas_dict["instances"] = {"used": 1, "limit": 10}
-        quotas_dict["floating_ips"] = {"used": 2, "limit": 4}
-        quotas_dict["security_groups"] = {"used": 2, "limit": 10}
-        self.assertEquals(res, quotas_dict)
+                                " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id"))
 
 
 if __name__ == '__main__':

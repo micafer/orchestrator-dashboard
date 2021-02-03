@@ -72,6 +72,18 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.text = "system wn ()\nsystem front ()"
+        elif url == "/im/clouds/credid/images":
+            resp.ok = True
+            resp.status_code = 200
+            resp.json.return_value = {"images": [{"uri": "one://server/imageid", "name": "imagename"}]}
+        elif url == "/im/clouds/credid/usage":
+            resp.ok = True
+            resp.status_code = 200
+            resp.json.return_value = {"quotas": {"cores": {"used": 1, "limit": 10},
+                                                "ram": {"used": 1, "limit": 10},
+                                                "instances": {"used": 1, "limit": 10},
+                                                "floating_ips": {"used": 1, "limit": 10},
+                                                "security_groups": {"used": 1, "limit": 10}}}
 
         return resp
 
@@ -122,7 +134,7 @@ class IMDashboardTests(unittest.TestCase):
         if url == "/im/infrastructures":
             resp.ok = True
             resp.status_code = 200
-            self.assertIn("appdb://site/image?vo", kwargs["data"])
+            self.assertIn("IMAGE_NAME", kwargs["data"])
             self.assertIn("default: 4", kwargs["data"])
         elif url == "/im/infrastructures/infid":
             resp.ok = True
@@ -296,40 +308,46 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.appdb.get_sites")
     def test_sites(self, get_sites, avatar):
         self.login(avatar)
-        get_sites.return_value = {"SITE_NAME": {"url": "", "state": "", "id": ""},
-                                  "SITE2": {"url": "", "state": "CRITICAL", "id": ""}}
+        get_sites.return_value = {"SITE_NAME": {"url": "URL", "state": "", "id": ""},
+                                  "SITE2": {"url": "URL2", "state": "CRITICAL", "id": ""}}
         res = self.client.get('/sites/vo')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'<option name="selectedSite" value=SITE_NAME>SITE_NAME</option>', res.data)
-        self.assertIn(b'<option name="selectedSite" value=static_site_name>static_site_name</option>', res.data)
-        self.assertIn(b'<option name="selectedSite" value=SITE2>SITE2 (WARNING: CRITICAL state!)</option>', res.data)
+        self.assertIn(b'<option name="selectedSite" value=URL>SITE_NAME</option>', res.data)
+        self.assertIn(b'<option name="selectedSite" value=static_site_url>static_site_name</option>', res.data)
+        self.assertIn(b'<option name="selectedSite" value=URL2>SITE2 (WARNING: CRITICAL state!)</option>', res.data)
 
     @patch("app.utils.avatar")
-    @patch("app.utils.get_site_images")
+    @patch("app.utils.getUserAuthData")
+    @patch("app.utils.get_site_info")
     @patch("app.appdb.get_images")
-    @patch("app.appdb.get_sites")
-    def test_images(self, get_sites, get_images, get_site_images, avatar):
+    @patch('requests.get')
+    def test_images(self, get, get_images, get_site_info, user_data, avatar):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get.side_effect = self.get_response
         self.login(avatar)
-        get_images.return_value = ["IMAGE"]
-        get_site_images.return_value = [("IMAGE_NAME", "IMAGE_ID")]
-        get_sites.return_value = {"SITE_NAME": {"url": "SITE_URL", "state": "SITE_STATUS", "id": "SITE_ID"}}
-        res = self.client.get('/images/static_site_name/vo?local=1')
+        get_site_info.return_value = ({"id": "siteid"}, "", "vo_name")
+
+        res = self.client.get('/images/credid?local=1')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'<option name="selectedSiteImage" value=IMAGE_ID>IMAGE_NAME</option>', res.data)
-        res = self.client.get('/images/static_site_name/vo')
+        self.assertIn(b'<option name="selectedSiteImage" value=one://server/imageid>imagename</option>', res.data)
+
+        get_images.return_value = ["IMAGE"]
+        res = self.client.get('/images/credid')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'<option name="selectedImage" value=IMAGE>IMAGE</option>', res.data)
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
     @patch("app.utils.avatar")
-    def test_submit(self, avatar, post, user_data):
+    @patch("app.cred.Credentials.get_cred")
+    def test_submit(self, get_cred, avatar, post, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         post.side_effect = self.post_response
+        get_cred.return_value = {"id": "credid", "type": "fedcloud"}
         self.login(avatar)
-        params = {'extra_opts.selectedSite': 'site',
-                  'extra_opts.selectedImage': 'image',
-                  'extra_opts.selectedVO': 'vo',
+        params = {'extra_opts.selectedImage': '',
+                  'extra_opts.selectedSiteImage': 'IMAGE_NAME',
+                  'extra_opts.selectedCred': 'credid',
                   'num_cpus': '4',
                   'ports': '22,80,443'}
         res = self.client.post('/submit?template=simple-node.yml', data=params)
@@ -337,16 +355,15 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
 
     @patch("app.utils.avatar")
-    @patch("app.appdb.get_sites")
-    def test_manage_creds(self, get_sites, avatar):
+    @patch("app.cred.Credentials.get_creds")
+    def test_manage_creds(self, get_creds, avatar):
         self.login(avatar)
-        get_sites.return_value = {"SITE_NAME": {"url": "SITE_URL", "state": "SITE_STATUS", "id": "SITE_ID"}}
+        get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url"}]
         res = self.client.get('/manage_creds')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'SITE_NAME', res.data)
-        self.assertIn(b'SITE_URL', res.data)
-        self.assertIn(b'static_site_name', res.data)
-        self.assertIn(b'static_site_url', res.data)
+        self.assertIn(b'credid', res.data)
+        self.assertIn(b'site_url', res.data)
+        self.assertIn(b'fedcloudRow.png', res.data)
 
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.get_cred")
@@ -354,7 +371,7 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.appdb.get_project_ids")
     def test_write_creds(self, get_project_ids, flash, get_cred, avatar):
         self.login(avatar)
-        get_cred.return_value = {"project": "PROJECT_NAME"}
+        get_cred.return_value = {"id": "credid", "type": "fedcloud", "host": "site_url"}
         get_project_ids.return_value = {"VO_NAME": "PROJECT_ID"}
         res = self.client.get('/write_creds?service_id=static_id')
         self.assertEqual(200, res.status_code)

@@ -34,7 +34,7 @@ class Credentials:
 
     def _encrypt(self, message):
         if self.key:
-            return self.key.encrypt(message.encode()) 
+            return self.key.encrypt(message.encode())
         else:
             return message
 
@@ -90,11 +90,12 @@ class Credentials:
             old_data = data
         else:
             old_data = self.get_cred(serviceid, userid)
+            print(old_data)
             old_data.update(data)
 
         if 'enabled' in old_data:
             enabled = old_data['enabled']
-            del old_data['enabled']    
+            del old_data['enabled']
         else:
             enabled = 1
 
@@ -110,5 +111,6 @@ class Credentials:
 
     def enable_cred(self, serviceid, userid, enable=1):
         db = self._get_creds_db()
-        db.execute("update credentials set enabled = %s where userid = %s and serviceid = %s", (enable, userid, serviceid))
+        db.execute("update credentials set enabled = %s where userid = %s and serviceid = %s",
+                   (enable, userid, serviceid))
         db.close()
