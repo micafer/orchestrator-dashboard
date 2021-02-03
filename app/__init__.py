@@ -472,10 +472,19 @@ def create_app(oidc_blueprint=None):
 
         if local:
             access_token = oidc_blueprint.session.token['access_token']
-            for image_name, image_id in utils.get_site_images(cred_id, access_token, cred, session["userid"]):
-                res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image_id, image_name)
+            auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+            headers = {"Authorization": auth_data}
+
+            url = "%s/clouds/%s/images" % (settings.imUrl, cred_id)
+            response = requests.get(url, headers=headers)
+
+            if not response.ok:
+                res += '<option name="selectedSiteImage" value=%s>%s</option>' % (response.text, response.text)
+            else:
+                for image in response.json()["images"]:
+                    res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image['uri'], image['name'])
         else:
-            site, _, vo = utils.get_site_connect_info(cred_id, cred, session["userid"])
+            site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
             for image in appdb.get_images(site['id'], vo):
                 res += '<option name="selectedImage" value=%s>%s</option>' % (image, image)
         return res
@@ -485,8 +494,16 @@ def create_app(oidc_blueprint=None):
     def getusage(cred_id=None):
         try:
             access_token = oidc_blueprint.session.token['access_token']
-            quotas_dict = utils.get_site_usage(cred_id, access_token, cred, session["userid"])
-            return json.dumps(quotas_dict)
+            auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+            headers = {"Authorization": auth_data}
+
+            url = "%s/clouds/%s/quotas" % (settings.imUrl, cred_id)
+            response = requests.get(url, headers=headers)
+
+            if not response.ok:
+                 return "Error loading site quotas: %s!" % response.text, 400
+            else:
+                return json.dumps(response.json()["quotas"])
         except Exception as ex:
             return "Error loading site quotas: %s!" % str(ex), 400
 
@@ -556,37 +573,28 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         image = None
-        if cred_data['type'] != 'fedcloud':
+        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula']:
+            if form_data['extra_opts.selectedImage'] != "":
+                site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
+                image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
+            elif form_data['extra_opts.selectedSiteImage'] != "":
+                image = form_data['extra_opts.selectedSiteImage']
+        else:
             image_id = form_data['extra_opts.imageID']
             protocol_map = {
                 'EC2': 'aws',
                 'GCE': 'gce',
-                'OpenStack': 'ost',
-                'OpenNebula': 'one',
                 'Azure': 'azr',
                 'Orange': 'ora',
                 'Linode': 'lin',
                 'Kubernetes': 'docker'
             }
-            if cred_data['type'] in ['OpenStack', 'OpenNebula']:
-                host = urlparse(cred_data['host'])[2]
-                if ":" in host:
-                    host = host[:host.find(":")]
-                image = "%s://%s/%s" % (protocol_map.get(cred_data['type']), host, image_id)
-            elif cred_data['type'] == 'Linode':
+            if cred_data['type'] == 'Linode':
                 image = "%s://linode/%s" % (protocol_map.get(cred_data['type']), image_id)
             elif cred_data['type'] in ['GCE', 'EC2', 'Azure']:
                 image = "%s://%s" % (protocol_map.get(cred_data['type']), image_id)
             elif cred_data['type'] == "Orange":
                 image = "%s://%s/%s" % (protocol_map.get(cred_data['type']), cred_data['region'], image_id)
-
-        else:
-            site, _, vo = utils.get_site_connect_info(cred_id, cred, session["userid"])
-
-            if form_data['extra_opts.selectedImage'] != "":
-                image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
-            elif form_data['extra_opts.selectedSiteImage'] != "":
-                image = "ost://%s/%s" % (urlparse(site['url'])[1], form_data['extra_opts.selectedSiteImage'])
 
         if not image:
             flash("No correct image specified.", "error")
@@ -661,9 +669,9 @@ def create_app(oidc_blueprint=None):
             if 'cred_id' in creds:
                 cred_id = creds['cred_id']
                 del creds['cred_id']
-            if 'certificate' in request.files:
-                if request.files['certificate'].filename != "":
-                    creds['certificate'] = request.files['certificate'].read().decode()
+            if 'password' in request.files:
+                if request.files['password'].filename != "":
+                    creds['password'] = request.files['password'].read().decode()
             try:
                 if 'password' in creds and creds['password'] in [None, '']:
                     del creds['password']

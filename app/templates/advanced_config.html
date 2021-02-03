@@ -81,12 +81,31 @@
         if (cred_type == 'fedcloud') {
             $('#cloudImages').hide();
             $('#fedcloudImages').show();
+            $('#siteImages').show();
             $('#fedcloudUsage').show();
             loadImages();
             loadSiteImages();
             loadSiteInfo();
+        } else if (cred_type == 'OpenStack') {
+            $('#cloudImages').hide();
+            $('#fedcloudImages').hide();
+            $('#siteImages').show();
+            var tenant_id = select.options[select.selectedIndex].getAttribute("data-tenant-id");
+            if (tenant_id == "") {
+                $('#fedcloudUsage').hide();
+            } else {
+                $('#fedcloudUsage').show();
+                loadSiteInfo();
+            }
+            loadSiteImages();
+        } else if (cred_type == 'OpenNebula' || cred_type == 'Orange' || cred_type == 'Linode' || cred_type == 'GCE') {
+            $('#cloudImages').hide();
+            $('#fedcloudImages').hide();
+            $('#siteImages').show();
+            $('#fedcloudUsage').hide();
+            loadSiteImages();
         } else {
-            if (cred_type == 'GCE' || cred_type == 'EC2') {
+            if (cred_type == 'EC2') {
                 document.getElementById('imageID').setAttribute("placeholder", "Region / Image ID");
             } else if (cred_type == 'Azure') {
                 document.getElementById('imageID').setAttribute("placeholder", "Publisher / Offer / SKU / Version");
@@ -95,6 +114,7 @@
             }
             $('#cloudImages').show();
             $('#fedcloudImages').hide();
+            $('#siteImages').hide();
             $('#fedcloudUsage').hide();
         }
    }
@@ -189,7 +209,7 @@
                <select class="js-example-basic-single js-states form-control" id="selectedCred" name="extra_opts.selectedCred" onchange="changedCred();">
                    <option name="selectedCred" value=""> - Select Cloud site - </option>
                {% for cred in creds %}
-                   <option data-type="{{ cred['type'] }}" name="selectedCred" value={{ cred['id'] }}>{{ cred['id'] }}</option>
+                   <option  data-tenant-id="{{cred['tenant_id'] if 'tenant_id' in cred else '' }}" data-type="{{ cred['type'] }}" name="selectedCred" value={{ cred['id'] }}>{{ cred['id'] }}</option>
                {% endfor %}
                </select>
            </div>
@@ -207,6 +227,9 @@
               <select class="js-example-basic-single js-states form-control" id="selectedImage" name="extra_opts.selectedImage" onchange="activateSubmit()">
                   <option name="selectedImage" value="">Select provider</option>
               </select>
+            </div>
+
+            <div class="form-group" id="siteImages" style="display: none;">
               <br/>
               <label>Select Site image:</label>
               <select class="js-example-basic-single js-states form-control" id="selectedSiteImage" name="extra_opts.selectedSiteImage" onchange="activateSubmit()">

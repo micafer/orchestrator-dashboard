@@ -70,7 +70,7 @@
             <div class="col">
             <label for="certificate"><strong>Server Certificate</strong></label>
             <div>
-              <input name="certificate" type="file" class="form-control form-control-sm" id="certificate"/>
+              <input name="password" type="file" class="form-control form-control-sm" id="password"/>
             </div>
           </div>
       </div>
@@ -108,6 +108,14 @@
           </div>
           <div class="col">
             <input placeholder="Api Version" name="api_version" class="col-sm-12" type="text" id="api_version" value="{{ creds['api_version'] if creds else '' }}"/>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Tenant ID" name="tenant_id" class="col-sm-12" type="text" id="tenant_id" value="{{ creds['tenant_id'] if creds else '' }}"/>
+          </div>
+          <div class="col">
           </div>
         </div>
 

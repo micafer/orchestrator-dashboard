@@ -106,7 +106,7 @@ def getStaticVOs():
     return list(set(res))
 
 
-def get_site_connect_info(cred_id, cred, userid):
+def get_site_info(cred_id, cred, userid):
     domain = None
 
     cred_data = cred.get_cred(cred_id, userid)
@@ -121,65 +121,6 @@ def get_site_connect_info(cred_id, cred, userid):
         domain = project_ids[vo]
 
     return site, domain, vo
-
-
-def get_site_driver(site_url, domain, access_token):
-    OpenStack = get_driver(Provider.OPENSTACK)
-    driver = OpenStack('egi.eu', access_token,
-                       api_version='2.0',
-                       ex_tenant_name='openid',
-                       ex_force_auth_url=site_url,
-                       ex_force_auth_version='3.x_oidc_access_token',
-                       ex_domain_name=domain)
-
-    # Workaround to unset default service_region (RegionOne)
-    driver.connection.service_region = None
-    if isinstance(driver, OpenStack_2_NodeDriver):
-        driver.connection.service_region = None
-        driver.image_connection.service_region = None
-        driver.network_connection.service_region = None
-        driver.volumev2_connection.service_region = None
-    return driver
-
-
-def get_site_images(cred_id, access_token, cred, userid):
-    try:
-        site, domain, _ = get_site_connect_info(cred_id, cred, userid)
-        driver = get_site_driver(site['url'], domain, access_token)
-        images = driver.list_images()
-        return [(image.name, image.id) for image in images]
-    except Exception as ex:
-        msg = "Error loading site images: %s!" % str(ex)
-        return [(escape(msg), escape(msg))]
-
-
-def get_site_usage(cred_id, access_token, cred, userid):
-    site, domain, _ = get_site_connect_info(cred_id, cred, userid)
-    driver = get_site_driver(site['url'], domain, access_token)
-    quotas = driver.ex_get_quota_set(domain)
-    try:
-        net_quotas = driver.ex_get_network_quotas(domain)
-    except Exception:
-        net_quotas = None
-
-    quotas_dict = {}
-    quotas_dict["cores"] = {"used": quotas.cores.in_use + quotas.cores.reserved,
-                            "limit": quotas.cores.limit}
-    quotas_dict["ram"] = {"used": (quotas.ram.in_use + quotas.ram.reserved) / 1024,
-                          "limit": quotas.ram.limit / 1024}
-    quotas_dict["instances"] = {"used": quotas.instances.in_use + quotas.instances.reserved,
-                                "limit": quotas.instances.limit}
-    quotas_dict["floating_ips"] = {"used": quotas.floating_ips.in_use + quotas.floating_ips.reserved,
-                                   "limit": quotas.floating_ips.limit}
-    quotas_dict["security_groups"] = {"used": quotas.security_groups.in_use + quotas.security_groups.reserved,
-                                      "limit": quotas.security_groups.limit}
-
-    if net_quotas:
-        quotas_dict["floating_ips"] = {"used": net_quotas.floatingip.in_use + net_quotas.floatingip.reserved,
-                                       "limit": net_quotas.floatingip.limit}
-        quotas_dict["security_groups"] = {"used": net_quotas.security_group.in_use + net_quotas.security_group.reserved,
-                                          "limit": net_quotas.security_group.limit}
-    return quotas_dict
 
 
 def getUserVOs(entitlements):
@@ -219,8 +160,8 @@ def getUserAuthData(access_token, cred, userid):
             res += "\\nid = %s" % cred['id']
             if cred['type'] != "fedcloud":
                 for key, value in cred.items():
-                    if value and key not in ['priority', 'enabled', 'id']:
-                        res += "; %s = %s" % (key, value)
+                    if value and key not in ['enabled', 'id']:
+                        res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
             else:
                 res += "; type = OpenStack;"
                 res += " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
