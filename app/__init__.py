@@ -573,7 +573,7 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         image = None
-        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula']:
+        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
             if form_data['extra_opts.selectedImage'] != "":
                 site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
@@ -583,18 +583,10 @@ def create_app(oidc_blueprint=None):
             image_id = form_data['extra_opts.imageID']
             protocol_map = {
                 'EC2': 'aws',
-                'GCE': 'gce',
-                'Azure': 'azr',
-                'Orange': 'ora',
-                'Linode': 'lin',
-                'Kubernetes': 'docker'
+                'Kubernetes': 'docker',
+                'Azure': 'azr'
             }
-            if cred_data['type'] == 'Linode':
-                image = "%s://linode/%s" % (protocol_map.get(cred_data['type']), image_id)
-            elif cred_data['type'] in ['GCE', 'EC2', 'Azure']:
-                image = "%s://%s" % (protocol_map.get(cred_data['type']), image_id)
-            elif cred_data['type'] == "Orange":
-                image = "%s://%s/%s" % (protocol_map.get(cred_data['type']), cred_data['region'], image_id)
+            image = "%s://%s" % (protocol_map.get(cred_data['type']), image_id)
 
         if not image:
             flash("No correct image specified.", "error")

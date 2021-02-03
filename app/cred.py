@@ -98,7 +98,6 @@ class Credentials:
         else:
             enabled = 1
 
-
         str_data = self._encrypt(json.dumps(old_data))
         db.execute(op + " into credentials (data, userid, serviceid, enabled) values (%s, %s, %s, %s)",
                    (str_data, userid, serviceid, enabled))
