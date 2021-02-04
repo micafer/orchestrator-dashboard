@@ -35,8 +35,6 @@ from hashlib import md5
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-import libcloud.security
-libcloud.security.VERIFY_SSL_CERT = False
 import urllib3
 urllib3.disable_warnings(InsecureRequestWarning)
 
