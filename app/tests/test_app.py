@@ -80,10 +80,10 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"quotas": {"cores": {"used": 1, "limit": 10},
-                                                "ram": {"used": 1, "limit": 10},
-                                                "instances": {"used": 1, "limit": 10},
-                                                "floating_ips": {"used": 1, "limit": 10},
-                                                "security_groups": {"used": 1, "limit": 10}}}
+                                                 "ram": {"used": 1, "limit": 10},
+                                                 "instances": {"used": 1, "limit": 10},
+                                                 "floating_ips": {"used": 1, "limit": 10},
+                                                 "security_groups": {"used": 1, "limit": 10}}}
 
         return resp
 
@@ -297,12 +297,18 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEquals(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'info'))
 
     @patch("app.utils.avatar")
-    def test_configure(self, avatar):
+    @patch("app.cred.Credentials.get_creds")
+    def test_configure(self, get_creds, avatar):
         self.login(avatar)
+        get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "vo": "voname"},
+                                  {"id": "credid1", "type": "OpenStack", "host": "site_url1", "tenant_id": "tenid"}]
         res = self.client.get('/configure?selected_tosca=simple-node.yml')
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Launch a compute node getting the IP and SSH credentials to access via ssh", res.data)
-        self.assertIn(b'<option name="selectedVO" value=vo>vo</option>', res.data)
+        self.assertIn(b'<option data-tenant-id="" data-type="fedcloud" name="selectedCred" '
+                      b'value=credid>credid</option>', res.data)
+        self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
+                      b'name="selectedCred" value=credid1>credid1</option>', res.data)
 
     @patch("app.utils.avatar")
     @patch("app.appdb.get_sites")
@@ -367,31 +373,36 @@ class IMDashboardTests(unittest.TestCase):
 
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.get_cred")
+    @patch("app.cred.Credentials.write_creds")
     @patch("app.flash")
-    @patch("app.appdb.get_project_ids")
-    def test_write_creds(self, get_project_ids, flash, get_cred, avatar):
+    def test_write_creds(self, flash, write_creds, get_cred, avatar):
         self.login(avatar)
-        get_cred.return_value = {"id": "credid", "type": "fedcloud", "host": "site_url"}
-        get_project_ids.return_value = {"VO_NAME": "PROJECT_ID"}
-        res = self.client.get('/write_creds?service_id=static_id')
+        get_cred.return_value = {"id": "credid", "type": "OpenNebula", "host": "SITE_URL",
+                                 "username": "USER", "password": "PASS"}
+        res = self.client.get('/write_creds?cred_type=OpenNebula&cred_id=')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'PROJECT_NAME', res.data)
-        self.assertIn(b'PROJECT_ID', res.data)
-        self.assertIn(b'stprojectid', res.data)
-        self.assertEqual(get_project_ids.call_count, 1)
+        self.assertNotIn(b'site_url', res.data)
 
-        # Test that cache works and get_project_ids is not called again
-        res = self.client.get('/write_creds?service_id=static_id')
+        res = self.client.get('/write_creds?cred_id=credid&cred_type=OpenNebula')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'PROJECT_NAME', res.data)
-        self.assertIn(b'PROJECT_ID', res.data)
-        self.assertIn(b'stprojectid', res.data)
-        self.assertEqual(get_project_ids.call_count, 1)
+        self.assertIn(b'SITE_URL', res.data)
+        self.assertIn(b'USER', res.data)
 
-        res = self.client.post('/write_creds?service_id=SERVICE_ID', data={"project": "PROJECT_NAME"})
+        res = self.client.post('/write_creds?cred_id=credid&cred_type=OpenNebula', data={"host": "SITE_URL2",
+                                                                                         "id": "credid"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully written!", 'info'))
+        self.assertEquals(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
+                                                             'id': 'credid'}, False))
+
+        res = self.client.post('/write_creds?cred_id=&cred_type=OpenNebula', data={"host": "SITE_URL3",
+                                                                                   "id": "credid"})
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/manage_creds', res.headers['location'])
+        self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'info'))
+        self.assertEquals(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
+                                                                                  'id': 'credid'}, True))
 
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.delete_cred")
