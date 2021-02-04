@@ -30,7 +30,7 @@ from flask_dance.consumer import OAuth2ConsumerBlueprint
 from app.settings import Settings
 from app.cred import Credentials
 from app.infra import Infrastructures
-from app import utils, appdb
+from app import utils, appdb, db
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError
 from werkzeug.exceptions import Forbidden
 from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
