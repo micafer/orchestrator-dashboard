@@ -55,8 +55,6 @@ To enable the encryption of the Cloud providers credentials (sensitive data), yo
 environment varible with a valid key used to encrypt/decrypt de data. To get a valid one you can use this 
 python code (you will nedd [Cryptography](https://cryptography.io/) library):
 
-https://cryptography.io/
-
 ```py
 from cryptography.fernet import Fernet
 key = Fernet.generate_key()
