@@ -49,6 +49,20 @@ You need to run the IM dashboard on HTTPS (otherwise you will get an error); you
 
 Details are provided in the next paragraphs.
 
+## Enabling Credentials encryption
+
+To enable the encryption of the Cloud providers credentials (sensitive data), you have to set the `CREDS_KEY`
+environment varible with a valid key used to encrypt/decrypt de data. To get a valid one you can use this 
+python code (you will nedd [Cryptography](https://cryptography.io/) library):
+
+https://cryptography.io/
+
+```py
+from cryptography.fernet import Fernet
+key = Fernet.generate_key()
+print(key.decode())
+```
+
 ## TOSCA Template Metadata
 
 The IM dashboard can exploit some optional information provided in the TOSCA templates for rendering the cards describing the type of applications/services or virtual infrastructure that a user can deploy.
