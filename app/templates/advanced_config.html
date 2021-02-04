@@ -206,12 +206,16 @@
 
            <div class="form-group">
                <label>Select Cloud Provider:</label>
-               <select class="js-example-basic-single js-states form-control" id="selectedCred" name="extra_opts.selectedCred" onchange="changedCred();">
-                   <option name="selectedCred" value=""> - Select Cloud site - </option>
-               {% for cred in creds %}
-                   <option data-tenant-id="{{cred['tenant_id'] if 'tenant_id' in cred else '' }}" data-type="{{ cred['type'] }}" name="selectedCred" value={{ cred['id'] }}>{{ cred['id'] }}</option>
-               {% endfor %}
-               </select>
+               {% if not creds %}
+               <label>No Cloud Provider defined. Add it in the Cloud Credentials page: <a class="btn btn-success text-white" href="{{ url_for('manage_creds') }}">Add</a></label>
+               {% else %}
+                <select class="js-example-basic-single js-states form-control" id="selectedCred" name="extra_opts.selectedCred" onchange="changedCred();">
+                    <option name="selectedCred" value=""> - Select Cloud site - </option>
+                    {% for cred in creds %}
+                    <option data-tenant-id="{{cred['tenant_id'] if 'tenant_id' in cred else '' }}" data-type="{{ cred['type'] }}" name="selectedCred" value={{ cred['id'] }}>{{ cred['id'] }}</option>
+                    {% endfor %}
+                </select>
+               {% endif %}
            </div>
 
            <div class="form-group" id="cloudImages" style="display: none;">
