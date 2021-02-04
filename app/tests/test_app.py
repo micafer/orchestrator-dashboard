@@ -337,10 +337,10 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         self.assertIn(b'<option name="selectedSiteImage" value=one://server/imageid>imagename</option>', res.data)
 
-        get_images.return_value = ["IMAGE"]
+        get_images.return_value = [("IMAGE_NAME", "IMAGE")]
         res = self.client.get('/images/credid')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'<option name="selectedImage" value=IMAGE>IMAGE</option>', res.data)
+        self.assertIn(b'<option name="selectedImage" value=IMAGE>IMAGE_NAME</option>', res.data)
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')

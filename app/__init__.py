@@ -486,8 +486,8 @@ def create_app(oidc_blueprint=None):
                     res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image['uri'], image['name'])
         else:
             site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
-            for image in appdb.get_images(site['id'], vo):
-                res += '<option name="selectedImage" value=%s>%s</option>' % (image, image)
+            for image_name, image_id in appdb.get_images(site['id'], vo):
+                res += '<option name="selectedImage" value=%s>%s</option>' % (image_id, image_name)
         return res
 
     @app.route('/usage/<cred_id>')

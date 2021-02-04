@@ -126,11 +126,12 @@ class TestAppDB(unittest.TestCase):
     @patch('app.appdb.appdb_call')
     def test_get_images(self, appdb_call):
         images = """<virtualization:provider id="11548G0">
-                    <provider:image appcname="scipioncloud.gpu" voname="vo.access.egi.eu" archived="false"/>
+                    <provider:image appcname="scipioncloud.gpu" voname="vo.access.egi.eu"
+                    appname="ScipionCloud-GPU" archived="false"/>
                     </virtualization:provider>"""
         appdb_call.return_value = xmltodict.parse(images.replace('\n', ''))
         res = appdb.get_images('11548G0', 'vo.access.egi.eu')
-        self.assertEquals(res, ["scipioncloud.gpu"])
+        self.assertEquals(res, [("ScipionCloud-GPU", "scipioncloud.gpu")])
 
 
 if __name__ == '__main__':
