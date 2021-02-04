@@ -28,16 +28,12 @@ import io
 import ast
 import time
 import sys
-from flask import flash, g, escape
+from flask import flash, g
 from app import appdb
 from fnmatch import fnmatch
 from hashlib import md5
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-from libcloud.compute.types import Provider
-from libcloud.compute.providers import get_driver
-from libcloud.compute.drivers.openstack import OpenStack_2_NodeDriver
 
 import libcloud.security
 libcloud.security.VERIFY_SSL_CERT = False
