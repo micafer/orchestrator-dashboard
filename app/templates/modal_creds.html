@@ -57,14 +57,6 @@
               <input placeholder="Secret Key" name="password" class="col-sm-12" type="password" id="password"/>
           </div>
         </div>
-
-        <div class="row form-group">
-          <div class="col">
-              <input placeholder="Region" name="region" class="col-sm-12" type="text" id="region" value="{{ creds['region'] if creds else '' }}"/>
-          </div>
-          <div class="col">
-          </div>
-        </div>
 {% elif cred_type == "GCE" %}
         <div class="row form-group">
           <div class="col">
