@@ -98,16 +98,14 @@
                 loadSiteInfo();
             }
             loadSiteImages();
-        } else if (cred_type == 'OpenNebula' || cred_type == 'Orange' || cred_type == 'Linode' || cred_type == 'GCE') {
+        } else if (cred_type == 'OpenNebula' || cred_type == 'Orange' || cred_type == 'Linode' || cred_type == 'GCE' || cred_type == 'EC2') {
             $('#cloudImages').hide();
             $('#fedcloudImages').hide();
             $('#siteImages').show();
             $('#fedcloudUsage').hide();
             loadSiteImages();
         } else {
-            if (cred_type == 'EC2') {
-                document.getElementById('imageID').setAttribute("placeholder", "Region / Image ID");
-            } else if (cred_type == 'Azure') {
+            if (cred_type == 'Azure') {
                 document.getElementById('imageID').setAttribute("placeholder", "Publisher / Offer / SKU / Version");
             } else {
                 document.getElementById('imageID').setAttribute("placeholder", "Image ID");
@@ -159,6 +157,10 @@
                 data = JSON.parse(text);
 
                 for (var i = 0; i < resource_types.length; i++) {
+                    if (data[resource_types[i]]["limit"] == -1) {
+                        // -1 value means no limit, set a big value
+                        data[resource_types[i]]["limit"] = 10000;
+                    }
                     config[resource_types[i]].data = {
                         labels: [
                         'Used',
