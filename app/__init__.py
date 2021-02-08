@@ -119,7 +119,8 @@ def create_app(oidc_blueprint=None):
     @app.route('/settings')
     @authorized_with_valid_token
     def show_settings():
-        return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=settings.imUrl)
+        imUrl = "%s (%s)" % (settings.imUrl, im.get_version())
+        return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=imUrl)
 
     @app.route('/login')
     def login():
