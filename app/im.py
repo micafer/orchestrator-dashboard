@@ -103,14 +103,14 @@ class InfrastructureManager():
     def addresource_inf(self, infid, payload, auth_data):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
         url = "%s/infrastructures/%s" % (self.im_url, infid)
-        return requests.post(url, headers=headers, data=payload, timeout=self.timeout))
+        return requests.post(url, headers=headers, data=payload, timeout=self.timeout)
 
     def get_cloud_images(self, cloud_id, auth_data):
         headers = {"Authorization": auth_data}
         url = "%s/clouds/%s/images" % (self.im_url, cloud_id)
-        return requests.get(url, headers=headers, timeout=self.timeout))
+        return requests.get(url, headers=headers, timeout=self.timeout)
 
     def get_cloud_quotas(self, cloud_id, auth_data):
         headers = {"Authorization": auth_data}
         url = "%s/clouds/%s/quotas" % (self.im_url, cloud_id)
-        return requests.get(url, headers=headers, timeout=self.timeout))
+        return requests.get(url, headers=headers, timeout=self.timeout)
