@@ -1,4 +1,5 @@
 import unittest
+import json
 from app import create_app
 from urllib.parse import urlparse
 from mock import patch, MagicMock
@@ -76,7 +77,7 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"images": [{"uri": "one://server/imageid", "name": "imagename"}]}
-        elif url == "/im/clouds/credid/usage":
+        elif url == "/im/clouds/credid/quotas":
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"quotas": {"cores": {"used": 1, "limit": 10},
@@ -441,3 +442,20 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/addresources/infid', data={"wn_num": "1"})
         self.assertEqual(302, res.status_code)
         self.assertEquals(flash.call_args_list[0][0], ("1 nodes added successfully", 'info'))
+
+    @patch("app.utils.avatar")
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.get')
+    def test_quotas(self, get, user_data, avatar):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get.side_effect = self.get_response
+        self.login(avatar)
+
+        res = self.client.get('/usage/credid')
+        self.assertEqual(200, res.status_code)
+        expected_res = {"cores": {"used": 1, "limit": 10},
+                        "ram": {"used": 1, "limit": 10},
+                        "instances": {"used": 1, "limit": 10},
+                        "floating_ips": {"used": 1, "limit": 10},
+                        "security_groups": {"used": 1, "limit": 10}}
+        self.assertEquals(expected_res, json.loads(res.data))
