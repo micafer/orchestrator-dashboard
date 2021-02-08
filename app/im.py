@@ -30,7 +30,7 @@ class InfrastructureManager():
         self.timeout = timeout
 
     def get_version(self):
-        url = "%s/infrastructures/version" % self.im_url
+        url = "%s/version" % self.im_url
         try:
             response = requests.get(url, timeout=self.timeout)
             return response.text
