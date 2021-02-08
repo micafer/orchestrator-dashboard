@@ -25,13 +25,14 @@ import requests
 
 class InfrastructureManager():
 
-    def __init__(self, im_url):
+    def __init__(self, im_url, timeout=20):
         self.im_url = im_url
+        self.timeout = timeout
 
     def get_inf_list(self, auth_data):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
         url = "%s/infrastructures" % self.im_url
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=self.timeout)
 
         infrastructures = {}
         if not response.ok:
@@ -44,7 +45,7 @@ class InfrastructureManager():
                 inf_id_list = []
             for inf_id in inf_id_list:
                 url = "%s/state" % inf_id
-                response = requests.get(url, headers=headers)
+                response = requests.get(url, headers=headers, timeout=self.timeout)
                 if not response.ok:
                     raise Exception("Error retrieving infrastructure %s state: \n%s" % (inf_id, response.text))
                 else:
@@ -56,17 +57,17 @@ class InfrastructureManager():
     def get_vm_info(self, infid, vmid, auth_data):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
         url = "%s/infrastructures/%s/vms/%s" % (self.im_url, infid, vmid)
-        return requests.get(url, headers=headers)
+        return requests.get(url, headers=headers, timeout=self.timeout)
 
     def manage_vm(self, op, infid, vmid, auth_data):
         headers = {"Authorization": auth_data}
         op = op.lower()
         if op in ["stop", "start", "reboot"]:
             url = "%s/infrastructures/%s/vms/%s/%s" % (self.im_url, infid, vmid, op)
-            response = requests.put(url, headers=headers)
+            response = requests.put(url, headers=headers, timeout=self.timeout)
         elif op == "terminate":
             url = "%s/infrastructures/%s/vms/%s" % (self.im_url, infid, vmid)
-            response = requests.delete(url, headers=headers)
+            response = requests.delete(url, headers=headers, timeout=self.timeout)
         else:
             raise Exception("Invalid VM Operation: %s." % op)
 
@@ -75,41 +76,41 @@ class InfrastructureManager():
     def reconfigure_inf(self, infid, auth_data):
         headers = {"Authorization": auth_data}
         url = "%s/infrastructures/%s/reconfigure" % (self.im_url, infid)
-        return requests.put(url, headers=headers)
+        return requests.put(url, headers=headers, timeout=self.timeout)
 
     def get_inf_property(self, infid, prop, auth_data):
         headers = {"Authorization": auth_data}
         url = "%s/infrastructures/%s/%s" % (self.im_url, infid, prop)
-        return requests.get(url, headers=headers)
+        return requests.get(url, headers=headers, timeout=self.timeout)
 
     def get_vm_contmsg(self, infid, vmid, auth_data):
         headers = {"Authorization": auth_data}
         url = "%s/infrastructures/%s/vms/%s/contmsg" % (self.im_url, infid, vmid)
-        return requests.get(url, headers=headers)
+        return requests.get(url, headers=headers, timeout=self.timeout)
 
     def delete_inf(self, infid, force, auth_data):
         headers = {"Authorization": auth_data}
         url = "%s/infrastructures/%s?async=1" % (self.im_url, infid)
         if force:
             url += "&force=1"
-        return requests.delete(url, headers=headers)
+        return requests.delete(url, headers=headers, timeout=self.timeout)
 
     def create_inf(self, payload, auth_data):
         headers = {"Authorization": auth_data, "Content-Type": "text/yaml"}
         url = "%s/infrastructures?async=1" % self.im_url
-        return requests.post(url, headers=headers, data=payload)
+        return requests.post(url, headers=headers, data=payload, timeout=self.timeout)
 
     def addresource_inf(self, infid, payload, auth_data):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
         url = "%s/infrastructures/%s" % (self.im_url, infid)
-        return requests.post(url, headers=headers, data=payload)
+        return requests.post(url, headers=headers, data=payload, timeout=self.timeout))
 
     def get_cloud_images(self, cloud_id, auth_data):
         headers = {"Authorization": auth_data}
         url = "%s/clouds/%s/images" % (self.im_url, cloud_id)
-        return requests.get(url, headers=headers)
+        return requests.get(url, headers=headers, timeout=self.timeout))
 
     def get_cloud_quotas(self, cloud_id, auth_data):
         headers = {"Authorization": auth_data}
         url = "%s/clouds/%s/quotas" % (self.im_url, cloud_id)
-        return requests.get(url, headers=headers)
+        return requests.get(url, headers=headers, timeout=self.timeout))
