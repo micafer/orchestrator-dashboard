@@ -192,7 +192,10 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.get_vm_info(infid, vmid, auth_data)
+        try:
+            response = im.get_vm_info(infid, vmid, auth_data)
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
 
         vminfo = {}
         state = ""
@@ -288,12 +291,13 @@ def create_app(oidc_blueprint=None):
     def infreconfigure(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.reconfigure_inf(infid, auth_data)
+        try:
+            response = im.reconfigure_inf(infid, auth_data)
+            response.raise_for_status()
+        except Exception as ex:
+            flash("Error reconfiguring Infrastructure: \n%s" % ex, 'error')
 
-        if response.ok:
-            flash("Infrastructure successfuly reconfigured.", "info")
-        else:
-            flash("Error reconfiguring Infrastructure: \n" + response.text, "error")
+        flash("Infrastructure successfuly reconfigured.", "info")
 
         return redirect(url_for('showinfrastructures'))
 
@@ -302,13 +306,14 @@ def create_app(oidc_blueprint=None):
     def template(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.get_inf_property(infid, 'tosca', auth_data)
-
-        if not response.ok:
-            flash("Error getting template: \n" + response.text, "error")
-            template = ""
-        else:
+        template = ""
+        try:
+            response = im.get_inf_property(infid, 'tosca', auth_data)
+            response.raise_for_status()
             template = response.text
+        except Exception as ex:
+            flash("Error getting template: \n%s" % ex, "error")
+
         return render_template('deptemplate.html', template=template)
 
     @app.route('/log/<infid>')
@@ -316,12 +321,14 @@ def create_app(oidc_blueprint=None):
     def inflog(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.get_inf_property(infid, 'contmsg', auth_data)
-
-        if not response.ok:
-            log = "Not found"
-        else:
+        log = "Not found"
+        try:
+            response = im.get_inf_property(infid, 'contmsg', auth_data)
+            response.raise_for_status()
             log = response.text
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
+
         return render_template('inflog.html', log=log)
 
     @app.route('/vmlog/<infid>/<vmid>')
@@ -330,12 +337,14 @@ def create_app(oidc_blueprint=None):
 
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.get_vm_contmsg(infid, vmid, auth_data)
-
-        if not response.ok:
-            log = "Not found"
-        else:
+        log = "Not found"
+        try:
+            response = im.get_vm_contmsg(infid, vmid, auth_data)
+            response.raise_for_status()
             log = response.text
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
+
         return render_template('inflog.html', log=log, vmid=vmid)
 
     @app.route('/outputs/<infid>')
@@ -344,16 +353,18 @@ def create_app(oidc_blueprint=None):
 
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.get_inf_property(infid, 'outputs', auth_data)
+        outputs = {}
+        try:
+            response = im.get_inf_property(infid, 'outputs', auth_data)
+            response.raise_for_status()
 
-        if not response.ok:
-            outputs = {}
-        else:
             outputs = response.json()["outputs"]
             for elem in outputs:
                 if isinstance(outputs[elem], str) and (outputs[elem].startswith('http://') or
                                                        outputs[elem].startswith('https://')):
                     outputs[elem] = Markup("<a href='%s' target='_blank'>%s</a>" % (outputs[elem], outputs[elem]))
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
 
         return render_template('outputs.html', infid=infid, outputs=outputs)
 
@@ -362,16 +373,15 @@ def create_app(oidc_blueprint=None):
     def infdel(infid=None, force=0):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.delete_inf(infid, force, auth_data)
+        try:
+            response = im.delete_inf(infid, force, auth_data)
+            response.raise_for_status()
 
-        if not response.ok:
-            flash("Error deleting infrastructure: " + response.text, "error")
-        else:
             flash("Infrastructure '%s' successfuly deleted." % infid, "info")
-            try:
-                infra.delete_infra(infid)
-            except Exception as ex:
-                flash("Error deleting infrastructure name: %s" + str(ex), "warning")
+            # deleting from DB
+            infra.delete_infra(infid)
+        except Exception as ex:
+            flash("Error deleting infrastructure: %s." % ex, 'error')
 
         return redirect(url_for('showinfrastructures'))
 
@@ -427,13 +437,14 @@ def create_app(oidc_blueprint=None):
         if local:
             access_token = oidc_blueprint.session.token['access_token']
             auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-            response = im.get_cloud_images(cred_id, auth_data)
-
-            if not response.ok:
-                res += '<option name="selectedSiteImage" value=%s>%s</option>' % (response.text, response.text)
-            else:
+            try:
+                response = im.get_cloud_images(cred_id, auth_data)
+                response.raise_for_status()
                 for image in response.json()["images"]:
                     res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image['uri'], image['name'])
+            except Exception as ex:
+                res += '<option name="selectedSiteImage" value=%s>%s</option>' % (response.text, response.text)
+
         else:
             site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
             for image_name, image_id in appdb.get_images(site['id'], vo):
@@ -443,15 +454,12 @@ def create_app(oidc_blueprint=None):
     @app.route('/usage/<cred_id>')
     @authorized_with_valid_token
     def getusage(cred_id=None):
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         try:
-            access_token = oidc_blueprint.session.token['access_token']
-            auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
             response = im.get_cloud_quotas(cred_id, auth_data)
-
-            if not response.ok:
-                return "Error loading site quotas: %s!" % response.text, 400
-            else:
-                return json.dumps(response.json()["quotas"])
+            response.raise_for_status()
+            return json.dumps(response.json()["quotas"])
         except Exception as ex:
             return "Error loading site quotas: %s!" % str(ex), 400
 
@@ -558,16 +566,18 @@ def create_app(oidc_blueprint=None):
 
         payload = yaml.dump(template, default_flow_style=False, sort_keys=False)
 
-        response = im.create_inf(payload, auth_data)
+        try:
+            response = im.create_inf(payload, auth_data)
+            response.raise_for_status()
 
-        if not response.ok:
-            flash("Error creating infrastrucrure: \n" + response.text, "error")
-        else:
             try:
                 inf_id = os.path.basename(response.text)
                 infra.write_infra(inf_id, {"name": form_data['infra_name']})
             except Exception as ex:
                 flash("Error storing Infrastructure name: %s" % str(ex), "warning")
+
+        except Exception as ex:
+            flash("Error creating infrastrucrure: \n%s." % ex, 'error')
 
         return redirect(url_for('showinfrastructures'))
 
@@ -655,9 +665,10 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.get_inf_property(infid, 'radl', auth_data)
+        try:
+            response = im.get_inf_property(infid, 'radl', auth_data)
+            response.raise_for_status()
 
-        if response.ok:
             systems = []
             try:
                 radl = radl_parse.parse_radl(response.text)
@@ -666,8 +677,8 @@ def create_app(oidc_blueprint=None):
                 flash("Error parsing RADL: \n%s" % str(ex), 'error')
 
             return render_template('addresource.html', infid=infid, systems=systems)
-        else:
-            flash("Error getting RADL: \n%s" % (response.text), 'error')
+        except Exception as ex:
+            flash("Error getting RADL: \n%s" % ex, 'error')
             return redirect(url_for('showinfrastructures'))
 
     @app.route('/addresources/<infid>', methods=['POST'])
@@ -678,7 +689,10 @@ def create_app(oidc_blueprint=None):
         form_data = request.form.to_dict()
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        response = im.get_inf_property(infid, 'radl', auth_data)
+        try:
+            response = im.get_inf_property(infid, 'radl', auth_data)
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
 
         if response.ok:
             radl = None
@@ -696,13 +710,13 @@ def create_app(oidc_blueprint=None):
                 flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
 
             if radl:
-                response = im.addresource_inf(infid, str(radl), auth_data)
-
-                if response.ok:
+                try:
+                    response = im.addresource_inf(infid, str(radl), auth_data)
+                    response.raise_for_status()
                     num = len(response.json()["uri-list"])
                     flash("%d nodes added successfully" % num, 'info')
-                else:
-                    flash("Error adding nodesL: \n%s" % (response.text), 'error')
+                except Exception as ex:
+                    flash("Error adding nodesL: \n%s" % ex, 'error')
 
             return redirect(url_for('showinfrastructures'))
         else:
