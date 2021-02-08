@@ -55,7 +55,7 @@ class InfrastructureManager():
                 url = "%s/state" % inf_id
                 response = requests.get(url, headers=headers, timeout=self.timeout)
                 if not response.ok:
-                    raise Exception("Error retrieving infrastructure %s state: \n%s" % (inf_id, response.text))
+                    infrastructures[os.path.basename(inf_id)] = {"state": "unknown", "vm_states": {}}
                 else:
                     inf_state = response.json()
                     infrastructures[os.path.basename(inf_id)] = inf_state['state']
