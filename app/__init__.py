@@ -20,7 +20,6 @@
 # under the License.
 """Main Flask App file."""
 
-import requests
 import yaml
 import io
 import os
@@ -428,10 +427,7 @@ def create_app(oidc_blueprint=None):
         if local:
             access_token = oidc_blueprint.session.token['access_token']
             auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-            headers = {"Authorization": auth_data}
-
-            url = "%s/clouds/%s/images" % (settings.imUrl, cred_id)
-            response = requests.get(url, headers=headers)
+            response = im.get_cloud_images(cred_id, auth_data)
 
             if not response.ok:
                 res += '<option name="selectedSiteImage" value=%s>%s</option>' % (response.text, response.text)
@@ -450,10 +446,7 @@ def create_app(oidc_blueprint=None):
         try:
             access_token = oidc_blueprint.session.token['access_token']
             auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-            headers = {"Authorization": auth_data}
-
-            url = "%s/clouds/%s/quotas" % (settings.imUrl, cred_id)
-            response = requests.get(url, headers=headers)
+            response = im.get_cloud_quotas(cred_id, auth_data)
 
             if not response.ok:
                 return "Error loading site quotas: %s!" % response.text, 400
