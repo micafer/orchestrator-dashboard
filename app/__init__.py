@@ -20,7 +20,6 @@
 # under the License.
 """Main Flask App file."""
 
-import requests
 import yaml
 import io
 import os
