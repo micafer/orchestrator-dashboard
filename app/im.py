@@ -29,6 +29,14 @@ class InfrastructureManager():
         self.im_url = im_url
         self.timeout = timeout
 
+    def get_version(self):
+        url = "%s/infrastructures/version" % self.im_url
+        try:
+            response = requests.get(url, timeout=self.timeout)
+            return response.text
+        except Exception as ex:
+            return str(ex)
+
     def get_inf_list(self, auth_data):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
         url = "%s/infrastructures" % self.im_url
