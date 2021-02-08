@@ -53,12 +53,13 @@ class InfrastructureManager():
                 inf_id_list = []
             for inf_id in inf_id_list:
                 url = "%s/state" % inf_id
-                response = requests.get(url, headers=headers, timeout=self.timeout)
-                if not response.ok:
-                    infrastructures[os.path.basename(inf_id)] = {"state": "unknown", "vm_states": {}}
-                else:
+                try:
+                    response = requests.get(url, headers=headers, timeout=self.timeout)
+                    response.raise_for_status()
                     inf_state = response.json()
                     infrastructures[os.path.basename(inf_id)] = inf_state['state']
+                except Exception:
+                    infrastructures[os.path.basename(inf_id)] = {"state": "unknown", "vm_states": {}}
 
         return infrastructures
 
