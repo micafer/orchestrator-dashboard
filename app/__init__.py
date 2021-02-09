@@ -187,10 +187,12 @@ def create_app(oidc_blueprint=None):
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
 
-    @app.route('/vminfo/<infid>/<vmid>')
+    @app.route('/vminfo')
     @authorized_with_valid_token
-    def showvminfo(infid=None, vmid=None):
+    def showvminfo():
         access_token = oidc_blueprint.session.token['access_token']
+        vmid = request.args['vmId']
+        infid = request.args['infId']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         try:
@@ -272,20 +274,36 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        infrastructures = {}
+        inf_list = []
         try:
-            infrastructures = im.get_inf_list(auth_data)
+            inf_list = im.get_inf_list(auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
 
-        for inf_id, inf in infrastructures.items():
+        infrastructures = {}
+        for inf_id in inf_list:
+            infrastructures[inf_id] = {}
             try:
                 infra_name = infra.get_infra(inf_id)["name"]
             except Exception:
                 infra_name = ""
-            inf['name'] = infra_name
+            infrastructures[inf_id]['name'] = infra_name
 
         return render_template('infrastructures.html', infrastructures=infrastructures)
+
+    @app.route('/infrastructures/state')
+    @authorized_with_valid_token
+    def infrastructure_state():
+        access_token = oidc_blueprint.session.token['access_token']
+        infid = request.args['infid']
+        if not infid:
+            return "Error: No infid set!", 400
+
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        try:
+            return im.get_inf_state(infid, auth_data)
+        except Exception as ex:
+            return "Error: %s!" % str(ex), 400
 
     @app.route('/reconfigure/<infid>')
     @authorized_with_valid_token
