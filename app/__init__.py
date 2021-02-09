@@ -297,13 +297,13 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
         infid = request.args['infid']
         if not infid:
-            return "Error: No infid set!", 400
+            return {"state": "error", "vm_states": {}}
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         try:
             return im.get_inf_state(infid, auth_data)
-        except Exception as ex:
-            return "Error: %s!" % str(ex), 400
+        except Exception:
+            return {"state": "error", "vm_states": {}}
 
     @app.route('/reconfigure/<infid>')
     @authorized_with_valid_token
