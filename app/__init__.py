@@ -266,7 +266,7 @@ def create_app(oidc_blueprint=None):
         if op == "terminate":
             return redirect(url_for('showinfrastructures'))
         else:
-            return redirect(url_for('showvminfo', infid=infid, vmid=vmid))
+            return redirect(url_for('showvminfo', infId=infid, vmId=vmid))
 
     @app.route('/infrastructures')
     @authorized_with_valid_token
