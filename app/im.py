@@ -25,7 +25,7 @@ import requests
 
 class InfrastructureManager():
 
-    def __init__(self, im_url, timeout=20):
+    def __init__(self, im_url, timeout=60):
         self.im_url = im_url
         self.timeout = timeout
 
@@ -42,26 +42,26 @@ class InfrastructureManager():
         url = "%s/infrastructures" % self.im_url
         response = requests.get(url, headers=headers, timeout=self.timeout)
 
-        infrastructures = {}
+        infrastructures = []
         if not response.ok:
             raise Exception("Error retrieving infrastructure list: \n" + response.text)
         else:
-            state_res = response.json()
-            if "uri-list" in state_res:
-                inf_id_list = [elem["uri"] for elem in state_res["uri-list"]]
-            else:
-                inf_id_list = []
-            for inf_id in inf_id_list:
-                url = "%s/state" % inf_id
-                try:
-                    response = requests.get(url, headers=headers, timeout=self.timeout)
-                    response.raise_for_status()
-                    inf_state = response.json()
-                    infrastructures[os.path.basename(inf_id)] = inf_state['state']
-                except Exception:
-                    infrastructures[os.path.basename(inf_id)] = {"state": "unknown", "vm_states": {}}
+            json_res = response.json()
+            if "uri-list" in json_res:
+                infrastructures = [os.path.basename(elem["uri"]) for elem in json_res["uri-list"]]
 
         return infrastructures
+
+    def get_inf_state(self, infid, auth_data):
+        headers = {"Authorization": auth_data, "Accept": "application/json"}
+        url = "%s/infrastructures/%s/state" % (self.im_url, infid)
+        try:
+            response = requests.get(url, headers=headers, timeout=self.timeout)
+            response.raise_for_status()
+            inf_state = response.json()
+            return inf_state['state']
+        except Exception:
+            raise Exception("Error retrieving infrastructure state: \n" + response.text)
 
     def get_vm_info(self, infid, vmid, auth_data):
         headers = {"Authorization": auth_data, "Accept": "application/json"}

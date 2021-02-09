@@ -254,20 +254,32 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        infrastructures = {}
+        inf_list = []
         try:
-            infrastructures = im.get_inf_list(auth_data)
+            inf_list = im.get_inf_list(auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
 
-        for inf_id, inf in infrastructures.items():
+        infrastructures = {}
+        for inf_id in inf_list:
+            infrastructures[inf_id] = {}
             try:
                 infra_name = infra.get_infra(inf_id)["name"]
             except Exception:
                 infra_name = ""
-            inf['name'] = infra_name
+            infrastructures[inf_id]['name'] = infra_name
 
         return render_template('infrastructures.html', infrastructures=infrastructures)
+
+    @app.route('/infrastructures/<infid>/state')
+    @authorized_with_valid_token
+    def infrastructure_state(infid=None):
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        try:
+            return json.dumps(im.get_inf_state(infid, auth_data))
+        except Exception as ex:
+            return "Error: %s!" % str(ex), 400
 
     @app.route('/reconfigure/<infid>')
     @authorized_with_valid_token

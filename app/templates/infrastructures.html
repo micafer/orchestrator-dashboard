@@ -4,7 +4,6 @@
 
 
 <div class="container-fluid">
-{% set ar = namespace(found=false) %}
 {% include 'flashed_messages.html' %}
   <br>
     <div class="card shadow mb-4">
@@ -38,10 +37,6 @@
               <!--Table head-->
               <!--Table body-->
               <tbody>
-                {% for infId, infState in infrastructures.items() %}
-                {% if infState["state"] in ["pending", "running", "deleting"]%}
-                    {% set ar.found = true %}
-                {% endif %}
                 <tr>
                     <th scope="row">
                       {{infState["name"]}}
@@ -49,39 +44,11 @@
                     <th>
                       {{infId}}
                     </th>
-                    <td>
-                    {% if infState["state"] == "configured" %}
-                    <span class="btn btn-success btn-sm">
-                    {% elif infState["state"] in ["stopped", "off"] %}
-                    <span class="btn btn-warning btn-sm text-white">
-                    {% elif infState["state"] in ["failed", "unconfigured", "unknown"] %}
-                    <span class="btn btn-danger btn-sm">
-                    {% else %}
-                    <span class="btn btn-warning btn-sm text-white"><span class="spinner-grow spinner-grow-sm"></span>
-                    {% endif %}
-                    <strong>
-                    {{infState["state"]}}
-                    </strong>
-                    </span>
+                    <td id="{{infId}}_state">
+                      Loading <span class="spinner-grow spinner-grow-sm"></span>
                     </td>
-                    <td>
-                    {% for vmId, vmState in infState["vm_states"].items() %}
-
-                      {% set vmStateToolTip = vmState %}
-                      {% if vmState == "configured" %}
-                      {% set vmStateToolTip = "<span class='btn btn-success btn-sm'>" + vmState %}
-                      {% elif vmState in ["stopped", "off"] %}
-                      {% set vmStateToolTip = "<span class='btn btn-warning btn-sm text-white'>" + vmState %}
-                      {% elif vmState in ["failed", "unconfigured", "unknown"] %}
-                      {% set vmStateToolTip = "<span class='btn btn-danger btn-sm'>" + vmState %}
-                        {% else %}
-                      {% set vmStateToolTip = "<span class='btn btn-warning btn-sm text-white'><span class='spinner-grow spinner-grow-sm'></span>" + vmState %}
-                      {% endif %}
-
-                      <a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo', infid=infId, vmid=vmId) }}" data-toggle="tooltip" data-placement="top" data-html="true" title="{{vmStateToolTip}}">
-                        <span class="fas fa-server mr-2"></span>{{vmId}}
-                      </a>
-                    {% endfor %}
+                    <td id="{{infId}}_vms">
+                      Loading <span class="spinner-grow spinner-grow-sm"></span>
                     </td>
                     <td>
                       <div class="btn-group">
@@ -175,9 +142,7 @@
 }
 </style>
 
-{% if ar.found %}
-<script>setTimeout(function(){location.reload();},30000);</script>
-{% endif %}
+
 
 <script>
 $(function () {
