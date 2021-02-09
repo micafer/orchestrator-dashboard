@@ -171,7 +171,6 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/infrastructures')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'infid', res.data)
-        self.assertIn(b'<span class="fas fa-server mr-2"></span>0', res.data)
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -180,7 +179,7 @@ class IMDashboardTests(unittest.TestCase):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         get.side_effect = self.get_response
         self.login(avatar)
-        res = self.client.get('/vminfo/infid/0')
+        res = self.client.get('/vminfo?infId=infid&vmId=0')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'Username: user', res.data)
         self.assertIn(b'Password: pass', res.data)

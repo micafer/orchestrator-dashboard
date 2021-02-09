@@ -2,7 +2,39 @@
 {% block title %}Infrastructure List{% endblock %}
 {% block content %}
 
+<script>
+  function getSpanFromState(state) {
+    if (state == "configured") {
+      return "<span class='btn btn-success btn-sm'>";
+    } else if (state == "stopped" || state == "off") {
+      return "<span class='btn btn-warning btn-sm text-white'>";
+    } else if (state == "failed" || state == "unconfigured" || state == "unknown") {
+      return  "<span class='btn btn-danger btn-sm'>";
+    } else {
+      return "<span class='btn btn-warning btn-sm text-white'><span class='spinner-grow spinner-grow-sm'></span>";
+    }
+  }
 
+  function loadInfrState(infid) {
+    $.getJSON("{{url_for('infrastructure_state')}}?infid=" + infid, function( data ) {
+      // Set state
+      var state = getSpanFromState(data["state"]) ;
+      state += '<strong>' + data["state"] + '</strong></span>';
+      $('#' + infid + '_state').html(state);
+
+      // Set VMs
+      var vms = '';
+      $.each( data["vm_states"], function( vmId, vmState ) {
+        var tooltip = getSpanFromState(vmState) + vmState + '</span>';
+        vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-toggle="tooltip" data-placement="top" data-html="true" title="' + tooltip + '">';
+        vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
+      });
+      $('#' + infid + '_vms').html(vms);
+      $('[data-toggle="tooltip"]').tooltip()
+    });
+
+  }
+</script>
 <div class="container-fluid">
 {% include 'flashed_messages.html' %}
   <br>
@@ -27,29 +59,39 @@
             <!--Table head-->
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Infrastructure uuid</th>
-                  <th>Status</th>
-                  <th>VMs</th>
-                  <th>Actions</th>
+                  <th style="width: 15%" scope="col">Name</th>
+                  <th style="width: 35%" scope="col">Infrastructure uuid</th>
+                  <th style="width: 10%" scope="col">Status</th>
+                  <th style="width: 25%" scope="col">VMs</th>
+                  <th style="width: 15%" scope="col">Actions</th>
                 </tr>
               </thead>
               <!--Table head-->
               <!--Table body-->
               <tbody>
+                {% for infId, infInfo in infrastructures.items() %}
                 <tr>
                     <th scope="row">
-                      {{infState["name"]}}
+                      {{infInfo["name"]}}
                     </th>
                     <th>
                       {{infId}}
                     </th>
-                    <td id="{{infId}}_state">
-                      Loading <span class="spinner-grow spinner-grow-sm"></span>
+
+                    <td>
+                      <div id="{{infId}}_state">
+                       Loading <span class="spinner-grow spinner-grow-sm"></span>
+                      </div>
                     </td>
-                    <td id="{{infId}}_vms">
-                      Loading <span class="spinner-grow spinner-grow-sm"></span>
+                    <td>
+                      <div id="{{infId}}_vms">
+                       Loading <span class="spinner-grow spinner-grow-sm"></span>
+                      </div>
                     </td>
+                    <script>
+                      loadInfrState("{{infId}}");
+                    </script>
+
                     <td>
                       <div class="btn-group">
                         <!-- DELETE -->
@@ -145,9 +187,6 @@
 
 
 <script>
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
 
 $(document).ready(function () {
     $(".deleteBtn").click(function () {
