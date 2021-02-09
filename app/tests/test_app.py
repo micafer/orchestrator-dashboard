@@ -207,7 +207,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.get('/managevm/stop/infid/0')
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/vminfo/infid/0', res.headers['location'])
+        self.assertIn('http://localhost/vminfo?infId=infid&vmId=0', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'info'))
 
     @patch("app.utils.getUserAuthData")
