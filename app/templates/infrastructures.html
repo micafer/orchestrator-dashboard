@@ -30,7 +30,14 @@
         vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
       });
       $('#' + infid + '_vms').html(vms);
-      $('[data-toggle="tooltip"]').tooltip()
+      $('[data-toggle="tooltip"]').tooltip();
+      if (data["state"] == "pending" || data["state"] == "running") {
+        setTimeout(function(){loadInfrState(infid);},30000);
+        console.log("timeout. inf.")
+      } else if (data["state"] == "deleting") {
+        setTimeout(function(){location.reload();},30000);
+        console.log("timeout. gen.")
+      }
     });
 
   }
