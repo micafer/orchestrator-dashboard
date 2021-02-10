@@ -33,6 +33,8 @@
       $('[data-toggle="tooltip"]').tooltip();
       if (data["state"] == "pending" || data["state"] == "running") {
         setTimeout(function(){loadInfrState(infid);},30000);
+      } else if (data["state"] == "error") {
+        setTimeout(function(){loadInfrState(infid);},15000);
       } else if (data["state"] == "deleting") {
         setTimeout(function(){location.reload();},30000);
       }
