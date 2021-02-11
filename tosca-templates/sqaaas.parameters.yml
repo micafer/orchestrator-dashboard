@@ -44,6 +44,18 @@ inputs:
     sqaaas_gh_token:
       tab: SQAaaS Data
 
+    sqaaas_jenkins_url:
+      tab: SQAaaS Data
+
+    sqaaas_jenkins_admin:
+      tab: SQAaaS Data
+
+    sqaaas_jenkins_github_org_name:
+      tab: SQAaaS Data
+
+    sqaaas_github_org:
+      tab: SQAaaS Data
+
 tabs:
   - HW Data
   - Kubernetes Data

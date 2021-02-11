@@ -107,7 +107,7 @@ class TestAppDB(unittest.TestCase):
         appdb_call.return_value = xmltodict.parse(va_provider.replace('\n', ''))["appdb:appdb"]
         res = appdb.get_sites("vo.access.egi.eu")
         self.assertEquals(res, {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
-                                          'state': '', 'id': '1'}})
+                                          'state': '', 'id': '1', 'name': 'CESGA'}})
         self.assertEquals(appdb_call.call_args_list[0][0][0], "/rest/1.0/va_providers/1")
 
     @patch('app.appdb.appdb_call')
@@ -126,11 +126,12 @@ class TestAppDB(unittest.TestCase):
     @patch('app.appdb.appdb_call')
     def test_get_images(self, appdb_call):
         images = """<virtualization:provider id="11548G0">
-                    <provider:image appcname="scipioncloud.gpu" voname="vo.access.egi.eu" archived="false"/>
+                    <provider:image appcname="scipioncloud.gpu" voname="vo.access.egi.eu"
+                    appname="ScipionCloud-GPU" archived="false"/>
                     </virtualization:provider>"""
         appdb_call.return_value = xmltodict.parse(images.replace('\n', ''))
         res = appdb.get_images('11548G0', 'vo.access.egi.eu')
-        self.assertEquals(res, ["scipioncloud.gpu"])
+        self.assertEquals(res, [("ScipionCloud-GPU", "scipioncloud.gpu")])
 
 
 if __name__ == '__main__':

@@ -71,9 +71,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.19.5"
+      default: "1.19.17"
       constraints:
-      - valid_values: [ "1.19.5", "1.18.13", "1.17.15" ]
+      - valid_values: [ "1.19.7", "1.18.15", "1.17.17" ]
     kube_cert_manager:
       type: boolean
       description: Flag to install Cert-Manager and manage the generation of TLS certificas with Let's Encrypt
@@ -95,6 +95,22 @@ topology_template:
       description: GitHub API token
       default: ""
 
+    sqaaas_jenkins_url:
+      type: string
+      description: Jenkins URL endpoint
+      default: "https://jenkins.eosc-synergy.eu/"
+    sqaaas_jenkins_admin:
+      type: string
+      description: Jenkins user with admin permissions
+      default: "admin"
+    sqaaas_jenkins_github_org_name:
+      type: string
+      description: Name in Jenkins of the base repository organization
+      default: "eosc-synergy-org"
+    sqaaas_github_org:
+      type: string
+      description: GitHub organization name
+      default: "eosc-synergy"
 
   node_templates:
 
@@ -110,6 +126,11 @@ topology_template:
             inputs:
               sqaaas_jk_token: { get_input: sqaaas_jk_token }
               sqaaas_gh_token: { get_input: sqaaas_gh_token }
+              sqaaas_repo_type: "github"
+              sqaaas_jenkins_url: "https://jenkins.eosc-synergy.eu/"
+              sqaaas_jenkins_admin: "admin"
+              sqaaas_jenkins_github_org_name: "eosc-synergy-org"
+              sqaaas_github_org: "eosc-synergy"
 
     lrms_front_end:
       type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes
@@ -191,9 +212,9 @@ topology_template:
             type: linux
 
   outputs:
-    dashboard_endpoint:
+   sqaaas_api_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/sqaaas/v1/' ] }
+   sqaaas_web_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/sqaaas-web/' ] }
+   kubernetes_dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
-    api_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
-    kubeapps_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }

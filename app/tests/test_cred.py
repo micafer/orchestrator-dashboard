@@ -28,27 +28,36 @@ class TestCredentials(unittest.TestCase):
     def tearDown(self):
         os.unlink('/tmp/creds.db')
 
-    def test_get_cred(self):
+    def test_creds(self):
         creds = Credentials("sqlite:///tmp/creds.db")
-        res = creds._get_creds_db()
-        str_data = '{"project": "project_name"}'
-        res.execute("replace into credentials (data, userid, serviceid) values (%s, %s, %s)",
-                    (str_data, "user", "serviceid"))
-        res.close()
+        creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username":
+                                             "user", "password": "pass"}, True)
 
-        res = creds.get_cred("serviceid", "user")
-        self.assertEquals(res, {'project': 'project_name'})
+        res = creds.get_cred("credid", "user")
+        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1})
 
-    def test_write_creds(self):
-        creds = Credentials("sqlite:///tmp/creds.db")
-        creds.write_creds("serviceid", "user", {"project": "new_project"})
-        res = creds.get_cred("serviceid", "user")
-        self.assertEquals(res, {"project": "new_project"})
+        creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username": "user1"})
+        res = creds.get_cred("credid", "user")
+        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
 
-    def test_delete_creds(self):
-        creds = Credentials("sqlite:///tmp/creds.db")
-        creds.delete_cred("serviceid", "user")
-        res = creds.get_cred("serviceid", "user")
+        creds.delete_cred("credid", "user")
+        res = creds.get_cred("credid", "user")
+        self.assertEquals(res, {})
+
+    def test_creds_enc(self):
+        creds = Credentials("sqlite:///tmp/creds.db", 'ZMiCBQwtVu2HE6TS4METx84d4LhqmZ5NJtgiTjJzbeU=')
+        creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username": "user", "password": "pass"},
+                          True)
+
+        res = creds.get_cred("credid", "user")
+        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1})
+
+        creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username": "user1"})
+        res = creds.get_cred("credid", "user")
+        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
+
+        creds.delete_cred("credid", "user")
+        res = creds.get_cred("credid", "user")
         self.assertEquals(res, {})
 
 

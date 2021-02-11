@@ -20,7 +20,6 @@
 # under the License.
 """Main Flask App file."""
 
-import requests
 import yaml
 import io
 import os
@@ -30,7 +29,8 @@ from flask_dance.consumer import OAuth2ConsumerBlueprint
 from app.settings import Settings
 from app.cred import Credentials
 from app.infra import Infrastructures
-from app import utils, appdb
+from app.im import InfrastructureManager
+from app import utils, appdb, db
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError
 from werkzeug.exceptions import Forbidden
 from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
@@ -46,8 +46,13 @@ def create_app(oidc_blueprint=None):
     app.secret_key = "8210f566-4981-11ea-92d1-f079596e599b"
     app.config.from_json('config.json')
     settings = Settings(app.config)
-    cred = Credentials(settings.db_url)
+    if 'CREDS_KEY' in os.environ:
+        key = os.environ['CREDS_KEY']
+    else:
+        key = None
+    cred = Credentials(settings.db_url, key)
     infra = Infrastructures(settings.db_url)
+    im = InfrastructureManager(settings.imUrl)
 
     toscaTemplates = utils.loadToscaTemplates(settings.toscaDir)
     toscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir, toscaTemplates)
@@ -93,16 +98,19 @@ def create_app(oidc_blueprint=None):
         @wraps(f)
         def decorated_function(*args, **kwargs):
 
-            try:
-                if not oidc_blueprint.session.authorized or 'username' not in session:
-                    return redirect(url_for('login'))
+            if settings.debug_oidc_token:
+                oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
+            else:
+                try:
+                    if not oidc_blueprint.session.authorized or 'username' not in session:
+                        return redirect(url_for('login'))
 
-                if oidc_blueprint.session.token['expires_in'] < 20:
-                    app.logger.debug("Force refresh token")
-                    oidc_blueprint.session.get('/userinfo')
-            except (InvalidTokenError, TokenExpiredError):
-                flash("Token expired.", 'warning')
-                return redirect(url_for('login'))
+                    if oidc_blueprint.session.token['expires_in'] < 20:
+                        app.logger.debug("Force refresh token")
+                        oidc_blueprint.session.get('/userinfo')
+                except (InvalidTokenError, TokenExpiredError):
+                    flash("Token expired.", 'warning')
+                    return redirect(url_for('login'))
 
             return f(*args, **kwargs)
 
@@ -111,7 +119,8 @@ def create_app(oidc_blueprint=None):
     @app.route('/settings')
     @authorized_with_valid_token
     def show_settings():
-        return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=settings.imUrl)
+        imUrl = "%s (v. %s)" % (settings.imUrl, im.get_version())
+        return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=imUrl)
 
     @app.route('/login')
     def login():
@@ -120,66 +129,76 @@ def create_app(oidc_blueprint=None):
 
     @app.route('/')
     def home():
-        if not oidc_blueprint.session.authorized:
-            return redirect(url_for('login'))
-
-        try:
-            account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + "/userinfo")
-        except (InvalidTokenError, TokenExpiredError):
-            flash("Token expired.", 'warning')
-            return redirect(url_for('login'))
-
-        if account_info.ok:
-            account_info_json = account_info.json()
-
+        if settings.debug_oidc_token:
             session["vos"] = None
-            if 'eduperson_entitlement' in account_info_json:
-                session["vos"] = utils.getUserVOs(account_info_json['eduperson_entitlement'])
-
-            if settings.oidcGroups:
-                user_groups = []
-                if 'groups' in account_info_json:
-                    user_groups = account_info_json['groups']
-                elif 'eduperson_entitlement' in account_info_json:
-                    user_groups = account_info_json['eduperson_entitlement']
-                if not set(settings.oidcGroups).issubset(user_groups):
-                    app.logger.debug("No match on group membership. User group membership: " + json.dumps(user_groups))
-                    message = Markup('You need to be a member of the following groups: {0}. <br>'
-                                     ' Please, visit <a href="{1}">{1}</a> and apply for the requested '
-                                     'membership.'.format(json.dumps(settings.oidcGroups), settings.oidcUrl))
-                    raise Forbidden(description=message)
-
-            session['userid'] = account_info_json['sub']
-            if 'name' in account_info_json:
-                session['username'] = account_info_json['name']
-            else:
-                session['username'] = ""
-                if 'given_name' in account_info_json:
-                    session['username'] = account_info_json['given_name']
-                if 'family_name' in account_info_json:
-                    session['username'] += " " + account_info_json['family_name']
-                if session['username'] == "":
-                    session['username'] = account_info_json['sub']
-            if 'email' in account_info_json:
-                session['gravatar'] = utils.avatar(account_info_json['email'], 26)
-            else:
-                session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
-
+            session['userid'] = "userid"
+            session['username'] = "username"
+            session['gravatar'] = ""
             return render_template('portfolio.html', templates=toscaInfo)
         else:
-            flash("Error getting User info: \n" + account_info.text, 'error')
-            return render_template('home.html', oidc_name=settings.oidcName)
+            if not oidc_blueprint.session.authorized:
+                return redirect(url_for('login'))
 
-    @app.route('/vminfo/<infid>/<vmid>')
+            try:
+                account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + "/userinfo")
+            except (InvalidTokenError, TokenExpiredError):
+                flash("Token expired.", 'warning')
+                return redirect(url_for('login'))
+
+            if account_info.ok:
+                account_info_json = account_info.json()
+
+                session["vos"] = None
+                if 'eduperson_entitlement' in account_info_json:
+                    session["vos"] = utils.getUserVOs(account_info_json['eduperson_entitlement'])
+
+                if settings.oidcGroups:
+                    user_groups = []
+                    if 'groups' in account_info_json:
+                        user_groups = account_info_json['groups']
+                    elif 'eduperson_entitlement' in account_info_json:
+                        user_groups = account_info_json['eduperson_entitlement']
+                    if not set(settings.oidcGroups).issubset(user_groups):
+                        app.logger.debug("No match on group membership. User group membership: " +
+                                         json.dumps(user_groups))
+                        message = Markup('You need to be a member of the following groups: {0}. <br>'
+                                         ' Please, visit <a href="{1}">{1}</a> and apply for the requested '
+                                         'membership.'.format(json.dumps(settings.oidcGroups), settings.oidcUrl))
+                        raise Forbidden(description=message)
+
+                session['userid'] = account_info_json['sub']
+                if 'name' in account_info_json:
+                    session['username'] = account_info_json['name']
+                else:
+                    session['username'] = ""
+                    if 'given_name' in account_info_json:
+                        session['username'] = account_info_json['given_name']
+                    if 'family_name' in account_info_json:
+                        session['username'] += " " + account_info_json['family_name']
+                    if session['username'] == "":
+                        session['username'] = account_info_json['sub']
+                if 'email' in account_info_json:
+                    session['gravatar'] = utils.avatar(account_info_json['email'], 26)
+                else:
+                    session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
+
+                return render_template('portfolio.html', templates=toscaInfo)
+            else:
+                flash("Error getting User info: \n" + account_info.text, 'error')
+                return render_template('home.html', oidc_name=settings.oidcName)
+
+    @app.route('/vminfo')
     @authorized_with_valid_token
-    def showvminfo(infid=None, vmid=None):
+    def showvminfo():
         access_token = oidc_blueprint.session.token['access_token']
+        vmid = request.args['vmId']
+        infid = request.args['infId']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data, "Accept": "application/json"}
-
-        url = "%s/infrastructures/%s/vms/%s" % (settings.imUrl, infid, vmid)
-        response = requests.get(url, headers=headers)
+        try:
+            response = im.get_vm_info(infid, vmid, auth_data)
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
 
         vminfo = {}
         state = ""
@@ -233,17 +252,13 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data, "Accept": "application/json"}
-
-        op = op.lower()
-        if op in ["stop", "start", "reboot"]:
-            url = "%s/infrastructures/%s/vms/%s/%s" % (settings.imUrl, infid, vmid, op)
-            response = requests.put(url, headers=headers)
-        elif op == "terminate":
-            url = "%s/infrastructures/%s/vms/%s" % (settings.imUrl, infid, vmid)
-            response = requests.delete(url, headers=headers)
-        else:
-            flash("Error: invalid operation: %s." % op, 'error')
+        try:
+            if op == "reconfigure":
+                response = im.reconfigure_inf(infid, auth_data, [vmid])
+            else:
+                response = im.manage_vm(op, infid, vmid, auth_data)
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
             return redirect(url_for('showinfrastructures'))
 
         if response.ok:
@@ -254,7 +269,7 @@ def create_app(oidc_blueprint=None):
         if op == "terminate":
             return redirect(url_for('showinfrastructures'))
         else:
-            return redirect(url_for('showvminfo', infid=infid, vmid=vmid))
+            return redirect(url_for('showvminfo', infId=infid, vmId=vmid))
 
     @app.route('/infrastructures')
     @authorized_with_valid_token
@@ -262,53 +277,49 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data, "Accept": "application/json"}
-
-        url = "%s/infrastructures" % settings.imUrl
-        response = requests.get(url, headers=headers)
+        inf_list = []
+        try:
+            inf_list = im.get_inf_list(auth_data)
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
 
         infrastructures = {}
-        if not response.ok:
-            flash("Error retrieving infrastructure list: \n" + response.text, 'error')
-        else:
-            app.logger.debug("Infrastructures: %s" % response.text)
-            state_res = response.json()
-            if "uri-list" in state_res:
-                inf_id_list = [elem["uri"] for elem in state_res["uri-list"]]
-            else:
-                inf_id_list = []
-            for inf_id in inf_id_list:
-                url = "%s/state" % inf_id
-                response = requests.get(url, headers=headers)
-                if not response.ok:
-                    flash("Error retrieving infrastructure %s state: \n%s" % (inf_id, response.text), 'warning')
-                else:
-                    inf_state = response.json()
-                    infrastructures[os.path.basename(inf_id)] = inf_state['state']
-
-                    try:
-                        infra_name = infra.get_infra(os.path.basename(inf_id))["name"]
-                    except Exception:
-                        infra_name = ""
-
-                    infrastructures[os.path.basename(inf_id)]['name'] = infra_name
+        for inf_id in inf_list:
+            infrastructures[inf_id] = {}
+            try:
+                infra_name = infra.get_infra(inf_id)["name"]
+            except Exception:
+                infra_name = ""
+            infrastructures[inf_id]['name'] = infra_name
 
         return render_template('infrastructures.html', infrastructures=infrastructures)
+
+    @app.route('/infrastructures/state')
+    @authorized_with_valid_token
+    def infrastructure_state():
+        access_token = oidc_blueprint.session.token['access_token']
+        infid = request.args['infid']
+        if not infid:
+            return {"state": "error", "vm_states": {}}
+
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        try:
+            return im.get_inf_state(infid, auth_data)
+        except Exception:
+            return {"state": "error", "vm_states": {}}
 
     @app.route('/reconfigure/<infid>')
     @authorized_with_valid_token
     def infreconfigure(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data}
+        try:
+            response = im.reconfigure_inf(infid, auth_data)
+            response.raise_for_status()
+        except Exception as ex:
+            flash("Error reconfiguring Infrastructure: \n%s" % ex, 'error')
 
-        url = "%s/infrastructures/%s/reconfigure" % (settings.imUrl, infid)
-        response = requests.put(url, headers=headers)
-
-        if response.ok:
-            flash("Infrastructure successfuly reconfigured.", "info")
-        else:
-            flash("Error reconfiguring Infrastructure: \n" + response.text, "error")
+        flash("Infrastructure successfuly reconfigured.", "info")
 
         return redirect(url_for('showinfrastructures'))
 
@@ -317,16 +328,14 @@ def create_app(oidc_blueprint=None):
     def template(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data}
-
-        url = "%s/infrastructures/%s/tosca" % (settings.imUrl, infid)
-        response = requests.get(url, headers=headers)
-
-        if not response.ok:
-            flash("Error getting template: \n" + response.text, "error")
-            template = ""
-        else:
+        template = ""
+        try:
+            response = im.get_inf_property(infid, 'tosca', auth_data)
+            response.raise_for_status()
             template = response.text
+        except Exception as ex:
+            flash("Error getting template: \n%s" % ex, "error")
+
         return render_template('deptemplate.html', template=template)
 
     @app.route('/log/<infid>')
@@ -334,15 +343,14 @@ def create_app(oidc_blueprint=None):
     def inflog(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data}
-
-        url = "%s/infrastructures/%s/contmsg" % (settings.imUrl, infid)
-        response = requests.get(url, headers=headers, verify=False)
-
-        if not response.ok:
-            log = "Not found"
-        else:
+        log = "Not found"
+        try:
+            response = im.get_inf_property(infid, 'contmsg', auth_data)
+            response.raise_for_status()
             log = response.text
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
+
         return render_template('inflog.html', log=log)
 
     @app.route('/vmlog/<infid>/<vmid>')
@@ -351,15 +359,14 @@ def create_app(oidc_blueprint=None):
 
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data}
-
-        url = "%s/infrastructures/%s/vms/%s/contmsg" % (settings.imUrl, infid, vmid)
-        response = requests.get(url, headers=headers, verify=False)
-
-        if not response.ok:
-            log = "Not found"
-        else:
+        log = "Not found"
+        try:
+            response = im.get_vm_contmsg(infid, vmid, auth_data)
+            response.raise_for_status()
             log = response.text
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
+
         return render_template('inflog.html', log=log, vmid=vmid)
 
     @app.route('/outputs/<infid>')
@@ -368,19 +375,18 @@ def create_app(oidc_blueprint=None):
 
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data}
+        outputs = {}
+        try:
+            response = im.get_inf_property(infid, 'outputs', auth_data)
+            response.raise_for_status()
 
-        url = "%s/infrastructures/%s/outputs" % (settings.imUrl, infid)
-        response = requests.get(url, headers=headers, verify=False)
-
-        if not response.ok:
-            outputs = {}
-        else:
             outputs = response.json()["outputs"]
             for elem in outputs:
                 if isinstance(outputs[elem], str) and (outputs[elem].startswith('http://') or
                                                        outputs[elem].startswith('https://')):
                     outputs[elem] = Markup("<a href='%s' target='_blank'>%s</a>" % (outputs[elem], outputs[elem]))
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
 
         return render_template('outputs.html', infid=infid, outputs=outputs)
 
@@ -389,21 +395,15 @@ def create_app(oidc_blueprint=None):
     def infdel(infid=None, force=0):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data}
+        try:
+            response = im.delete_inf(infid, force, auth_data)
+            response.raise_for_status()
 
-        url = "%s/infrastructures/%s?async=1" % (settings.imUrl, infid)
-        if force:
-            url += "&force=1"
-        response = requests.delete(url, headers=headers)
-
-        if not response.ok:
-            flash("Error deleting infrastructure: " + response.text, "error")
-        else:
             flash("Infrastructure '%s' successfuly deleted." % infid, "info")
-            try:
-                infra.delete_infra(infid)
-            except Exception as ex:
-                flash("Error deleting infrastructure name: %s" + str(ex), "warning")
+            # deleting from DB
+            infra.delete_infra(infid)
+        except Exception as ex:
+            flash("Error deleting infrastructure: %s." % ex, 'error')
 
         return redirect(url_for('showinfrastructures'))
 
@@ -415,16 +415,24 @@ def create_app(oidc_blueprint=None):
 
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
+        creds = cred.get_creds(session['userid'], 1)
+
+        return render_template('createdep.html',
+                               template=toscaInfo[selected_tosca],
+                               selectedTemplate=selected_tosca,
+                               creds=creds)
+
+    @app.route('/vos')
+    def getvos():
+        res = ""
         vos = utils.getStaticVOs()
         vos.extend(appdb.get_vo_list())
         vos = list(set(vos))
         if "vos" in session and session["vos"]:
             vos = [vo for vo in vos if vo in session["vos"]]
-
-        return render_template('createdep.html',
-                               template=toscaInfo[selected_tosca],
-                               selectedTemplate=selected_tosca,
-                               vos=vos)
+        for vo in vos:
+            res += '<option name="selectedVO" value=%s>%s</option>' % (vo, vo)
+        return res
 
     @app.route('/sites/<vo>')
     def getsites(vo=None):
@@ -433,37 +441,47 @@ def create_app(oidc_blueprint=None):
         for site_name, site in appdb_sites.items():
             if site["state"]:
                 site["state"] = " (WARNING: %s state!)" % site["state"]
-            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site_name, site_name, site["state"])
+            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site['url'], site_name, site["state"])
 
-        for site_name, _ in utils.getStaticSites(vo).items():
+        for site_name, site in utils.getStaticSites(vo).items():
             # avoid site duplication
             if site_name not in appdb_sites:
-                res += '<option name="selectedSite" value=%s>%s</option>' % (site_name, site_name)
+                res += '<option name="selectedSite" value=%s>%s</option>' % (site['url'], site_name)
 
         return res
 
-    @app.route('/images/<site>/<vo>')
+    @app.route('/images/<cred_id>')
     @authorized_with_valid_token
-    def getimages(site=None, vo=None):
+    def getimages(cred_id=None):
         res = ""
         local = request.args.get('local', None)
+
         if local:
             access_token = oidc_blueprint.session.token['access_token']
-            for image_name, image_id in utils.get_site_images(site, vo, access_token, cred, session["userid"]):
-                res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image_id, image_name)
+            auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+            try:
+                response = im.get_cloud_images(cred_id, auth_data)
+                response.raise_for_status()
+                for image in response.json()["images"]:
+                    res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image['uri'], image['name'])
+            except Exception as ex:
+                res += '<option name="selectedSiteImage" value=%s>%s</option>' % (response.text, response.text)
+
         else:
-            site_id = utils.getCachedSiteList()[site]['id']
-            for image in appdb.get_images(site_id, vo):
-                res += '<option name="selectedImage" value=%s>%s</option>' % (image, image)
+            site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
+            for image_name, image_id in appdb.get_images(site['id'], vo):
+                res += '<option name="selectedImage" value=%s>%s</option>' % (image_id, image_name)
         return res
 
-    @app.route('/usage/<site>/<vo>')
+    @app.route('/usage/<cred_id>')
     @authorized_with_valid_token
-    def getusage(site=None, vo=None):
+    def getusage(cred_id=None):
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         try:
-            access_token = oidc_blueprint.session.token['access_token']
-            quotas_dict = utils.get_site_usage(site, vo, access_token, cred, session["userid"])
-            return json.dumps(quotas_dict)
+            response = im.get_cloud_quotas(cred_id, auth_data)
+            response.raise_for_status()
+            return json.dumps(response.json()["quotas"])
         except Exception as ex:
             return "Error loading site quotas: %s!" % str(ex), 400
 
@@ -525,103 +543,115 @@ def create_app(oidc_blueprint=None):
     def createdep():
 
         form_data = request.form.to_dict()
-        vo = form_data['extra_opts.selectedVO']
-        site = form_data['extra_opts.selectedSite']
-
-        access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"], vo, site)
 
         app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
+        cred_id = form_data['extra_opts.selectedCred']
+        cred_data = cred.get_cred(cred_id, session["userid"])
+        access_token = oidc_blueprint.session.token['access_token']
+
+        image = None
+        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
+            if form_data['extra_opts.selectedImage'] != "":
+                site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
+                image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
+            elif form_data['extra_opts.selectedSiteImage'] != "":
+                image = form_data['extra_opts.selectedSiteImage']
+        else:
+            image_id = form_data['extra_opts.imageID']
+            protocol_map = {
+                'EC2': 'aws',
+                'Kubernetes': 'docker',
+                'Azure': 'azr'
+            }
+            image = "%s://%s" % (protocol_map.get(cred_data['type']), image_id)
+
+        if not image:
+            flash("No correct image specified.", "error")
+            return redirect(url_for('showinfrastructures'))
+
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
-
-            if form_data['extra_opts.selectedImage'] != "":
-                image = "appdb://%s/%s?%s" % (form_data['extra_opts.selectedSite'],
-                                              form_data['extra_opts.selectedImage'],
-                                              form_data['extra_opts.selectedVO'])
-            elif form_data['extra_opts.selectedSiteImage'] != "":
-                site_url = utils.get_ost_image_url(form_data['extra_opts.selectedSite'])
-                image = "ost://%s/%s" % (site_url, form_data['extra_opts.selectedSiteImage'])
-            else:
-                flash("No correct image selected.", "error")
-                return redirect(url_for('showinfrastructures'))
-
             template = add_image_to_template(template, image)
 
-            template = add_auth_to_template(template, auth_data)
+        template = add_image_to_template(template, image)
 
-            inputs = {k: v for (k, v) in form_data.items() if not k.startswith("extra_opts.")}
+        template = add_auth_to_template(template, auth_data)
 
-            app.logger.debug("Parameters: " + json.dumps(inputs))
+        inputs = {k: v for (k, v) in form_data.items() if not k.startswith("extra_opts.")}
 
-            template = set_inputs_to_template(template, inputs)
+        app.logger.debug("Parameters: " + json.dumps(inputs))
 
-            payload = yaml.dump(template, default_flow_style=False, sort_keys=False)
+        template = set_inputs_to_template(template, inputs)
 
-        headers = {"Authorization": auth_data, "Content-Type": "text/yaml"}
+        payload = yaml.dump(template, default_flow_style=False, sort_keys=False)
 
-        url = "%s/infrastructures?async=1" % settings.imUrl
-        response = requests.post(url, headers=headers, data=payload)
+        try:
+            response = im.create_inf(payload, auth_data)
+            response.raise_for_status()
 
-        if not response.ok:
-            flash("Error creating infrastrucrure: \n" + response.text, "error")
-        else:
             try:
                 inf_id = os.path.basename(response.text)
                 infra.write_infra(inf_id, {"name": form_data['infra_name']})
             except Exception as ex:
                 flash("Error storing Infrastructure name: %s" % str(ex), "warning")
 
+        except Exception as ex:
+            flash("Error creating infrastrucrure: \n%s." % ex, 'error')
+
         return redirect(url_for('showinfrastructures'))
 
     @app.route('/manage_creds')
     @authorized_with_valid_token
     def manage_creds():
-        sites = {}
+        creds = {}
 
         try:
-            sites = utils.getCachedSiteList()
-        except Exception as e:
-            flash("Error retrieving sites list: \n" + str(e), 'warning')
+            creds = cred.get_creds(session["userid"])
 
-        return render_template('service_creds.html', sites=sites)
+        except Exception as e:
+            flash("Error retrieving credentials: \n" + str(e), 'warning')
+
+        return render_template('service_creds.html', creds=creds)
 
     @app.route('/write_creds', methods=['GET', 'POST'])
     @authorized_with_valid_token
     def write_creds():
-        serviceid = request.args.get('service_id', "")
-        servicename = request.args.get('service_name', "")
-        app.logger.debug("service_id={}".format(serviceid))
+        cred_id = request.args.get('cred_id', "")
+        cred_type = request.args.get('cred_type', "")
+        app.logger.debug("service_id={}".format(cred_id))
 
         if request.method == 'GET':
             res = {}
-            projects = {}
             try:
-                res = cred.get_cred(servicename, session["userid"])
-                projects = utils.getCachedProjectIDs(serviceid)
-                app.logger.debug("projects={}".format(projects))
-
-                if session["vos"]:
-                    filter_projects = {}
-                    for vo, project in projects.items():
-                        if vo in session["vos"]:
-                            filter_projects[vo] = project
-                    projects = filter_projects
+                if cred_id:
+                    res = cred.get_cred(cred_id, session["userid"])
+                    cred_type = res['type']
             except Exception as ex:
                 flash("Error reading credentials %s!" % ex, 'error')
 
-            return render_template('modal_creds.html', service_creds=res, service_id=serviceid,
-                                   service_name=servicename, projects=projects)
+            return render_template('modal_creds.html', creds=res, cred_id=cred_id, cred_type=cred_type)
         else:
             app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
             creds = request.form.to_dict()
+            if 'cred_id' in creds:
+                cred_id = creds['cred_id']
+                del creds['cred_id']
+            if 'password' in request.files:
+                if request.files['password'].filename != "":
+                    creds['password'] = request.files['password'].read().decode()
             try:
-                cred.write_creds(servicename, session["userid"], creds)
+                if 'password' in creds and creds['password'] in [None, '']:
+                    del creds['password']
+                cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
                 flash("Credentials successfully written!", 'info')
+            except db.IntegrityError:
+                flash("Error writing credentials: Duplicated Credential ID!", 'error')
             except Exception as ex:
-                flash("Error writing credentials %s!" % ex, 'error')
+                flash("Error writing credentials: %s!" % ex, 'error')
 
             return redirect(url_for('manage_creds'))
 
@@ -629,12 +659,24 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def delete_creds():
 
-        serviceid = request.args.get('service_id', "")
+        cred_id = request.args.get('cred_id', "")
         try:
-            cred.delete_cred(serviceid, session["userid"])
+            cred.delete_cred(cred_id, session["userid"])
             flash("Credentials successfully deleted!", 'info')
         except Exception as ex:
             flash("Error deleting credentials %s!" % ex, 'error')
+
+        return redirect(url_for('manage_creds'))
+
+    @app.route('/enable_creds')
+    @authorized_with_valid_token
+    def enable_creds():
+        cred_id = request.args.get('cred_id', "")
+        enable = request.args.get('enable', 0)
+        try:
+            cred.enable_cred(cred_id, session["userid"], enable)
+        except Exception as ex:
+            flash("Error updating credentials %s!" % ex, 'error')
 
         return redirect(url_for('manage_creds'))
 
@@ -645,12 +687,10 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data, "Accept": "text/plain"}
+        try:
+            response = im.get_inf_property(infid, 'radl', auth_data)
+            response.raise_for_status()
 
-        url = "%s/infrastructures/%s/radl" % (settings.imUrl, infid)
-        response = requests.get(url, headers=headers)
-
-        if response.ok:
             systems = []
             try:
                 radl = radl_parse.parse_radl(response.text)
@@ -659,8 +699,8 @@ def create_app(oidc_blueprint=None):
                 flash("Error parsing RADL: \n%s" % str(ex), 'error')
 
             return render_template('addresource.html', infid=infid, systems=systems)
-        else:
-            flash("Error getting RADL: \n%s" % (response.text), 'error')
+        except Exception as ex:
+            flash("Error getting RADL: \n%s" % ex, 'error')
             return redirect(url_for('showinfrastructures'))
 
     @app.route('/addresources/<infid>', methods=['POST'])
@@ -668,14 +708,13 @@ def create_app(oidc_blueprint=None):
     def addresources(infid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
-
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        headers = {"Authorization": auth_data, "Accept": "text/plain"}
-
         form_data = request.form.to_dict()
 
-        url = "%s/infrastructures/%s/radl" % (settings.imUrl, infid)
-        response = requests.get(url, headers=headers)
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        try:
+            response = im.get_inf_property(infid, 'radl', auth_data)
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
 
         if response.ok:
             radl = None
@@ -683,23 +722,23 @@ def create_app(oidc_blueprint=None):
                 radl = radl_parse.parse_radl(response.text)
                 radl.deploys = []
                 for system in radl.systems:
+                    sys_dep = deploy(system.name, 0)
                     if "%s_num" % system.name in form_data:
                         vm_num = int(form_data["%s_num" % system.name])
                         if vm_num > 0:
-                            radl.deploys.append(deploy(system.name, vm_num))
+                            sys_dep.vm_number = vm_num
+                    radl.deploys.append(sys_dep)
             except Exception as ex:
                 flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
 
             if radl:
-                headers = {"Authorization": auth_data, "Accept": "application/json"}
-                url = "%s/infrastructures/%s" % (settings.imUrl, infid)
-                response = requests.post(url, headers=headers, data=str(radl))
-
-                if response.ok:
+                try:
+                    response = im.addresource_inf(infid, str(radl), auth_data)
+                    response.raise_for_status()
                     num = len(response.json()["uri-list"])
                     flash("%d nodes added successfully" % num, 'info')
-                else:
-                    flash("Error adding nodesL: \n%s" % (response.text), 'error')
+                except Exception as ex:
+                    flash("Error adding nodesL: \n%s" % ex, 'error')
 
             return redirect(url_for('showinfrastructures'))
         else:

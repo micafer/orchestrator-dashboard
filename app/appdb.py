@@ -103,7 +103,8 @@ def get_sites(vo=None):
                 url = urlparse(provider_endpoint_url)
                 endpoints[provider_name] = {"url": "%s://%s" % url[0:2],
                                             "state": critical,
-                                            "id": ID}
+                                            "id": ID,
+                                            "name": provider_name}
 
     return endpoints
 
@@ -124,8 +125,8 @@ def get_images(site_id, vo):
 
         for os_tpl in images:
             try:
-                if '@voname' in os_tpl and vo in os_tpl['@voname'] and os_tpl['@archived'] == "false":
-                    oss.append(os_tpl['@appcname'])
+                if '@voname' in os_tpl and vo == os_tpl['@voname'] and os_tpl['@archived'] == "false":
+                    oss.append((os_tpl['@appname'], os_tpl['@appcname']))
             except Exception:
                 continue
     except Exception:

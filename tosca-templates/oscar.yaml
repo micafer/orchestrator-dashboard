@@ -96,7 +96,7 @@ topology_template:
         install_metrics: true
         install_nfs_client: true
         install_ingress: true
-        version: 1.18.3
+        version: 1.19.3
       requirements:
         - host: front
 
@@ -134,7 +134,7 @@ topology_template:
       type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
-        version: 1.18.3
+        version: 1.19.3
       requirements:
         - host: wn
   
