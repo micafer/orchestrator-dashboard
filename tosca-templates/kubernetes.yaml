@@ -70,9 +70,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.19.3"
+      default: "1.20.2"
       constraints:
-      - valid_values: [ "1.19.3", "1.18.10", "1.16.15", "1.17.13" ]
+      - valid_values: [ "1.20.2", 1.19.7", "1.18.15", "1.17.17" ]
     install_kubeapps:
       type: boolean
       description: Flag to set the kubeapps UI to be installed
