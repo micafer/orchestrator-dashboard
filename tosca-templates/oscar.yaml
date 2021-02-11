@@ -96,7 +96,7 @@ topology_template:
         install_metrics: true
         install_nfs_client: true
         install_ingress: true
-        version: 1.18.3
+        version: 1.19.3
       requirements:
         - host: front
 

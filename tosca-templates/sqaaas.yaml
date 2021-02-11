@@ -71,9 +71,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.19.5"
+      default: "1.20.2"
       constraints:
-      - valid_values: [ "1.19.5", "1.18.13", "1.17.15" ]
+      - valid_values: [ "1.20.2", "1.19.7", "1.18.15", "1.17.17" ]
     kube_cert_manager:
       type: boolean
       description: Flag to install Cert-Manager and manage the generation of TLS certificas with Let's Encrypt
