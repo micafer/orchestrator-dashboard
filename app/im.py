@@ -82,9 +82,11 @@ class InfrastructureManager():
 
         return response
 
-    def reconfigure_inf(self, infid, auth_data):
+    def reconfigure_inf(self, infid, auth_data, vmids=None):
         headers = {"Authorization": auth_data}
         url = "%s/infrastructures/%s/reconfigure" % (self.im_url, infid)
+        if vmids:
+            url += "?vm_list=%s" % ",".join(vmids)
         return requests.put(url, headers=headers, timeout=self.timeout)
 
     def get_inf_property(self, infid, prop, auth_data):

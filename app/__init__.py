@@ -253,7 +253,10 @@ def create_app(oidc_blueprint=None):
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         try:
-            response = im.manage_vm(op, infid, vmid, auth_data)
+            if op == "reconfigure":
+                response = im.reconfigure_inf(infid, auth_data, [vmid])
+            else:
+                response = im.manage_vm(op, infid, vmid, auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
             return redirect(url_for('showinfrastructures'))
