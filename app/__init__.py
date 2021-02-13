@@ -276,7 +276,7 @@ def create_app(oidc_blueprint=None):
     def showinfrastructures():
         access_token = oidc_blueprint.session.token['access_token']
 
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        auth_data = "type = InfrastructureManager; token = %s" % access_token
         inf_list = []
         try:
             inf_list = im.get_inf_list(auth_data)
