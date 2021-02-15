@@ -38,6 +38,7 @@ from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
 from radl.radl import deploy
+from flask_apscheduler import APScheduler
 
 
 def create_app(oidc_blueprint=None):
@@ -53,6 +54,12 @@ def create_app(oidc_blueprint=None):
     cred = Credentials(settings.db_url, key)
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl)
+
+    # To Reload internally the site cache
+    scheduler = APScheduler()
+    scheduler.api_enabled = False
+    scheduler.init_app(app)
+    scheduler.start()
 
     toscaTemplates = utils.loadToscaTemplates(settings.toscaDir)
     toscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir, toscaTemplates)
@@ -276,7 +283,7 @@ def create_app(oidc_blueprint=None):
     def showinfrastructures():
         access_token = oidc_blueprint.session.token['access_token']
 
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        auth_data = "type = InfrastructureManager; token = %s" % access_token
         inf_list = []
         try:
             inf_list = im.get_inf_list(auth_data)
@@ -764,6 +771,15 @@ def create_app(oidc_blueprint=None):
     def internal_server_error(error):
         app.logger.error('Server Error: %s', (error))
         return render_template('error_pages/500.html', support_email=app.config.get('SUPPORT_EMAIL')), 500
+
+    # Reload internally the site cache
+    @scheduler.task('interval', id='reload_sites', seconds=5)
+    def reload_sites():
+        scheduler.modify_job('reload_sites', trigger='interval', seconds=settings.appdb_cache_timeout - 30)
+        with app.app_context():
+            app.logger.debug('Reload Site List.')
+            g.settings = settings
+            utils.getCachedSiteList(True)
 
     return app
 

@@ -127,12 +127,12 @@ def getUserVOs(entitlements):
     return vos
 
 
-def getCachedSiteList():
+def getCachedSiteList(force=False):
     global SITE_LIST
     global LAST_UPDATE
 
     now = int(time.time())
-    if not SITE_LIST or now - LAST_UPDATE > g.settings.appdb_cache_timeout:
+    if force or not SITE_LIST or now - LAST_UPDATE > g.settings.appdb_cache_timeout:
         try:
             SITE_LIST = appdb.get_sites()
             # in case of error do not update time
