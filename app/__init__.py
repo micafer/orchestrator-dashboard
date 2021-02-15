@@ -558,7 +558,7 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         image = None
-        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
+        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE', 'Azure']:
             if form_data['extra_opts.selectedImage'] != "":
                 site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
@@ -568,8 +568,7 @@ def create_app(oidc_blueprint=None):
             image_id = form_data['extra_opts.imageID']
             protocol_map = {
                 'EC2': 'aws',
-                'Kubernetes': 'docker',
-                'Azure': 'azr'
+                'Kubernetes': 'docker'
             }
             image = "%s://%s" % (protocol_map.get(cred_data['type']), image_id)
 

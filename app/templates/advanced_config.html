@@ -98,7 +98,7 @@
                 loadSiteInfo();
             }
             loadSiteImages();
-        } else if (cred_type == 'OpenNebula' || cred_type == 'Orange' || cred_type == 'Linode' || cred_type == 'GCE') {
+        } else if (cred_type == 'OpenNebula' || cred_type == 'Orange' || cred_type == 'Linode' || cred_type == 'GCE' || cred_type == 'Azure') {
             $('#cloudImages').hide();
             $('#fedcloudImages').hide();
             $('#siteImages').show();
@@ -107,8 +107,6 @@
         } else {
             if (cred_type == 'EC2') {
                 document.getElementById('imageID').setAttribute("placeholder", "Region / Image ID");
-            } else if (cred_type == 'Azure') {
-                document.getElementById('imageID').setAttribute("placeholder", "Publisher / Offer / SKU / Version");
             } else {
                 document.getElementById('imageID').setAttribute("placeholder", "Image ID");
             }
