@@ -17,16 +17,19 @@ topology_template:
       type: string
       description: Admin password for accessing Mesos HTTP service
       required: yes
+      default: admin
 
     marathon_password:
       type: string
       description: Admin password for accessing Marathon HTTP service
       required: yes
+      default: admin
 
     chronos_password:
       type: string
       description: Admin password for accessing Chronos HTTP service
       required: yes
+      default: admin
 
     slave_num:
       type: integer
