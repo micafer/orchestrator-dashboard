@@ -98,7 +98,14 @@
               <input placeholder="Region" name="service_region" class="col-sm-12" type="text" id="service_region" value="{{ creds['service_region'] if creds else '' }}"/>
           </div>
           <div class="col">
-              <input placeholder="Auth Version" name="auth_version" class="col-sm-12" type="text" id="auth_version" value="{{ creds['auth_version'] if creds else '' }}"/>
+            <select class="js-example-basic-single js-states form-control" id="auth_version" name="auth_version" required>
+              <option name="auth_version" value="">Set Auth Version</option>
+              <option name="auth_version" value="3.x_password" {{ "selected" if creds and creds['auth_version'] == "3.x_password" else '' }}>3.x_password</option>
+              <option name="auth_version" value="3.x_oidc_access_token" {{ "selected" if creds and creds['auth_version'] == "3.x_oidc_access_token" else '' }}>3.x_oidc_access_token</option>
+              <option name="auth_version" value="2.0_voms" {{ "selected" if creds and creds['auth_version'] == "2.0_voms" else '' }}>2.0_voms</option>
+              <option name="auth_version" value="2.0_password" {{ "selected" if creds and creds['auth_version'] == "2.0_password" else '' }}>2.0_password</option>
+          </select>
+
           </div>
         </div>
 
