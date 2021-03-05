@@ -36,6 +36,17 @@
        });
    }
 
+   // to avoid using spaces in the ID field
+   $("input#id").on({
+      keydown: function(e) {
+        if (e.which === 32)
+          return false;
+      },
+      change: function() {
+        this.value = this.value.replace(/\s/g, "");
+      }
+    });
+
 </script>
 <img src="{{ url_for('static', filename='images/' + cred_type + 'Row.png') }}"/><br/><br/>
 
