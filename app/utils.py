@@ -166,17 +166,20 @@ def getUserAuthData(access_token, cred, userid):
                     for site in list(getCachedSiteList().values()):
                         fedcloud_sites[site['url']] = site
 
-                site_info = fedcloud_sites[cred['host']]
-                if 'api_version' in site_info:
-                    res += "; api_version  = %s" % site_info['api_version']
+                if cred['host'] in fedcloud_sites:
+                    site_info = fedcloud_sites[cred['host']]
+                    if 'api_version' in site_info:
+                        res += "; api_version  = %s" % site_info['api_version']
 
-                projectid = None
-                project_ids = getCachedProjectIDs(site_info["id"])
-                if cred['vo'] in project_ids:
-                    projectid = project_ids[cred['vo']]
+                    projectid = None
+                    project_ids = getCachedProjectIDs(site_info["id"])
+                    if cred['vo'] in project_ids:
+                        projectid = project_ids[cred['vo']]
 
-                if projectid:
-                    res += "; domain = %s" % projectid
+                    if projectid:
+                        res += "; domain = %s" % projectid
+                else:
+                    print("Error %s not in list of FedCloud sites." % cred['host'], file=sys.stderr)
 
     return res
 
