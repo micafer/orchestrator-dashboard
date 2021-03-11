@@ -752,6 +752,20 @@ def create_app(oidc_blueprint=None):
             flash("Error getting RADL: \n%s" % (response.text), 'error')
             return redirect(url_for('showinfrastructures'))
 
+    @app.route('/manage_inf/<infid>/<op>')
+    @authorized_with_valid_token
+    def manage_inf(infid=None, op=None):
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+
+        try:
+            response = im.manage_inf(op, infid, auth_data)
+            response.raise_for_status()
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
+
+        return redirect(url_for('showinfrastructures'))
+
     @app.route('/logout')
     def logout():
         session.clear()

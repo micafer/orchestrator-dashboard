@@ -129,3 +129,14 @@ class InfrastructureManager():
         headers = {"Authorization": auth_data}
         url = "%s/clouds/%s/quotas" % (self.im_url, cloud_id)
         return requests.get(url, headers=headers, timeout=self.timeout)
+
+    def manage_inf(self, op, infid, auth_data):
+        headers = {"Authorization": auth_data}
+        op = op.lower()
+        if op in ["stop", "start"]:
+            url = "%s/infrastructures/%s/%s" % (self.im_url, infid, op)
+            response = requests.put(url, headers=headers, timeout=self.timeout)
+        else:
+            raise Exception("Invalid Infrastructure Operation: %s." % op)
+
+        return response
