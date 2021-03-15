@@ -761,6 +761,7 @@ def create_app(oidc_blueprint=None):
         try:
             response = im.manage_inf(op, infid, auth_data)
             response.raise_for_status()
+            flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'info')
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
 
