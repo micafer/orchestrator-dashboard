@@ -61,13 +61,17 @@ topology_template:
       type: string
       description: OSCAR password
       default: oscar123
+    minio_password:
+      type: string
+      description: MinIO password
+      default: minio123
 
   node_templates:
 
     oscar:
       type: tosca.nodes.indigo.OSCAR
       properties:
-        minio_secretkey:  minio123
+        minio_secretkey:  { get_input: minio_password }
         password: { get_input: oscar_password }
       capabilities:
         endpoint:
@@ -79,6 +83,9 @@ topology_template:
               https_port:
                 protocol: tcp
                 source: 443
+              minio_port:
+                protocol: tcp
+                source: 30300
       requirements:
         - host: lrms_front_end
 

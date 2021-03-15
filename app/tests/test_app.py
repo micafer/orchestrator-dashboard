@@ -186,6 +186,20 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'infid', res.data)
 
     @patch("app.utils.getUserAuthData")
+    @patch('requests.put')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_manageinf_start(self, flash, avatar, put, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        put.side_effect = self.put_response
+        self.login(avatar)
+        res = self.client.get('/manage_inf/infid/stop')
+        self.assertEqual(302, res.status_code)
+        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertEquals(flash.call_args_list[0][0],
+                          ("Operation 'stop' successfully made on Infrastructure ID: infid", 'info'))
+
+    @patch("app.utils.getUserAuthData")
     @patch('requests.get')
     @patch("app.utils.avatar")
     def test_vm_info(self, avatar, get, user_data):

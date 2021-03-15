@@ -62,6 +62,7 @@
         <div class="card-body">
 
             <div class="table-responsive">
+              <br>
             <table class="table table-striped table-hover" id="tableUserDeployments" width="100%" cellspacing="0">
             <!--Table head-->
               <thead>
@@ -113,6 +114,8 @@
                           <a class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
                           <a class="dropdown-item" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
                           <a class="dropdown-item" href="{{ url_for('infoutputs', infid=infId) }}"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
+                          <a class="dropdown-item" href="#" onclick="$('#stop_confirm_{{infId}}').modal('show');"><span class="fas fa-pause mr-2 grey-text"></span>Stop</a>
+                          <a class="dropdown-item" href="#" onclick="$('#start_confirm_{{infId}}').modal('show');"><span class="fas fa-play mr-2 grey-text"></span>Start</a>
                           <a class="dropdown-item" href="#" onclick="$('#reconfigure_confirm_{{infId}}').modal('show');"><span class="fas fa-recycle mr-2 grey-text"></span>Reconfigure</a>
                       </div>
                     </td>
@@ -156,10 +159,47 @@
                     </div>
                   </div>
                 </div>
+                <!-- Modal Stop -->
+                <div class="modal fade" id="stop_confirm_{{infId}}" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="stop_confirm_label_{{infId}}">Confirm Infrastructure stop</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                        Do you really want to stop the Infrastructure {{infId}}?
+                      </div>
+                      <div class="modal-footer">
+                        <a class="btn btn-primary stopCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-warning StopBtn" role="button" href="{{ url_for("manage_inf", infid=infId, op="stop") }}">Stop</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Modal Start -->
+                <div class="modal fade" id="start_confirm_{{infId}}" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="start_confirm_label_{{infId}}">Confirm Infrastructure start</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                        Do you really want to start the Infrastructure {{infId}}?
+                      </div>
+                      <div class="modal-footer">
+                        <a class="btn btn-primary startCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-success StartBtn" role="button" href="{{ url_for("manage_inf", infid=infId, op="start") }}">Start</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 {% endfor %}
               </tbody>
               <!--Table body-->
             </table>
+            <br>
             </div>
         </div>
     </div>
@@ -210,6 +250,24 @@ $(document).ready(function () {
       $(this).parent().find(".reconfCancelBtn").addClass("disabled", true);
       $(this).addClass("disabled", true);
       $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Reconfiguring...` );
+  });
+});
+
+$(document).ready(function () {
+  $(".StopBtn").click(function () {
+      // add spinner to button
+      $(this).parent().find(".stopCancelBtn").addClass("disabled", true);
+      $(this).addClass("disabled", true);
+      $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Stopping...` );
+  });
+});
+
+$(document).ready(function () {
+  $(".StartBtn").click(function () {
+      // add spinner to button
+      $(this).parent().find(".startCancelBtn").addClass("disabled", true);
+      $(this).addClass("disabled", true);
+      $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...` );
   });
 });
 </script>
