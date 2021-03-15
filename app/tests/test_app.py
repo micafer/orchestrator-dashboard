@@ -11,6 +11,7 @@ class IMDashboardTests(unittest.TestCase):
 
     def setUp(self):
         self.app = create_app(self.oauth)
+        self.app.config['WTF_CSRF_ENABLED'] = False
         self.client = self.app.test_client()
 
     @staticmethod
@@ -193,7 +194,7 @@ class IMDashboardTests(unittest.TestCase):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         put.side_effect = self.put_response
         self.login(avatar)
-        res = self.client.get('/manage_inf/infid/stop')
+        res = self.client.post('/manage_inf/infid/stop')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
@@ -219,7 +220,7 @@ class IMDashboardTests(unittest.TestCase):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         put.side_effect = self.put_response
         self.login(avatar)
-        res = self.client.get('/managevm/stop/infid/0')
+        res = self.client.post('/managevm/stop/infid/0')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/vminfo?infId=infid&vmId=0', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'info'))
@@ -232,7 +233,7 @@ class IMDashboardTests(unittest.TestCase):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         delete.side_effect = self.delete_response
         self.login(avatar)
-        res = self.client.get('/managevm/terminate/infid/0')
+        res = self.client.post('/managevm/terminate/infid/0')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0", 'info'))
@@ -245,7 +246,7 @@ class IMDashboardTests(unittest.TestCase):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         put.side_effect = self.put_response
         self.login(avatar)
-        res = self.client.get('/reconfigure/infid')
+        res = self.client.post('/manage_inf/infid/reconfigure')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Infrastructure successfuly reconfigured.", 'info'))
@@ -305,7 +306,7 @@ class IMDashboardTests(unittest.TestCase):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         delete.side_effect = self.delete_response
         self.login(avatar)
-        res = self.client.get('/delete/infid/0')
+        res = self.client.post('/manage_inf/infid/delete')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'info'))

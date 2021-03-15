@@ -134,8 +134,16 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <a class="btn btn-danger deleteBtn" role="button" href="{{ url_for('infdel', infid=infId, force=0) }}">Delete</a>
-                        <a class="btn btn-danger foceDeleteBtn" role="button" title="The infrastructure will be deleted even if sonme resources are not correctly deleted" href="{{ url_for('infdel', infid=infId, force=1) }}"><span class="fas fa-exclamation-triangle mr-2"></span>Force Delete</a>
+                        <form action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-danger deleteBtn" role="button">Delete</button>
+                        </form>
+                        <form action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
+                          <input type="hidden" name="force" value="1"/>
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-danger foceDeleteBtn" role="button" title="The infrastructure will be deleted even if sonme resources are not correctly deleted"><span class="fas fa-exclamation-triangle mr-2"></span>Force Delete</button>
+                        </form>
+
                       </div>
                     </div>
                   </div>
@@ -154,7 +162,10 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary reconfCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <a class="btn btn-success reconfigureBtn" role="button" href="{{ url_for("infreconfigure", infid=infId) }}">Reconfigure</a>
+                        <form action="{{ url_for('manage_inf', infid=infId, op='reconfigure') }}" method="post">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-success reconfigureBtn" role="button">Reconfigure</button>
+                        </form>
                       </div>
                     </div>
                   </div>
@@ -172,7 +183,10 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary stopCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <a class="btn btn-warning StopBtn" role="button" href="{{ url_for("manage_inf", infid=infId, op="stop") }}">Stop</a>
+                        <form action="{{ url_for('manage_inf', infid=infId, op='stop') }}" method="post">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-warning StopBtn" role="button">Stop</button>
+                        </form>
                       </div>
                     </div>
                   </div>
@@ -190,7 +204,10 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary startCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <a class="btn btn-success StartBtn" role="button" href="{{ url_for("manage_inf", infid=infId, op="start") }}">Start</a>
+                        <form action="{{ url_for('manage_inf', infid=infId, op='start') }}" method="post">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-success StartBtn" role="button">Start</button>
+                        </form>
                       </div>
                     </div>
                   </div>

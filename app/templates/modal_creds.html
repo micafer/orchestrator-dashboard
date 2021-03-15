@@ -50,6 +50,7 @@
 </script>
 <img src="{{ url_for('static', filename='images/' + cred_type + 'Row.png') }}"/><br/><br/>
 
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <input name="cred_id" type="hidden" value="{{ cred_id }}"/>
       <input name="type" type="hidden" value="{{ cred_type }}"/>
       <div class="row form-group">
