@@ -197,7 +197,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
-                          "Operation 'stop' successfully made on Infrastructure ID: infid", 'info')
+                          ("Operation 'stop' successfully made on Infrastructure ID: infid", 'info'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
