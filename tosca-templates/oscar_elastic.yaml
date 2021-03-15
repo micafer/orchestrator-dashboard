@@ -83,8 +83,8 @@ topology_template:
           configure:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/refresh_install.yml
             inputs:
-                CLIENT_ID: ef4d5286-0db3-4c06-87ff-6a27ec97cb85
-                CLIENT_SECRET: O-UODpEZZiceW3X47Kx_RDYnd5KJwrm-UzHJK_4Z5tfyKF5RbtbluJcnzeGzPz8xmlfbCWEjKjDj_aBT3HlhlA
+                CLIENT_ID: client_id
+                CLIENT_SECRET: client_secret
           start:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/use_external_im.yml
 
