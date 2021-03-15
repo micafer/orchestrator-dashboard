@@ -24,6 +24,7 @@
 
     <div class="table-responsive">
         <form id="addNodes" action="{{ url_for('addresources', infid=infid) }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <table id="tableSystems" class="table table-bordered table-striped" width="100%" cellspacing="0">
             <thead>
                 <tr>

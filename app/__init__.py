@@ -39,6 +39,7 @@ from urllib.parse import urlparse
 from radl import radl_parse
 from radl.radl import deploy
 from flask_apscheduler import APScheduler
+from flask_wtf.csrf import CSRFProtect
 
 
 def create_app(oidc_blueprint=None):
@@ -51,6 +52,7 @@ def create_app(oidc_blueprint=None):
         key = os.environ['CREDS_KEY']
     else:
         key = None
+    CSRFProtect(app)
     cred = Credentials(settings.db_url, key)
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl)
@@ -253,7 +255,7 @@ def create_app(oidc_blueprint=None):
         return render_template('vminfo.html', infid=infid, vmid=vmid, vminfo=vminfo,
                                state=state, nets=nets, deployment=deployment)
 
-    @app.route('/managevm/<op>/<infid>/<vmid>')
+    @app.route('/managevm/<op>/<infid>/<vmid>', methods=['POST'])
     @authorized_with_valid_token
     def managevm(op=None, infid=None, vmid=None):
         access_token = oidc_blueprint.session.token['access_token']
@@ -314,21 +316,6 @@ def create_app(oidc_blueprint=None):
             return im.get_inf_state(infid, auth_data)
         except Exception:
             return {"state": "error", "vm_states": {}}
-
-    @app.route('/reconfigure/<infid>')
-    @authorized_with_valid_token
-    def infreconfigure(infid=None):
-        access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        try:
-            response = im.reconfigure_inf(infid, auth_data)
-            response.raise_for_status()
-        except Exception as ex:
-            flash("Error reconfiguring Infrastructure: \n%s" % ex, 'error')
-
-        flash("Infrastructure successfuly reconfigured.", "info")
-
-        return redirect(url_for('showinfrastructures'))
 
     @app.route('/template/<infid>')
     @authorized_with_valid_token
@@ -396,23 +383,6 @@ def create_app(oidc_blueprint=None):
             flash("Error: %s." % ex, 'error')
 
         return render_template('outputs.html', infid=infid, outputs=outputs)
-
-    @app.route('/delete/<infid>/<force>')
-    @authorized_with_valid_token
-    def infdel(infid=None, force=0):
-        access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
-        try:
-            response = im.delete_inf(infid, force, auth_data)
-            response.raise_for_status()
-
-            flash("Infrastructure '%s' successfuly deleted." % infid, "info")
-            # deleting from DB
-            infra.delete_infra(infid)
-        except Exception as ex:
-            flash("Error deleting infrastructure: %s." % ex, 'error')
-
-        return redirect(url_for('showinfrastructures'))
 
     @app.route('/configure')
     @authorized_with_valid_token
@@ -752,16 +722,31 @@ def create_app(oidc_blueprint=None):
             flash("Error getting RADL: \n%s" % (response.text), 'error')
             return redirect(url_for('showinfrastructures'))
 
-    @app.route('/manage_inf/<infid>/<op>')
+    @app.route('/manage_inf/<infid>/<op>', methods=['POST'])
     @authorized_with_valid_token
     def manage_inf(infid=None, op=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
 
         try:
-            response = im.manage_inf(op, infid, auth_data)
-            response.raise_for_status()
-            flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'info')
+            if op in ["start", "stop"]:
+                response = im.manage_inf(op, infid, auth_data)
+                response.raise_for_status()
+                flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'info')
+            elif op == "delete":
+                form_data = request.form.to_dict()
+                force = False
+                if 'force' in form_data and form_data['force'] != "0":
+                    force = True
+                response = im.delete_inf(infid, force, auth_data)
+                response.raise_for_status()
+                flash("Infrastructure '%s' successfuly deleted." % infid, "info")
+                # deleting from DB
+                infra.delete_infra(infid)
+            elif op == "reconfigure":
+                response = im.reconfigure_inf(infid, auth_data)
+                response.raise_for_status()
+                flash("Infrastructure successfuly reconfigured.", "info")
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
 
