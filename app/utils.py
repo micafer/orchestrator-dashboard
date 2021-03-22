@@ -145,12 +145,12 @@ def getCachedSiteList(force=False):
     return SITE_LIST
 
 
-def getUserAuthData(access_token, cred, userid):
+def getUserAuthData(access_token, cred, userid, cred_id=None):
     res = "type = InfrastructureManager; token = %s" % access_token
 
     fedcloud_sites = None
     for cred in cred.get_creds(userid):
-        if cred['enabled']:
+        if cred['enabled'] and (cred_id is None or cred_id == cred['id']):
             res += "\\nid = %s" % cred['id']
             if cred['type'] != "fedcloud":
                 for key, value in cred.items():
