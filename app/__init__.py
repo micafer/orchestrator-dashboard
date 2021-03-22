@@ -436,7 +436,7 @@ def create_app(oidc_blueprint=None):
 
         if local:
             access_token = oidc_blueprint.session.token['access_token']
-            auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+            auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
             try:
                 response = im.get_cloud_images(cred_id, auth_data)
                 response.raise_for_status()
@@ -455,7 +455,7 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def getusage(cred_id=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
         try:
             response = im.get_cloud_quotas(cred_id, auth_data)
             response.raise_for_status()
