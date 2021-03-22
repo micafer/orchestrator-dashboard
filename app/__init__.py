@@ -548,7 +548,7 @@ def create_app(oidc_blueprint=None):
             flash("No correct image specified.", "error")
             return redirect(url_for('showinfrastructures'))
 
-        auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
@@ -624,6 +624,8 @@ def create_app(oidc_blueprint=None):
             try:
                 if 'password' in creds and creds['password'] in [None, '']:
                     del creds['password']
+                if 'csrf_token' in creds:
+                    del creds['csrf_token']
                 cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
                 flash("Credentials successfully written!", 'info')
             except db.IntegrityError:
