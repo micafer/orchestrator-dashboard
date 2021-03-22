@@ -414,16 +414,17 @@ def create_app(oidc_blueprint=None):
     @app.route('/sites/<vo>')
     def getsites(vo=None):
         res = ""
+        static_sites = utils.getStaticSites(vo)
+        for site_name, site in static_sites.items():
+            res += '<option name="selectedSite" value=%s>%s</option>' % (site['url'], site_name)
+
         appdb_sites = appdb.get_sites(vo)
         for site_name, site in appdb_sites.items():
-            if site["state"]:
-                site["state"] = " (WARNING: %s state!)" % site["state"]
-            res += '<option name="selectedSite" value=%s>%s%s</option>' % (site['url'], site_name, site["state"])
-
-        for site_name, site in utils.getStaticSites(vo).items():
             # avoid site duplication
-            if site_name not in appdb_sites:
-                res += '<option name="selectedSite" value=%s>%s</option>' % (site['url'], site_name)
+            if site_name not in static_sites:
+                if site["state"]:
+                    site["state"] = " (WARNING: %s state!)" % site["state"]
+                res += '<option name="selectedSite" value=%s>%s%s</option>' % (site['url'], site_name, site["state"])
 
         return res
 
