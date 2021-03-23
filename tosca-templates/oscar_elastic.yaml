@@ -74,6 +74,18 @@ topology_template:
       properties:
         im_auth: ""
         powermanager_plugin: im
+        kube_token: { get_input: admin_token }
+        config_options:
+          - { section: 'scheduling', option: 'IDLE_TIME', value: '300' }
+          - { section: 'scheduling', option: 'RECONSIDER_JOB_TIME', value: '60' }
+          - { section: 'monitoring', option: 'MAX_WAIT_POWERON', value: '3000' }
+          - { section: 'monitoring', option: 'MAX_WAIT_POWEROFF', value: '600' }
+          - { section: 'monitoring', option: 'PERIOD_LIFECYCLE', value: '10' }
+          - { section: 'monitoring', option: 'PERIOD_MONITORING_NODES', value: '2' }
+          - { section: 'client', option: 'CLUES_REQUEST_WAIT_TIMEOUT', value: '3000' }
+          # These options enable to have always one slot free
+          - { section: 'scheduling', option: 'SCHEDULER_CLASSES', value: 'clueslib.schedulers.CLUES_Scheduler_PowOn_Requests, clueslib.schedulers.CLUES_Scheduler_Reconsider_Jobs, clueslib.schedulers.CLUES_Scheduler_PowOff_IDLE, clueslib.schedulers.CLUES_Scheduler_PowOn_Free' }
+          - { section: 'scheduling', option: 'EXTRA_SLOTS_FREE', value: '1' }
       capabilities:
         endpoint:
           properties:
@@ -127,7 +139,7 @@ topology_template:
         install_metrics: true
         install_nfs_client: true
         install_ingress: true
-        version: 1.18.8
+        version: 1.19.3
       requirements:
         - host: front
 
@@ -165,7 +177,7 @@ topology_template:
       type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
-        version: 1.18.3
+        version: 1.19.3
       capabilities:
         wn:
           properties:
@@ -173,7 +185,7 @@ topology_template:
             min_instances: 0
       requirements:
         - host: wn
-  
+
     wn:
       type: tosca.nodes.indigo.Compute
       capabilities:
