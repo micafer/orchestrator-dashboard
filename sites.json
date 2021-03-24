@@ -75,8 +75,7 @@
         "vos": {
             "eosc-synergy.eu": "0f1a9bfa6693460987355a7d25ae90c6",
 	    "cryoem.instruct-eric.eu": "f82b19069f644c0dafcad4b7f6a4dac0"
-        },
-        "api_version": "1.1"
+        }
     },
     {
         "name": "BIFI",
