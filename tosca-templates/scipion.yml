@@ -23,7 +23,13 @@ topology_template:
       type: string
       description: Instance type of Scipion Node
       required: no
-      default: 'hpc.8core-64ram-nvidia-1080-glados'
+      default: 'gpu1cpu6'
+    disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the FE instance
+      default: 10 GB
+      constraints:
+      - valid_values: [ 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
 
   node_templates:
 
@@ -57,6 +63,19 @@ topology_template:
         os:
           properties:
             type: linux
+      requirements:
+        - local_storage:
+            node: master_block_storage
+            relationship:
+              type: AttachesTo
+              properties:
+                location: /data
+
+    master_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: disk_size }
+
   outputs:
     master_node_ip:
       value: { concat: [ 'https://', get_attribute: [ master_node, public_address, 0 ], ':5904/?resize=remote' ] }
