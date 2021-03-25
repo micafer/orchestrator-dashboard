@@ -247,7 +247,7 @@ def create_app(oidc_blueprint=None):
                 if "net_interface.%s.dns_name" % cont in vminfo:
                     nets += " (%s)" % vminfo["net_interface.%s.dns_name" % cont]
                     del vminfo["net_interface.%s.dns_name" % cont]
-                
+
                 cont += 1
 
             cont = 0
