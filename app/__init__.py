@@ -212,6 +212,7 @@ def create_app(oidc_blueprint=None):
         vminfo = {}
         state = ""
         nets = ""
+        disks = ""
         deployment = ""
         if not response.ok:
             flash("Error retrieving VM info: \n" + response.text, 'error')
@@ -233,6 +234,8 @@ def create_app(oidc_blueprint=None):
                 else:
                     deployment += ": " + vminfo["provider.host"]
                 del vminfo["provider.host"]
+            if "disk.0.os.name" in vminfo:
+                del vminfo["disk.0.os.name"]
 
             cont = 0
             while "net_interface.%s.ip" % cont in vminfo:
@@ -241,6 +244,10 @@ def create_app(oidc_blueprint=None):
                 nets += Markup('<i class="fa fa-network-wired"></i>')
                 nets += " %s: %s" % (cont, vminfo["net_interface.%s.ip" % cont])
                 del vminfo["net_interface.%s.ip" % cont]
+                if "net_interface.%s.dns_name" % cont in vminfo:
+                    nets += " (%s)" % vminfo["net_interface.%s.dns_name" % cont]
+                    del vminfo["net_interface.%s.dns_name" % cont]
+                
                 cont += 1
 
             cont = 0
@@ -252,8 +259,40 @@ def create_app(oidc_blueprint=None):
                 if elem.endswith("size") and isinstance(vminfo[elem], int):
                     vminfo[elem] = "%d GB" % (vminfo[elem] / 1073741824)
 
+            cont = 0
+            while "disk.%s.size" % cont in vminfo or "disk.%s.image.url" % cont in vminfo:
+                if cont > 0:
+                    disks += Markup('<br/>')
+                disks += Markup('<i class="fa fa-database"></i> - %s:<br/>' % cont)
+                if "disk.%s.size" % cont in vminfo:
+                    disks += Markup('&nbsp;&nbsp;')
+                    disks += "- Size: %s" % vminfo["disk.%s.size" % cont]
+                    disks += Markup('<br/>')
+                    del vminfo["disk.%s.size" % cont]
+                if "disk.%s.image.url" % cont in vminfo:
+                    disks += Markup('&nbsp;&nbsp;')
+                    disks += "- URL: %s" % vminfo["disk.%s.image.url" % cont]
+                    disks += Markup('<br/>')
+                    del vminfo["disk.%s.image.url" % cont]
+                if "disk.%s.device" % cont in vminfo:
+                    disks += Markup('&nbsp;&nbsp;')
+                    disks += "- Device: %s" % vminfo["disk.%s.device" % cont]
+                    disks += Markup('<br/>')
+                    del vminfo["disk.%s.device" % cont]
+                if "disk.%s.mount_path" % cont in vminfo:
+                    disks += Markup('&nbsp;&nbsp;')
+                    disks += "- Mount path: %s" % vminfo["disk.%s.mount_path" % cont]
+                    disks += Markup('<br/>')
+                    del vminfo["disk.%s.mount_path" % cont]
+                if "disk.%s.fstype" % cont in vminfo:
+                    disks += Markup('&nbsp;&nbsp;')
+                    disks += "- Fstype: %s" % vminfo["disk.%s.fstype" % cont]
+                    disks += Markup('<br/>')
+                    del vminfo["disk.%s.fstype" % cont]
+                cont += 1
+
         return render_template('vminfo.html', infid=infid, vmid=vmid, vminfo=vminfo,
-                               state=state, nets=nets, deployment=deployment)
+                               state=state, nets=nets, deployment=deployment, disks=disks)
 
     @app.route('/managevm/<op>/<infid>/<vmid>', methods=['POST'])
     @authorized_with_valid_token
