@@ -303,6 +303,14 @@ def create_app(oidc_blueprint=None):
         try:
             if op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data, [vmid])
+            if op == "resize":
+                form_data = request.form.to_dict()
+                cpu = int(form_data['cpu'])
+                memory = int(form_data['memory'])
+                system_name = form_data['system_name']
+
+                radl = "system %s (cpu.count= %d and memory.size=%dg)" % (system_name, cpu, memory)
+                response = im.resize_vm(infid, vmid, radl, auth_data)
             else:
                 response = im.manage_vm(op, infid, vmid, auth_data)
         except Exception as ex:

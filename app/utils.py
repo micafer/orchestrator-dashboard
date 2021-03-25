@@ -189,7 +189,7 @@ def format_json_radl(vminfo):
     for elem in vminfo:
         if elem["class"] == "system":
             for field, value in elem.items():
-                if field not in ["class", "id"]:
+                if field not in ["class"]:
                     if field.endswith("_min"):
                         field = field[:-4]
                     res[field] = value
