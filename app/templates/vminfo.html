@@ -64,7 +64,15 @@
                     Provider:
                   </th>
                   <td>
-                    {{ deployment }}
+                    {{ deployment }}<br/>
+                    {% if 'instance_id' in vminfo %}
+                      - Instance ID: {{ vminfo['instance_id'] }}<br/>
+                      {% set _dummy=vminfo.pop('instance_id') %}
+                    {% endif %}
+                    {% if 'instance_name' in vminfo %}
+                      - Instance Name: {{ vminfo['instance_name'] }}
+                      {% set _dummy=vminfo.pop('instance_name') %}
+                    {% endif %}
                   </td>
                 </tr>
                 <tr>
@@ -95,6 +103,10 @@
                       , {{ vminfo['disk.0.free_size'] }} of HD
                       {% set _dummy=vminfo.pop('disk.0.free_size') %}
                     {% endif %}
+                    {% if 'instance_type' in vminfo %}
+                       ({{ vminfo['instance_type'] }})
+                      {% set _dummy=vminfo.pop('instance_type') %}
+                    {% endif %}
                   </td>
                 </tr>
                 <tr>
@@ -120,10 +132,19 @@
                     {% endif %}
                   </td>
                 </tr>
+                <tr>
+                  <th>
+                    Disks:
+                  </th>
+                  <td>
+                    {{ disks }}
+                  </td>
+                </tr>
             </tbody>
         </table>
         </div>
 
+        {% if vminfo %}
         <div class="table-responsive">
           <table id="tableFields" class="table table-bordered table-striped" width="100%" cellspacing="0">
             <thead>
@@ -146,6 +167,7 @@
             </tbody>
         </table>
       </div>
+      {% endif %}
 
                 <!-- Modal Start -->
                 <div class="modal fade" id="managevm_confirm_start" role="dialog">
