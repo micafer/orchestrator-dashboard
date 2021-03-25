@@ -81,12 +81,12 @@
                   </th>
                   <td>
                     {% if 'cpu.count' in vminfo %}
+                      {{ vminfo['cpu.count'] }} CPUs, 
                       {% set _dummy=vminfo.pop('cpu.count') %}
-                    {{ vminfo['cpu.count'] }} CPUs, 
                     {% endif %}
                     {% if 'memory.size' in vminfo %}
-                      {% set _dummy=vminfo.pop('memory.size') %}
                       {{ vminfo['memory.size'] }} of RAM
+                      {% set _dummy=vminfo.pop('memory.size') %}
                       {% endif %}
                     {% if 'disks.free_size' in vminfo %}
                       , {{ vminfo['disks.free_size'] }} of HD
