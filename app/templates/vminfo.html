@@ -26,6 +26,7 @@
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_stop').modal('show');"><span class='fas fa-pause mr-2'></span>Stop</a>	
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_start').modal('show');"><span class='fas fa-play mr-2'></span>Start</a>	
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_reboot').modal('show');"><span class='fas fa-redo mr-2'></span>Reboot</a>	
+                    <a class="dropdown-item" href="#" onclick="$('#managevm_resize').modal('show');"><span class='fas fa-expand mr-2'></span>Resize</a>	
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_reconfigure').modal('show');"><span class='fas fa-recycle mr-2'></span>Reconfigure</a>	
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_terminate').modal('show');"><span class='fas fa-power-off mr-2'></span>Terminate</a>	
                     <a class="dropdown-item" href="{{ url_for('vmlog', infid=infid, vmid=vmid) }}"><span class='fas fa-file-alt mr-2'></span>Log</a>
@@ -64,6 +65,8 @@
                     Provider:
                   </th>
                   <td>
+                    {% set system_name=vminfo.pop('id') %}
+
                     {{ deployment }}<br/>
                     {% if 'instance_id' in vminfo %}
                       - Instance ID: {{ vminfo['instance_id'] }}<br/>
@@ -90,11 +93,11 @@
                   <td>
                     {% if 'cpu.count' in vminfo %}
                       {{ vminfo['cpu.count'] }} CPUs, 
-                      {% set _dummy=vminfo.pop('cpu.count') %}
+                      {% set cpu=vminfo.pop('cpu.count') %}
                     {% endif %}
                     {% if 'memory.size' in vminfo %}
                       {{ vminfo['memory.size'] }} of RAM
-                      {% set _dummy=vminfo.pop('memory.size') %}
+                      {% set memory=vminfo.pop('memory.size') %}
                       {% endif %}
                     {% if 'disks.free_size' in vminfo %}
                       , {{ vminfo['disks.free_size'] }} of HD
@@ -274,12 +277,52 @@
                     </div>
                   </div>
                 </div>
+                <!-- Modal Resize-->
+                <div class="modal fade" id="managevm_resize" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="managevm_resize_label">VM resize</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <form action="{{ url_for('managevm', op='resize', infid=infid, vmid=vmid) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="system_name" value="{{ system_name }}"/>
+                      <div class="modal-body">
+
+                        <div class="row form-group">
+                          <div class="col">
+                            CPU Number: <input name="cpu" class="col-sm-12" type="number" value="{{ cpu }}" required/>
+                          </div>
+                          <div class="col">
+                            {% set memory_parts = memory.split() %}
+                            Memory (GB): <input name="memory" class="col-sm-12" type="number" value="{{ memory_parts[0] }}" required/>
+                          </div>
+                        </div>
+
+                      </div>
+                      <div class="modal-footer">
+                          <a class="btn btn-outline-primary cancelResizeBtn" role="button" data-dismiss="modal">Cancel</a>
+                          <button type="submit" class="btn btn-primary ResizeBtn">Resize</button>
+                      </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
         </div>
     </div>
 </div>
 
 <script>
+  $(document).ready(function () {
+      $(".ResizeBtn").click(function () {
+          // add spinner to button
+          $(this).parent().find(".cancelResizeBtn").addClass("disabled", true);
+          $(this).addClass("disabled", true);
+          $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Resizing...` );
+      });
+  });
   $(document).ready(function () {
       $(".StartBtn").click(function () {
           // add spinner to button

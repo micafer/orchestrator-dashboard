@@ -140,3 +140,10 @@ class InfrastructureManager():
             raise Exception("Invalid Infrastructure Operation: %s." % op)
 
         return response
+
+    def resize_vm(self, infid, vmid, radl, auth_data):
+        headers = {"Authorization": auth_data}
+        url = "%s/infrastructures/%s/vms/%s" % (self.im_url, infid, vmid)
+        response = requests.put(url, headers=headers, data=radl, timeout=self.timeout)
+
+        return response
