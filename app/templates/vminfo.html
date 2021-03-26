@@ -91,6 +91,12 @@
                     HW Features:
                   </th>
                   <td>
+                    {% if 'instance_type' in vminfo %}
+                      {% if vminfo['instance_type'] %}
+                       {{ vminfo['instance_type'] }}<br/>
+                      {% endif %}
+                      {% set _dummy=vminfo.pop('instance_type') %}
+                    {% endif %}
                     {% if 'cpu.count' in vminfo %}
                       {{ vminfo['cpu.count'] }} CPUs, 
                       {% set cpu=vminfo.pop('cpu.count') %}
@@ -106,9 +112,21 @@
                       , {{ vminfo['disk.0.free_size'] }} of HD
                       {% set _dummy=vminfo.pop('disk.0.free_size') %}
                     {% endif %}
-                    {% if 'instance_type' in vminfo %}
-                       ({{ vminfo['instance_type'] }})
-                      {% set _dummy=vminfo.pop('instance_type') %}
+                    {% if 'gpu.count' in vminfo %}
+                      , {{ vminfo['gpu.count'] }} GPUs
+                      {% set _dummy=vminfo.pop('gpu.count') %}
+                      {% if 'gpu.vendor' in vminfo or 'gpu.model' in vminfo %}
+                        (
+                        {% if 'gpu.model' in vminfo %}
+                          {{ vminfo['gpu.model'] }} 
+                          {% set _dummy=vminfo.pop('gpu.model') %}
+                        {% endif %}
+                        {% if 'gpu.vendor' in vminfo %}
+                          {{ vminfo['gpu.vendor'] }} 
+                          {% set _dummy=vminfo.pop('gpu.count') %}
+                        {% endif %}
+                        )
+                      {% endif %}
                     {% endif %}
                   </td>
                 </tr>
