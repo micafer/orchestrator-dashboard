@@ -264,7 +264,8 @@ def create_app(oidc_blueprint=None):
             while "disk.%s.size" % cont in vminfo or "disk.%s.image.url" % cont in vminfo:
                 if cont > 0:
                     disks += Markup('<br/>')
-                disks += Markup('<i class="fa fa-database"></i> <span class="badge badge-secondary">%s</span>:<br/>' % cont)
+                disks += Markup('<i class="fa fa-database"></i> <span class="badge badge-secondary">'
+                                '%s</span><br/>' % cont)
                 if "disk.%s.size" % cont in vminfo:
                     disks += Markup('&nbsp;&nbsp;')
                     disks += "- Size: %s" % vminfo["disk.%s.size" % cont]
