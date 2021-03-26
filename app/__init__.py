@@ -242,7 +242,8 @@ def create_app(oidc_blueprint=None):
                 if cont > 0:
                     nets += Markup('<br/>')
                 nets += Markup('<i class="fa fa-network-wired"></i>')
-                nets += " %s: %s" % (cont, vminfo["net_interface.%s.ip" % cont])
+                nets += Markup(' <span class="badge badge-secondary">%s</span>' % cont)
+                nets += ": %s" % vminfo["net_interface.%s.ip" % cont]
                 del vminfo["net_interface.%s.ip" % cont]
                 if "net_interface.%s.dns_name" % cont in vminfo:
                     nets += " (%s)" % vminfo["net_interface.%s.dns_name" % cont]
@@ -263,7 +264,8 @@ def create_app(oidc_blueprint=None):
             while "disk.%s.size" % cont in vminfo or "disk.%s.image.url" % cont in vminfo:
                 if cont > 0:
                     disks += Markup('<br/>')
-                disks += Markup('<i class="fa fa-database"></i> - %s:<br/>' % cont)
+                disks += Markup('<i class="fa fa-database"></i> <span class="badge badge-secondary">'
+                                '%s</span><br/>' % cont)
                 if "disk.%s.size" % cont in vminfo:
                     disks += Markup('&nbsp;&nbsp;')
                     disks += "- Size: %s" % vminfo["disk.%s.size" % cont]
