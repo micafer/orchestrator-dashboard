@@ -266,31 +266,18 @@ def create_app(oidc_blueprint=None):
                     disks += Markup('<br/>')
                 disks += Markup('<i class="fa fa-database"></i> <span class="badge badge-secondary">'
                                 '%s</span><br/>' % cont)
-                if "disk.%s.size" % cont in vminfo:
-                    disks += Markup('&nbsp;&nbsp;')
-                    disks += "- Size: %s" % vminfo["disk.%s.size" % cont]
-                    disks += Markup('<br/>')
-                    del vminfo["disk.%s.size" % cont]
-                if "disk.%s.image.url" % cont in vminfo:
-                    disks += Markup('&nbsp;&nbsp;')
-                    disks += "- URL: %s" % vminfo["disk.%s.image.url" % cont]
-                    disks += Markup('<br/>')
-                    del vminfo["disk.%s.image.url" % cont]
-                if "disk.%s.device" % cont in vminfo:
-                    disks += Markup('&nbsp;&nbsp;')
-                    disks += "- Device: %s" % vminfo["disk.%s.device" % cont]
-                    disks += Markup('<br/>')
-                    del vminfo["disk.%s.device" % cont]
-                if "disk.%s.mount_path" % cont in vminfo:
-                    disks += Markup('&nbsp;&nbsp;')
-                    disks += "- Mount path: %s" % vminfo["disk.%s.mount_path" % cont]
-                    disks += Markup('<br/>')
-                    del vminfo["disk.%s.mount_path" % cont]
-                if "disk.%s.fstype" % cont in vminfo:
-                    disks += Markup('&nbsp;&nbsp;')
-                    disks += "- Fstype: %s" % vminfo["disk.%s.fstype" % cont]
-                    disks += Markup('<br/>')
-                    del vminfo["disk.%s.fstype" % cont]
+
+                prop_map = {"size": "Size", "image.url": "URL", "device": "Device", "mount_path": "Mount Path",
+                            "fstype": "F.S. type", "os.flavour": "O.S. Flavor", "os.version": "O.S. Version"}
+                
+                for name, label in prop_map.items():
+                    prop = "disk.%s.%s" % (cont, name)
+                    if prop in vminfo:
+                        disks += Markup('&nbsp;&nbsp;')
+                        disks += "- %s: %s" % (label, vminfo[prop])
+                        disks += Markup('<br/>')
+                        del vminfo[prop]          
+
                 cont += 1
 
         return render_template('vminfo.html', infid=infid, vmid=vmid, vminfo=vminfo,
