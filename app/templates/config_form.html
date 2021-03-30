@@ -4,16 +4,17 @@
 {% set inputs=template['inputs'] %}
 {% if tabs|length > 0 %}
   {% for tab in tabs %}
+    {% set tab_id = tab.replace(" ", "_") %}
     {% if loop.first %}
-      <li class="nav-item"><a class="nav-link active" data-toggle="tab" href=#{{tab}}>{{tab}}</a></li>
+      <li class="nav-item"><a class="nav-link active" data-id="#{{tab_id}}" data-toggle="tab" href=#{{tab_id}}>{{tab}}</a></li>
     {% else %}
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href=#{{tab}}>{{tab}}</a></li>
+      <li class="nav-item"><a class="nav-link" data-id="#{{tab_id}}" data-toggle="tab" href=#{{tab_id}}>{{tab}}</a></li>
     {% endif %}
   {% endfor %}
 {% else %}
-  <li class="nav-item"><a class="nav-link" data-toggle="tab" href=#InputValues>Input Values</a></li>
+  <li class="nav-item"><a class="nav-link" data-id="#InputValues" data-toggle="tab" href=#InputValues>Input Values</a></li>
 {% endif %}
-<li class="nav-item"><a class="nav-link" data-toggle="tab" href=#Advanced>Cloud Provider Selection</a></li> <!-- always create advanced tab -->
+<li class="nav-item"><a class="nav-link" data-id="#Advanced" data-toggle="tab" href=#Advanced>Cloud Provider Selection</a></li> <!-- always create advanced tab -->
 </ul>
   <!-- end tab creation section -->
 
@@ -21,10 +22,11 @@
   <!-- inputs -->
   {% if tabs|length > 0 %}
     {% for tab in tabs %}
+      {% set tab_id = tab.replace(" ", "_") %}
       {% if loop.first %}
-        <div id={{tab}} class="tab-pane fade show active">
+        <div id="{{tab_id}}" class="tab-pane fade show active">
       {% else %}
-        <div id={{tab}} class="tab-pane fade">
+        <div id="{{tab_id}}" class="tab-pane fade">
       {% endif %}
 
       <br>
@@ -37,7 +39,7 @@
     {% endfor %}
 
   {% else %} <!-- no tabs -->
-    <div id=InputValues class="tab-pane fade in active">
+    <div id="InputValues" class="tab-pane fade in active">
       {% for key, value in inputs.items() %}
         {% include 'input_types.html' %}
       {% endfor %}
@@ -51,3 +53,20 @@
     {% include 'advanced_config.html' %}
   </div>
 </div>
+
+<script>
+  // Functio to validate fields of each tab before changing to other tab
+ $('.nav-tabs a').on('hide.bs.tab', function(e){
+  var link = e.delegateTarget;
+  var tab_id = link.getAttribute('data-id')
+  var inputs = $(tab_id).find(':input');
+  var valid = true;
+  for (var i = 0; i < inputs.length; i++) {
+    if (!inputs[i].checkValidity()) {
+      inputs[i].reportValidity();
+      valid = false;
+    }
+  }
+  return valid;
+});
+</script>

@@ -65,6 +65,8 @@ topology_template:
       type: string
       description: MinIO password
       default: minio123
+      constraints:
+      - min_length: 8
 
   node_templates:
 
