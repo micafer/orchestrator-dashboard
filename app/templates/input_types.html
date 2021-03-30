@@ -36,8 +36,8 @@
 
     <!-- ports text type -->
     {% elif value.tag_type == "ports" %}
-      <input type="hidden" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" pattern="^[0-9]+(,[0-9]+)*$">
-    <!-- end hidden text type -->
+      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" pattern="^[0-9]+(,[0-9]+)*$">
+    <!-- end ports text type -->
 
     <!-- select type -->
     <!-- https://github.com/select2/select2/issues/4220 -->
