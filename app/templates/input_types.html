@@ -84,6 +84,7 @@
 	  {% else %}
 
       {% if value.type == "integer" %}
+      <!-- number type -->
       <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
       {% else %}
 	    <!-- text type, hide fields with password -->

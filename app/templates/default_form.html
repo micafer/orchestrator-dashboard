@@ -1,7 +1,7 @@
 <!-- start tabs creation section -->
 <ul class="nav nav-tabs">
-  <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#InputValues">Input Values</a></li>
-  <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#Advanced">Cloud Provider Selection</a></li>
+  <li class="nav-item"><a class="nav-link active" data-id="#InputValues" data-toggle="tab" href="#InputValues">Input Values</a></li>
+  <li class="nav-item"><a class="nav-link" data-id="#Advanced" data-toggle="tab" href="#Advanced">Cloud Provider Selection</a></li>
 </ul>
 <!-- end tab creation section -->
 <div class="tab-content">
@@ -10,6 +10,8 @@
   <div class="tab-pane fade show active" id=InputValues>
     {% if inputs|length > 0 %}
       {% for key, value in inputs.items() %}
+        {% set min_length = value.constraints | selectattr('min_length') | map(attribute='min_length') | list  %}
+        {% set max_length = value.constraints | selectattr('max_length') | map(attribute='max_length') | list  %}
         <div class="form-group">
           <label for="{{key}}">{% if value.description %}{{value.description}}{% else %}{{key}}{% endif %}</label>
 
@@ -22,9 +24,14 @@
           {% endfor %}
           </select>
 	  {% else %}
+      {% if value.type == "integer" %}
+      <!-- number type -->
+      <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
+      {% else %}
 	  <!-- text type, hide fields with password -->
-          <input {% if 'password' in key %}type="password"{% else %}type="text"{% endif %} class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} />
-	  {% endif %}
+          <input {% if 'password' in key %}type="password"{% else %}type="text"{% endif %} class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
+      {% endif %}
+    {% endif %}
         </div>
       {% endfor %}
     {% else %}
@@ -38,3 +45,20 @@
     {% include 'advanced_config.html' %}
   </div>
 </div>
+
+<script>
+  // Functio to validate fields of each tab before changing to other tab
+ $('.nav-tabs a').on('hide.bs.tab', function(e){
+  var link = e.delegateTarget;
+  var tab_id = link.getAttribute('data-id')
+  var inputs = $(tab_id).find(':input');
+  var valid = true;
+  for (var i = 0; i < inputs.length; i++) {
+    if (!inputs[i].checkValidity()) {
+      inputs[i].reportValidity();
+      valid = false;
+    }
+  }
+  return valid;
+});
+</script>
