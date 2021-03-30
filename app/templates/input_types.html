@@ -82,8 +82,13 @@
           {% endfor %}
           </select>
 	  {% else %}
-	  <!-- text type, hide fields with password -->
-    <input {% if 'password' in key %}type="password"{% else %}type="text"{% endif %} class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
+
+      {% if value.type == "integer" %}
+      <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
+      {% else %}
+	    <!-- text type, hide fields with password -->
+      <input {% if 'password' in key %}type="password"{% else %}type="text"{% endif %} class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
+      {% endif %}
     {% endif %}
     
   {% endif %}  <!-- end tag type existence if -->
