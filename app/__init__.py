@@ -269,14 +269,13 @@ def create_app(oidc_blueprint=None):
 
                 prop_map = {"size": "Size", "image.url": "URL", "device": "Device", "mount_path": "Mount Path",
                             "fstype": "F.S. type", "os.flavour": "O.S. Flavor", "os.version": "O.S. Version"}
-                
                 for name, label in prop_map.items():
                     prop = "disk.%s.%s" % (cont, name)
                     if prop in vminfo:
                         disks += Markup('&nbsp;&nbsp;')
                         disks += "- %s: %s" % (label, vminfo[prop])
                         disks += Markup('<br/>')
-                        del vminfo[prop]          
+                        del vminfo[prop]
 
                 cont += 1
 
