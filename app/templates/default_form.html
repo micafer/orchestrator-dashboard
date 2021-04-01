@@ -27,6 +27,8 @@
       {% if value.type == "integer" %}
       <!-- number type -->
       <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
+      {% elif value.type == "scalar-unit.size" %}
+      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" pattern="[0-9]*( )([TMG]B)" title="Number Unit(MB, GB or TB)">
       {% else %}
 	  <!-- text type, hide fields with password -->
           <input {% if 'password' in key %}type="password"{% else %}type="text"{% endif %} class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
