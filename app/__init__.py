@@ -753,7 +753,7 @@ def create_app(oidc_blueprint=None):
                     num = len(response.json()["uri-list"])
                     flash("%d nodes added successfully" % num, 'info')
                 except Exception as ex:
-                    flash("Error adding nodesL: \n%s" % ex, 'error')
+                    flash("Error adding nodes: \n%s\n%s" % (ex, response.text), 'error')
 
             return redirect(url_for('showinfrastructures'))
         else:
