@@ -360,7 +360,7 @@ def create_app(oidc_blueprint=None):
         template = ""
         try:
             response = im.get_inf_property(infid, 'tosca', auth_data)
-            if response.status_code != 200:
+            if not response.ok:
                 raise Exception(response.text)
             template = response.text
         except Exception as ex:
@@ -376,7 +376,7 @@ def create_app(oidc_blueprint=None):
         log = "Not found"
         try:
             response = im.get_inf_property(infid, 'contmsg', auth_data)
-            if response.status_code != 200:
+            if not response.ok:
                 raise Exception(response.text)
             log = response.text
         except Exception as ex:
@@ -393,7 +393,7 @@ def create_app(oidc_blueprint=None):
         log = "Not found"
         try:
             response = im.get_vm_contmsg(infid, vmid, auth_data)
-            if response.status_code != 200:
+            if not response.ok:
                 raise Exception(response.text)
             log = response.text
         except Exception as ex:
@@ -410,7 +410,7 @@ def create_app(oidc_blueprint=None):
         outputs = {}
         try:
             response = im.get_inf_property(infid, 'outputs', auth_data)
-            if response.status_code != 200:
+            if not response.ok:
                 raise Exception(response.text)
 
             outputs = response.json()["outputs"]
@@ -478,7 +478,7 @@ def create_app(oidc_blueprint=None):
             auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
             try:
                 response = im.get_cloud_images(cred_id, auth_data)
-                if response.status_code != 200:
+                if not response.ok:
                     raise Exception(response.text)
                 for image in response.json()["images"]:
                     res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image['uri'], image['name'])
@@ -498,7 +498,7 @@ def create_app(oidc_blueprint=None):
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
         try:
             response = im.get_cloud_quotas(cred_id, auth_data)
-            if response.status_code != 200:
+            if not response.ok:
                 raise Exception(response.text)
             return json.dumps(response.json()["quotas"])
         except Exception as ex:
@@ -609,7 +609,7 @@ def create_app(oidc_blueprint=None):
 
         try:
             response = im.create_inf(payload, auth_data)
-            if response.status_code != 200:
+            if not response.ok:
                 raise Exception(response.text)
 
             try:
@@ -711,7 +711,7 @@ def create_app(oidc_blueprint=None):
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         try:
             response = im.get_inf_property(infid, 'radl', auth_data)
-            if response.status_code != 200:
+            if not response.ok:
                 raise Exception(response.text)
 
             systems = []
@@ -757,7 +757,7 @@ def create_app(oidc_blueprint=None):
             if radl:
                 try:
                     response = im.addresource_inf(infid, str(radl), auth_data)
-                    if response.status_code != 200:
+                    if not response.ok:
                         raise Exception(response.text)
                     num = len(response.json()["uri-list"])
                     flash("%d nodes added successfully" % num, 'info')
@@ -778,7 +778,7 @@ def create_app(oidc_blueprint=None):
         try:
             if op in ["start", "stop"]:
                 response = im.manage_inf(op, infid, auth_data)
-                if response.status_code != 200:
+                if not response.ok:
                     raise Exception(response.text)
                 flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'info')
             elif op == "delete":
@@ -787,14 +787,14 @@ def create_app(oidc_blueprint=None):
                 if 'force' in form_data and form_data['force'] != "0":
                     force = True
                 response = im.delete_inf(infid, force, auth_data)
-                if response.status_code != 200:
+                if not response.ok:
                     raise Exception(response.text)
                 flash("Infrastructure '%s' successfuly deleted." % infid, "info")
                 # deleting from DB
                 infra.delete_infra(infid)
             elif op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data)
-                if response.status_code != 200:
+                if not response.ok:
                     raise Exception(response.text)
                 flash("Infrastructure successfuly reconfigured.", "info")
         except Exception as ex:
