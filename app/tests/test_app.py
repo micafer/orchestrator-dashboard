@@ -104,6 +104,9 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/reconfigure":
             resp.ok = True
             resp.status_code = 200
+        elif url == "/im/infrastructures/infid/stop":
+            resp.ok = True
+            resp.status_code = 200
 
         return resp
 
@@ -190,7 +193,7 @@ class IMDashboardTests(unittest.TestCase):
     @patch('requests.put')
     @patch("app.utils.avatar")
     @patch("app.flash")
-    def test_manageinf_start(self, flash, avatar, put, user_data):
+    def test_manageinf_stop(self, flash, avatar, put, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         put.side_effect = self.put_response
         self.login(avatar)

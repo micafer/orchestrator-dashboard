@@ -48,6 +48,7 @@
 -->
 
 <script>
+
 function onSubmit() {
 {% if g.analytics_tag %}
     gtag('event', 'submit', {'event_category' : '{{selectedTemplate}}', 'event_label' : 'Submit'});
@@ -62,12 +63,6 @@ $(document).ready(function() {
 </script>
 
 <script>
-$(document).ready(function () {
-    $("#loadToscaBtn").click(function () {
-        // add spinner to button
-        $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...` );
-    });
-});
 $(document).ready(function () {
     $("#depSubmit").submit(function () {
         //disable button on click
