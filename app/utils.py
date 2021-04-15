@@ -289,3 +289,74 @@ def exchange_token_with_audience(oidc_url, client_id, client_secret, oidc_token,
     deserialized_oidc_response = json.loads(oidc_response.text)
 
     return deserialized_oidc_response['access_token']
+
+def delete_dns_record(infid, im, auth_data):
+    """Helper function to delete DNS registry created with the tosca.nodes.ec3.DNSRegistry node type"""
+    template = ""
+    try:
+        response = im.get_inf_property(infid, 'tosca', auth_data)
+        if not response.ok:
+            raise Exception(response.text)
+        template = response.text
+    except Exception as ex:
+        return False, "Error getting infrastructure template: %s" % ex
+
+    try:
+        yaml_template = yaml.safe_load(template)
+        for node in list(yaml_template['topology_template']['node_templates'].values()):
+            if node["type"] == "tosca.nodes.ec3.DNSRegistry":
+                record = node["properties"]["record_name"]
+                domain = node["properties"]["domain_name"]
+                credentials = node["properties"]["dns_service_credentials"]["token"]
+                delete_route53_record(record, domain, credentials)
+    except Exception as ex:
+        return False, "Error deleting DNS record: %s" % ex
+    
+    return True, ""
+
+def delete_route53_record(record, domain, credentials):
+    import boto3
+
+    if credentials.startswith("arn:aws:iam"):
+        sts_client = boto3.client('sts')
+
+        assumed_role_object=sts_client.assume_role(
+            RoleArn="arn:aws:iam::account-of-role-to-assume:role/name-of-role",
+            RoleSessionName="AssumeRoleSession1"
+        )
+
+        credentials=assumed_role_object['Credentials']
+
+        route53=boto3.client(
+            'route53',
+            aws_access_key_id=credentials['AccessKeyId'],
+            aws_secret_access_key=credentials['SecretAccessKey'],
+            aws_session_token=credentials['SessionToken'],
+        )
+    elif credentials.find(":") != -1:
+        parts = credentials.split(":")
+        route53=boto3.client(
+            'route53',
+            aws_access_key_id=parts[0],
+            aws_secret_access_key=parts[1]
+        )
+    else:
+        raise Exception("Invalid credentials")
+
+    zone = route53.list_hosted_zones_by_name(DNSName=domain)["HostedZones"][0]
+
+    record = route53.list_resource_record_sets(HostedZoneId=zone['Id'],
+                                      StartRecordType='A',
+                                      StartRecordName='%s.%s.' % (record, domain),
+                                      MaxItems='1')["ResourceRecordSets"][0]
+
+    route53.change_resource_record_sets(
+        HostedZoneId=zone['Id'],
+        ChangeBatch={
+            'Changes': [
+                {
+                    'Action': 'DELETE',
+                    'ResourceRecordSet': record
+                }
+            ]
+        })

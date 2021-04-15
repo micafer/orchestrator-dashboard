@@ -786,6 +786,9 @@ def create_app(oidc_blueprint=None):
                 force = False
                 if 'force' in form_data and form_data['force'] != "0":
                     force = True
+                success, msg = utils.delete_dns_record(infid, im, auth_data)
+                if not success:
+                    app.logger.error('Error deleting DNS record: %s', (msg))
                 response = im.delete_inf(infid, force, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
