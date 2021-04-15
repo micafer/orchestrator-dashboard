@@ -528,6 +528,15 @@ def create_app(oidc_blueprint=None):
 
         return template
 
+    def add_record_name_to_template(template):
+        # Add a random name in the DNS record name
+
+        for node in list(template['topology_template']['node_templates'].values()):
+            if node["type"] == "tosca.nodes.ec3.DNSRegistry":
+                node["properties"]["record_name"] = utils.generate_random_name()
+
+        return template
+
     def set_inputs_to_template(template, inputs):
         # Add the image to all compute nodes
 
@@ -598,6 +607,9 @@ def create_app(oidc_blueprint=None):
         template = add_image_to_template(template, image)
 
         template = add_auth_to_template(template, auth_data)
+
+        # Specially added for OSCAR clusters
+        template = add_record_name_to_template(template)
 
         inputs = {k: v for (k, v) in form_data.items() if not k.startswith("extra_opts.")}
 
@@ -786,6 +798,7 @@ def create_app(oidc_blueprint=None):
                 force = False
                 if 'force' in form_data and form_data['force'] != "0":
                     force = True
+                # Specially added for OSCAR clusters
                 success, msg = utils.delete_dns_record(infid, im, auth_data)
                 if not success:
                     app.logger.error('Error deleting DNS record: %s', (msg))
