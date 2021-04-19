@@ -77,7 +77,7 @@ topology_template:
           - { section: 'monitoring', option: 'MAX_WAIT_POWERON', value: '3000' }
           - { section: 'monitoring', option: 'MAX_WAIT_POWEROFF', value: '600' }
           - { section: 'monitoring', option: 'PERIOD_LIFECYCLE', value: '10' }
-          - { section: 'monitoring', option: 'PERIOD_MONITORING_NODES', value: '2' }
+          - { section: 'monitoring', option: 'PERIOD_MONITORING_NODES', value: '10' }
           - { section: 'client', option: 'CLUES_REQUEST_WAIT_TIMEOUT', value: '3000' }
       capabilities:
         endpoint:
