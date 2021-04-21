@@ -238,16 +238,17 @@ def create_app(oidc_blueprint=None):
                 del vminfo["disk.0.os.name"]
 
             cont = 0
-            while "net_interface.%s.ip" % cont in vminfo:
-                if cont > 0:
-                    nets += Markup('<br/>')
-                nets += Markup('<i class="fa fa-network-wired"></i>')
-                nets += Markup(' <span class="badge badge-secondary">%s</span>' % cont)
-                nets += ": %s" % vminfo["net_interface.%s.ip" % cont]
-                del vminfo["net_interface.%s.ip" % cont]
-                if "net_interface.%s.dns_name" % cont in vminfo:
-                    nets += " (%s)" % vminfo["net_interface.%s.dns_name" % cont]
-                    del vminfo["net_interface.%s.dns_name" % cont]
+            while "net_interface.%s.connection" % cont in vminfo:
+                if "net_interface.%s.ip" % cont in vminfo:
+                    if cont > 0:
+                        nets += Markup('<br/>')
+                    nets += Markup('<i class="fa fa-network-wired"></i>')
+                    nets += Markup(' <span class="badge badge-secondary">%s</span>' % cont)
+                    nets += ": %s" % vminfo["net_interface.%s.ip" % cont]
+                    del vminfo["net_interface.%s.ip" % cont]
+                    if "net_interface.%s.dns_name" % cont in vminfo:
+                        nets += " (%s)" % vminfo["net_interface.%s.dns_name" % cont]
+                        del vminfo["net_interface.%s.dns_name" % cont]
 
                 cont += 1
 
