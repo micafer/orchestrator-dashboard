@@ -114,12 +114,21 @@
         }
     },
     {
-        "name": "UPV-GRyCAP",
+        "name": "UPV-GRyCAP-Horsemen",
         "url": "https://horsemen.i3m.upv.es:5000",
         "id": "upvgrycap",
         "vos": {
             "EOServices-vo.indra.es": "392beb802d024d469ee85e6a92425656",
             "saps-vo.i3m.upv.es": "e363b1b9f92d42b6944d64338edf7479"
+        }
+    },
+    {
+        "name": "UPV-GRyCAP",
+        "url": "https://menoscloud.i3m.upv.es:5000",
+        "id": "13152G0",
+        "vos": {
+            "eosc-synergy.eu": "6f84e31391024330b16d29d6ccd26932",
+            "saps-vo.i3m.upv.es": "e7608e969cfd4f49907cff17d1774898"
         }
     }
 ]
