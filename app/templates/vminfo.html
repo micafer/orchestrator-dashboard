@@ -86,6 +86,16 @@
                     {{ nets }}
                   </td>
                 </tr>
+                {% if outports %}
+                <tr>
+                  <th>
+                    Ports:
+                  </th>
+                  <td>
+                    {{ outports }}
+                  </td>
+                </tr>
+                {% endif %}
                 <tr>
                   <th>
                     HW Features:

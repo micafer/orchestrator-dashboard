@@ -28,6 +28,7 @@ import io
 import ast
 import time
 import sys
+from radl.radl import outport
 from flask import flash, g
 from app import appdb
 from fnmatch import fnmatch
@@ -194,6 +195,16 @@ def format_json_radl(vminfo):
                         field = field[:-4]
                     res[field] = value
     return res
+
+
+def get_out_ports(vminfo):
+    outports = []
+    for elem in vminfo:
+        # Search outports of public nets
+        if elem["class"] == "network" and "outports" in elem and "outbound" in elem and elem["outbound"] == "yes":
+            outports = outport.parseOutPorts(elem["outports"])
+
+    return outports
 
 
 def to_pretty_json(value):
