@@ -545,12 +545,12 @@ def create_app(oidc_blueprint=None):
 
         return template
 
-    def add_record_name_to_template(template):
+    def add_record_name_to_template(template, replace_name):
         # Add a random name in the DNS record name
 
         for node in list(template['topology_template']['node_templates'].values()):
             if node["type"] == "tosca.nodes.ec3.DNSRegistry":
-                node["properties"]["record_name"] = utils.generate_random_name()
+                node["properties"]["record_name"] = node["properties"]["record_name"].replace("*", replace_name)
 
         return template
 
@@ -626,7 +626,7 @@ def create_app(oidc_blueprint=None):
         template = add_auth_to_template(template, auth_data)
 
         # Specially added for OSCAR clusters
-        template = add_record_name_to_template(template)
+        template = add_record_name_to_template(template, utils.generate_random_name())
 
         inputs = {k: v for (k, v) in form_data.items() if not k.startswith("extra_opts.")}
 
