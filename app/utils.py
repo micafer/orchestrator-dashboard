@@ -726,4 +726,4 @@ def generate_random_name():
         "yonath",
         "zhukovsky"
     ]
-    return "%s-%s%d" % (left[randint(0, len(left))], rigth[randint(0, len(rigth))], randint(0, 9))
+    return "%s-%s%d" % (left[randint(0, len(left)-1)], rigth[randint(0, len(rigth)-1)], randint(0, 9))
