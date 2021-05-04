@@ -23,8 +23,11 @@
                     <span class='fas fa-server mr-2'></span> Manage VM
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    {% if state != "stopped" %}
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_stop').modal('show');"><span class='fas fa-pause mr-2'></span>Stop</a>	
+                    {% else %}
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_start').modal('show');"><span class='fas fa-play mr-2'></span>Start</a>	
+                    {% endif %}
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_reboot').modal('show');"><span class='fas fa-redo mr-2'></span>Reboot</a>	
                     <a class="dropdown-item" href="#" onclick="$('#managevm_resize').modal('show');"><span class='fas fa-expand-arrows-alt mr-2'></span>Resize</a>
                     <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_reconfigure').modal('show');"><span class='fas fa-recycle mr-2'></span>Reconfigure</a>	

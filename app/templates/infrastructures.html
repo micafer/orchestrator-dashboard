@@ -31,6 +31,32 @@
       });
       $('#' + infid + '_vms').html(vms);
       $('[data-toggle="tooltip"]').tooltip();
+      if (data["state"] == "stopped") {
+        $('#stop_' + infid + '_a').hide()
+        $('#start_' + infid + '_a').show()
+      } else {
+        $('#stop_' + infid + '_a').show()
+        $('#start_' + infid + '_a').hide()
+      }
+      if (data["state"] == "configured") {
+        $('#main_button_' + infid).attr("href","outputs/" + infid);
+        $('#main_button_' + infid).html('<span class="fas fa-file-export mr-2"></span>Outputs')
+        $('#main_button_' + infid).removeClass("btn-primary")
+        $('#main_button_' + infid).addClass("btn-success")
+        $('#toggle_button_' + infid).removeClass("btn-primary")
+        $('#toggle_button_' + infid).addClass("btn-success")
+        $('#log_' + infid + '_a').show()
+        $('#outputs_' + infid + '_a').hide()
+      } else {
+        $('#main_button_' + infid).attr("href","log/" + infid);
+        $('#main_button_' + infid).html('<span class="fas fa-file-alt mr-2"></span>Log')
+        $('#main_button_' + infid).removeClass("btn-success")
+        $('#main_button_' + infid).addClass("btn-primary")
+        $('#toggle_button_' + infid).removeClass("btn-success")
+        $('#toggle_button_' + infid).addClass("btn-primary")
+        $('#outputs_' + infid + '_a').show()
+        $('#log_' + infid + '_a').hide()
+      }
       if (data["state"] == "pending" || data["state"] == "running") {
         setTimeout(function(){loadInfrState(infid);},30000);
       } else if (data["state"] == "error") {
@@ -108,19 +134,20 @@
                     <td>
                       <div class="btn-group">
                         <!-- DELETE -->
-                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete_confirm_{{infId}}" data-backdrop="static" data-keyboard="false">
-                          <span class="fas fa-trash-alt mr-2"></span>Delete
-                        </button>
-                        <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+                        <a id="main_button_{{infId}}" type="button" class="text-white btn btn-primary btn-sm" href="{{ url_for('inflog', infid=infId) }}">
+                          <span class="fas fa-file-alt mr-2"></span>Log
+                        </a>
+                        <button id="toggle_button_{{infId}}" type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu">
                           <a class="dropdown-item" href="{{ url_for('addresourcesform', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
                           <a class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
-                          <a class="dropdown-item" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
-                          <a class="dropdown-item" href="{{ url_for('infoutputs', infid=infId) }}"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
-                          <a class="dropdown-item" href="#" onclick="$('#stop_confirm_{{infId}}').modal('show');"><span class="fas fa-pause mr-2 grey-text"></span>Stop</a>
-                          <a class="dropdown-item" href="#" onclick="$('#start_confirm_{{infId}}').modal('show');"><span class="fas fa-play mr-2 grey-text"></span>Start</a>
+                          <a id="log_{{infId}}_a" class="dropdown-item" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
+                          <a id="outputs_{{infId}}_a" class="dropdown-item" href="{{ url_for('infoutputs', infid=infId) }}"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
+                          <a id="stop_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#stop_confirm_{{infId}}').modal('show');"><span class="fas fa-pause mr-2 grey-text"></span>Stop</a>
+                          <a id="start_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#start_confirm_{{infId}}').modal('show');"><span class="fas fa-play mr-2 grey-text"></span>Start</a>
+                          <a id="delete_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_confirm_{{infId}}').modal('show');"><span class="fas fa-trash-alt mr-2 grey-text"></span>Delete</a>
                           <a class="dropdown-item" href="#" onclick="$('#reconfigure_confirm_{{infId}}').modal('show');"><span class="fas fa-recycle mr-2 grey-text"></span>Reconfigure</a>
                       </div>
                     </td>
