@@ -127,10 +127,10 @@ topology_template:
               sqaaas_jk_token: { get_input: sqaaas_jk_token }
               sqaaas_gh_token: { get_input: sqaaas_gh_token }
               sqaaas_repo_type: "github"
-              sqaaas_jenkins_url: "https://jenkins.eosc-synergy.eu/"
-              sqaaas_jenkins_admin: "admin"
-              sqaaas_jenkins_github_org_name: "eosc-synergy-org"
-              sqaaas_github_org: "eosc-synergy"
+              sqaaas_jenkins_url: { get_input: sqaaas_jenkins_url }
+              sqaaas_jenkins_admin: { get_input: sqaaas_jenkins_admin } 
+              sqaaas_jenkins_github_org_name: { get_input: sqaaas_jenkins_github_org_name }
+              sqaaas_github_org: { get_input: sqaaas_github_org }
 
     lrms_front_end:
       type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes
@@ -144,6 +144,9 @@ topology_template:
               kube_port:
                 protocol: tcp
                 source: 6443
+              badrgapi_port:
+                protocol: tcp
+                source: 8443
       properties:
         admin_username:  kubeuser
         install_nfs_client: true
@@ -218,3 +221,7 @@ topology_template:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/sqaaas-web/' ] }
    kubernetes_dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
+   badgr_web_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/badgr/' ] }
+   badgr_api_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':8443' ] }
