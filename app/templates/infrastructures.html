@@ -39,7 +39,8 @@
         $('#start_' + infid + '_a').hide()
       }
       if (data["state"] == "configured") {
-        $('#main_button_' + infid).attr("href","outputs/" + infid);
+        $('#main_button_' + infid).attr("href","#");
+        $('#main_button_' + infid).attr("onclick","$('#outputs_" + infid + "').modal('show');");
         $('#main_button_' + infid).html('<span class="fas fa-file-export mr-2"></span>Outputs')
         $('#main_button_' + infid).removeClass("btn-primary")
         $('#main_button_' + infid).addClass("btn-success")
@@ -49,6 +50,7 @@
         $('#outputs_' + infid + '_a').hide()
       } else {
         $('#main_button_' + infid).attr("href","log/" + infid);
+        $('#main_button_' + infid).removeAttr("onclick");
         $('#main_button_' + infid).html('<span class="fas fa-file-alt mr-2"></span>Log')
         $('#main_button_' + infid).removeClass("btn-success")
         $('#main_button_' + infid).addClass("btn-primary")
@@ -144,7 +146,7 @@
                           <a class="dropdown-item" href="{{ url_for('addresourcesform', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
                           <a class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
                           <a id="log_{{infId}}_a" class="dropdown-item" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
-                          <a id="outputs_{{infId}}_a" class="dropdown-item" href="{{ url_for('infoutputs', infid=infId) }}"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
+                          <a id="outputs_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#outputs_{{infId}}').modal('show');"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
                           <a id="stop_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#stop_confirm_{{infId}}').modal('show');"><span class="fas fa-pause mr-2 grey-text"></span>Stop</a>
                           <a id="start_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#start_confirm_{{infId}}').modal('show');"><span class="fas fa-play mr-2 grey-text"></span>Start</a>
                           <a id="delete_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_confirm_{{infId}}').modal('show');"><span class="fas fa-trash-alt mr-2 grey-text"></span>Delete</a>
@@ -239,6 +241,37 @@
                     </div>
                   </div>
                 </div>
+                <!-- Modal Retrieve/Update Credentials-->
+                <div class="modal fade" id="outputs_{{infId}}">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="outputs_label_{{infId}}">Outputs</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                      </div>
+                      <div class="modal-footer">
+                        <a class="btn btn-primary outputsCancelBtn" role="button" data-dismiss="modal">Close</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <script>
+                  $(document).ready(function () {
+                    $('#outputs_{{infId}}').on('hidden.bs.modal', function () {
+                      var modal = $(this)
+                      modal.find('.modal-body').empty()
+                    });
+                  });
+
+                  $(document).ready(function () {
+                    $('#outputs_{{infId}}').on('show.bs.modal', function (event) {
+                      var modal = $(this)
+                      modal.find('.modal-body').html('Loading...').load("{{ url_for('infoutputs', infid=infId) }}");
+                    });
+                  });
+                </script>
                 {% endfor %}
               </tbody>
               <!--Table body-->
