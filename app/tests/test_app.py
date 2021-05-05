@@ -252,7 +252,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/reconfigure')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Infrastructure successfuly reconfigured.", 'info'))
+        self.assertEquals(flash.call_args_list[0][0], ("Reconfiguration process successfuly started.", 'info'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
