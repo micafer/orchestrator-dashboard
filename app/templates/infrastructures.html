@@ -64,12 +64,10 @@
     var state = JSON.parse(state_str);
   
     if (!$.isEmptyObject(state)) {
-      console.log(state);
       setInfrState(infid, state);
     }
     $.getJSON("{{url_for('infrastructure_state')}}?infid=" + infid, function( data ) {
         setInfrState(infid, data);
-        console.log("updated");
         if (data["state"] == "pending" || data["state"] == "running") {
           setTimeout(function(){loadInfrState(infid);},30000);
         } else if (data["state"] == "error") {
