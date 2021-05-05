@@ -360,7 +360,9 @@ $(document).ready(function () {
         "order": [[ 2, "desc" ]]
     });
 
-    setTimeout(function(){location.reload();},20000);
+    {% if reload %}
+    setTimeout(function(){loadInfrState("{{ reload }}");},5000);
+    {% endif %}
 </script>
 
 {% endblock %}

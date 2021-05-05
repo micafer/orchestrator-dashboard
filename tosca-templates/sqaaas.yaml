@@ -71,9 +71,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.19.17"
+      default: "1.20.6"
       constraints:
-      - valid_values: [ "1.19.7", "1.18.15", "1.17.17" ]
+      - valid_values: [ "1.20.6", "1.19.10", "1.18.19", "1.21.0" ]
     kube_cert_manager:
       type: boolean
       description: Flag to install Cert-Manager and manage the generation of TLS certificas with Let's Encrypt
@@ -111,6 +111,12 @@ topology_template:
       type: string
       description: GitHub organization name
       default: "eosc-synergy"
+    install_badgr:
+      type: boolean
+      description: Flag to set the Badgr server to be installed
+      default: false
+      constraints:
+      - valid_values: [ true, false ]
 
   node_templates:
 
@@ -131,6 +137,7 @@ topology_template:
               sqaaas_jenkins_admin: { get_input: sqaaas_jenkins_admin } 
               sqaaas_jenkins_github_org_name: { get_input: sqaaas_jenkins_github_org_name }
               sqaaas_github_org: { get_input: sqaaas_github_org }
+              install_badgr: { get_input: install_badgr }
 
     lrms_front_end:
       type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes
