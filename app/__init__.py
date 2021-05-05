@@ -337,6 +337,10 @@ def create_app(oidc_blueprint=None):
     def showinfrastructures():
         access_token = oidc_blueprint.session.token['access_token']
 
+        reload_infid = None
+        if 'reload' in request.args:
+            reload_infid = request.args['reload']
+
         auth_data = "type = InfrastructureManager; token = %s" % access_token
         inf_list = []
         try:
@@ -353,7 +357,7 @@ def create_app(oidc_blueprint=None):
                 infra_name = ""
             infrastructures[inf_id]['name'] = infra_name
 
-        return render_template('infrastructures.html', infrastructures=infrastructures)
+        return render_template('infrastructures.html', infrastructures=infrastructures, reload=reload_infid)
 
     @app.route('/infrastructures/state')
     @authorized_with_valid_token
@@ -803,6 +807,7 @@ def create_app(oidc_blueprint=None):
     def manage_inf(infid=None, op=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+        reload = None
 
         try:
             if op in ["start", "stop"]:
@@ -810,6 +815,7 @@ def create_app(oidc_blueprint=None):
                 if not response.ok:
                     raise Exception(response.text)
                 flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'info')
+                reload = infid
             elif op == "delete":
                 form_data = request.form.to_dict()
                 force = False
@@ -829,11 +835,11 @@ def create_app(oidc_blueprint=None):
                 response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
-                flash("Infrastructure successfuly reconfigured.", "info")
+                flash("Reconfiguration process successfuly started.", "info")
         except Exception as ex:
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 
-        return redirect(url_for('showinfrastructures'))
+        return redirect(url_for('showinfrastructures', reload=reload))
 
     @app.route('/logout')
     def logout():
