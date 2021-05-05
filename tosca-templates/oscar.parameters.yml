@@ -26,6 +26,9 @@ inputs:
     minio_password:
       tab: OSCAR parameters
 
+    cert_user_email:
+      tab: OSCAR parameters
+
 tabs:
   - HW Data
   - OSCAR parameters
