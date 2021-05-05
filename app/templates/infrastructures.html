@@ -15,8 +15,7 @@
     }
   }
 
-  function loadInfrState(infid) {
-    $.getJSON("{{url_for('infrastructure_state')}}?infid=" + infid, function( data ) {
+  function setInfrState(infid, data) {
       // Set state
       var state = getSpanFromState(data["state"]) ;
       state += '<strong>' + data["state"] + '</strong></span>';
@@ -59,14 +58,26 @@
         $('#outputs_' + infid + '_a').show()
         $('#log_' + infid + '_a').hide()
       }
-      if (data["state"] == "pending" || data["state"] == "running") {
-        setTimeout(function(){loadInfrState(infid);},30000);
-      } else if (data["state"] == "error") {
-        setTimeout(function(){loadInfrState(infid);},5000);
-      } else if (data["state"] == "deleting") {
-        setTimeout(function(){location.reload();},30000);
-      }
-    });
+  }
+
+  function loadInfrState(infid, state_str="{}") {
+    var state = JSON.parse(state_str);
+  
+    if (!$.isEmptyObject(state)) {
+      console.log(state);
+      setInfrState(infid, state);
+    }
+    $.getJSON("{{url_for('infrastructure_state')}}?infid=" + infid, function( data ) {
+        setInfrState(infid, data);
+        console.log("updated");
+        if (data["state"] == "pending" || data["state"] == "running") {
+          setTimeout(function(){loadInfrState(infid);},30000);
+        } else if (data["state"] == "error") {
+          setTimeout(function(){loadInfrState(infid);},5000);
+        } else if (data["state"] == "deleting") {
+          setTimeout(function(){location.reload();},30000);
+        }
+      });
   }
 
   function showForceMessage(check) {
@@ -130,7 +141,7 @@
                       </div>
                     </td>
                     <script>
-                      loadInfrState("{{infId}}");
+                      loadInfrState('{{infId}}', '{{infInfo["state"] | tojson | safe}}');
                     </script>
 
                     <td>

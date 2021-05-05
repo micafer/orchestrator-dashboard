@@ -352,10 +352,14 @@ def create_app(oidc_blueprint=None):
         for inf_id in inf_list:
             infrastructures[inf_id] = {}
             try:
-                infra_name = infra.get_infra(inf_id)["name"]
+                infra_data = infra.get_infra(inf_id)
             except Exception:
-                infra_name = ""
-            infrastructures[inf_id]['name'] = infra_name
+                infra_data = {}
+            infrastructures[inf_id] = {'name': '', 'state': {}}
+            if 'name' in infra_data:
+                infrastructures[inf_id]['name'] = infra_data["name"]
+            if 'state' in infra_data:
+                infrastructures[inf_id]['state'] = infra_data["state"]
 
         return render_template('infrastructures.html', infrastructures=infrastructures, reload=reload_infid)
 
@@ -369,7 +373,12 @@ def create_app(oidc_blueprint=None):
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         try:
-            return im.get_inf_state(infid, auth_data)
+            state = im.get_inf_state(infid, auth_data)
+            try:
+                infra.write_infra(infid, {"state": state})
+            except Exception as ex:
+                app.logger.error("Error saving infrastructure state: %s" % ex)
+            return state
         except Exception:
             return {"state": "error", "vm_states": {}}
 
