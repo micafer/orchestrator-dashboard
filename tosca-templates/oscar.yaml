@@ -138,6 +138,10 @@ topology_template:
         cert_manager: true
         cert_user_email: { get_input: cert_user_email }
         public_dns_name: { concat: [ get_property: [dns_reg, record_name], '.', get_property: [dns_reg, domain_name] ] }
+        cert_manager_challenge: dns01
+        cert_manager_challenge_dns01_domain: { get_property: [dns_reg, domain_name] }
+        cert_manager_challenge_dns01_ak: AK
+        cert_manager_challenge_dns01_sk: SK
       requirements:
         - host: front
 
