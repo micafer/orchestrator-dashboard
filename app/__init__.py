@@ -839,8 +839,14 @@ def create_app(oidc_blueprint=None):
                 if not response.ok:
                     raise Exception(response.text)
                 flash("Infrastructure '%s' successfuly deleted." % infid, "info")
-                # deleting from DB
-                infra.delete_infra(infid)
+                try:
+                    infra_data = infra.get_infra(infid)
+                    infra_data["state"]["state"] = "deleting"
+                    infra.write_infra(infid, infra_data)
+                    scheduler.add_job('delete_infra_%s' % infid, delete_infra, trigger='interval',
+                                      seconds=60, args=(infid,))
+                except Exception as dex:
+                    app.logger.error('Error setting infra state to deleting.: %s', (dex))
             elif op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:
@@ -879,6 +885,10 @@ def create_app(oidc_blueprint=None):
             app.logger.debug('Reload Site List.')
             g.settings = settings
             utils.getCachedSiteList(True)
+
+    def delete_infra(infid):
+        infra.delete_infra(infid)
+        scheduler.delete_job('delete_infra_%s' % infid)
 
     return app
 
