@@ -656,7 +656,8 @@ def create_app(oidc_blueprint=None):
 
             try:
                 inf_id = os.path.basename(response.text)
-                infra.write_infra(inf_id, {"name": form_data['infra_name']})
+                infra.write_infra(inf_id, {"name": form_data['infra_name'],
+                                           "state": {"state": "pending", "vm_states": {}}})
             except Exception as ex:
                 flash("Error storing Infrastructure name: %s" % str(ex), "warning")
 
