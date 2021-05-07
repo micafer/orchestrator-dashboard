@@ -98,7 +98,14 @@
                 loadSiteInfo();
             }
             loadSiteImages();
-        } else if (cred_type == 'OpenNebula' || cred_type == 'Orange' || cred_type == 'Linode' || cred_type == 'GCE') {
+        } else if (cred_type == 'OpenNebula') {
+            $('#cloudImages').hide();
+            $('#fedcloudImages').hide();
+            $('#siteImages').show();
+            $('#fedcloudUsage').show();
+            loadSiteInfo();
+            loadSiteImages();
+        } else if (cred_type == 'Orange' || cred_type == 'Linode' || cred_type == 'GCE') {
             $('#cloudImages').hide();
             $('#fedcloudImages').hide();
             $('#siteImages').show();
