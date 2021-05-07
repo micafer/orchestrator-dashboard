@@ -166,7 +166,7 @@
                 data = JSON.parse(text);
 
                 for (var i = 0; i < resource_types.length; i++) {
-                    if (data[resource_types[i]]["limit"] == -1) {
+                    if (data[resource_types[i]]["limit"] <= 0) {
                         // -1 value means no limit, set a big value
                         data[resource_types[i]]["limit"] = 10000;
                     }
