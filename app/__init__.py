@@ -352,10 +352,14 @@ def create_app(oidc_blueprint=None):
         for inf_id in inf_list:
             infrastructures[inf_id] = {}
             try:
-                infra_name = infra.get_infra(inf_id)["name"]
+                infra_data = infra.get_infra(inf_id)
             except Exception:
-                infra_name = ""
-            infrastructures[inf_id]['name'] = infra_name
+                infra_data = {}
+            infrastructures[inf_id] = {'name': '', 'state': {}}
+            if 'name' in infra_data:
+                infrastructures[inf_id]['name'] = infra_data["name"]
+            if 'state' in infra_data:
+                infrastructures[inf_id]['state'] = infra_data["state"]
 
         return render_template('infrastructures.html', infrastructures=infrastructures, reload=reload_infid)
 
@@ -369,7 +373,12 @@ def create_app(oidc_blueprint=None):
 
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         try:
-            return im.get_inf_state(infid, auth_data)
+            state = im.get_inf_state(infid, auth_data)
+            try:
+                infra.write_infra(infid, {"state": state})
+            except Exception as ex:
+                app.logger.error("Error saving infrastructure state: %s" % ex)
+            return state
         except Exception:
             return {"state": "error", "vm_states": {}}
 
@@ -658,7 +667,8 @@ def create_app(oidc_blueprint=None):
 
             try:
                 inf_id = os.path.basename(response.text)
-                infra.write_infra(inf_id, {"name": form_data['infra_name']})
+                infra.write_infra(inf_id, {"name": form_data['infra_name'],
+                                           "state": {"state": "pending", "vm_states": {}}})
             except Exception as ex:
                 flash("Error storing Infrastructure name: %s" % str(ex), "warning")
 
@@ -840,8 +850,14 @@ def create_app(oidc_blueprint=None):
                 if not response.ok:
                     raise Exception(response.text)
                 flash("Infrastructure '%s' successfuly deleted." % infid, "info")
-                # deleting from DB
-                infra.delete_infra(infid)
+                try:
+                    infra_data = infra.get_infra(infid)
+                    infra_data["state"]["state"] = "deleting"
+                    infra.write_infra(infid, infra_data)
+                    scheduler.add_job('delete_infra_%s' % infid, delete_infra, trigger='interval',
+                                      seconds=60, args=(infid,))
+                except Exception as dex:
+                    app.logger.error('Error setting infra state to deleting.: %s', (dex))
             elif op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:
@@ -880,6 +896,10 @@ def create_app(oidc_blueprint=None):
             app.logger.debug('Reload Site List.')
             g.settings = settings
             utils.getCachedSiteList(True)
+
+    def delete_infra(infid):
+        infra.delete_infra(infid)
+        scheduler.delete_job('delete_infra_%s' % infid)
 
     return app
 

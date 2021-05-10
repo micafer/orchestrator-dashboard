@@ -44,6 +44,9 @@ class TestInfrastructures(unittest.TestCase):
         infra.write_infra("infid", {"name": "infra_name"})
         res = infra.get_infra("infid")
         self.assertEquals(res, {"name": "infra_name"})
+        infra.write_infra("infid", {"state": "infra_state"})
+        res = infra.get_infra("infid")
+        self.assertEquals(res, {"name": "infra_name", "state": "infra_state"})
 
     def test_delete_infra(self):
         infra = Infrastructures("sqlite:///tmp/creds.db")

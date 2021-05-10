@@ -51,7 +51,15 @@ class Infrastructures:
 
     def write_infra(self, infid, data):
         db = self._get_inf_db()
-        str_data = json.dumps(data)
+
+        res = db.select("select data from infrastructures where infid = %s", (infid,))
+
+        old_data = {}
+        if len(res) > 0:
+            old_data = json.loads(res[0][0])
+        old_data.update(data)
+
+        str_data = json.dumps(old_data)
         db.execute("replace into infrastructures (infid, data) values (%s, %s)", (infid, str_data))
         db.close()
 
