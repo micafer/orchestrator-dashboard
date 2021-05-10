@@ -399,7 +399,7 @@ def create_app(oidc_blueprint=None):
         return render_template('deptemplate.html', template=template)
 
     def add_colors(log):
-        """Add color in error messages in logs"""
+        """Add color in error messages in logs."""
         res = ""
         lines = log.split('\n')
         for n, line in enumerate(lines):
