@@ -29,7 +29,7 @@
         </div>
 
         <div class="card-body">
-          <pre id="text-val">{{ log | safe }}</pre>
+          <span id="text-val" style="font-family:monospace;">{{ log | safe }}</span>
         </div>
 	<div class="card-footer text-center">
 	<!-- input type="button" id="downloadBtn" value="Download log file"/-->
@@ -67,6 +67,9 @@ function download(filename, text) {
 
 document.getElementById("downloadBtn").addEventListener("click", function(){
     var text = document.getElementById("text-val").innerHTML;
+    text = text.replaceAll('<span class="bg-danger text-white">', '');
+    text = text.replaceAll('</span>', '');
+    text = text.replaceAll('<br>', '\n');
     var filename = "deployment-log.txt";
 
     download(filename, text);
