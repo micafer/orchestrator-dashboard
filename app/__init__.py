@@ -398,6 +398,17 @@ def create_app(oidc_blueprint=None):
 
         return render_template('deptemplate.html', template=template)
 
+    def add_colors(log):
+        """Add color in error messages in logs."""
+        res = ""
+        lines = log.split('\n')
+        for n, line in enumerate(lines):
+            if "ERROR executing task" in line or ("fatal: " in line and "...ignoring" not in lines[n + 1]):
+                res += Markup('<span class="bg-danger text-white">%s</span><br>' % line)
+            else:
+                res += Markup("%s<br>" % line)
+        return res
+
     @app.route('/log/<infid>')
     @authorized_with_valid_token
     def inflog(infid=None):
@@ -408,7 +419,7 @@ def create_app(oidc_blueprint=None):
             response = im.get_inf_property(infid, 'contmsg', auth_data)
             if not response.ok:
                 raise Exception(response.text)
-            log = response.text
+            log = add_colors(response.text)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
 
@@ -425,7 +436,7 @@ def create_app(oidc_blueprint=None):
             response = im.get_vm_contmsg(infid, vmid, auth_data)
             if not response.ok:
                 raise Exception(response.text)
-            log = response.text
+            log = add_colors(response.text)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
 
