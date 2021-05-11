@@ -19,7 +19,8 @@
         "vos": {
             "eosc-synergy.eu": "ddf0c468c8af4e0bbb9808bfc0288381",
             "worsica.vo.incd.pt": "a53ca78c534046e5b13f4537ae698411",
-            "covid19.eosc-synergy.eu": "05e52356addc44e18ef2bd14f2e2f67d"
+            "covid19.eosc-synergy.eu": "05e52356addc44e18ef2bd14f2e2f67d",
+            "lagoproject.net": "14e8f964db4c4a8ea286b0886ab51e7c"
         }
     },
     {
@@ -31,7 +32,8 @@
             "covid19.eosc-synergy.eu": "972298c557184a2192ebc861f3184da8",
             "o3as.data.kit.edu": "4a22f140a5fb4678aa1599fbf0b44b2f",
             "vo.access.egi.eu": "3a8e9d966e644405bf19b536adf7743d",
-	    "mswss.ui.savba.sk": "a91154f2803b4414a4f34039539833fa"
+            "mswss.ui.savba.sk": "a91154f2803b4414a4f34039539833fa",
+            "lagoproject.net": "50a0ce2d050048c68bc3094b6682d837"
         }
     },
     {
@@ -66,7 +68,8 @@
             "vo.lifewatch.eu": "ac7bc26131d248ecb6add521e648c331",
 	    "vo.nextgeoss.eu": "13c11c4073f4456fac7df84c4eb8f85b",
 	    "vo.openbiomap.lifewatch.eu": "ac7bc26131d248ecb6add521e648c331",
-            "worsica.vo.incd.pt": "7bb9c2694f9040c68cd72cb994f5ce89"
+            "worsica.vo.incd.pt": "7bb9c2694f9040c68cd72cb994f5ce89",
+        "lagoproject.net": "77c86367335f4e9cb1e9ccab72d24f0a"
         }
     },
     {
@@ -87,7 +90,8 @@
             "eosc-synergy.eu": "fdfa9b81582447729f16de6cf61b16e4",
             "covid19.eosc-synergy.eu": "36b6d10a0c194fa8991e7e8d15297478",
             "o3as.data.kit.edu": "621b1977bb384beab1519713c7e695f0",
-            "worsica.vo.incd.pt": "fce23a2c4eca447a9d5b9c2bdab55e26"
+            "worsica.vo.incd.pt": "fce23a2c4eca447a9d5b9c2bdab55e26",
+            "lagoproject.net": "bb8a629f3e644b69befbf17130c1dee3"
         }
     },
     {
