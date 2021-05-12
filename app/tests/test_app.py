@@ -320,9 +320,9 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "vo": "voname"},
                                   {"id": "credid1", "type": "OpenStack", "host": "site_url1", "tenant_id": "tenid"}]
-        res = self.client.get('/configure?selected_tosca=simple-node.yml')
+        res = self.client.get('/configure?selected_tosca=simple-node-disk.yml')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b"Launch a compute node getting the IP and SSH credentials to access via ssh", res.data)
+        self.assertIn(b"Start a virtual machine with extra HD", res.data)
         self.assertIn(b'<option data-tenant-id="" data-type="fedcloud" name="selectedCred" '
                       b'value=credid>credid</option>', res.data)
         self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
@@ -373,8 +373,10 @@ class IMDashboardTests(unittest.TestCase):
                   'extra_opts.selectedSiteImage': 'IMAGE_NAME',
                   'extra_opts.selectedCred': 'credid',
                   'num_cpus': '4',
-                  'ports': '22,80,443'}
-        res = self.client.post('/submit?template=simple-node.yml', data=params)
+                  'ports': '22,80,443',
+                  'storage_size': '0 GB',
+                  'mount_path': '/mnt/disk'}
+        res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
 
