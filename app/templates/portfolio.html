@@ -23,13 +23,17 @@
             <div class="wrapper">
                 <img class="card-img-bottom img-fluid" src="{% if tosca['metadata']['icon'].startswith('http') %}{{tosca['metadata']['icon']}}{% else %}{{ url_for('static', filename=tosca['metadata']['icon']) }}{% endif %}" alt="Card image cap">
                 {% if tosca['metadata']['tag'] is defined %}
-                  {% if tosca['metadata']['tag'] == "elastic" %}
-                    <div class="corner-ribbon bottom-right sticky orange shadow">{{tosca['metadata']['tag']}}</div>
-                  {% elif tosca['metadata']['tag'] == "beta" %}
-                    <div class="corner-ribbon bottom-right sticky tomato shadow">{{tosca['metadata']['tag']}}</div>
+                  {% if tosca['metadata']['tag_color'] is defined %}
+                    {% set tag_color=tosca['metadata']['tag_color'] %}
                   {% else %}
-                    <div class="corner-ribbon bottom-right sticky green shadow">{{tosca['metadata']['tag']}}</div>
+                    {% set tag_color='green' %}
                   {% endif %}
+                  {% if tosca['metadata']['tag'] == "elastic" %}
+                    {% set tag_color='orange' %}
+                  {% elif tosca['metadata']['tag'] == "beta" %}
+                    {% set tag_color='tomato' %}
+                  {% endif %}
+                  <div class="corner-ribbon bottom-right sticky {{tag_color}} shadow">{{tosca['metadata']['tag']}}</div>
                 {% endif %}
             </div>
             <div class="card-img-overlay text-center">
