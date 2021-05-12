@@ -322,7 +322,7 @@ class IMDashboardTests(unittest.TestCase):
                                   {"id": "credid1", "type": "OpenStack", "host": "site_url1", "tenant_id": "tenid"}]
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b"Start a virtual machine with extra HD", res.data)
+        self.assertIn(b"Launch a compute node getting the IP and SSH credentials to access via ssh", res.data)
         self.assertIn(b'<option data-tenant-id="" data-type="fedcloud" name="selectedCred" '
                       b'value=credid>credid</option>', res.data)
         self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
