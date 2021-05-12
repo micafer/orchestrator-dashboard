@@ -379,7 +379,8 @@ def create_app(oidc_blueprint=None):
             except Exception as ex:
                 app.logger.error("Error saving infrastructure state: %s" % ex)
             return state
-        except Exception:
+        except Exception as exs:
+            app.logger.error("Error getting infrastructure state: %s" % exs)
             return {"state": "error", "vm_states": {}}
 
     @app.route('/template/<infid>')

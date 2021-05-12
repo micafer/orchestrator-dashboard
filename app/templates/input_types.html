@@ -1,8 +1,8 @@
 <div class="form-group">
   {% if value.tag_type is not defined or value.tag_type != "hidden" %}
   <label for="{{key}}">
-    {% if value.display_name is defined %}
-    {{value.display_name}}
+    {% if value.description is defined %}
+    {{value.description}}
     {% else %}
     {{key}}
     {% endif %}
@@ -90,5 +90,4 @@
     {% endif %}
     
   {% endif %}  <!-- end tag type existence if -->
-  <span id="help{{key}}" class="help-block">{{value.description}}</span>
 </div>
