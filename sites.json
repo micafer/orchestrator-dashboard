@@ -134,5 +134,13 @@
             "eosc-synergy.eu": "6f84e31391024330b16d29d6ccd26932",
             "saps-vo.i3m.upv.es": "e7608e969cfd4f49907cff17d1774898"
         }
+    },
+    {
+        "name": "TR-FC1-ULAKBIM",
+        "url": "https://bulut.truba.gov.tr:5000",
+        "id": "13132G0",
+        "vos": {
+            "vo.enes.org": "a59bd0a9ed754941962846c4a081d6ca"
+        }
     }
 ]
