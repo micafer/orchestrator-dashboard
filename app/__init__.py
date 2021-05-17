@@ -407,7 +407,7 @@ def create_app(oidc_blueprint=None):
             if "ERROR executing task" in line or ("fatal: " in line and "...ignoring" not in lines[n + 1]):
                 res += Markup('<span class="bg-danger text-white">%s</span><br>' % line)
             else:
-                res += Markup("%s<br>" % line)
+                res += Markup("%s<br>\n" % line)
         return res
 
     @app.route('/log/<infid>')
