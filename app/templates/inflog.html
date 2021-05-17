@@ -69,7 +69,7 @@ document.getElementById("downloadBtn").addEventListener("click", function(){
     var text = document.getElementById("text-val").innerHTML;
     text = text.replaceAll('<span class="bg-danger text-white">', '');
     text = text.replaceAll('</span>', '');
-    text = text.replaceAll('<br>', '\n');
+    text = text.replaceAll('<br>', '');
     var filename = "deployment-log.txt";
 
     download(filename, text);
