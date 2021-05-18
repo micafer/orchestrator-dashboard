@@ -64,8 +64,8 @@ class InfrastructureManager():
             response.raise_for_status()
             inf_state = response.json()
             return inf_state['state']
-        except Exception:
-            raise Exception("Error retrieving infrastructure state: \n" + response.text)
+        except Exception as ex:
+            raise Exception("Error retrieving infrastructure state: %s\n" % ex)
 
     def get_vm_info(self, infid, vmid, auth_data):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
