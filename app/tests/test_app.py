@@ -57,7 +57,10 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/tosca":
             resp.ok = True
             resp.status_code = 200
-            resp.text = "TOSCA"
+            resp.text = """topology_template:
+                            node_templates:
+                                simple_node:
+                                        type: tosca.nodes.indigo.Compute"""
         elif url == "/im/infrastructures/infid/contmsg":
             resp.ok = True
             resp.status_code = 200
@@ -263,7 +266,8 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.get('/template/infid')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'TOSCA', res.data)
+        expected = b"topology_template:\n  node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
+        self.assertIn(expected, res.data)
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')

@@ -384,7 +384,7 @@ def create_app(oidc_blueprint=None):
             return {"state": "error", "vm_states": {}}
 
     def hide_sensitive_data(template):
-        """Remove/Hide sensitive data (passwords, credentials)"""
+        """Remove/Hide sensitive data (passwords, credentials)."""
         data = yaml.full_load(template)
 
         for node in list(data['topology_template']['node_templates'].values()):
