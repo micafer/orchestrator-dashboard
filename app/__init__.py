@@ -383,6 +383,28 @@ def create_app(oidc_blueprint=None):
             app.logger.error("Error getting infrastructure state: %s" % exs)
             return {"state": "error", "vm_states": {}}
 
+    def hide_sensitive_data(template):
+        """Remove/Hide sensitive data (passwords, credentials)."""
+        data = yaml.full_load(template)
+
+        for node in list(data['topology_template']['node_templates'].values()):
+            if node["type"] == "tosca.nodes.ec3.DNSRegistry":
+                try:
+                    node["properties"]["dns_service_credentials"]["token"] = "AK:SK"
+                except KeyError:
+                    pass
+
+            if node["type"] == "tosca.nodes.ec3.ElasticCluster":
+                if "im_auth" in node["properties"]:
+                    node["properties"]["im_auth"] = "protected"
+                try:
+                    node["interfaces"]["Standard"]["configure"]["inputs"]["CLIENT_ID"] = "client_id"
+                    node["interfaces"]["Standard"]["configure"]["inputs"]["CLIENT_SECRET"] = "client_secret"
+                except KeyError:
+                    pass
+
+        return yaml.dump(data, default_flow_style=False, sort_keys=False)
+
     @app.route('/template/<infid>')
     @authorized_with_valid_token
     def template(infid=None):
@@ -393,7 +415,7 @@ def create_app(oidc_blueprint=None):
             response = im.get_inf_property(infid, 'tosca', auth_data)
             if not response.ok:
                 raise Exception(response.text)
-            template = response.text
+            template = hide_sensitive_data(response.text)
         except Exception as ex:
             flash("Error getting template: \n%s" % ex, "error")
 
@@ -644,7 +666,6 @@ def create_app(oidc_blueprint=None):
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
-            template = add_image_to_template(template, image)
 
         template = add_image_to_template(template, image)
 
