@@ -893,7 +893,10 @@ def create_app(oidc_blueprint=None):
     @app.route('/logout')
     def logout():
         session.clear()
-        oidc_blueprint.session.get("/logout")
+        try:
+            oidc_blueprint.session.get("/logout")
+        except Exception as ex:
+            app.logger.warn("Error in OIDC logout: %s" % ex)
         return redirect(url_for('login'))
 
     @app.errorhandler(403)
