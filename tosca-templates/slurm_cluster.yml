@@ -24,29 +24,47 @@ topology_template:
       description: Number of CPUs for the front-end node
       default: 1
       required: yes
-      constraints:
-      - valid_values: [ 1, 2, 4, 8, 16, 32, 64 ]
     fe_mem:
       type: scalar-unit.size
       description: Amount of Memory for the front-end node
       default: 1 GB
       required: yes
-      constraints:
-      - valid_values: [ 1 GB, 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
     wn_cpus:
       type: integer
       description: Number of CPUs for the WNs
       default: 1
       required: yes
-      constraints:
-      - valid_values: [ 1, 2, 4, 8, 16, 32, 64 ]
     wn_mem:
       type: scalar-unit.size
       description: Amount of Memory for the WNs
       default: 1 GB
       required: yes
+
+    fe_disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the FE instance (Set 0 if disk is not needed)
+      default: 0 GB
       constraints:
-      - valid_values: [ 1 GB, 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+      - valid_values: [ 0 GB, 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    fe_volume_id:
+      type: string
+      description: "Or URL of the disk to be attached to the FE instance (format: ost://api.cloud.ifca.es/<vol_id>"
+      default: ""
+    fe_mount_path:
+      type: string
+      description: "Path to mount the FE attached disk"
+      default: "/home/data"
+
+    wn_disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the WN instances (Set 0 if disk is not needed)
+      default: 0 GB
+      constraints:
+      - valid_values: [ 0 GB, 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    wn_mount_path:
+      type: string
+      description: "Path to mount the WN attached disk"
+      default: "/mnt/data"
 
   node_templates:
 
@@ -77,6 +95,19 @@ topology_template:
           properties:
             distribution: ubuntu
             type: linux
+      requirements:
+      - local_storage:
+          node: fe_block_storage
+          relationship:
+            type: AttachesTo
+            properties:
+              location: { get_input: fe_mount_path }
+
+    fe_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: fe_disk_size }
+        volume_id: { get_input: fe_volume_id }
 
     wn_node:
       type: tosca.nodes.indigo.LRMS.WorkerNode.Slurm
@@ -100,6 +131,18 @@ topology_template:
           properties:
             distribution: ubuntu
             type: linux
+      requirements:
+      - local_storage:
+          node: wn_block_storage
+          relationship:
+            type: AttachesTo
+            properties:
+              location: { get_input: wn_mount_path }
+
+    wn_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: wn_disk_size }
 
   outputs:
     cluster_ip:

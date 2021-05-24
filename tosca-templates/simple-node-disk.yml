@@ -36,7 +36,7 @@ topology_template:
       description: Size of the extra HD added to the instance (Set 0 if disk is not needed)
       default: 0 GB
       constraints:
-      - valid_values: [ 0 GB, 10 GB, 20 GB, 30 GB, 50 GB, 100 GB ]
+      - valid_values: [ 0 GB, 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB, 10 TB, 20 TB, 40 TB, 100 TB ]
     mount_path:
       type: string
       description: Path to mount the extra disk
