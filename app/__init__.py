@@ -112,14 +112,14 @@ def create_app(oidc_blueprint=None):
             else:
                 try:
                     if not oidc_blueprint.session.authorized or 'username' not in session:
-                        return redirect(url_for('login'))
+                        return logout()
 
                     if oidc_blueprint.session.token['expires_in'] < 20:
                         app.logger.debug("Force refresh token")
                         oidc_blueprint.session.get('/userinfo')
                 except (InvalidTokenError, TokenExpiredError):
                     flash("Token expired.", 'warning')
-                    return redirect(url_for('login'))
+                    return logout()
 
             return f(*args, **kwargs)
 
@@ -146,13 +146,13 @@ def create_app(oidc_blueprint=None):
             return render_template('portfolio.html', templates=toscaInfo)
         else:
             if not oidc_blueprint.session.authorized:
-                return redirect(url_for('login'))
+                return logout()
 
             try:
                 account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + "/userinfo")
             except (InvalidTokenError, TokenExpiredError):
                 flash("Token expired.", 'warning')
-                return redirect(url_for('login'))
+                return logout()
 
             if account_info.ok:
                 account_info_json = account_info.json()
@@ -893,7 +893,10 @@ def create_app(oidc_blueprint=None):
     @app.route('/logout')
     def logout():
         session.clear()
-        oidc_blueprint.session.get("/logout")
+        try:
+            oidc_blueprint.session.get("/logout")
+        except Exception as ex:
+            app.logger.warn("Error in OIDC logout: %s" % ex)
         return redirect(url_for('login'))
 
     @app.errorhandler(403)
