@@ -138,12 +138,28 @@ def create_app(oidc_blueprint=None):
 
     @app.route('/')
     def home():
+        template_filter = None
+        if 'filter' in request.args:
+            template_filter = request.args['filter']
+        if "filter" in session:
+            template_filter = session["filter"]
+
+        if template_filter:
+            session["filter"] = template_filter
+            templates = {}
+            for k, v in toscaInfo.items():
+                if 'description' and v['description']:
+                    if v['description'].find(template_filter) != -1:
+                        templates[k] = v
+        else:
+            templates = toscaInfo
+
         if settings.debug_oidc_token:
             session["vos"] = None
             session['userid'] = "userid"
             session['username'] = "username"
             session['gravatar'] = ""
-            return render_template('portfolio.html', templates=toscaInfo)
+            return render_template('portfolio.html', templates=templates)
         else:
             if not oidc_blueprint.session.authorized:
                 return logout()
@@ -191,7 +207,7 @@ def create_app(oidc_blueprint=None):
                 else:
                     session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
 
-                return render_template('portfolio.html', templates=toscaInfo)
+                return render_template('portfolio.html', templates=templates)
             else:
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
