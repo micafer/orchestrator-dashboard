@@ -288,7 +288,8 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                                         if "tabs" in pars_data:
                                             toscaInfo[tosca]['tabs'] = pars_data["tabs"]
 
-        toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
+        toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(),
+                                            key=lambda x: x[1]["metadata"]['order']))
 
     return toscaInfoOrder
 
