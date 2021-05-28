@@ -35,6 +35,7 @@ from app import appdb
 from fnmatch import fnmatch
 from hashlib import md5
 from random import randint
+from collections import OrderedDict
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -245,6 +246,7 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
             toscaInfo[tosca] = {"valid": True,
                                 "description": "TOSCA Template",
                                 "metadata": {
+                                    "order": 99999999,
                                     "icon": "https://cdn4.iconfinder.com/data/icons/mosaicon-04/512/websettings-512.png"
                                 },
                                 "enable_config_form": False,
@@ -286,7 +288,9 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                                         if "tabs" in pars_data:
                                             toscaInfo[tosca]['tabs'] = pars_data["tabs"]
 
-    return toscaInfo
+        toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
+
+    return toscaInfoOrder
 
 
 def exchange_token_with_audience(oidc_url, client_id, client_secret, oidc_token, audience):
