@@ -246,8 +246,8 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
             toscaInfo[tosca] = {"valid": True,
                                 "description": "TOSCA Template",
                                 "metadata": {
-                                    "icon": "https://cdn4.iconfinder.com/data/icons/mosaicon-04/512/websettings-512.png",
-                                    "order": 99999999
+                                    "order": 99999999,
+                                    "icon": "https://cdn4.iconfinder.com/data/icons/mosaicon-04/512/websettings-512.png"
                                 },
                                 "enable_config_form": False,
                                 "inputs": {},
@@ -288,8 +288,7 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                                         if "tabs" in pars_data:
                                             toscaInfo[tosca]['tabs'] = pars_data["tabs"]
 
-        toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(),
-                                            key=lambda x: x[1]["metadata"]['order']))
+        toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
 
     return toscaInfoOrder
 
