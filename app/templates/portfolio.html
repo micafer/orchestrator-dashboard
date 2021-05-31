@@ -9,12 +9,14 @@
       <input id="cardFilter" class="form-control py-2 border" type="text" onkeyup="cardFilter()" placeholder="Search...">
     </div>
 
+  <div class="card-deck">
+
  {% for tosca_filename, tosca in templates.items() %}
     {% if loop.index % 3 == 1 %}
-    <div class="card-deck">
+    <div class="card-group">
     {% endif %}
 
-        <div class="card mb-4" style="max-width: 20rem; max-height: 25rem;">
+        <div class="card mb-4" style="width: 20rem; max-height: 25rem;">
             <div class="card-body">
                 <h5 class="card-title text-center">
 		  <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
@@ -52,6 +54,8 @@
     {% if templates|count % 3 != 0 %}
     </div>
     {% endif %}
+
+  </div>
 </div>
 
 <script>
@@ -200,6 +204,7 @@ $(document).ready(function() {
 </script>
 
 <script>
+
 function cardFilter() {
     var input, filter, cards, cardContainer, h5, title, i;
     input = document.getElementById("cardFilter");
@@ -215,6 +220,7 @@ function cardFilter() {
         }
     }
 }
+
 </script>
 
 {% endblock %}
