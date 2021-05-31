@@ -238,7 +238,7 @@ def loadToscaTemplates(directory):
 
 
 def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
-    toscaInfo = {}
+    toscaInfoOrder = toscaInfo = {}
     for tosca in toscaTemplates:
         with io.open(toscaDir + tosca) as stream:
             template = yaml.full_load(stream)
