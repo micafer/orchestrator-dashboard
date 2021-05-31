@@ -1,0 +1,61 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: >
+  Launch a compute node getting the for the EOSC-Synergy Repository as a Service.
+
+metadata:
+  display_name: Start a EOSC-Synergy RaaS virtual machine
+  icon: images/synergy-raas.png
+  tag: VM
+
+topology_template:
+
+  inputs:        
+    num_cpus:
+      type: integer
+      description: Number of virtual cpus for the VM
+      default: 2
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+    mem_size:
+      type: scalar-unit.size
+      description: Amount of memory for the VM
+      default: 4 GB
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+
+  node_templates:
+
+    synegy_raas:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: simple_node 
+      artifacts:
+        docker_role:
+          file: grycap.docker
+          type: tosca.artifacts.AnsibleGalaxy.role
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/synergy_raas.yml
+
+    simple_node:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            network_name: PUBLIC
+        host:
+          properties:
+            num_cpus: { get_input: num_cpus }
+            mem_size: { get_input: mem_size }
+        os:
+          properties:
+            type: linux
+
+  outputs:
+    raas_endpoint: 
+      value: { concat: [ 'http://', get_attribute: [ simple_node, public_address, 0 ], ':8080/xmlui/' ] }
