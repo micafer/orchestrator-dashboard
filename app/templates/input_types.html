@@ -20,6 +20,11 @@
     <!-- end select type -->
 
     <!-- hidden text type -->
+    {% elif value.tag_type == "textarea" %} >
+      <textarea class="form-control" id="{{key}}" name="{{key}}" cols="40" rows="5" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}>{{value.default}}</textarea>
+    <!-- end hidden text type -->
+
+    <!-- hidden text type -->
     {% elif value.tag_type == "hidden" %}
       <input type="hidden" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" >
     <!-- end hidden text type -->
