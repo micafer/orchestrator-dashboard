@@ -48,6 +48,10 @@ topology_template:
         endpoint:
           properties:
             network_name: PUBLIC
+            ports:
+              raas_port:
+                protocol: tcp
+                source: 8080
         host:
           properties:
             num_cpus: { get_input: num_cpus }
