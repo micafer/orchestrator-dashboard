@@ -133,7 +133,13 @@ def create_app(oidc_blueprint=None):
 
     @app.route('/login')
     def login():
+        # Maintain filter session value
+        template_filter = None
+        if "filter" in session:
+            template_filter = session["filter"]
         session.clear()
+        if template_filter:
+            session["filter"] = template_filter
         return render_template('home.html', oidc_name=settings.oidcName)
 
     @app.route('/')
@@ -162,7 +168,7 @@ def create_app(oidc_blueprint=None):
             return render_template('portfolio.html', templates=templates)
         else:
             if not oidc_blueprint.session.authorized:
-                return logout()
+                return redirect(url_for('login'))
 
             try:
                 account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + "/userinfo")
