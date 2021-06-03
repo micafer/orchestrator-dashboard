@@ -10,13 +10,20 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h4 class="font-weight-bold text-primary">
+            {% if 'metadata' in template and 'display_name' in template['metadata'] and template['metadata']['display_name'] %}
+            {{template['metadata']['display_name']}}
+            {% else %}
             Template: {{selectedTemplate}}
+            {% endif %}
             </h4>
         </div>
 
         <div class="card-body">
             <div class="alert alert-info">
                 <strong>Description:</strong> {{template['description']}}
+                {% if 'metadata' in template and 'web' in template['metadata'] and template['metadata']['web'] %}
+                (<a href="{{template['metadata']['web']}}">{{template['metadata']['web']}}</a>)
+                {% endif %}
             </div>
 
             <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post" onsubmit="return onSubmit();">
