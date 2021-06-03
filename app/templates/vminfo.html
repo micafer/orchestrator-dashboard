@@ -136,7 +136,7 @@
                         {% endif %}
                         {% if 'gpu.vendor' in vminfo %}
                           {{ vminfo['gpu.vendor'] }} 
-                          {% set _dummy=vminfo.pop('gpu.count') %}
+                          {% set _dummy=vminfo.pop('gpu.vendor') %}
                         {% endif %}
                         )
                       {% endif %}
