@@ -22,7 +22,7 @@
             <div class="alert alert-info">
                 <strong>Description:</strong> {{template['description']}}
                 {% if 'metadata' in template and 'web' in template['metadata'] and template['metadata']['web'] %}
-                (<a href="{{template['metadata']['web']}}">{{template['metadata']['web']}}</a>)
+                (<a taget="_blank" href="{{template['metadata']['web']}}">{{template['metadata']['web']}}</a>)
                 {% endif %}
             </div>
 
