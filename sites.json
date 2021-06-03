@@ -37,15 +37,6 @@
         }
     },
     {
-        "name": "IISAS-FedCloud-Old",
-        "url": "https://nova.ui.savba.sk:5000",
-        "id": "10963G0",
-        "vos": {
-            "eosc-synergy.eu": "d09a0c28397f4b41ad4bd62e7d63b51e"
-        },
-        "api_version": "1.1"
-    },
-    {
         "name": "IFCA-LCG2",
         "url": "https://api.cloud.ifca.es:5000",
         "id": "7513G0",
