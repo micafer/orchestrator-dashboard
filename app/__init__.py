@@ -305,18 +305,19 @@ def create_app(oidc_blueprint=None):
                 cont += 1
 
             str_outports = ""
-            for port in outports:
-                str_outports += Markup('<i class="fas fa-project-diagram"></i> <span class="badge '
-                                       'badge-secondary">%s</span>' % port.get_remote_port())
-                if not port.is_range():
-                    if port.get_remote_port() != port.get_local_port():
-                        str_outports += Markup(' <i class="fas fa-long-arrow-alt-right">'
-                                               '</i> <span class="badge badge-secondary">%s</span>' %
-                                               port.get_local_port())
-                else:
-                    str_outports += Markup(' : </i> <span class="badge badge-secondary">%s</span>' %
-                                           port.get_local_port())
-                str_outports += Markup('<br/>')
+            if outports:
+                for port in outports:
+                    str_outports += Markup('<i class="fas fa-project-diagram"></i> <span class="badge '
+                                        'badge-secondary">%s</span>' % port.get_remote_port())
+                    if not port.is_range():
+                        if port.get_remote_port() != port.get_local_port():
+                            str_outports += Markup(' <i class="fas fa-long-arrow-alt-right">'
+                                                '</i> <span class="badge badge-secondary">%s</span>' %
+                                                port.get_local_port())
+                    else:
+                        str_outports += Markup(' : </i> <span class="badge badge-secondary">%s</span>' %
+                                            port.get_local_port())
+                    str_outports += Markup('<br/>')
 
         return render_template('vminfo.html', infid=infid, vmid=vmid, vminfo=vminfo, outports=str_outports,
                                state=state, nets=nets, deployment=deployment, disks=disks)
