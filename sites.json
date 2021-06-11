@@ -37,15 +37,6 @@
         }
     },
     {
-        "name": "IISAS-FedCloud-Old",
-        "url": "https://nova.ui.savba.sk:5000",
-        "id": "10963G0",
-        "vos": {
-            "eosc-synergy.eu": "d09a0c28397f4b41ad4bd62e7d63b51e"
-        },
-        "api_version": "1.1"
-    },
-    {
         "name": "IFCA-LCG2",
         "url": "https://api.cloud.ifca.es:5000",
         "id": "7513G0",
@@ -71,16 +62,6 @@
             "worsica.vo.incd.pt": "7bb9c2694f9040c68cd72cb994f5ce89",
         "lagoproject.net": "77c86367335f4e9cb1e9ccab72d24f0a"
         }
-    },
-    {
-        "name": "IISAS-GPUCloud",
-        "url": "https://keystone3.ui.savba.sk:5000",
-        "id": "10961G0",
-        "vos": {
-            "eosc-synergy.eu": "0f1a9bfa6693460987355a7d25ae90c6",
-	    "cryoem.instruct-eric.eu": "f82b19069f644c0dafcad4b7f6a4dac0"
-        },
-	"api_version": "1.1"
     },
     {
         "name": "BIFI",
