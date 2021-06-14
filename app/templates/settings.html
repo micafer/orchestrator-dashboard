@@ -16,15 +16,18 @@
         <table id="tableServices" class="table table-bordered table-striped" width="100%" cellspacing="0">
             <thead>
                 <tr>
-                    <!-- <th>id</th>-->
-                    <th>Service</th>
-                    <th>Endpoint</th>
+                    <th>Name</th>
+                    <th>Value</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>OIDC issuer</td>
                     <td>{{ oidc_url }}</td>
+                </tr>
+                <tr>
+                    <td>OIDC Access token</td>
+                    <td style="max-width:40em;">{{ access_token }}</td>
                 </tr>
                 <tr>
                     <td>Infrastructure Manager (IM)</td>
@@ -36,17 +39,5 @@
     </div>
     </div>
 </div>
-
-<script>
-    $('#tableServices').dataTable( {
-        "responsive": true,
-        "order": [],
-        "columnDefs": [ {
-          "targets"  : 'no-sort',
-          "orderable": false,
-        }],
-        "order": [[ 1, "asc" ]]
-    });
-</script>
 
 {% endblock %}
