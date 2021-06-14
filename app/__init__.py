@@ -129,7 +129,11 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def show_settings():
         imUrl = "%s (v. %s)" % (settings.imUrl, im.get_version())
-        return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=imUrl)
+        if settings.debug_oidc_token:
+            access_token = settings.debug_oidc_token
+        else:
+            access_token = oidc_blueprint.session.token['access_token']
+        return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=imUrl, access_token=access_token)
 
     @app.route('/login')
     def login():
