@@ -113,7 +113,7 @@ def get_images(site_id, vo):
     oss = []
 
     try:
-        va_data = appdb_call('/rest/1.0/va_providers/%s' % site_id, timeout=APPDB_TIMEOUT*2)
+        va_data = appdb_call('/rest/1.0/va_providers/%s' % site_id, timeout=APPDB_TIMEOUT * 2)
 
         images = []
         if ('provider:image' in va_data['virtualization:provider'] and
