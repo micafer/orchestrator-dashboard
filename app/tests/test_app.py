@@ -77,11 +77,11 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.text = "system wn ()\nsystem front ()"
-        elif url == "/im/clouds/credid/images":
+        elif url == "/im/clouds/sitecredid/images":
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"images": [{"uri": "one://server/imageid", "name": "imagename"}]}
-        elif url == "/im/clouds/credid/quotas":
+        elif url == "/im/clouds/sitecredid/quotas":
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"quotas": {"cores": {"used": 1, "limit": 10},
