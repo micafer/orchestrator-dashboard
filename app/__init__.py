@@ -568,7 +568,7 @@ def create_app(oidc_blueprint=None):
             access_token = oidc_blueprint.session.token['access_token']
             auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
             try:
-                response = im.get_cloud_images(cred_id, auth_data)
+                response = im.get_cloud_images("site%s" % cred_id, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
                 for image in response.json()["images"]:
@@ -588,7 +588,7 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
         try:
-            response = im.get_cloud_quotas(cred_id, auth_data)
+            response = im.get_cloud_quotas("site%s" % cred_id, auth_data)
             if not response.ok:
                 raise Exception(response.text)
             return json.dumps(response.json()["quotas"])
