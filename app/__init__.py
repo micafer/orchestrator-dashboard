@@ -335,7 +335,7 @@ def create_app(oidc_blueprint=None):
         try:
             if op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data, [vmid])
-            if op == "resize":
+            elif op == "resize":
                 form_data = request.form.to_dict()
                 cpu = int(form_data['cpu'])
                 memory = int(form_data['memory'])

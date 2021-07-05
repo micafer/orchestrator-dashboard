@@ -386,6 +386,15 @@ $(document).ready(function () {
       $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Terminating...` );
   });
 });
+$(document).ready(function () {
+  $(".ReconfBtn").click(function () {
+      // add spinner to button
+      $(this).parent().find(".cancelReconfBtn").addClass("disabled", true);
+      $(this).addClass("disabled", true);
+      $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Reconfiguring...` );
+  });
+});
+
 
 function download(filename, text) {
   var element = document.createElement('a');
