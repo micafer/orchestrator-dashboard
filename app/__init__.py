@@ -129,7 +129,11 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def show_settings():
         imUrl = "%s (v. %s)" % (settings.imUrl, im.get_version())
-        return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=imUrl)
+        if settings.debug_oidc_token:
+            access_token = settings.debug_oidc_token
+        else:
+            access_token = oidc_blueprint.session.token['access_token']
+        return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=imUrl, access_token=access_token)
 
     @app.route('/login')
     def login():
@@ -331,7 +335,7 @@ def create_app(oidc_blueprint=None):
         try:
             if op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data, [vmid])
-            if op == "resize":
+            elif op == "resize":
                 form_data = request.form.to_dict()
                 cpu = int(form_data['cpu'])
                 memory = int(form_data['memory'])
@@ -564,7 +568,7 @@ def create_app(oidc_blueprint=None):
             access_token = oidc_blueprint.session.token['access_token']
             auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
             try:
-                response = im.get_cloud_images(cred_id, auth_data)
+                response = im.get_cloud_images("site%s" % cred_id, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
                 for image in response.json()["images"]:
@@ -584,7 +588,7 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"], cred_id)
         try:
-            response = im.get_cloud_quotas(cred_id, auth_data)
+            response = im.get_cloud_quotas("site%s" % cred_id, auth_data)
             if not response.ok:
                 raise Exception(response.text)
             return json.dumps(response.json()["quotas"])

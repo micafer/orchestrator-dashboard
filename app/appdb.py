@@ -25,17 +25,17 @@ from urllib.parse import urlparse
 
 APPDB_URL = "https://appdb.egi.eu"
 VO_LIST = []
-APPDB_TIMEOUT = 5
+APPDB_TIMEOUT = 10
 
 
-def appdb_call(path, retries=3, url=APPDB_URL):
+def appdb_call(path, retries=3, url=APPDB_URL, timeout=APPDB_TIMEOUT):
     """Basic AppDB REST API call."""
     data = None
     try:
         cont = 0
         while data is None and cont < retries:
             cont += 1
-            resp = requests.request("GET", url + path, verify=False, timeout=APPDB_TIMEOUT)
+            resp = requests.request("GET", url + path, verify=False, timeout=timeout)
             if resp.status_code == 200:
                 data = xmltodict.parse(resp.text.replace('\n', ''))['appdb:appdb']
     except Exception:
@@ -113,7 +113,7 @@ def get_images(site_id, vo):
     oss = []
 
     try:
-        va_data = appdb_call('/rest/1.0/va_providers/%s' % site_id)
+        va_data = appdb_call('/rest/1.0/va_providers/%s' % site_id, timeout=APPDB_TIMEOUT * 4)
 
         images = []
         if ('provider:image' in va_data['virtualization:provider'] and

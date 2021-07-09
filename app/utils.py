@@ -155,7 +155,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None):
     fedcloud_sites = None
     for cred in cred.get_creds(userid):
         if cred['enabled'] and (cred_id is None or cred_id == cred['id']):
-            res += "\\nid = %s" % cred['id']
+            res += "\\nid = site%s" % cred['id']
             if cred['type'] != "fedcloud":
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:

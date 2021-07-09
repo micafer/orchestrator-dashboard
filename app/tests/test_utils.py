@@ -45,9 +45,9 @@ class TestUtils(unittest.TestCase):
         getCachedProjectIDs.return_value = {"vo_name_st": "project_id_st", "vo_name": "project_id"}
 
         res = utils.getUserAuthData("token", cred, "user")
-        self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = one; type = OpenNebula;"
+        self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = siteone; type = OpenNebula;"
                                 " username = user; password = pass\\n"
-                                "id = fed; type = OpenStack; username = egi.eu;"
+                                "id = sitefed; type = OpenStack; username = egi.eu;"
                                 " tenant = openid; auth_version = 3.x_oidc_access_token; host ="
                                 " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id"))
 
