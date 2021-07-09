@@ -125,8 +125,9 @@ def get_images(site_id, vo):
 
         for os_tpl in images:
             try:
-                if '@voname' in os_tpl and vo == os_tpl['@voname'] and os_tpl['@archived'] == "false":
-                    oss.append((os_tpl['@appname'], os_tpl['@appcname']))
+                if '@voname' in os_tpl and vo == os_tpl['@voname']:
+                    if (os_tpl['@appname'], os_tpl['@appcname']) not in oss:
+                        oss.append((os_tpl['@appname'], os_tpl['@appcname']))
             except Exception:
                 continue
     except Exception:
