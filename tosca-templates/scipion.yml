@@ -59,7 +59,7 @@ topology_template:
       description: Size of the disk to be attached to the FE instance
       default: 100 GB
       constraints:
-        - valid_values: [ 100 GB, 500 GB, 1 TB, 5 TB, 8TB ]
+        - valid_values: [ 100 GB, 500 GB, 1 TB, 2 TB, 5 TB, 8TB ]
     workers_num:
       type: integer
       description: Number of worker nodes in cluster
@@ -143,7 +143,7 @@ topology_template:
       interfaces:
         Standard:
           configure:
-            implementation: https://raw.githubusercontent.com/CERIT-SC/scipion-docker/slurm/ansible_master.yaml
+            implementation: https://raw.githubusercontent.com/CERIT-SC/scipion-docker/master/ansible_master.yaml
             inputs:
               vnc_pass: { get_input: vnc_pass }
               cryosparc_license: { get_input: cryosparc_license }
@@ -183,7 +183,7 @@ topology_template:
       interfaces:
         Standard:
           configure:
-            implementation: https://raw.githubusercontent.com/CERIT-SC/scipion-docker/slurm/ansible_worker.yaml
+            implementation: https://raw.githubusercontent.com/CERIT-SC/scipion-docker/master/ansible_worker.yaml
             inputs:
               slurm_front_end_ip: { get_attribute: [ lrms_server, private_address, 0 ] }
       artifacts:
