@@ -6,6 +6,7 @@ imports:
 metadata:
   display_name: Launch a Kubernetes Virtual Cluster
   icon: images/kubernetes.png
+  order: 5
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 
@@ -70,9 +71,15 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.20.6"
+      default: "1.20.8"
       constraints:
-      - valid_values: [ "1.20.6", "1.19.10", "1.18.19", "1.21.0" ]
+      - valid_values: [ "1.20.8", "1.19.13", "1.21.3" ]
+    cri_runtime:
+      type: string
+      description: CRI Runtime to use with Kubernetes
+      default: "docker"
+      constraints:
+      - valid_values: [ docker, containerd ]
     install_kubeapps:
       type: boolean
       description: Flag to set the kubeapps UI to be installed
