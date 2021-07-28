@@ -32,6 +32,9 @@ inputs:
     kube_version:
       tab: Kubernetes Data
 
+    cri_runtime:
+      tab: Kubernetes Data
+
     install_kubeapps:
       tab: Kubernetes Data
 
