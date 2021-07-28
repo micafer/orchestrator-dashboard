@@ -4,14 +4,14 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 description: >
-  Launch a set of computing nodes with Docker installed.
+  Launch a set of computing nodes with Docker and Docker Compose installed.
 
 metadata:
   display_name: Docker VMs
   icon: images/docker.png
   tag: VM
 
-topology_template:
+topology_template:  
 
   inputs:        
     num_cpus:
