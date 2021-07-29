@@ -336,8 +336,8 @@ def delete_dns_record(infid, im, auth_data):
     return True, ""
 
 
-def delete_route53_record(record, domain, credentials):
-    if not (record and domain and credentials):
+def delete_route53_record(record_name, domain, credentials):
+    if not (record_name and domain and credentials):
         return False, "Error some empty value deleting DNS record"
 
     import boto3
@@ -356,11 +356,11 @@ def delete_route53_record(record, domain, credentials):
 
     record = route53.list_resource_record_sets(HostedZoneId=zone['Id'],
                                                StartRecordType='A',
-                                               StartRecordName='%s.%s.' % (record, domain),
+                                               StartRecordName='%s.%s.' % (record_name, domain),
                                                MaxItems='1')["ResourceRecordSets"][0]
 
-    if record["Name"] != '%s.%s.' % (record, domain):
-        return False, "Discard to delete DNS record %s as is not %s.%s." % (record["Name"], record, domain)
+    if record["Name"] != '%s.%s.' % (record_name, domain):
+        return False, "Discard to delete DNS record %s as is not %s.%s." % (record["Name"], record_name, domain)
 
     route53.change_resource_record_sets(
         HostedZoneId=zone['Id'],
@@ -373,7 +373,7 @@ def delete_route53_record(record, domain, credentials):
             ]
         })
 
-    return True, ""
+    return True, record["Name"]
 
 
 def generate_random_name():
