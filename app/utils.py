@@ -329,7 +329,7 @@ def delete_dns_record(infid, im, auth_data):
                 record = node["properties"]["record_name"]
                 domain = node["properties"]["domain_name"]
                 credentials = node["properties"]["dns_service_credentials"]["token"].strip()
-                return delete_route53_record(record, domain, credentials)
+                delete_route53_record(record, domain, credentials)
     except Exception as ex:
         return False, "Error deleting DNS record: %s" % ex
 
