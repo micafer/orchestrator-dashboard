@@ -895,6 +895,8 @@ def create_app(oidc_blueprint=None):
                 success, msg = utils.delete_dns_record(infid, im, auth_data)
                 if not success:
                     app.logger.error('Error deleting DNS record: %s', (msg))
+                else:
+                    app.logger.info('%s DNS record successfully deleted.', (msg))
                 response = im.delete_inf(infid, force, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
