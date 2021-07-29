@@ -322,6 +322,8 @@ def delete_dns_record(infid, im, auth_data):
     except Exception as ex:
         return False, "Error getting infrastructure template: %s" % ex
 
+    msg = ""
+    success = True
     try:
         yaml_template = yaml.safe_load(template)
         for node in list(yaml_template['topology_template']['node_templates'].values()):
@@ -329,11 +331,14 @@ def delete_dns_record(infid, im, auth_data):
                 record = node["properties"]["record_name"]
                 domain = node["properties"]["domain_name"]
                 credentials = node["properties"]["dns_service_credentials"]["token"].strip()
-                return delete_route53_record(record, domain, credentials)
+                res, dm = delete_route53_record(record, domain, credentials)
+                if not res:
+                    success = False
+                msg += dm + "\n"
     except Exception as ex:
         return False, "Error deleting DNS record: %s" % ex
 
-    return True, ""
+    return success, msg
 
 
 def delete_route53_record(record_name, domain, credentials):
