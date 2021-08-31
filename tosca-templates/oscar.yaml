@@ -4,18 +4,18 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 metadata:
-  display_name: Launch a OSCAR Virtual Cluster
+  display_name: Launch an OSCAR Virtual Cluster
   icon: images/oscar.png
   order: 2
   web: https://grycap.github.io/oscar/
 
-description: Template for launching a OSCAR Virtual Cluster
+description: Template for launching an OSCAR Virtual Cluster
 
 topology_template:
   inputs:
     wn_num:
       type: integer
-      description: Number of WNs in the oscar cluster
+      description: Number of WNs in the OSCAR cluster
       default: 1
       required: yes
     fe_cpus:
