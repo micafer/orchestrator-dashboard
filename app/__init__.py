@@ -519,6 +519,29 @@ def create_app(oidc_blueprint=None):
     def configure():
 
         selected_tosca = request.args['selected_tosca']
+        inf_id = request.args.get('inf_id', None)
+
+        inputs = {}
+        infra_name = ""
+        if inf_id:
+            access_token = oidc_blueprint.session.token['access_token']
+            auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+            try:
+                response = im.get_inf_property(inf_id, 'tosca', auth_data)
+                if not response.ok:
+                    raise Exception(response.text)
+                template = response.text
+                data = yaml.full_load(template)
+                for input_name, input_value in list(data['topology_template']['inputs'].items()):
+                    inputs[input_name] = input_value.get("default", None)
+            except Exception as ex:
+                flash("Error getting TOSCA template inputs: \n%s" % ex, "error")
+
+            try:
+                infra_data = infra.get_infra(inf_id)
+                infra_name = infra_data["name"] + " New"
+            except Exception:
+                pass
 
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
@@ -527,7 +550,8 @@ def create_app(oidc_blueprint=None):
         return render_template('createdep.html',
                                template=toscaInfo[selected_tosca],
                                selectedTemplate=selected_tosca,
-                               creds=creds)
+                               creds=creds, input_values=inputs,
+                               infra_name=infra_name)
 
     @app.route('/vos')
     def getvos():
