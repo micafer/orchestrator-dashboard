@@ -183,7 +183,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
+                        <form action="{{ url_for('manage_inf', infid=infId, op='delete-recreate') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteRecreateBtn" role="button">Delete-Recreate</button>
                           <input type="checkbox" name="force" value="1" onclick="showForceMessage(this);"> Force
