@@ -939,7 +939,7 @@ def create_app(oidc_blueprint=None):
                                       seconds=60, args=(infid,))
                 except Exception as dex:
                     app.logger.error('Error setting infra state to deleting.: %s', (dex))
-                
+
                 if op == "delete-recreate":
                     return redirect(url_for('configure', inf_id=infid))
 
