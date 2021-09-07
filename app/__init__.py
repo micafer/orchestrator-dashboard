@@ -517,8 +517,39 @@ def create_app(oidc_blueprint=None):
     @app.route('/configure')
     @authorized_with_valid_token
     def configure():
+        selected_tosca = None
+        inf_id = request.args.get('inf_id', None)
 
-        selected_tosca = request.args['selected_tosca']
+        inputs = {}
+        infra_name = ""
+        if inf_id:
+            access_token = oidc_blueprint.session.token['access_token']
+            auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+            try:
+                response = im.get_inf_property(inf_id, 'tosca', auth_data)
+                if not response.ok:
+                    raise Exception(response.text)
+                template = response.text
+                data = yaml.full_load(template)
+                for input_name, input_value in list(data['topology_template']['inputs'].items()):
+                    inputs[input_name] = input_value.get("default", None)
+                if 'filename' in data['metadata'] and data['metadata']['filename']:
+                    selected_tosca = data['metadata']['filename']
+            except Exception as ex:
+                flash("Error getting TOSCA template inputs: \n%s" % ex, "error")
+
+            try:
+                infra_data = infra.get_infra(inf_id)
+                infra_name = infra_data["name"] + " New"
+            except Exception:
+                pass
+
+        if 'selected_tosca' in request.args:
+            selected_tosca = request.args['selected_tosca']
+
+        if not selected_tosca or selected_tosca not in toscaInfo:
+            flash("InvalidTOSCA template name: %s" % selected_tosca, "error")
+            return redirect(url_for('home'))
 
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
@@ -527,7 +558,8 @@ def create_app(oidc_blueprint=None):
         return render_template('createdep.html',
                                template=toscaInfo[selected_tosca],
                                selectedTemplate=selected_tosca,
-                               creds=creds)
+                               creds=creds, input_values=inputs,
+                               infra_name=infra_name)
 
     @app.route('/vos')
     def getvos():
@@ -886,7 +918,7 @@ def create_app(oidc_blueprint=None):
                     raise Exception(response.text)
                 flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'info')
                 reload = infid
-            elif op == "delete":
+            elif op in ["delete", "delete-recreate"]:
                 form_data = request.form.to_dict()
                 force = False
                 if 'force' in form_data and form_data['force'] != "0":
@@ -909,6 +941,10 @@ def create_app(oidc_blueprint=None):
                                       seconds=60, args=(infid,))
                 except Exception as dex:
                     app.logger.error('Error setting infra state to deleting.: %s', (dex))
+
+                if op == "delete-recreate":
+                    return redirect(url_for('configure', inf_id=infid))
+
             elif op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:
