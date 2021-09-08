@@ -41,6 +41,12 @@ topology_template:
       type: string
       description: Path to mount the extra disk
       default: /mnt/disk
+    ports:
+      type: map
+      entry_schema:
+        type: PortSpec
+      description: Comma separated list of ports to be Opened in the Cloud site (eg. 22,80,443)
+      default: 22
 
   node_templates:
 
@@ -50,6 +56,7 @@ topology_template:
         endpoint:
           properties:
             network_name: PUBLIC
+            ports: { get_input: ports }
         scalable:
           properties:
             count: { get_input: num_instances }
