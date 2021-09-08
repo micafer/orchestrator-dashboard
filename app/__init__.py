@@ -532,7 +532,16 @@ def create_app(oidc_blueprint=None):
                 template = response.text
                 data = yaml.full_load(template)
                 for input_name, input_value in list(data['topology_template']['inputs'].items()):
-                    inputs[input_name] = input_value.get("default", None)
+                    inputs[input_name] = None
+                    if input_value.get("default", None):
+                        if input_value["type"] == "map" and input_name == "ports":
+                            inputs[input_name] = ""
+                            for port_value in input_value["default"].values():
+                                if inputs[input_name]:
+                                    inputs[input_name] += ","
+                                inputs[input_name] += str(port_value['source'])
+                        else:
+                            inputs[input_name] = input_value["default"]
                 if 'filename' in data['metadata'] and data['metadata']['filename']:
                     selected_tosca = data['metadata']['filename']
             except Exception as ex:
@@ -725,6 +734,8 @@ def create_app(oidc_blueprint=None):
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
+
+        template['metadata']['filename'] = request.args.get('template')
 
         template = add_image_to_template(template, image)
 
