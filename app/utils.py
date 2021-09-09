@@ -322,6 +322,8 @@ def delete_dns_record(infid, im, auth_data):
     except Exception as ex:
         return False, "Error getting infrastructure template: %s" % ex
 
+    msg = ""
+    success = True
     try:
         yaml_template = yaml.safe_load(template)
         for node in list(yaml_template['topology_template']['node_templates'].values()):
@@ -329,16 +331,19 @@ def delete_dns_record(infid, im, auth_data):
                 record = node["properties"]["record_name"]
                 domain = node["properties"]["domain_name"]
                 credentials = node["properties"]["dns_service_credentials"]["token"].strip()
-                delete_route53_record(record, domain, credentials)
+                res, dm = delete_route53_record(record, domain, credentials)
+                if not res:
+                    success = False
+                msg += dm + "\n"
     except Exception as ex:
         return False, "Error deleting DNS record: %s" % ex
 
-    return True, ""
+    return success, msg
 
 
-def delete_route53_record(record, domain, credentials):
-    if not (record and domain and credentials):
-        return
+def delete_route53_record(record_name, domain, credentials):
+    if not (record_name and domain and credentials):
+        return False, "Error some empty value deleting DNS record"
 
     import boto3
 
@@ -356,8 +361,11 @@ def delete_route53_record(record, domain, credentials):
 
     record = route53.list_resource_record_sets(HostedZoneId=zone['Id'],
                                                StartRecordType='A',
-                                               StartRecordName='%s.%s.' % (record, domain),
+                                               StartRecordName='%s.%s.' % (record_name, domain),
                                                MaxItems='1')["ResourceRecordSets"][0]
+
+    if record["Name"] != '%s.%s.' % (record_name, domain):
+        return False, "Discard to delete DNS record %s as is not %s.%s." % (record["Name"], record_name, domain)
 
     route53.change_resource_record_sets(
         HostedZoneId=zone['Id'],
@@ -369,6 +377,8 @@ def delete_route53_record(record, domain, credentials):
                 }
             ]
         })
+
+    return True, record["Name"]
 
 
 def generate_random_name():
