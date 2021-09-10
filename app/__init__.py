@@ -234,15 +234,17 @@ def create_app(oidc_blueprint=None):
             response = im.get_vm_info(infid, vmid, auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
+            return redirect(url_for('showinfrastructures'))
 
-        vminfo = {}
-        state = ""
-        nets = ""
-        disks = ""
-        deployment = ""
         if not response.ok:
             flash("Error retrieving VM info: \n" + response.text, 'error')
+            return redirect(url_for('showinfrastructures'))
         else:
+            vminfo = {}
+            state = ""
+            nets = ""
+            disks = ""
+            deployment = ""
             app.logger.debug("VM Info: %s" % response.text)
             radl_json = response.json()["radl"]
             outports = utils.get_out_ports(radl_json)
@@ -307,6 +309,14 @@ def create_app(oidc_blueprint=None):
                         del vminfo[prop]
 
                 cont += 1
+
+            # delete disk info of disks without size
+            for prop_name in ["device", "fstype", "mount_path"]:
+                new_cont = cont
+                prop = "disk.%s.%s" % (new_cont, prop_name)
+                while prop in vminfo:
+                    del vminfo[prop]
+                    new_cont += 1
 
             str_outports = ""
             if outports:
