@@ -234,15 +234,17 @@ def create_app(oidc_blueprint=None):
             response = im.get_vm_info(infid, vmid, auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
+            return redirect(url_for('showinfrastructures'))
 
-        vminfo = {}
-        state = ""
-        nets = ""
-        disks = ""
-        deployment = ""
         if not response.ok:
             flash("Error retrieving VM info: \n" + response.text, 'error')
+            return redirect(url_for('showinfrastructures'))
         else:
+            vminfo = {}
+            state = ""
+            nets = ""
+            disks = ""
+            deployment = ""
             app.logger.debug("VM Info: %s" % response.text)
             radl_json = response.json()["radl"]
             outports = utils.get_out_ports(radl_json)
@@ -307,6 +309,14 @@ def create_app(oidc_blueprint=None):
                         del vminfo[prop]
 
                 cont += 1
+
+            # delete disk info of disks without size
+            for prop_name in ["device", "fstype", "mount_path"]:
+                new_cont = cont
+                prop = "disk.%s.%s" % (new_cont, prop_name)
+                while prop in vminfo:
+                    del vminfo[prop]
+                    new_cont += 1
 
             str_outports = ""
             if outports:
@@ -517,8 +527,48 @@ def create_app(oidc_blueprint=None):
     @app.route('/configure')
     @authorized_with_valid_token
     def configure():
+        selected_tosca = None
+        inf_id = request.args.get('inf_id', None)
 
-        selected_tosca = request.args['selected_tosca']
+        inputs = {}
+        infra_name = ""
+        if inf_id:
+            access_token = oidc_blueprint.session.token['access_token']
+            auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
+            try:
+                response = im.get_inf_property(inf_id, 'tosca', auth_data)
+                if not response.ok:
+                    raise Exception(response.text)
+                template = response.text
+                data = yaml.full_load(template)
+                for input_name, input_value in list(data['topology_template']['inputs'].items()):
+                    inputs[input_name] = None
+                    if input_value.get("default", None):
+                        if input_value["type"] == "map" and input_name == "ports":
+                            inputs[input_name] = ""
+                            for port_value in input_value["default"].values():
+                                if inputs[input_name]:
+                                    inputs[input_name] += ","
+                                inputs[input_name] += str(port_value['source'])
+                        else:
+                            inputs[input_name] = input_value["default"]
+                if 'filename' in data['metadata'] and data['metadata']['filename']:
+                    selected_tosca = data['metadata']['filename']
+            except Exception as ex:
+                flash("Error getting TOSCA template inputs: \n%s" % ex, "error")
+
+            try:
+                infra_data = infra.get_infra(inf_id)
+                infra_name = infra_data["name"] + " New"
+            except Exception:
+                pass
+
+        if 'selected_tosca' in request.args:
+            selected_tosca = request.args['selected_tosca']
+
+        if not selected_tosca or selected_tosca not in toscaInfo:
+            flash("InvalidTOSCA template name: %s" % selected_tosca, "error")
+            return redirect(url_for('home'))
 
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
@@ -527,7 +577,8 @@ def create_app(oidc_blueprint=None):
         return render_template('createdep.html',
                                template=toscaInfo[selected_tosca],
                                selectedTemplate=selected_tosca,
-                               creds=creds)
+                               creds=creds, input_values=inputs,
+                               infra_name=infra_name)
 
     @app.route('/vos')
     def getvos():
@@ -693,6 +744,8 @@ def create_app(oidc_blueprint=None):
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
+
+        template['metadata']['filename'] = request.args.get('template')
 
         template = add_image_to_template(template, image)
 
@@ -886,7 +939,7 @@ def create_app(oidc_blueprint=None):
                     raise Exception(response.text)
                 flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'info')
                 reload = infid
-            elif op == "delete":
+            elif op in ["delete", "delete-recreate"]:
                 form_data = request.form.to_dict()
                 force = False
                 if 'force' in form_data and form_data['force'] != "0":
@@ -909,6 +962,10 @@ def create_app(oidc_blueprint=None):
                                       seconds=60, args=(infid,))
                 except Exception as dex:
                     app.logger.error('Error setting infra state to deleting.: %s', (dex))
+
+                if op == "delete-recreate":
+                    return redirect(url_for('configure', inf_id=infid))
+
             elif op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:

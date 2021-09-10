@@ -11,27 +11,28 @@
 
   {% set min_length = value.constraints | selectattr('min_length') | map(attribute='min_length') | list  %}
   {% set max_length = value.constraints | selectattr('max_length') | map(attribute='max_length') | list  %}
+  {% set input_value = input_values[key] | default(value.default, true)  %}
 
   {% if value.tag_type is defined %}
 
     <!-- text type -->
     {% if value.tag_type == "text" %}
-      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
+      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
     <!-- end select type -->
 
     <!-- hidden text type -->
     {% elif value.tag_type == "textarea" %} >
-      <textarea class="form-control" id="{{key}}" name="{{key}}" cols="40" rows="5" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}>{{value.default}}</textarea>
+      <textarea class="form-control" id="{{key}}" name="{{key}}" cols="40" rows="5" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}>{{input_value}}</textarea>
     <!-- end hidden text type -->
 
     <!-- hidden text type -->
     {% elif value.tag_type == "hidden" %}
-      <input type="hidden" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" >
+      <input type="hidden" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" >
     <!-- end hidden text type -->
 
     <!-- email type -->
     {% elif value.tag_type == "email" %}
-      <input type="email" class="form-control" id="{{key}}" name="{{key}}" placeholder="Enter your email" {% if value.required %}required{%endif%} >
+      <input type="email" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" placeholder="Enter your email" {% if value.required %}required{%endif%} >
     <!-- end email type -->
 
     <!-- password type -->
@@ -44,7 +45,7 @@
     {% elif value.tag_type == "select" %}
       <select class="js-example-basic-single js-states form-control" id="{{key}}" name="{{key}}">
       {% for constraint in value.constraints %}
-        <option value="{{constraint['value']}}">{{constraint['label']}}</option>
+        <option {% if input_value == constraint['value']%}selected{%endif%} value="{{constraint['value']}}">{{constraint['label']}}</option>
       {% endfor %}
       </select>
     <!-- end select type -->
@@ -78,19 +79,19 @@
 	  {% if constraints %}
 	  <select class="js-example-basic-single js-states form-control" id="{{key}}" name="{{key}}">
           {% for val in constraints[0] %}
-             <option value="{{val}}">{{val}}</option>
+             <option {% if input_value == val%}selected{%endif%} value="{{val}}">{{val}}</option>
           {% endfor %}
           </select>
 	  {% else %}
 
       {% if value.type == "integer" %}
       <!-- number type -->
-      <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
+      <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
       {% elif value.type == "scalar-unit.size" %}
-      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" pattern="[0-9]*( )([TMG]B)" title="Number Unit(MB, GB or TB)">
+      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" pattern="[0-9]*( )([TMG]B)" title="Number Unit(MB, GB or TB)">
       {% else %}
 	    <!-- text type, hide fields with password -->
-      <input {% if 'password' in key %}type="password"{% else %}type="text"{% endif %} class="form-control" id="{{key}}" name="{{key}}" value="{{value.default}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
+      <input {% if 'password' in key %}type="password"{% else %}type="text"{% endif %} class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
       {% endif %}
     {% endif %}
     

@@ -30,7 +30,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-group">
                     <label for="additional_description">Infrastructure Name</label>
-                    <input type="text" class="form-control" id="infra_name" name="infra_name" placeholder="description" value="" maxlength="60" required>
+                    <input type="text" class="form-control" id="infra_name" name="infra_name" placeholder="description" value="{{ infra_name }}" maxlength="60" required>
                 </div>
             {% if template['enable_config_form'] is defined and template['enable_config_form'] is sameas true %}
                 {% include 'config_form.html' %}
