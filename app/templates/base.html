@@ -38,7 +38,7 @@
   <!-- Dotdotdot -->
   <script type="text/javascript" src="{{ url_for('static', filename='js/dotdotdot.js') }}"></script>
   <!-- Cookie Consent -->
-  <script src="{{ url_for('static', filename='js/cookieconsent-4.0.0.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cookieconsent-4.0.1.min.js') }}"></script>
 
   <style>
   .cookieconsent-com---palette-dark .cc-nb-okagree {
@@ -63,10 +63,16 @@
     document.addEventListener('DOMContentLoaded', function () {
     cookieconsent.run({"notice_banner_type":"interstitial",
                        "website_name": "IM Dashboard",
-                       "consent_type":"express",
                        "palette":"dark",
                        "language":"en",
                        "page_load_consent_levels":["strictly-necessary"],
+                       {% if g.analytics_tag %}
+                       "consent_type":"express",
+                       "page_show_consent_levels":["strictly-necessary", "tracking"],
+                       {% else %}
+                       "consent_type":"implied",
+                       "page_show_consent_levels":["strictly-necessary"],
+                       {% endif %}
                        "notice_banner_reject_button_hide":false,
                        "preferences_center_close_button_hide":false});
     });
