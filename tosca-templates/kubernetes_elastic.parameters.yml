@@ -8,10 +8,22 @@ inputs:
     fe_mem:
       tab: HW Data
 
+    fe_instance_type:
+      tab: HW Data
+
     wn_cpus:
       tab: HW Data
 
     wn_mem:
+      tab: HW Data
+
+    wn_instance_type:
+      tab: HW Data
+
+    disk_size:
+      tab: HW Data
+
+    volume_id:
       tab: HW Data
 
     admin_token:
@@ -20,7 +32,19 @@ inputs:
     kube_version:
       tab: Kubernetes Data
 
+    cri_runtime:
+      tab: Kubernetes Data
+
     install_kubeapps:
+      tab: Kubernetes Data
+
+    kube_nvidia_support:
+      tab: Kubernetes Data
+
+    kube_cert_manager:
+      tab: Kubernetes Data
+
+    kube_cert_user_email:
       tab: Kubernetes Data
 
 tabs:

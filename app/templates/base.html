@@ -134,6 +134,7 @@
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ session['username'] }}<span class="caret"></span>
             </a>
             <div class="dropdown-menu">
+              <a class="dropdown-item">{{ session['userid'] }}</a>
               <a class="dropdown-item" href="{{ url_for("manage_creds") }}">Cloud Credentials</a>
               <a class="dropdown-item" href="{{ url_for("logout") }}">Logout</a>
             </div>
