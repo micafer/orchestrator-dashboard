@@ -204,7 +204,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
-                          ("Operation 'stop' successfully made on Infrastructure ID: infid", 'info'))
+                          ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -229,7 +229,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/managevm/stop/infid/0')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/vminfo?infId=infid&vmId=0', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'info'))
+        self.assertEquals(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.delete')
@@ -242,7 +242,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/managevm/terminate/infid/0')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0", 'info'))
+        self.assertEquals(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.put')
@@ -255,7 +255,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/reconfigure')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Reconfiguration process successfuly started.", 'info'))
+        self.assertEquals(flash.call_args_list[0][0], ("Reconfiguration process successfuly started.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -316,7 +316,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/delete')
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'info'))
+        self.assertEquals(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'success'))
 
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.get_creds")
@@ -416,7 +416,7 @@ class IMDashboardTests(unittest.TestCase):
                                                                                          "id": "credid"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully written!", 'info'))
+        self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully written!", 'success'))
         self.assertEquals(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
                                                              'id': 'credid'}, False))
 
@@ -424,7 +424,7 @@ class IMDashboardTests(unittest.TestCase):
                                                                                    "id": "credid"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'info'))
+        self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
         self.assertEquals(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
                                                                                   'id': 'credid'}, True))
 
@@ -437,7 +437,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/delete_creds?service_id=SERVICE_ID')
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully deleted!", 'info'))
+        self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully deleted!", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -464,7 +464,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.post('/addresources/infid', data={"wn_num": "1"})
         self.assertEqual(302, res.status_code)
-        self.assertEquals(flash.call_args_list[0][0], ("1 nodes added successfully", 'info'))
+        self.assertEquals(flash.call_args_list[0][0], ("1 nodes added successfully", 'success'))
 
     @patch("app.utils.avatar")
     @patch("app.utils.getUserAuthData")
