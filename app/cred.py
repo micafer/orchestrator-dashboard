@@ -118,13 +118,14 @@ class Credentials:
     def validate_cred(self, userid, new_cred):
         """
         Validates the credential with the availabe ones.
+
         Returns: 0 if no problem, 1 if it is duplicated, or 2 if the site is the same
         """
         no_host_types = ["EC2", "GCE", "Azure", "linode", "Orange"]
         for cred in self.get_creds(userid):
             if cred["type"] == new_cred["type"]:
                 isequal = True
-                for k, v in cred.items():
+                for k in cred.keys():
                     if k not in ["id", "enabled"]:
                         if cred[k] != new_cred[k]:
                             isequal = False
