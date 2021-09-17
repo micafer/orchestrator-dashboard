@@ -116,14 +116,17 @@ class Credentials:
         db.close()
 
     def validate_cred(self, userid, new_cred):
-        """
-        Validates the credential with the availabe ones.
-
+        """ Validates the credential with the availabe ones.
         Returns: 0 if no problem, 1 if it is duplicated, or 2 if the site is the same
         """
+        cred_id = None
+        if isinstance(new_cred, str):
+            cred_id = new_cred
+            new_cred = self.get_cred(cred_id, userid)
+
         no_host_types = ["EC2", "GCE", "Azure", "linode", "Orange"]
         for cred in self.get_creds(userid):
-            if cred["type"] == new_cred["type"]:
+            if cred["enabled"] and cred["type"] == new_cred["type"] and (not cred_id or cred_id != cred['id']):
                 isequal = True
                 for k in cred.keys():
                     if k not in ["id", "enabled"]:
