@@ -166,7 +166,7 @@ def create_app(oidc_blueprint=None):
 
         if settings.debug_oidc_token:
             session["vos"] = None
-            session['userid'] = "userid"
+            session['userid'] = "a_very_long_user_id_00000000000000000000000000000000000000000000@egi.es"
             session['username'] = "username"
             session['gravatar'] = ""
             return render_template('portfolio.html', templates=templates)
