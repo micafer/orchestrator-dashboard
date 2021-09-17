@@ -860,6 +860,10 @@ def create_app(oidc_blueprint=None):
         cred_id = request.args.get('cred_id', "")
         enable = request.args.get('enable', 0)
         try:
+            if enable == '1':
+                val_res, val_msg = cred.validate_cred(session["userid"], cred_id)
+                if val_res == 2:
+                    flash(val_msg, 'warning')
             cred.enable_cred(cred_id, session["userid"], enable)
         except Exception as ex:
             flash("Error updating credentials %s!" % ex, 'error')
