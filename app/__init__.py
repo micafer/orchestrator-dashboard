@@ -360,7 +360,7 @@ def create_app(oidc_blueprint=None):
             return redirect(url_for('showinfrastructures'))
 
         if response.ok:
-            flash("Operation '%s' successfully made on VM ID: %s" % (op, vmid), 'info')
+            flash("Operation '%s' successfully made on VM ID: %s" % (op, vmid), 'success')
         else:
             flash("Error making %s op on VM %s: \n%s" % (op, vmid, response.text), 'error')
 
@@ -833,7 +833,8 @@ def create_app(oidc_blueprint=None):
                         flash(val_msg, 'warning')
                 if val_res != 1:
                     cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
-                    flash("Credentials successfully written!", 'info')
+                    if val_res == 0:
+                        flash("Credentials successfully written!", 'success')
             except db.IntegrityError:
                 flash("Error writing credentials: Duplicated Credential ID!", 'error')
             except Exception as ex:
@@ -848,7 +849,7 @@ def create_app(oidc_blueprint=None):
         cred_id = request.args.get('cred_id', "")
         try:
             cred.delete_cred(cred_id, session["userid"])
-            flash("Credentials successfully deleted!", 'info')
+            flash("Credentials successfully deleted!", 'success')
         except Exception as ex:
             flash("Error deleting credentials %s!" % ex, 'error')
 
@@ -928,7 +929,7 @@ def create_app(oidc_blueprint=None):
                     if not response.ok:
                         raise Exception(response.text)
                     num = len(response.json()["uri-list"])
-                    flash("%d nodes added successfully" % num, 'info')
+                    flash("%d nodes added successfully" % num, 'success')
                 except Exception as ex:
                     flash("Error adding nodes: \n%s\n%s" % (ex, response.text), 'error')
 
@@ -949,7 +950,7 @@ def create_app(oidc_blueprint=None):
                 response = im.manage_inf(op, infid, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
-                flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'info')
+                flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'success')
                 reload = infid
             elif op in ["delete", "delete-recreate"]:
                 form_data = request.form.to_dict()
@@ -965,7 +966,7 @@ def create_app(oidc_blueprint=None):
                 response = im.delete_inf(infid, force, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
-                flash("Infrastructure '%s' successfuly deleted." % infid, "info")
+                flash("Infrastructure '%s' successfuly deleted." % infid, "success")
                 try:
                     infra_data = infra.get_infra(infid)
                     infra_data["state"]["state"] = "deleting"
@@ -982,7 +983,7 @@ def create_app(oidc_blueprint=None):
                 response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
-                flash("Reconfiguration process successfuly started.", "info")
+                flash("Reconfiguration process successfuly started.", "success")
         except Exception as ex:
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 
