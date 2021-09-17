@@ -586,6 +586,7 @@ def create_app(oidc_blueprint=None):
         vos = utils.getStaticVOs()
         vos.extend(appdb.get_vo_list())
         vos = list(set(vos))
+        vos.sort()
         if "vos" in session and session["vos"]:
             vos = [vo for vo in vos if vo in session["vos"]]
         for vo in vos:
@@ -786,7 +787,6 @@ def create_app(oidc_blueprint=None):
 
         try:
             creds = cred.get_creds(session["userid"])
-
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
 
@@ -819,13 +819,21 @@ def create_app(oidc_blueprint=None):
             if 'password' in request.files:
                 if request.files['password'].filename != "":
                     creds['password'] = request.files['password'].read().decode()
+
             try:
                 if 'password' in creds and creds['password'] in [None, '']:
                     del creds['password']
                 if 'csrf_token' in creds:
                     del creds['csrf_token']
-                cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
-                flash("Credentials successfully written!", 'info')
+                val_res, val_msg = cred.validate_cred(session["userid"], creds)
+                if val_res != 0:
+                    if val_res == 1:
+                        flash("Credentials already available. Not addded.", 'info')
+                    elif val_res == 2:
+                        flash(val_msg, 'warning')
+                if val_res != 1:
+                    cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
+                    flash("Credentials successfully written!", 'info')
             except db.IntegrityError:
                 flash("Error writing credentials: Duplicated Credential ID!", 'error')
             except Exception as ex:
