@@ -114,3 +114,32 @@ class Credentials:
         db.execute("update credentials set enabled = %s where userid = %s and serviceid = %s",
                    (enable, userid, serviceid))
         db.close()
+
+    def validate_cred(self, userid, new_cred):
+        """
+        Validates the credential with the availabe ones.
+        Returns: 0 if no problem, 1 if it is duplicated, or 2 if the site is the same
+        """
+        no_host_types = ["EC2", "GCE", "Azure", "linode", "Orange"]
+        for cred in self.get_creds(userid):
+            if cred["type"] == new_cred["type"]:
+                isequal = True
+                for k, v in cred.items():
+                    if k not in ["id", "enabled"]:
+                        if cred[k] != new_cred[k]:
+                            isequal = False
+                            break
+                if isequal:
+                    return 1, "Duplicated"
+
+                if new_cred["type"] in no_host_types:
+                    return 2, ("There is already a " + new_cred["type"] + " Credentials " +
+                               " It may cause problems authenticating with the Provider." +
+                               " Please disable/remove one of the Credentials.")
+                else:
+                    if new_cred["host"] and cred["host"] == new_cred["host"]:
+                        return 2, ("This site has already a Credential with same site URL." +
+                                   " It may cause problems authenticating with the Site." +
+                                   " Please disable/remove one of the Credentials.")
+
+        return 0, ""
