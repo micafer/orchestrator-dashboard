@@ -21,9 +21,23 @@
             </div>
             <div class="col-md-6 text-right">
               <!-- Button -->
+              <div class="btn-group">
+              {% if vms %}
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="selectVM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Go to VM log:
+                </button>
+                <div class="dropdown-menu" aria-labelledby="selectVM">
+                {% for vm in range(vms) %}
+                  <a class="dropdown-item" onclick="document.getElementById('vm_{{vm}}').scrollIntoView();window.scrollBy(0, -100);">VM: {{vm}}</a>
+                {% endfor %}
+                </div>
+              </div>
+              {% endif %}
               <button class="btn btn-outline-primary" id="bottomBtn" onclick="bottomFunction()"><i class="fa fa-angle-double-down"></i> Bottom</a>
 	            <button type=button class='btn btn-outline-primary' onclick='location.reload(true)'><span class='fas fa-sync mr-2'></span>Refresh</button>
               <button type=button class="btn btn-small btn-outline-secondary" onclick="history.back()"><span class="fas fa-arrow-left mr-2"></span> Back</button>
+            </div>
             </div>
           </div> <!-- / .row -->
         </div>
