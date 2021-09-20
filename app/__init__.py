@@ -473,7 +473,7 @@ def create_app(oidc_blueprint=None):
         res = ""
         lines = log.split('\n')
         vms = 0
-        for line in enumerate(lines):
+        for line in lines:
             sline = str(line)
             if len(sline) > 8 and len(sline) < 12 and sline.startswith("VM ") and sline.endswith(":<br>"):
                 res += Markup('<p id="vm_%s" class="bg-dark text-white">%s</p><br>' % (vms, line))
