@@ -469,21 +469,36 @@ def create_app(oidc_blueprint=None):
                 res += Markup("%s<br>\n" % line)
         return res
 
+    def add_vm_separators(log):
+        res = ""
+        lines = log.split('\n')
+        vms = 0
+        for n, line in enumerate(lines):
+            sline = str(line)
+            if len(sline) > 8 and len(sline) < 12 and sline.startswith("VM ") and sline.endswith(":<br>"):
+                res += Markup('<p id="vm_%s" class="bg-dark text-white">%s</p><br>' % (vms, line))
+                vms += 1
+            else:
+                res += Markup("%s\n" % line)
+        return res, vms
+
     @app.route('/log/<infid>')
     @authorized_with_valid_token
     def inflog(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
         auth_data = utils.getUserAuthData(access_token, cred, session["userid"])
         log = "Not found"
+        vms = 0
         try:
             response = im.get_inf_property(infid, 'contmsg', auth_data)
             if not response.ok:
                 raise Exception(response.text)
             log = add_colors(response.text)
+            log, vms = add_vm_separators(log)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
 
-        return render_template('inflog.html', log=log)
+        return render_template('inflog.html', log=log, vms=vms)
 
     @app.route('/vmlog/<infid>/<vmid>')
     @authorized_with_valid_token
