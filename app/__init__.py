@@ -515,7 +515,7 @@ def create_app(oidc_blueprint=None):
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
 
-        return render_template('inflog.html', log=log, vmid=vmid)
+        return render_template('inflog.html', log=log, vmid=vmid, vms=0)
 
     @app.route('/outputs/<infid>')
     @authorized_with_valid_token
