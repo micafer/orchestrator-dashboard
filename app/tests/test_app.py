@@ -331,7 +331,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'<option data-tenant-id="" data-type="fedcloud" name="selectedCred" '
                       b'value=credid>\n                        credid\n                    </option>', res.data)
         self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
-                      b'name="selectedCred" value=credid1>\n                        credid1\n                    </option>', res.data)
+                      b'name="selectedCred" value=credid1>\n                        credid1\n'
+                      '                    </option>', res.data)
 
     @patch("app.utils.avatar")
     @patch("app.appdb.get_sites")
