@@ -59,8 +59,11 @@
                          <i class='fas fa-exclamation-triangle text-warning' title="VO currently not available for the user!. It may cause errors in the Cloud Provider Selection list."></i>
                          {% endif %}
                         {% endif %}
+                        {% if 'host' in cred %}
+                         - 
+                        {% endif %}
                         {% if 'vo' not in cred and 'tenant' in cred %}
-                         - <strong>Tenant: </strong> {{cred["tenant"]}}
+                        <strong>Tenant: </strong> {{cred["tenant"]}}
                         {% endif %}
                       </td>
                       <td>
