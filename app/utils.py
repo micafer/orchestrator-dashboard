@@ -182,6 +182,8 @@ def getUserAuthData(access_token, cred, userid, cred_id=None):
 
                     if projectid:
                         res += "; domain = %s" % projectid
+                    else:
+                        print("Error not project ID for Cred %s." % cred['id'], file=sys.stderr)
                 else:
                     print("Error %s not in list of FedCloud sites." % cred['host'], file=sys.stderr)
 
@@ -732,3 +734,23 @@ def generate_random_name():
         "zhukovsky"
     ]
     return "%s-%s%d" % (left[randint(0, len(left) - 1)], rigth[randint(0, len(rigth) - 1)], randint(0, 9))
+
+def get_project_ids(creds):
+    """Get the project ID associted with the fedcloud creds"""
+    fedcloud_sites = None
+    for cred in creds:
+        if cred['type'] == "fedcloud":
+            # only load this data the first time EGI Cloud site appears
+            if fedcloud_sites is None:
+                fedcloud_sites = {}
+                for site in list(getCachedSiteList().values()):
+                    fedcloud_sites[site['url']] = site
+
+            if cred['host'] in fedcloud_sites:
+                site_info = fedcloud_sites[cred['host']]
+
+                project_ids = getCachedProjectIDs(site_info["id"])
+                if cred['vo'] in project_ids:
+                    cred['project_id'] = project_ids[cred['vo']]
+
+    return creds

@@ -225,7 +225,7 @@
                     {% for cred in creds %}
                     <option data-tenant-id="{{cred['tenant_id'] if 'tenant_id' in cred else '' }}" data-type="{{ cred['type'] }}" name="selectedCred" value={{ cred['id'] }}>
                         {{ cred['id'] }}
-                        {%- if cred['type'] == 'fedcloud' and session['vos'] and cred['vo'] not in session['vos'] %}
+                        {%- if cred['type'] == 'fedcloud' and ((session['vos'] and cred['vo'] not in session['vos']) or 'project_id' not in cred) %}
                         (Warn)
                         {%- endif %}
                     </option>
