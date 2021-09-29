@@ -329,7 +329,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Launch a compute node getting the IP and SSH credentials to access via ssh", res.data)
         self.assertIn(b'<option data-tenant-id="" data-type="fedcloud" name="selectedCred" '
-                      b'value=credid>\n                        credid\n                    </option>', res.data)
+                      b'value=credid>\n                        credid\n                        (Warn)\n'
+                      b'                    </option>', res.data)
         self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
                       b'name="selectedCred" value=credid1>\n                        credid1\n'
                       b'                    </option>', res.data)
