@@ -735,8 +735,9 @@ def generate_random_name():
     ]
     return "%s-%s%d" % (left[randint(0, len(left) - 1)], rigth[randint(0, len(rigth) - 1)], randint(0, 9))
 
+
 def get_project_ids(creds):
-    """Get the project ID associted with the fedcloud creds"""
+    """Get the project ID associted with the fedcloud creds."""
     fedcloud_sites = None
     for cred in creds:
         if cred['type'] == "fedcloud":
