@@ -588,6 +588,7 @@ def create_app(oidc_blueprint=None):
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
         creds = cred.get_creds(session['userid'], 1)
+        utils.get_project_ids(creds)
 
         return render_template('createdep.html',
                                template=toscaInfo[selected_tosca],
@@ -802,6 +803,7 @@ def create_app(oidc_blueprint=None):
 
         try:
             creds = cred.get_creds(session["userid"])
+            utils.get_project_ids(creds)
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
 
