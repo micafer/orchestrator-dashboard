@@ -217,7 +217,7 @@ topology_template:
         control_plane_ip: { get_input: kube_ha_vip }
         master_node: false
       requirements:
-        - host: front
+        - host: cp
 
     cp:
       type: tosca.nodes.indigo.Compute
