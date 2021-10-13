@@ -197,7 +197,6 @@ topology_template:
       capabilities:
         endpoint:
           properties:
-            additional_ip: { get_input: kube_ha_vip }
             ports:
               https_port:
                 protocol: tcp
@@ -228,6 +227,7 @@ topology_template:
             count:  2
         endpoint:
           properties:
+            additional_ip: { get_input: kube_ha_vip }
             dns_name: "cp-#N#"
             network_name: PUBLIC
         host:
