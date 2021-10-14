@@ -430,7 +430,8 @@ class IMDashboardTests(unittest.TestCase):
                                                              'id': 'credid'}, False))
 
         res = self.client.post('/write_creds?cred_id=&cred_type=OpenNebula', data={"host": "SITE_URL3",
-                                                                                   "id": "credid"})
+                                                                                   "id": "credid",
+                                                                                   "type": "OpenNebula"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
