@@ -420,14 +420,15 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'SITE_URL', res.data)
         self.assertIn(b'USER', res.data)
 
+        userid = "a_very_long_user_id_00000000000000000000000000000000000000000000@egi.es"
         res = self.client.post('/write_creds?cred_id=credid&cred_type=OpenNebula', data={"host": "SITE_URL2",
                                                                                          "id": "credid",
                                                                                          "type": "OpenNebula"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully written!", 'success'))
-        self.assertEquals(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
-                                                             'id': 'credid'}, False))
+        self.assertEquals(write_creds.call_args_list[0][0], ('credid', userid, {'host': 'SITE_URL2',
+                                                             'id': 'credid', 'type': "OpenNebula"}, False))
 
         res = self.client.post('/write_creds?cred_id=&cred_type=OpenNebula', data={"host": "SITE_URL3",
                                                                                    "id": "credid",
@@ -435,8 +436,9 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
-        self.assertEquals(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
-                                                                                  'id': 'credid'}, True))
+        self.assertEquals(write_creds.call_args_list[1][0], ('credid', userid, {'host': 'SITE_URL3',
+                                                                                'id': 'credid',
+                                                                                'type': 'OpenNebula'}, True))
 
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.delete_cred")
