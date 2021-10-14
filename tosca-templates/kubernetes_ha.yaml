@@ -215,7 +215,7 @@ topology_template:
         cert_user_email: { get_input: kube_cert_user_email }
         cri_runtime: { get_input: cri_runtime }
         control_plane_ip: { get_input: kube_ha_vip }
-        master_node: false
+        master_node_ip: { get_attribute: [ front, private_address, 0 ] }
       requirements:
         - host: cp
 
