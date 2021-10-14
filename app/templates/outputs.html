@@ -20,7 +20,7 @@
                       <button class="btn btn-success btn-sm" id="copyBtn"><i class="fa fa-copy"></i> Copy to clipboard</button>
 
                       {% else %}
-                        {% if "{" in value %}
+                        {% if value.startswith("{") or value.startswith("[") %}
                         <pre>{{ value | tojson_pretty() | safe | replace("\\n", "\n") }}</pre>
                         {% else %}
                         {{ value }}
