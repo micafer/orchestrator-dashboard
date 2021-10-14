@@ -242,7 +242,13 @@ topology_template:
   outputs:
     dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
-    api_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
     kubeapps_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
+    api_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
+    api_endpoint_1:
+      value: { concat: [ 'https://', get_attribute: [ cp, public_address, 0 ], ':6443' ] }
+    api_endpoint_2:
+      value: { concat: [ 'https://', get_attribute: [ cp, public_address, 1 ], ':6443' ] }
+    virtual_api_endpoint:
+      value: { concat: [ 'https://', get_input: kube_ha_vip, ':8443' ] }
