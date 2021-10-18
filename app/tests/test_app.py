@@ -436,8 +436,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
         self.assertEquals(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
-                                                                                'id': 'credid',
-                                                                                'type': 'OpenNebula'}, True))
+                                                                                  'id': 'credid',
+                                                                                  'type': 'OpenNebula'}, True))
 
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.delete_cred")
