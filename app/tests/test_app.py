@@ -389,9 +389,14 @@ class IMDashboardTests(unittest.TestCase):
 
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.get_creds")
-    def test_manage_creds(self, get_creds, avatar):
+    @patch("app.appdb.get_sites")
+    @patch("app.appdb.get_project_ids")
+    def test_manage_creds(self, get_project_ids, get_sites, get_creds, avatar):
         self.login(avatar)
-        get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url"}]
+        get_project_ids.return_value = {}
+        get_sites.return_value = {"SITE_NAME": {"url": "URL", "state": "", "id": ""},
+                                  "SITE2": {"url": "URL2", "state": "CRITICAL", "id": ""}}
+        get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "project_id": "project"}]
         res = self.client.get('/manage_creds')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'credid', res.data)
@@ -416,20 +421,23 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'USER', res.data)
 
         res = self.client.post('/write_creds?cred_id=credid&cred_type=OpenNebula', data={"host": "SITE_URL2",
-                                                                                         "id": "credid"})
+                                                                                         "id": "credid",
+                                                                                         "type": "OpenNebula"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully written!", 'success'))
         self.assertEquals(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
-                                                             'id': 'credid'}, False))
+                                                             'id': 'credid', 'type': "OpenNebula"}, False))
 
         res = self.client.post('/write_creds?cred_id=&cred_type=OpenNebula', data={"host": "SITE_URL3",
-                                                                                   "id": "credid"})
+                                                                                   "id": "credid",
+                                                                                   "type": "OpenNebula"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
         self.assertEquals(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
-                                                                                  'id': 'credid'}, True))
+                                                                                  'id': 'credid',
+                                                                                  'type': 'OpenNebula'}, True))
 
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.delete_cred")

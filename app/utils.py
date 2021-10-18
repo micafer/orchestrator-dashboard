@@ -175,7 +175,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None):
                     if 'api_version' in site_info:
                         res += "; api_version  = %s" % site_info['api_version']
 
-                    projectid = None
+                    projectid = cred['project_id'] if 'project_id' in cred else None
                     project_ids = getCachedProjectIDs(site_info["id"])
                     if cred['vo'] in project_ids:
                         projectid = project_ids[cred['vo']]

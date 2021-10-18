@@ -803,6 +803,7 @@ def create_app(oidc_blueprint=None):
 
         try:
             creds = cred.get_creds(session["userid"])
+            # Get the project_id in case it has changed
             utils.get_project_ids(creds)
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
@@ -849,6 +850,8 @@ def create_app(oidc_blueprint=None):
                     elif val_res == 2:
                         flash(val_msg, 'warning')
                 if val_res != 1:
+                    # Get project_id to save it to de DB
+                    utils.get_project_ids([creds])
                     cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
                     if val_res == 0:
                         flash("Credentials successfully written!", 'success')
