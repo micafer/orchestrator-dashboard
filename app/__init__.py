@@ -37,7 +37,7 @@ from flask import Flask, json, render_template, request, redirect, url_for, flas
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
-from radl.radl import deploy, network
+from radl.radl import deploy
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect
 
