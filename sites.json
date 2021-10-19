@@ -9,7 +9,13 @@
             "biomed": "eca73ad6a84d4c0088063505c36349ab",
             "vo.indigo-datacloud.eu": "25cb49baedbf40a194729ff6802c8491",
             "umsa.cerit-sc.cz": "10e31299a9b548fdbe36e4dbe571168e",
-	    "cryoem.instruct-eric.eu": "d0ebf0fad0a04be19f93fdf794469544"
+	        "cryoem.instruct-eric.eu": "d0ebf0fad0a04be19f93fdf794469544"
+        },
+        "networks": {
+            "cryoem.instruct-eric.eu": {
+                "private": "78-128-250-pers-proj-net",
+                "public": "public-cesnet-78-128-250-PERSONAL"
+            }
         }
     },
     {
