@@ -37,7 +37,7 @@ from flask import Flask, json, render_template, request, redirect, url_for, flas
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
-from radl.radl import deploy
+from radl.radl import deploy, network
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect
 
@@ -738,10 +738,13 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         image = None
+        network_id = None
         if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
             if form_data['extra_opts.selectedImage'] != "":
                 site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
+                if cred_data['type'] == 'fedcloud' and "networks" in site and vo in site["networks"]:
+                    network_id = site["networks"][vo]
             elif form_data['extra_opts.selectedSiteImage'] != "":
                 image = form_data['extra_opts.selectedSiteImage']
         else:
@@ -763,6 +766,9 @@ def create_app(oidc_blueprint=None):
             template = yaml.full_load(stream)
 
         template['metadata']['filename'] = request.args.get('template')
+
+        if network_id:
+            template = add_network_id_to_template(template, network_id)
 
         template = add_image_to_template(template, image)
 
