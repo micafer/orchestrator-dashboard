@@ -730,8 +730,8 @@ def create_app(oidc_blueprint=None):
             if node["type"] == "tosca.nodes.indigo.Compute":
                 try:
                     if node["capabilities"]["endpoint"]["properties"]["network_name"] == "PUBLIC":
-                       node["capabilities"]["endpoint"]["properties"]["network_name"] = "%s,%s" % (priv_network_id,
-                                                                                                   pub_network_id)
+                        node["capabilities"]["endpoint"]["properties"]["network_name"] = "%s,%s" % (priv_network_id,
+                                                                                                    pub_network_id)
                 except KeyError:
                     continue
         return template
@@ -757,9 +757,9 @@ def create_app(oidc_blueprint=None):
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
                 if cred_data['type'] == 'fedcloud' and "networks" in site and vo in site["networks"]:
                     if "private" in site["networks"][vo]:
-                       priv_network_id = site["networks"][vo]["private"]
+                        priv_network_id = site["networks"][vo]["private"]
                     if "public" in site["networks"][vo]:
-                       pub_network_id = site["networks"][vo]["public"]
+                        pub_network_id = site["networks"][vo]["public"]
             elif form_data['extra_opts.selectedSiteImage'] != "":
                 image = form_data['extra_opts.selectedSiteImage']
         else:
