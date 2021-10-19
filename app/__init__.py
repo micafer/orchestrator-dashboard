@@ -725,6 +725,17 @@ def create_app(oidc_blueprint=None):
         app.logger.debug(yaml.dump(template, default_flow_style=False))
         return template
 
+    def add_network_id_to_template(template, priv_network_id, pub_network_id):
+        for node in list(template['topology_template']['node_templates'].values()):
+            if node["type"] == "tosca.nodes.indigo.Compute":
+                try:
+                    if node["capabilities"]["endpoint"]["properties"]["network_name"] == "PUBLIC":
+                       node["capabilities"]["endpoint"]["properties"]["network_name"] = "%s,%s" % (priv_network_id,
+                                                                                                   pub_network_id)
+                except KeyError:
+                    continue
+        return template
+
     @app.route('/submit', methods=['POST'])
     @authorized_with_valid_token
     def createdep():
@@ -738,13 +749,17 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
 
         image = None
-        network_id = None
+        priv_network_id = None
+        pub_network_id = None
         if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
             if form_data['extra_opts.selectedImage'] != "":
                 site, _, vo = utils.get_site_info(cred_id, cred, session["userid"])
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
                 if cred_data['type'] == 'fedcloud' and "networks" in site and vo in site["networks"]:
-                    network_id = site["networks"][vo]
+                    if "private" in site["networks"][vo]:
+                       priv_network_id = site["networks"][vo]["private"]
+                    if "public" in site["networks"][vo]:
+                       pub_network_id = site["networks"][vo]["public"]
             elif form_data['extra_opts.selectedSiteImage'] != "":
                 image = form_data['extra_opts.selectedSiteImage']
         else:
@@ -767,8 +782,8 @@ def create_app(oidc_blueprint=None):
 
         template['metadata']['filename'] = request.args.get('template')
 
-        if network_id:
-            template = add_network_id_to_template(template, network_id)
+        if priv_network_id and pub_network_id:
+            template = add_network_id_to_template(template, priv_network_id, pub_network_id)
 
         template = add_image_to_template(template, image)
 

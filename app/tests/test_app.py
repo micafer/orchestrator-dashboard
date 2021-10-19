@@ -387,6 +387,29 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
 
+    @patch('app.utils.get_site_info')
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.post')
+    @patch("app.utils.avatar")
+    @patch("app.cred.Credentials.get_cred")
+    def test_submit2(self, get_cred, avatar, post, user_data, get_site_info):
+        site = {"name": "SITE", "networks": {"vo": {"public": "pub_id", "private": "priv_id"}}}
+        get_site_info.return_value = site, None, "vo"
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        post.side_effect = self.post_response
+        get_cred.return_value = {"id": "credid", "type": "fedcloud", "vo": "vo"}
+        self.login(avatar)
+        params = {'extra_opts.selectedImage': 'appdbimage',
+                  'extra_opts.selectedSiteImage': '',
+                  'extra_opts.selectedCred': 'credid',
+                  'num_cpus': '4',
+                  'ports': '22,80,443',
+                  'storage_size': '0 GB',
+                  'mount_path': '/mnt/disk'}
+        res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
+        self.assertEqual(302, res.status_code)
+        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+
     @patch("app.utils.avatar")
     @patch("app.cred.Credentials.get_creds")
     @patch("app.appdb.get_sites")
