@@ -418,6 +418,7 @@ def create_app(oidc_blueprint=None):
                 app.logger.error("Error saving infrastructure state: %s" % ex)
             return state
         except Timeout as texs:
+            app.logger.error("Timeout waiting infrastructure state: %s" % texs)
             try:
                 # There is a timeout
                 infra_data = infra.get_infra(infid)
