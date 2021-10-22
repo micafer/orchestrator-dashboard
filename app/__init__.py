@@ -56,7 +56,7 @@ def create_app(oidc_blueprint=None):
     CSRFProtect(app)
     cred = Credentials(settings.db_url, key)
     infra = Infrastructures(settings.db_url)
-    im = InfrastructureManager(settings.imUrl, 60)
+    im = InfrastructureManager(settings.imUrl, settings.imTimeout)
 
     # To Reload internally the site cache
     scheduler = APScheduler()
