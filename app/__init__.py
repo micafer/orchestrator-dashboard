@@ -24,6 +24,7 @@ import yaml
 import io
 import os
 import logging
+from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
 from app.settings import Settings
@@ -55,7 +56,7 @@ def create_app(oidc_blueprint=None):
     CSRFProtect(app)
     cred = Credentials(settings.db_url, key)
     infra = Infrastructures(settings.db_url)
-    im = InfrastructureManager(settings.imUrl)
+    im = InfrastructureManager(settings.imUrl, settings.imTimeout)
 
     # To Reload internally the site cache
     scheduler = APScheduler()
@@ -416,9 +417,25 @@ def create_app(oidc_blueprint=None):
             except Exception as ex:
                 app.logger.error("Error saving infrastructure state: %s" % ex)
             return state
+        except Timeout as texs:
+            app.logger.error("Timeout waiting infrastructure state: %s" % texs)
+            try:
+                # There is a timeout
+                infra_data = infra.get_infra(infid)
+                infra_data["state"]["state"] = "timeout"
+                return infra_data["state"]
+            except Exception:
+                return {"state": "error", "vm_states": {}}
         except Exception as exs:
             app.logger.error("Error getting infrastructure state: %s" % exs)
-            return {"state": "error", "vm_states": {}}
+            try:
+                # We cannot get the current state, show error, but return
+                # previous VMs states
+                infra_data = infra.get_infra(infid)
+                infra_data["state"]["state"] = "error"
+                return infra_data["state"]
+            except Exception:
+                return {"state": "error", "vm_states": {}}
 
     def hide_sensitive_data(template):
         """Remove/Hide sensitive data (passwords, credentials)."""

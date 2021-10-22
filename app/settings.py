@@ -30,7 +30,6 @@ class Settings:
         self.oidcName = config['OIDC_NAME']
         self.oidcUrl = config['OIDC_BASE_URL']
         self.tempSlamUrl = config.get('SLAM_URL') if config.get('SLAM_URL') else ""
-        self.imConf = {'im_url': config.get('IM_URL')}
         self.external_links = config.get('EXTERNAL_LINKS') if config.get('EXTERNAL_LINKS') else []
         self.oidcGroups = config.get('OIDC_GROUP_MEMBERSHIP')
         self.db_url = config.get('DB_URL')
@@ -39,3 +38,4 @@ class Settings:
         self.static_sites_url = config.get('STATIC_SITES_URL', "")
         self.appdb_cache_timeout = config.get('APPDB_CACHE_TIMEOUT', 3600)
         self.debug_oidc_token = config.get('DEBUG_OIDC_TOKEN', None)
+        self.imTimeout = config.get('IM_TIMEOUT', 60)

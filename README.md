@@ -34,6 +34,7 @@ Create the `config.json` file (see the [example](app/config-sample.json)) settin
 | TOSCA_TEMPLATES_DIR | Absolute path where the TOSCA templates are stored | Y | N/A |
 | TOSCA_PARAMETERS_DIR | Absolute path where the TOSCA parameters are stored | Y | N/A |
 | IM_URL | Infrastructure Manager service URL | Y | N/A |
+| IM_TIMEOUT | Infrastructure Manager service calls timeout | N | 60 |
 | SUPPORT_EMAIL | Email address that will be shown in case of errors | N | "" |
 | EXTERNAL_LINKS | List of dictionaries ({ "url": "example.com" , "menu_item_name": "Example link"}) specifying links that will be shown under the "External Links" menu | N | [] |
 | LOG_LEVEL | Set Logging level | N | info |
