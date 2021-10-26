@@ -128,11 +128,12 @@ topology_template:
           auth.user.password: { get_input: user_username }
           auth.user.org: { get_input: org_name }
           auth.user.bucket: { get_input: bucket_name }
-          service.type: "NodePort"
-          service.nodePorts.http: "8086"
-          service.nodePorts.rpc:  "8088"
+          influxdb.service.type: "NodePort"
+          influxdb.service.nodePorts.http: "8086"
+          influxdb.service.nodePorts.rpc:  "8088"
           ingress.enabled: "true"
           ingress.path: "/influx"
+          ingress.annotations: "{kubernetes.io/ingress.class: nginx}"
       capabilities:
         endpoint:
           properties:
