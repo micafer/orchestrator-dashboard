@@ -142,7 +142,7 @@ topology_template:
                 source: 8086
               rpc:
                 protocol: tcp
-                source: 8086
+                source: 8088
       requirements:
         - host: front
         - dependency: lrms_front_end
@@ -232,9 +232,11 @@ topology_template:
             type: linux
 
   outputs:
-    dashboard_endpoint:
+    k8s_dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
-    api_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
-    kubeapps_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
+    influxdb_webui:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/influx/' ] }
+    influxdb_api_rpc:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':8088' ] }
+    influxdb_api_http:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':8086' ] }
