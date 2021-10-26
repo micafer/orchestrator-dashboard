@@ -70,9 +70,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.20.8"
+      default: "1.21.4"
       constraints:
-      - valid_values: [ "1.20.8", "1.19.13", "1.21.3" ]
+      - valid_values: [ "1.21.4", "1.19.14", "1.20.10", "1.22.1" ]
     kube_cert_manager:
       type: boolean
       description: Flag to install Cert-Manager
@@ -105,11 +105,11 @@ topology_template:
     user_username:
       type: string
       description: Name of the bucket admin user
-      default: admin
+      default: user
     user_password:
       type: string
       description: Password of the bucket admin user
-      default: adminpass
+      default: userpass
 
   node_templates:
 
@@ -123,15 +123,15 @@ topology_template:
           auth.admin.username: { get_input: admin_username }
           auth.admin.password: { get_input: admin_password }
           auth.admin.org: { get_input: org_name }
-          auth.admin.bucket: { get_input: bucket }
+          auth.admin.bucket: { get_input: bucket_name }
           auth.user.username: { get_input: user_username }
           auth.user.password: { get_input: user_username }
-          auth.user.org: { get_input: bucket }
-          auth.user.bucket: { get_input: bucket }
+          auth.user.org: { get_input: org_name }
+          auth.user.bucket: { get_input: bucket_name }
           service.type: "NodePort"
-          service.nodePorts.http: 8086
-          service.nodePorts.rpc:  8088
-          ingress.enabled: true
+          service.nodePorts.http: "8086"
+          service.nodePorts.rpc:  "8088"
+          ingress.enabled: "true"
           ingress.path: "/influx"
       capabilities:
         endpoint:
@@ -210,8 +210,8 @@ topology_template:
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
         version: { get_input: kube_version }
-        nvidia_support: { get_input: kube_nvidia_support }
-        cri_runtime: { get_input: cri_runtime }
+        nvidia_support: false
+        cri_runtime: docker
       requirements:
         - host: wn
             
