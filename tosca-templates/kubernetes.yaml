@@ -111,6 +111,9 @@ topology_template:
         endpoint:
           properties:
             ports:
+              http_port:
+                protocol: tcp
+                source: 80
               https_port:
                 protocol: tcp
                 source: 443
