@@ -113,6 +113,32 @@ topology_template:
 
   node_templates:
 
+    influxdb_igress:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: influxdb
+            namespace: influxdb
+            annotations:
+              kubernetes.io/ingress.class: nginx
+          spec:
+            rules:
+            - http:
+                paths:
+                - path: /
+                  backend:
+                    service:
+                      name: influxdb
+                      port:
+                        number: 8086
+                  pathType: Prefix
+      requirements:
+        - host: lrms_front_end
+        - dependency: influxdb
+
     influxdb:
       type: tosca.nodes.indigo.Helm.Chart
       properties:
@@ -128,22 +154,7 @@ topology_template:
           auth.user.password: { get_input: user_username }
           auth.user.org: { get_input: org_name }
           auth.user.bucket: { get_input: bucket_name }
-          influxdb.service.type: "NodePort"
           influxdb.service.nodePorts.http: "8086"
-          influxdb.service.nodePorts.rpc:  "8088"
-          ingress.enabled: "true"
-          ingress.path: "/influx"
-          ingress.annotations: "{kubernetes.io/ingress.class: nginx}"
-      capabilities:
-        endpoint:
-          properties:
-            ports:
-              http:
-                protocol: tcp
-                source: 8086
-              rpc:
-                protocol: tcp
-                source: 8088
       requirements:
         - host: front
         - dependency: lrms_front_end
@@ -235,9 +246,5 @@ topology_template:
   outputs:
     k8s_dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
-    influxdb_webui:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/influx/' ] }
-    influxdb_api_rpc:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':8088' ] }
-    influxdb_api_http:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':8086' ] }
+    influxdb_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/' ] }
