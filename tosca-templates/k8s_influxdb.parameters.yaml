@@ -50,10 +50,7 @@ inputs:
     admin_password:
       tab: InfluxDB Data
 
-    user_username:
-      tab: InfluxDB Data
-
-    user_password:
+    admin_token:
       tab: InfluxDB Data
 
 tabs:

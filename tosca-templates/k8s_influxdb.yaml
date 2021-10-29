@@ -101,15 +101,10 @@ topology_template:
       type: string
       description: Password of the full admin user
       default: adminpass
-
-    user_username:
+    admin_token:
       type: string
-      description: Name of the bucket admin user
-      default: user
-    user_password:
-      type: string
-      description: Password of the bucket admin user
-      default: userpass
+      description: Token of the full admin user
+      default: adminpass
 
   node_templates:
 
@@ -122,17 +117,14 @@ topology_template:
         values: 
           auth.admin.username: { get_input: admin_username }
           auth.admin.password: { get_input: admin_password }
+          auth.admin.token: { get_input: admin_token }
           auth.admin.org: { get_input: org_name }
           auth.admin.bucket: { get_input: bucket_name }
-          auth.user.username: { get_input: user_username }
-          auth.user.password: { get_input: user_username }
-          auth.user.org: { get_input: org_name }
-          auth.user.bucket: { get_input: bucket_name }
           influxdb.service.type: "NodePort"
           influxdb.service.nodePorts.http: "8086"
           influxdb.service.nodePorts.rpc:  "8088"
           ingress.enabled: "true"
-          ingress.path: "/influx"
+          ingress.path: "/influx/"
           ingress.annotations.kubernetes.io/ingress.class: "nginx"
           image.debug: "true"
       capabilities:
