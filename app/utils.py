@@ -149,6 +149,18 @@ def getCachedSiteList(force=False):
     return SITE_LIST
 
 
+def getIMUserAuthData(access_token, cred, userid):
+    res = "type = InfrastructureManager; token = %s" % access_token
+    for cred in cred.get_creds(userid):
+        if cred['enabled']:
+            res += "\\nid = im%s" % cred['id']
+            if cred['type'] == "InfrastructureManager":
+                for key, value in cred.items():
+                    if value and key not in ['enabled', 'id']:
+                        res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
+    return res
+
+
 def getUserAuthData(access_token, cred, userid, cred_id=None):
     res = "type = InfrastructureManager; token = %s" % access_token
 

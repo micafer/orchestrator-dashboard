@@ -4,11 +4,10 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 metadata:
-  display_name: Launch a Kubernetes Virtual Cluster
-  icon: images/kubernetes.png
-  order: 5
+  display_name: Launch an InfluxDB on top of a Kubernetes Virtual Cluster
+  icon: images/k8s_influxdb.png
 
-description: TOSCA template for launching a Kubernetes Virtual Cluster.
+description: TOSCA template for launching an InfluxDB on top of a Kubernetes Virtual Cluster.
 
 topology_template:
   inputs:
@@ -74,24 +73,6 @@ topology_template:
       default: "1.21.4"
       constraints:
       - valid_values: [ "1.21.4", "1.19.14", "1.20.10", "1.22.1" ]
-    cri_runtime:
-      type: string
-      description: CRI Runtime to use with Kubernetes
-      default: "docker"
-      constraints:
-      - valid_values: [ docker, containerd ]
-    install_kubeapps:
-      type: boolean
-      description: Flag to set the kubeapps UI to be installed
-      default: true
-      constraints:
-      - valid_values: [ true, false ]
-    kube_nvidia_support:
-      type: boolean
-      description: Flag to add NVIDIA support
-      default: false
-      constraints:
-      - valid_values: [ false, true ]
     kube_cert_manager:
       type: boolean
       description: Flag to install Cert-Manager
@@ -103,7 +84,72 @@ topology_template:
       description: Email to be used in the Let's Encrypt issuer
       default: "jhondoe@server.com"
 
+    org_name:
+      type: string
+      description: Name of organization
+      default: org
+    bucket_name:
+      type: string
+      description: Name of the bucket
+      default: bucket
+
+    admin_username:
+      type: string
+      description: Name of the full admin user
+      default: admin
+    admin_password:
+      type: string
+      description: Password of the full admin user
+      default: adminpass
+    admin_token:
+      type: string
+      description: Token of the full admin user
+      default: admintoken
+
   node_templates:
+
+    influxdb_igress:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: influxdb
+            namespace: influxdb
+            annotations:
+              kubernetes.io/ingress.class: nginx
+          spec:
+            rules:
+            - http:
+                paths:
+                - path: /
+                  backend:
+                    service:
+                      name: influxdb
+                      port:
+                        number: 8086
+                  pathType: Prefix
+      requirements:
+        - host: lrms_front_end
+        - dependency: influxdb
+
+    influxdb:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        repository_name: bitnami
+        repository_url: "https://charts.bitnami.com/bitnami"
+        name: influxdb
+        values: 
+          auth.admin.username: { get_input: admin_username }
+          auth.admin.password: { get_input: admin_password }
+          auth.admin.token: { get_input: admin_token }
+          auth.admin.org: { get_input: org_name }
+          auth.admin.bucket: { get_input: bucket_name }
+          influxdb.service.nodePorts.http: "8086"
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
 
     lrms_front_end:
       type: tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes
@@ -111,7 +157,7 @@ topology_template:
         endpoint:
           properties:
             ports:
-              http_port:
+              https_port:
                 protocol: tcp
                 source: 80
               https_port:
@@ -124,12 +170,12 @@ topology_template:
         admin_username:  kubeuser
         install_nfs_client: true
         admin_token: { get_input: admin_token }
-        install_kubeapps:  { get_input: install_kubeapps }
+        install_kubeapps:  false
         version: { get_input: kube_version }
-        nvidia_support: { get_input: kube_nvidia_support }
+        nvidia_support: false
         cert_manager: { get_input: kube_cert_manager }
         cert_user_email: { get_input: kube_cert_user_email }
-        cri_runtime: { get_input: cri_runtime }
+        cri_runtime: docker
       requirements:
         - host: front
 
@@ -168,8 +214,8 @@ topology_template:
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
         version: { get_input: kube_version }
-        nvidia_support: { get_input: kube_nvidia_support }
-        cri_runtime: { get_input: cri_runtime }
+        nvidia_support: false
+        cri_runtime: docker
       requirements:
         - host: wn
             
@@ -190,9 +236,7 @@ topology_template:
             type: linux
 
   outputs:
-    dashboard_endpoint:
+    k8s_dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
-    api_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
-    kubeapps_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
+    influxdb_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/' ] }
