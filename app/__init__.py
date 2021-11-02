@@ -379,7 +379,7 @@ def create_app(oidc_blueprint=None):
         if 'reload' in request.args:
             reload_infid = request.args['reload']
 
-        auth_data = "type = InfrastructureManager; token = %s" % access_token
+        auth_data = utils.getIMUserAuthData(access_token, cred, session["userid"])
         inf_list = []
         try:
             inf_list = im.get_inf_list(auth_data)
