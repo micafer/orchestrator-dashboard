@@ -55,10 +55,9 @@
       <input name="type" type="hidden" value="{{ cred_type }}"/>
       <div class="row form-group">
         <div class="col">
-        <input placeholder="ID" name="id" class="col-sm-12" pattern="[a-zA-Z0-9_]+" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required {{ 'readonly' if cred_id else '' }}/>
+        <input placeholder="ID" name="id" class="col-sm-12" pattern="[a-zA-Z_.][\w\d_.-]*" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required {{ 'readonly' if cred_id else '' }}/>
         </div>
         <div class="col">
-          <font size="-1"><i class="fas fa-arrow-left"></i> (Only letters, numbers and _)</font>
         </div>
       </div>
 {% if cred_type == "EC2" %}
