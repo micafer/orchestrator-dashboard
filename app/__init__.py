@@ -860,18 +860,19 @@ def create_app(oidc_blueprint=None):
                     del creds['password']
                 if 'csrf_token' in creds:
                     del creds['csrf_token']
-                val_res, val_msg = cred.validate_cred(session["userid"], creds)
-                if val_res != 0:
-                    if val_res == 1:
-                        flash("Credentials already available. Not addded.", 'info')
-                    elif val_res == 2:
-                        flash(val_msg, 'warning')
-                if val_res != 1:
-                    # Get project_id to save it to de DB
-                    utils.get_project_ids([creds])
-                    cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
-                    if val_res == 0:
-                        flash("Credentials successfully written!", 'success')
+                if not cred_id:
+                    val_res, val_msg = cred.validate_cred(session["userid"], creds)
+                    if val_res != 0:
+                        if val_res == 1:
+                            flash("Credentials already available. Not addded.", 'info')
+                        elif val_res == 2:
+                            flash(val_msg, 'warning')
+                    if val_res != 1:
+                        # Get project_id to save it to de DB
+                        utils.get_project_ids([creds])
+                        cred.write_creds(creds["id"], session["userid"], creds, cred_id in [None, ''])
+                        if val_res == 0:
+                            flash("Credentials successfully written!", 'success')
             except db.IntegrityError:
                 flash("Error writing credentials: Duplicated Credential ID!", 'error')
             except Exception as ex:
