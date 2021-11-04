@@ -26,7 +26,7 @@ inputs:
     volume_id:
       tab: HW Data
 
-    admin_token:
+    kube_admin_token:
       tab: Kubernetes Data
 
     kube_version:

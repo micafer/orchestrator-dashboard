@@ -55,9 +55,10 @@
       <input name="type" type="hidden" value="{{ cred_type }}"/>
       <div class="row form-group">
         <div class="col">
-        <input placeholder="ID" name="id" class="col-sm-12" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required {{ 'readonly' if cred_id else '' }}/>
+        <input placeholder="ID" name="id" class="col-sm-12" pattern="[a-zA-Z0-9_]+" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required {{ 'readonly' if cred_id else '' }}/>
         </div>
         <div class="col">
+          <font size="-1"><i class="fas fa-arrow-left"></i> (Only letters, numbers and _)</font>
         </div>
       </div>
 {% if cred_type == "EC2" %}
@@ -72,7 +73,7 @@
 {% elif cred_type == "GCE" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
               <input placeholder="Project" name="project" class="col-sm-12" type="project" id="project" value="{{ creds['project'] if creds else '' }}" required/>
@@ -89,7 +90,7 @@
 {% elif cred_type == "OpenStack" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
               <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
@@ -141,7 +142,7 @@
 {% elif cred_type == "OpenNebula" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
               <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
@@ -159,7 +160,7 @@
 {% elif cred_type == "Azure" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
               <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
@@ -177,7 +178,7 @@
 {% elif cred_type == "Orange" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
               <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
@@ -242,7 +243,7 @@
 {% elif cred_type == "InfrastructureManager" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Usernname" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
               <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>

@@ -63,7 +63,7 @@ topology_template:
       description: "Or URL of the disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
       default: ""
 
-    admin_token:
+    kube_admin_token:
       type: string
       description: Access Token for the Kubernetes admin user
       default: not_very_secret_token
@@ -108,7 +108,7 @@ topology_template:
 
   node_templates:
 
-    influxdb_igress:
+    influxdb_ingress:
       type: tosca.nodes.indigo.KubernetesObject
       properties:
         spec: |
@@ -169,7 +169,7 @@ topology_template:
       properties:
         admin_username:  kubeuser
         install_nfs_client: true
-        admin_token: { get_input: admin_token }
+        admin_token: { get_input: kube_admin_token }
         install_kubeapps:  false
         version: { get_input: kube_version }
         nvidia_support: false
