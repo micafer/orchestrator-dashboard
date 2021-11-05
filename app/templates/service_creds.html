@@ -69,6 +69,15 @@
                         {% if 'vo' not in cred and 'tenant' in cred %}
                         <strong>Tenant: </strong> {{cred["tenant"]}}
                         {% endif %}
+                        {% if 'subscription_id' in cred%}
+                        <strong>Subscription ID: </strong> {{cred["subscription_id"]}}
+                        {% endif %}
+                        {% if 'subscription_id' in cred%}
+                        <strong>Subscription ID: </strong> {{cred["subscription_id"]}}
+                        {% endif %}
+                        {% if 'project' in cred%}
+                        <strong>Project: </strong> {{cred["project"]}}
+                        {% endif %}
                       </td>
                       <td>
                         <button {{ 'disabled' if cred['type']=='fedcloud' else '' }} type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-info" data-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
