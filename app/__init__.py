@@ -744,7 +744,18 @@ def create_app(oidc_blueprint=None):
 
     def add_network_id_to_template(template, priv_network_id, pub_network_id):
         for node in list(template['topology_template']['node_templates'].values()):
-            if node["type"] == "tosca.nodes.indigo.Compute":
+            if node["type"] == "tosca.nodes.network.Network":
+                try:
+                    if node["properties"]["network_type"] == "public":
+                        node["properties"]["network_name"] = pub_network_id
+                    elif node["properties"]["network_type"] == "private":
+                        node["properties"]["network_name"] = priv_network_id
+                except KeyError:
+                    # if network_type is not set it is a private net
+                    if "properties" not in node:
+                        node["properties"] = {}
+                    node["properties"]["network_name"] = priv_network_id
+            elif node["type"] == "tosca.nodes.indigo.Compute":
                 try:
                     if node["capabilities"]["endpoint"]["properties"]["network_name"] == "PUBLIC":
                         node["capabilities"]["endpoint"]["properties"]["network_name"] = "%s,%s" % (priv_network_id,
