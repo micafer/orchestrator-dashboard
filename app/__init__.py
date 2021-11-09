@@ -1092,6 +1092,19 @@ def create_app(oidc_blueprint=None):
             g.settings = settings
             utils.getCachedSiteList(True)
 
+    # Reload internally the site cache
+    @scheduler.task('interval', id='reload_templates', seconds=120)
+    def reload_templates():
+        with app.app_context():
+            newToscaTemplates = utils.reLoadToscaTemplates(settings.toscaDir, toscaTemplates, delay=140)
+            if newToscaTemplates:
+                app.logger.debug('Reloading TOSCA templates %s' % newToscaTemplates)
+                for elem in newToscaTemplates:
+                    if elem not in toscaTemplates:
+                        toscaTemplates.append(elem)
+                newToscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir, newToscaTemplates)
+                toscaInfo.update(newToscaInfo)
+
     def delete_infra(infid):
         infra.delete_infra(infid)
         scheduler.delete_job('delete_infra_%s' % infid)

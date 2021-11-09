@@ -251,6 +251,23 @@ def loadToscaTemplates(directory):
     return toscaTemplates
 
 
+def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
+
+    toscaTemplates = []
+    for path, _, files in os.walk(directory):
+        for name in files:
+            if (fnmatch(name, "*.yml") or fnmatch(name, "*.yaml")) and \
+                    not (fnmatch(name, "*.parameters.yaml") or fnmatch(name, "*.parameters.yml")):
+                # skip hidden files
+                if name[0] != '.':
+                    filename = os.path.relpath(os.path.join(path, name), directory)
+                    diff_time = time.time() - os.path.getmtime(os.path.join(path, name))
+                    if filename not in oldToscaTemplates or diff_time < delay:
+                        toscaTemplates.append(filename)
+
+    return toscaTemplates
+
+
 def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
     toscaInfoOrder = toscaInfo = {}
     for tosca in toscaTemplates:
