@@ -1,13 +1,13 @@
-Flask_Dance==3.2.0
-Werkzeug==1.0.1
-Flask==1.1.2
-requests==2.25.1
-PyYAML==5.4.1
-packaging==20.9
+Flask_Dance==5.1.0
+Werkzeug==2.0.2
+Flask==2.0.2
+requests==2.26.0
+PyYAML==6.0.0
+packaging==21.2
 xmltodict==0.12.0
 radl==1.1.5
-cryptography==3.3.1
-apscheduler==3.7.0
-Flask-APScheduler==1.12.0
-Flask-WTF==0.14.3
-boto3==1.17.52
+cryptography==3.4.8
+apscheduler==3.8.0 # 3.8.1 version fails
+Flask-APScheduler==1.12.2
+Flask-WTF==1.0.0
+boto3==1.20.2
