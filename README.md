@@ -42,6 +42,9 @@ Create the `config.json` file (see the [example](app/config-sample.json)) settin
 | ANALYTICS_TAG | Google Analytic Tag | N | "" |
 | STATIC_SITES | List of static sites added to the AppDB ones ([{"name": "static_site_name", "url": "static_site_url", "id": "static_id", "vos": {"vo": "stprojectid"}}]) | N | [] |
 | STATIC_SITES_URL | URL of a JSON file with the list of static sites added to the AppDB ones | N | "" |
+| APPDB_CACHE_TIMEOUT | AppDB cache TTL | N | 3600 |
+| CHECK_TOSCA_CHANGES_TIME | Interval to look for changes in TOSCA templates | N | 120 |
+
 
 You need to run the IM dashboard on HTTPS (otherwise you will get an error); you can choose between
 
