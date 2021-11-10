@@ -39,3 +39,4 @@ class Settings:
         self.appdb_cache_timeout = config.get('APPDB_CACHE_TIMEOUT', 3600)
         self.debug_oidc_token = config.get('DEBUG_OIDC_TOKEN', None)
         self.imTimeout = config.get('IM_TIMEOUT', 60)
+        self.checkToscaChangesTime = config.get('CHECK_TOSCA_CHANGES_TIME', 120)

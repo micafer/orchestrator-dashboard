@@ -17,5 +17,6 @@
     "STATIC_SITES": [{"name": "static_site_name", "url": "static_site_url", "id": "static_id", "vos": {"vo": "stprojectid"}, "api_version": "1.1"}],
     "STATIC_SITES_URL": "",
     "APPDB_CACHE_TIMEOUT": 3600,
+    "CHECK_TOSCA_CHANGES_TIME": 120,
     "IM_TIMEOUT": 60
 }
