@@ -1092,13 +1092,14 @@ def create_app(oidc_blueprint=None):
             g.settings = settings
             utils.getCachedSiteList(True)
 
-    # Reload internally the site cache
-    @scheduler.task('interval', id='reload_templates', seconds=120)
+    # Reload internally the TOSCA tamplates
+    @scheduler.task('interval', id='reload_templates', seconds=settings.checkToscaChangesTime)
     def reload_templates():
         with app.app_context():
-            newToscaTemplates = utils.reLoadToscaTemplates(settings.toscaDir, toscaTemplates, delay=140)
+            newToscaTemplates = utils.reLoadToscaTemplates(settings.toscaDir, toscaTemplates,
+                                                           delay=settings.checkToscaChangesTime + 10)
             if newToscaTemplates:
-                app.logger.debug('Reloading TOSCA templates %s' % newToscaTemplates)
+                app.logger.info('Reloading TOSCA templates %s' % newToscaTemplates)
                 for elem in newToscaTemplates:
                     if elem not in toscaTemplates:
                         toscaTemplates.append(elem)
