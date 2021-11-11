@@ -33,6 +33,12 @@
                     <td>Infrastructure Manager (IM)</td>
                     <td>{{ im_url }}</td>
                 </tr>
+                {% if vault_url %}
+                <tr>
+                    <td>Vault Server</td>
+                    <td>{{ vault_url }}</td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
