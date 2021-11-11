@@ -57,8 +57,8 @@ def create_app(oidc_blueprint=None):
             key = os.environ['CREDS_KEY']
         else:
             key = None
-        CSRFProtect(app)
         cred = DBCredentials(settings.db_url, key)
+    CSRFProtect(app)
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
 

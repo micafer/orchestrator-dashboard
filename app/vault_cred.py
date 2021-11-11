@@ -18,7 +18,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""Class to manage user credentials."""
+"""Class to manage user credentials using a Vault backend."""
 import hvac
 import requests
 from flask import json
@@ -41,7 +41,7 @@ class VaultCredentials(Credentials):
         else:
             data = '{ "jwt": "' + token + '" }'
 
-        response = requests.post(login_url, data=data, verify=False)
+        response = requests.post(login_url, data=data, verify=False, timeout=5)
 
         if not response.ok:
             raise Exception("Error getting Vault token: {} - {}".format(response.status_code, response.text))
@@ -61,11 +61,14 @@ class VaultCredentials(Credentials):
         vault_entity_id = self._login(token)
         data = []
 
-        creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
-        for cred_json in creds["data"].values():
-            new_item = json.loads(cred_json)
-            if enabled is None or enabled == new_item['enabled']:
-                data.append(new_item)
+        try:
+            creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
+            for cred_json in creds["data"].values():
+                new_item = json.loads(cred_json)
+                if enabled is None or enabled == new_item['enabled']:
+                    data.append(new_item)
+        except Exception:
+            pass
 
         return data
 

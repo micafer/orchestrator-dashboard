@@ -18,7 +18,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""Class to manage user credentials."""
+"""Class to manage user credentials using a DB backend with encryption."""
 from cryptography.fernet import Fernet
 from app.cred import Credentials
 from app.db import DataBase
