@@ -320,7 +320,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEquals(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'success'))
 
     @patch("app.utils.avatar")
-    @patch("app.cred.Credentials.get_creds")
+    @patch("app.db_cred.DBCredentials.get_creds")
     def test_configure(self, get_creds, avatar):
         self.login(avatar)
         get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "vo": "voname"},
@@ -370,7 +370,7 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
     @patch("app.utils.avatar")
-    @patch("app.cred.Credentials.get_cred")
+    @patch("app.db_cred.DBCredentials.get_cred")
     def test_submit(self, get_cred, avatar, post, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         post.side_effect = self.post_response
@@ -391,7 +391,7 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
     @patch("app.utils.avatar")
-    @patch("app.cred.Credentials.get_cred")
+    @patch("app.db_cred.DBCredentials.get_cred")
     def test_submit2(self, get_cred, avatar, post, user_data, get_site_info):
         site = {"name": "SITE", "networks": {"vo": {"public": "pub_id", "private": "priv_id"}}}
         get_site_info.return_value = site, None, "vo"
@@ -411,7 +411,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
 
     @patch("app.utils.avatar")
-    @patch("app.cred.Credentials.get_creds")
+    @patch("app.db_cred.DBCredentials.get_creds")
     @patch("app.appdb.get_sites")
     @patch("app.appdb.get_project_ids")
     def test_manage_creds(self, get_project_ids, get_sites, get_creds, avatar):
@@ -427,8 +427,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'fedcloudRow.png', res.data)
 
     @patch("app.utils.avatar")
-    @patch("app.cred.Credentials.get_cred")
-    @patch("app.cred.Credentials.write_creds")
+    @patch("app.db_cred.DBCredentials.get_cred")
+    @patch("app.db_cred.DBCredentials.write_creds")
     @patch("app.flash")
     def test_write_creds(self, flash, write_creds, get_cred, avatar):
         self.login(avatar)
@@ -463,7 +463,7 @@ class IMDashboardTests(unittest.TestCase):
                                                                                   'type': 'OpenNebula'}, True))
 
     @patch("app.utils.avatar")
-    @patch("app.cred.Credentials.delete_cred")
+    @patch("app.db_cred.DBCredentials.delete_cred")
     @patch("app.flash")
     def test_delete_creds(self, flash, delete_cred, avatar):
         self.login(avatar)
