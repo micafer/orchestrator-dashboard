@@ -40,3 +40,4 @@ class Settings:
         self.debug_oidc_token = config.get('DEBUG_OIDC_TOKEN', None)
         self.imTimeout = config.get('IM_TIMEOUT', 60)
         self.checkToscaChangesTime = config.get('CHECK_TOSCA_CHANGES_TIME', 120)
+        self.vault_url = config.get('VAULT_URL', None)
