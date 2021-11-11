@@ -20,6 +20,7 @@
 # under the License.
 """Class to manage user credentials."""
 
+
 class Credentials:
 
     def __init__(self, url):

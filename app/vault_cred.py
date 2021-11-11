@@ -24,6 +24,7 @@ import requests
 from flask import json
 from cred import Credentials
 
+
 class VaultCredentials(Credentials):
 
     def __init__(self, vault_url, role=None):
@@ -34,26 +35,26 @@ class VaultCredentials(Credentials):
 
     def _login(self, token):
         login_url = self.url + '/v1/auth/jwt/login'
-        
+
         if self.role:
-            data = '{ "jwt": "' + token +  '", "role": "' + self.role + '" }'
+            data = '{ "jwt": "' + token + '", "role": "' + self.role + '" }'
         else:
-            data = '{ "jwt": "' + token +  '" }'
-        
+            data = '{ "jwt": "' + token + '" }'
+
         response = requests.post(login_url, data=data, verify=False)
-        
+
         if not response.ok:
-            raise Exception("Error getting Vault token: {} - {}".format(response.status_code, response.text) )
-        
+            raise Exception("Error getting Vault token: {} - {}".format(response.status_code, response.text))
+
         deserialized_response = json.loads(response.text)
 
         vault_auth_token = deserialized_response["auth"]["client_token"]
         vault_entity_id = deserialized_response["auth"]["entity_id"]
-        
-        self.client = hvac.Client(url=self.url,token=vault_auth_token)
+
+        self.client = hvac.Client(url=self.url, token=vault_auth_token)
         if not self.client.is_authenticated():
             raise Exception("Error authenticating against Vault with token: {}".format(vault_auth_token))
-        
+
         return vault_entity_id
 
     def get_creds(self, token, enabled=None):
@@ -81,7 +82,7 @@ class VaultCredentials(Credentials):
 
         try:
             creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
-        except:
+        except Exception:
             creds = None
 
         if creds:
