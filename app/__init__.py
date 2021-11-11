@@ -28,7 +28,7 @@ from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
 from app.settings import Settings
-from app.cred import Credentials
+from app.db_cred import DBCredentials
 from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app import utils, appdb, db
@@ -54,7 +54,7 @@ def create_app(oidc_blueprint=None):
     else:
         key = None
     CSRFProtect(app)
-    cred = Credentials(settings.db_url, key)
+    cred = DBCredentials(settings.db_url, key)
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
 

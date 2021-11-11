@@ -19,101 +19,26 @@
 # specific language governing permissions and limitations
 # under the License.
 """Class to manage user credentials."""
-from flask import json
-from cryptography.fernet import Fernet
-from app.db import DataBase
-
 
 class Credentials:
 
-    def __init__(self, cred_db_url, key=None):
-        self.cred_db_url = cred_db_url
-        self.key = None
-        if key:
-            self.key = Fernet(key)
-
-    def _encrypt(self, message):
-        if self.key:
-            return self.key.encrypt(message.encode())
-        else:
-            return message
-
-    def _decrypt(self, message):
-        if self.key:
-            return self.key.decrypt(message)
-        else:
-            return message
-
-    def _get_creds_db(self):
-        db = DataBase(self.cred_db_url)
-        if db.connect():
-            if not db.table_exists("credentials"):
-                db.execute("CREATE TABLE credentials(userid VARCHAR(255), serviceid VARCHAR(255),"
-                           "enabled INTEGER ,data LONGBLOB, PRIMARY KEY (userid, serviceid))")
-        else:
-            raise Exception("Error connecting DB: %s" % self.cred_db_url)
-        return db
+    def __init__(self, url):
+        self.url = url
 
     def get_creds(self, userid, enabled=None):
-        db = self._get_creds_db()
-        res = db.select("select serviceid, enabled, data from credentials where userid = %s", (userid,))
-        db.close()
-
-        data = []
-        if len(res) > 0:
-            for elem in res:
-                new_item = json.loads(self._decrypt(elem[2]))
-                new_item['enabled'] = elem[1]
-                if enabled is None or enabled == new_item['enabled']:
-                    data.append(new_item)
-
-        return data
+        raise NotImplementedError("Should have implemented this")
 
     def get_cred(self, serviceid, userid):
-        db = self._get_creds_db()
-        res = db.select("select data, enabled from credentials where userid = %s and serviceid = %s",
-                        (userid, serviceid))
-        db.close()
-
-        data = {}
-        if len(res) > 0:
-            data = json.loads(self._decrypt(res[0][0]))
-            data['enabled'] = res[0][1]
-
-        return data
+        raise NotImplementedError("Should have implemented this")
 
     def write_creds(self, serviceid, userid, data, insert=False):
-        db = self._get_creds_db()
-        op = "replace"
-        if insert:
-            op = "insert"
-            old_data = data
-        else:
-            old_data = self.get_cred(serviceid, userid)
-            print(old_data)
-            old_data.update(data)
-
-        if 'enabled' in old_data:
-            enabled = old_data['enabled']
-            del old_data['enabled']
-        else:
-            enabled = 1
-
-        str_data = self._encrypt(json.dumps(old_data))
-        db.execute(op + " into credentials (data, userid, serviceid, enabled) values (%s, %s, %s, %s)",
-                   (str_data, userid, serviceid, enabled))
-        db.close()
+        raise NotImplementedError("Should have implemented this")
 
     def delete_cred(self, serviceid, userid):
-        db = self._get_creds_db()
-        db.execute("delete from credentials where userid = %s and serviceid = %s", (userid, serviceid))
-        db.close()
+        raise NotImplementedError("Should have implemented this")
 
     def enable_cred(self, serviceid, userid, enable=1):
-        db = self._get_creds_db()
-        db.execute("update credentials set enabled = %s where userid = %s and serviceid = %s",
-                   (enable, userid, serviceid))
-        db.close()
+        raise NotImplementedError("Should have implemented this")
 
     def validate_cred(self, userid, new_cred):
         """ Validates the credential with the availabe ones.

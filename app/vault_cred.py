@@ -19,20 +19,21 @@
 # specific language governing permissions and limitations
 # under the License.
 """Class to manage user credentials."""
-from flask import json
 import hvac
 import requests
+from flask import json
+from cred import Credentials
 
-class VaultCredentials():
+class VaultCredentials(Credentials):
 
-    def __init__(self, vault_url):
-        self.vault_url = vault_url
+    def __init__(self, vault_url, role=None):
         self.vault_path = "credentials/"
-        self.role = None
+        self.role = role
         self.client = None
+        super().__init__(vault_url)
 
     def _login(self, token):
-        login_url = self.vault_url + '/v1/auth/jwt/login'
+        login_url = self.url + '/v1/auth/jwt/login'
         
         if self.role:
             data = '{ "jwt": "' + token +  '", "role": "' + self.role + '" }'
@@ -49,7 +50,7 @@ class VaultCredentials():
         vault_auth_token = deserialized_response["auth"]["client_token"]
         vault_entity_id = deserialized_response["auth"]["entity_id"]
         
-        self.client = hvac.Client(url=self.vault_url,token=vault_auth_token)
+        self.client = hvac.Client(url=self.url,token=vault_auth_token)
         if not self.client.is_authenticated():
             raise Exception("Error authenticating against Vault with token: {}".format(vault_auth_token))
         
@@ -74,3 +75,55 @@ class VaultCredentials():
             return json.loads(creds["data"][serviceid])
         else:
             return None
+
+    def write_creds(self, serviceid, token, data, insert=False):
+        vault_entity_id = self._login(token)
+
+        try:
+            creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
+        except:
+            creds = None
+
+        if creds:
+            old_data = creds["data"]
+            if serviceid in creds["data"]:
+                service_data = json.loads(creds["data"][serviceid])
+                service_data.update(data)
+                creds["data"][serviceid] = service_data
+            else:
+                old_data[serviceid] = data
+                old_data[serviceid]['enabled'] = 1
+        else:
+            old_data = {serviceid: data}
+            old_data[serviceid]['enabled'] = 1
+
+        old_data[serviceid] = json.dumps(old_data[serviceid])
+        response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
+                                                                     old_data,
+                                                                     mount_point=self.vault_path)
+
+        response.raise_for_status()
+
+    def delete_cred(self, serviceid, token):
+        vault_entity_id = self._login(token)
+        creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
+        if serviceid in creds["data"]:
+            del creds["data"][serviceid]
+            response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
+                                                                         creds["data"],
+                                                                         method="PUT",
+                                                                         mount_point=self.vault_path)
+            response.raise_for_status()
+
+    def enable_cred(self, serviceid, token, enable=1):
+        vault_entity_id = self._login(token)
+        creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
+        if serviceid in creds["data"]:
+            service_data = json.loads(creds["data"][serviceid])
+            service_data["enabled"] = enable
+            creds["data"][serviceid] = json.dumps(service_data)
+            response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
+                                                                         creds["data"],
+                                                                         method="PUT",
+                                                                         mount_point=self.vault_path)
+            response.raise_for_status()
