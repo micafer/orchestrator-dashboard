@@ -91,7 +91,6 @@ class DBCredentials(Credentials):
             old_data = data
         else:
             old_data = self.get_cred(serviceid, userid)
-            print(old_data)
             old_data.update(data)
 
         if 'enabled' in old_data:
