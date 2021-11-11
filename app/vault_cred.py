@@ -46,7 +46,7 @@ class VaultCredentials(Credentials):
         if not response.ok:
             raise Exception("Error getting Vault token: {} - {}".format(response.status_code, response.text))
 
-        deserialized_response = json.loads(response.text)
+        deserialized_response = response.json()
 
         vault_auth_token = deserialized_response["auth"]["client_token"]
         vault_entity_id = deserialized_response["auth"]["entity_id"]
