@@ -44,6 +44,7 @@ Create the `config.json` file (see the [example](app/config-sample.json)) settin
 | STATIC_SITES_URL | URL of a JSON file with the list of static sites added to the AppDB ones | N | "" |
 | APPDB_CACHE_TIMEOUT | AppDB cache TTL | N | 3600 |
 | CHECK_TOSCA_CHANGES_TIME | Interval to look for changes in TOSCA templates | N | 120 |
+| VAULT_URL | Vault service URL to store Cloud credentials | N | None |
 
 
 You need to run the IM dashboard on HTTPS (otherwise you will get an error); you can choose between
