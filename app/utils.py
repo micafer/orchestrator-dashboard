@@ -31,7 +31,7 @@ import sys
 from radl.radl import outport
 from radl.radl_json import parse_radl
 from flask import flash, g
-from app import appdb
+from app import appdb, settings
 from fnmatch import fnmatch
 from hashlib import md5
 from random import randint

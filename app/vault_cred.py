@@ -22,7 +22,7 @@
 import hvac
 import requests
 from flask import json
-from cred import Credentials
+from app.cred import Credentials
 
 
 class VaultCredentials(Credentials):
