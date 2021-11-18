@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+import flask
 from app import utils
 from mock import patch, MagicMock
 
@@ -34,23 +35,29 @@ class TestUtils(unittest.TestCase):
     @patch("app.utils.getCachedSiteList")
     def test_getUserAuthData(self, getCachedSiteList, getCachedProjectIDs):
         cred = MagicMock()
-        cred.get_creds.return_value = [{'enabled': 1, 'type': 'OpenNebula', 'id': 'one',
-                                        'username': 'user', 'password': 'pass'},
-                                       {'enabled': 1, 'type': 'fedcloud', 'id': 'fed',
-                                        'host': 'https://api.cloud.ifca.es:5000', 'vo': 'vo_name'}]
-        getCachedSiteList.return_value = {
-            'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '11548G0'},
-            'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca'}
-        }
-        getCachedProjectIDs.return_value = {"vo_name_st": "project_id_st", "vo_name": "project_id"}
+        with flask.Flask(__name__).test_request_context() as flask_context:
+            cred.get_creds.return_value = [{'enabled': 1, 'type': 'OpenNebula', 'id': 'one',
+                                            'username': 'user', 'password': 'pass'},
+                                        {'enabled': 1, 'type': 'fedcloud', 'id': 'fed',
+                                            'host': 'https://api.cloud.ifca.es:5000', 'vo': 'vo_name'}]
+            getCachedSiteList.return_value = {
+                'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '11548G0'},
+                'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca'}
+            }
+            getCachedProjectIDs.return_value = {"vo_name_st": "project_id_st", "vo_name": "project_id"}
 
-        res = utils.getUserAuthData("token", cred, "user")
-        self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = siteone; type = OpenNebula;"
-                                " username = user; password = pass\\n"
-                                "id = sitefed; type = OpenStack; username = egi.eu;"
-                                " tenant = openid; auth_version = 3.x_oidc_access_token; host ="
-                                " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id"))
+            flask_context.g.settings = MagicMock()
+            flask_context.g.settings.im_auth = ""
+            res = utils.getUserAuthData("token", cred, "user")
+            self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = siteone; type = OpenNebula;"
+                                    " username = user; password = pass\\n"
+                                    "id = sitefed; type = OpenStack; username = egi.eu;"
+                                    " tenant = openid; auth_version = 3.x_oidc_access_token; host ="
+                                    " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id"))
 
+            flask_context.g.settings.im_auth = "Bearer"
+            res = utils.getUserAuthData("token", cred, "user")
+            self.assertEquals(res, ("Bearer token"))
 
 if __name__ == '__main__':
     unittest.main()
