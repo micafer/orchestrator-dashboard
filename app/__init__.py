@@ -609,7 +609,11 @@ def create_app(oidc_blueprint=None):
 
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
-        creds = cred.get_creds(get_cred_id(), 1)
+        try:
+            creds = cred.get_creds(get_cred_id(), 1)
+        except Exception as ex:
+            flash("Error getting user credentials: %s" % ex, "error")
+            creds = []
         utils.get_project_ids(creds)
 
         return render_template('createdep.html',
@@ -891,10 +895,6 @@ def create_app(oidc_blueprint=None):
             if 'password' in request.files:
                 if request.files['password'].filename != "":
                     creds['password'] = request.files['password'].read().decode()
-            if creds['type'] == 'fedcloud':
-                for site in list(utils.getCachedSiteList().values()):
-                    if site['url'] == cred['host'] and site['api_version']:
-                        creds['api_version'] = site['api_version']
 
             try:
                 if 'password' in creds and creds['password'] in [None, '']:

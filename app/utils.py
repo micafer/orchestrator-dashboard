@@ -150,6 +150,8 @@ def getCachedSiteList(force=False):
 
 
 def getIMUserAuthData(access_token, cred, userid):
+    if g.settings.im_auth == "Bearer":
+        return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = %s" % access_token
     for cred in cred.get_creds(userid):
         if cred['enabled']:
@@ -162,6 +164,8 @@ def getIMUserAuthData(access_token, cred, userid):
 
 
 def getUserAuthData(access_token, cred, userid, cred_id=None):
+    if g.settings.im_auth == "Bearer":
+        return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = %s" % access_token
 
     fedcloud_sites = None
