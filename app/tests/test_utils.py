@@ -38,7 +38,7 @@ class TestUtils(unittest.TestCase):
         with flask.Flask(__name__).test_request_context() as flask_context:
             cred.get_creds.return_value = [{'enabled': 1, 'type': 'OpenNebula', 'id': 'one',
                                             'username': 'user', 'password': 'pass'},
-                                        {'enabled': 1, 'type': 'fedcloud', 'id': 'fed',
+                                           {'enabled': 1, 'type': 'fedcloud', 'id': 'fed',
                                             'host': 'https://api.cloud.ifca.es:5000', 'vo': 'vo_name'}]
             getCachedSiteList.return_value = {
                 'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '11548G0'},
@@ -58,6 +58,7 @@ class TestUtils(unittest.TestCase):
             flask_context.g.settings.im_auth = "Bearer"
             res = utils.getUserAuthData("token", cred, "user")
             self.assertEquals(res, ("Bearer token"))
+
 
 if __name__ == '__main__':
     unittest.main()
