@@ -41,3 +41,4 @@ class Settings:
         self.imTimeout = config.get('IM_TIMEOUT', 60)
         self.checkToscaChangesTime = config.get('CHECK_TOSCA_CHANGES_TIME', 120)
         self.vault_url = config.get('VAULT_URL', None)
+        self.im_auth = config.get('IM_AUTH', None)

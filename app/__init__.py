@@ -609,7 +609,11 @@ def create_app(oidc_blueprint=None):
 
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
-        creds = cred.get_creds(get_cred_id(), 1)
+        try:
+            creds = cred.get_creds(get_cred_id(), 1)
+        except Exception as ex:
+            flash("Error getting user credentials: %s" % ex, "error")
+            creds = []
         utils.get_project_ids(creds)
 
         return render_template('createdep.html',
