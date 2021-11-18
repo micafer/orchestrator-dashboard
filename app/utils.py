@@ -176,6 +176,8 @@ def getUserAuthData(access_token, cred, userid, cred_id=None):
                 res += "; type = OpenStack;"
                 res += " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
                 res += " host = %s; password = '%s'" % (cred['host'], access_token)
+
+                projectid = cred['project_id'] if 'project_id' in cred else None
                 # only load this data if a EGI Cloud site appears
                 if fedcloud_sites is None:
                     fedcloud_sites = {}
@@ -187,17 +189,16 @@ def getUserAuthData(access_token, cred, userid, cred_id=None):
                     if 'api_version' in site_info:
                         res += "; api_version  = %s" % site_info['api_version']
 
-                    projectid = cred['project_id'] if 'project_id' in cred else None
                     project_ids = getCachedProjectIDs(site_info["id"])
                     if cred['vo'] in project_ids:
                         projectid = project_ids[cred['vo']]
-
-                    if projectid:
-                        res += "; domain = %s" % projectid
-                    else:
-                        print("Error not project ID for Cred %s." % cred['id'], file=sys.stderr)
                 else:
                     print("Error %s not in list of FedCloud sites." % cred['host'], file=sys.stderr)
+
+                if projectid:
+                    res += "; domain = %s" % projectid
+                else:
+                    print("Error not project ID for Cred %s." % cred['id'], file=sys.stderr)
 
     return res
 

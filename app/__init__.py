@@ -891,6 +891,10 @@ def create_app(oidc_blueprint=None):
             if 'password' in request.files:
                 if request.files['password'].filename != "":
                     creds['password'] = request.files['password'].read().decode()
+            if creds['type'] == 'fedcloud':
+                for site in list(utils.getCachedSiteList().values()):
+                    if site['url'] == cred['host'] and site['api_version']:
+                        creds['api_version'] = site['api_version']
 
             try:
                 if 'password' in creds and creds['password'] in [None, '']:
