@@ -77,11 +77,11 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.text = "system wn ()\nsystem front ()"
-        elif url == "/im/clouds/sitecredid/images":
+        elif url == "/im/clouds/credid/images":
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"images": [{"uri": "one://server/imageid", "name": "imagename"}]}
-        elif url == "/im/clouds/sitecredid/quotas":
+        elif url == "/im/clouds/credid/quotas":
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"quotas": {"cores": {"used": 1, "limit": 10},
@@ -356,7 +356,7 @@ class IMDashboardTests(unittest.TestCase):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         get.side_effect = self.get_response
         self.login(avatar)
-        get_site_info.return_value = ({"id": "siteid"}, "", "vo_name")
+        get_site_info.return_value = ({"id": "id"}, "", "vo_name")
 
         res = self.client.get('/images/credid?local=1')
         self.assertEqual(200, res.status_code)
