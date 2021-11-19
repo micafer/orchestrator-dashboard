@@ -155,7 +155,7 @@ def getIMUserAuthData(access_token, cred, userid):
     res = "type = InfrastructureManager; token = %s" % access_token
     for cred in cred.get_creds(userid):
         if cred['enabled']:
-            res += "\\nid = im%s" % cred['id']
+            res += "\\nid = %s" % cred['id']
             if cred['type'] == "InfrastructureManager":
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
@@ -171,7 +171,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None):
     fedcloud_sites = None
     for cred in cred.get_creds(userid):
         if cred['enabled'] and (cred_id is None or cred_id == cred['id']):
-            res += "\\nid = site%s" % cred['id']
+            res += "\\nid = %s" % cred['id']
             if cred['type'] != "fedcloud":
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
