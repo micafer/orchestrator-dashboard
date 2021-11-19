@@ -125,7 +125,7 @@
                       , {{ vminfo['disk.0.free_size'] }} of HD
                       {% set _dummy=vminfo.pop('disk.0.free_size') %}
                     {% endif %}
-                    {% if 'gpu.count' in vminfo %}
+                    {% if 'gpu.count' in vminfo and vminfo['gpu.count'] > 0 %}
                       , {{ vminfo['gpu.count'] }} GPUs
                       {% set _dummy=vminfo.pop('gpu.count') %}
                       {% if 'gpu.vendor' in vminfo or 'gpu.model' in vminfo %}
