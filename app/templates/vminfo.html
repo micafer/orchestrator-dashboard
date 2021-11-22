@@ -117,11 +117,11 @@
                     {% if 'memory.size' in vminfo %}
                       {{ vminfo['memory.size'] }} of RAM
                       {% set memory=vminfo.pop('memory.size') %}
-                      {% endif %}
-                    {% if 'disks.free_size' in vminfo and vminfo['disks.free_size] > 0 %}
+                    {% endif %}
+                    {% if 'disks.free_size' in vminfo %}
                       , {{ vminfo['disks.free_size'] }} of HD
                       {% set _dummy=vminfo.pop('disks.free_size') %}
-                    {% elif 'disk.0.free_size' in vminfo and vminfo['disk.0.free_size] > 0 %}
+                    {% elif 'disk.0.free_size' in vminfo %}
                       , {{ vminfo['disk.0.free_size'] }} of HD
                       {% set _dummy=vminfo.pop('disk.0.free_size') %}
                     {% endif %}
