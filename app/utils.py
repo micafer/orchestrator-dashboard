@@ -163,8 +163,8 @@ def getIMUserAuthData(access_token, cred, userid):
     return res
 
 
-def getUserAuthData(access_token, cred, userid, cred_id=None):
-    if g.settings.im_auth == "Bearer":
+def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
+    if g.settings.im_auth == "Bearer" and not full:
         return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = %s" % access_token
 

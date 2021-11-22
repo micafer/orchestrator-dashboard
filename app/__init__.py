@@ -812,7 +812,7 @@ def create_app(oidc_blueprint=None):
             flash("No correct image specified.", "error")
             return redirect(url_for('showinfrastructures'))
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id, True)
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
