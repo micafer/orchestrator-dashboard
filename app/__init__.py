@@ -1033,8 +1033,8 @@ def create_app(oidc_blueprint=None):
                         infra_data = infra.get_infra(infid)
                         infra_data["name"] = form_data['description']
                         infra.write_infra(infid, infra_data)
-                    except Exception as dex:
-                        flash("Error updating infrastructure description.", "error")
+                    except Exception as uex:
+                        flash("Error updating infrastructure description: %s" % str(uex), "error")
             elif op in ["start", "stop"]:
                 response = im.manage_inf(op, infid, auth_data)
                 if not response.ok:
