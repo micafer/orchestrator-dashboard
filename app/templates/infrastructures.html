@@ -128,7 +128,13 @@
                 {% for infId, infInfo in infrastructures.items() %}
                 <tr>
                     <th scope="row">
-                      {{infInfo["name"]}}
+                      <a id="desc_{{infId}}_a" href="#" onclick="$('#edit_dest_{{infId}}').modal('show');">
+                      {% if infInfo["name"] != "" %}
+                        {{infInfo["name"]}}
+                      {% else %}
+                        N/A
+                      {% endif %}
+                      </a>
                     </th>
                     <th>
                       {{infId}}
@@ -297,6 +303,28 @@
                     </div>
                   </div>
                 </div>
+                <!-- Modal Edit Inf Desc -->
+                <div class="modal fade" id="edit_dest_{{infId}}" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="edit_dest_label_{{infId}}">Edit Infrastructure Name</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="{{ url_for('manage_inf', infid=infId, op='descr') }}" method="post">
+                          Name: <input type="text" name="description" value="{{ infInfo['name'] }}"/>
+                      </div>
+                      <div class="modal-footer">
+                        <a class="btn btn-primary updateCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-success UpdateBtn" role="button">Update</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <script>
                   $(document).ready(function () {
                     $('#outputs_{{infId}}').on('hidden.bs.modal', function () {
@@ -394,6 +422,15 @@ $(document).ready(function () {
       $(this).parent().find(".startCancelBtn").addClass("disabled", true);
       $(this).addClass("disabled", true);
       $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...` );
+  });
+});
+
+$(document).ready(function () {
+  $(".UpdateBtn").click(function () {
+      // add spinner to button
+      $(this).parent().find(".updateCancelBtn").addClass("disabled", true);
+      $(this).addClass("disabled", true);
+      $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...` );
   });
 });
 </script>
