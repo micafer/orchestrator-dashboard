@@ -20,18 +20,17 @@
 # under the License.
 """Class to manage user credentials using a DB backend with encryption."""
 from cryptography.fernet import Fernet
-from app.cred import Credentials
 from app.db import DataBase
 from flask import json
 
 
-class DBCredentials(Credentials):
+class DBCredentials():
 
     def __init__(self, cred_db_url, key=None):
         self.key = None
         if key:
             self.key = Fernet(key)
-        super().__init__(cred_db_url)
+        self.url = cred_db_url
 
     def _encrypt(self, message):
         if self.key:

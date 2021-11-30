@@ -18,40 +18,83 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""Class to manage user credentials."""
+"""
+Class to manage user credentials.
+
+Temporary will migrate DB creds to Vault.
+"""
+
+from app.db_cred import DBCredentials
+from app.vault_cred import VaultCredentials
 
 
 class Credentials:
 
-    def __init__(self, url):
-        self.url = url
+    def __init__(self, vault_url, db_url, session, oidc_session, key=None, role=None):
+        self.db_client = DBCredentials(db_url, key)
+        self.vault_client = None
+        if vault_url:
+            self.vault_client = VaultCredentials(vault_url, role)
 
-    def get_creds(self, userid, enabled=None):
-        raise NotImplementedError("Should have implemented this")
+        self.session = session
+        self.oidc_session = oidc_session
 
-    def get_cred(self, serviceid, userid):
-        raise NotImplementedError("Should have implemented this")
+    def get_creds(self, enabled=None):
+        res = []
+        if self.vault_client:
+            res = self.vault_client.get_creds(self.oidc_session.token['access_token'], enabled)
 
-    def write_creds(self, serviceid, userid, data, insert=False):
-        raise NotImplementedError("Should have implemented this")
+        db_res = self.db_client.get_creds(self.session['userid'], enabled)
+        if db_res:
+            res.extend(db_res)
+            if self.vault_client:
+                # Move the data to the Vault server
+                for cred in db_res:
+                    try:
+                        self.vault_client.write_creds(cred["id"], self.oidc_session.token['access_token'], cred)
+                        self.db_client.delete_cred(cred["id"], self.session['userid'])
+                    except Exception:
+                        pass
 
-    def delete_cred(self, serviceid, userid):
-        raise NotImplementedError("Should have implemented this")
+        return res
 
-    def enable_cred(self, serviceid, userid, enable=1):
-        raise NotImplementedError("Should have implemented this")
+    def get_cred(self, serviceid):
+        res = None
+        if self.vault_client:
+            res = self.vault_client.get_cred(serviceid, self.oidc_session.token['access_token'])
+        if res:
+            return res
+        else:
+            return self.db_client.get_cred(serviceid, self.session['userid'])
 
-    def validate_cred(self, userid, new_cred):
+    def write_creds(self, serviceid, data, insert=False):
+        if self.vault_client:
+            self.vault_client.write_creds(serviceid, self.oidc_session.token['access_token'], data)
+        else:
+            self.db_client.write_creds(serviceid, self.session['userid'], data, insert)
+
+    def delete_cred(self, serviceid):
+        if self.vault_client:
+            self.vault_client.delete_cred(serviceid, self.oidc_session.token['access_token'])
+        self.db_client.delete_cred(serviceid, self.session['userid'])
+
+    def enable_cred(self, serviceid, enable=1):
+        if self.vault_client:
+            self.vault_client.enable_cred(serviceid, self.oidc_session.token['access_token'], enable)
+        else:
+            self.db_client.enable_cred(serviceid, self.session['userid'], enable)
+
+    def validate_cred(self, new_cred):
         """ Validates the credential with the availabe ones.
         Returns: 0 if no problem, 1 if it is duplicated, or 2 if the site is the same
         """
         cred_id = None
         if isinstance(new_cred, str):
             cred_id = new_cred
-            new_cred = self.get_cred(cred_id, userid)
+            new_cred = self.get_cred(cred_id)
 
         no_host_types = ["EC2", "GCE", "Azure", "linode", "Orange"]
-        for cred in self.get_creds(userid):
+        for cred in self.get_creds():
             if cred["enabled"] and cred["type"] == new_cred["type"] and (not cred_id or cred_id != cred['id']):
                 isequal = True
                 for k in cred.keys():

@@ -22,16 +22,15 @@
 import hvac
 import requests
 from flask import json
-from app.cred import Credentials
 
 
-class VaultCredentials(Credentials):
+class VaultCredentials():
 
     def __init__(self, vault_url, role=None):
         self.vault_path = "credentials/"
         self.role = role
         self.client = None
-        super().__init__(vault_url)
+        self.url = vault_url
 
     def _login(self, token):
         login_url = self.url + '/v1/auth/jwt/login'
@@ -80,7 +79,7 @@ class VaultCredentials(Credentials):
         else:
             return None
 
-    def write_creds(self, serviceid, token, data, insert=False):
+    def write_creds(self, serviceid, token, data):
         vault_entity_id = self._login(token)
 
         try:
