@@ -80,7 +80,7 @@ class Credentials:
 
     def enable_cred(self, serviceid, enable=1):
         if self.vault_client:
-            self.vault_client.enable_cred(serviceid, self.oidc_session.token['access_token'], enable)
+            self.vault_client.enable_cred(serviceid, self.oidc_session.token['access_token'], int(enable))
         else:
             self.db_client.enable_cred(serviceid, self.session['userid'], int(enable))
 
