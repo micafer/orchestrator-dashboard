@@ -82,7 +82,7 @@ class Credentials:
         if self.vault_client:
             self.vault_client.enable_cred(serviceid, self.oidc_session.token['access_token'], enable)
         else:
-            self.db_client.enable_cred(serviceid, self.session['userid'], enable)
+            self.db_client.enable_cred(serviceid, self.session['userid'], int(enable))
 
     def validate_cred(self, new_cred):
         """ Validates the credential with the availabe ones.

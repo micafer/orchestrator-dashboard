@@ -153,13 +153,12 @@ def getIMUserAuthData(access_token, cred):
     if g.settings.im_auth == "Bearer":
         return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = %s" % access_token
-    for cred in cred.get_creds():
-        if cred['enabled']:
-            res += "\\nid = %s" % cred['id']
-            if cred['type'] == "InfrastructureManager":
-                for key, value in cred.items():
-                    if value and key not in ['enabled', 'id']:
-                        res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
+    for cred in cred.get_creds(1):
+        res += "\\nid = %s" % cred['id']
+        if cred['type'] == "InfrastructureManager":
+            for key, value in cred.items():
+                if value and key not in ['enabled', 'id']:
+                    res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
     return res
 
 
@@ -169,8 +168,8 @@ def getUserAuthData(access_token, cred, cred_id=None, full=False):
     res = "type = InfrastructureManager; token = %s" % access_token
 
     fedcloud_sites = None
-    for cred in cred.get_creds():
-        if cred['enabled'] and (cred_id is None or cred_id == cred['id']):
+    for cred in cred.get_creds(1):
+        if cred_id is None or cred_id == cred['id']:
             res += "\\nid = %s" % cred['id']
             if cred['type'] != "fedcloud":
                 for key, value in cred.items():
