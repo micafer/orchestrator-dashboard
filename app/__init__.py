@@ -232,8 +232,8 @@ def create_app(oidc_blueprint=None):
         vmid = request.args['vmId']
         infid = request.args['infId']
 
-        auth_data = utils.getUserAuthData(access_token, cred)
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_vm_info(infid, vmid, auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
@@ -344,8 +344,8 @@ def create_app(oidc_blueprint=None):
     def managevm(op=None, infid=None, vmid=None):
         access_token = oidc_blueprint.session.token['access_token']
 
-        auth_data = utils.getUserAuthData(access_token, cred)
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             if op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data, [vmid])
             elif op == "resize":
@@ -381,9 +381,9 @@ def create_app(oidc_blueprint=None):
         if 'reload' in request.args:
             reload_infid = request.args['reload']
 
-        auth_data = utils.getIMUserAuthData(access_token, cred)
         inf_list = []
         try:
+            auth_data = utils.getIMUserAuthData(access_token, cred)
             inf_list = im.get_inf_list(auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
@@ -411,8 +411,8 @@ def create_app(oidc_blueprint=None):
         if not infid:
             return {"state": "error", "vm_states": {}}
 
-        auth_data = utils.getUserAuthData(access_token, cred)
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             state = im.get_inf_state(infid, auth_data)
             try:
                 infra.write_infra(infid, {"state": state})
@@ -465,9 +465,9 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def template(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred)
         template = ""
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'tosca', auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -505,10 +505,10 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def inflog(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred)
         log = "Not found"
         vms = 0
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'contmsg', auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -524,9 +524,9 @@ def create_app(oidc_blueprint=None):
     def vmlog(infid=None, vmid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred)
         log = "Not found"
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_vm_contmsg(infid, vmid, auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -541,9 +541,9 @@ def create_app(oidc_blueprint=None):
     def infoutputs(infid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred)
         outputs = {}
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'outputs', auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -568,8 +568,8 @@ def create_app(oidc_blueprint=None):
         infra_name = ""
         if inf_id:
             access_token = oidc_blueprint.session.token['access_token']
-            auth_data = utils.getUserAuthData(access_token, cred)
             try:
+                auth_data = utils.getUserAuthData(access_token, cred)
                 response = im.get_inf_property(inf_id, 'tosca', auth_data)
                 if not response.ok:
                     raise Exception(response.text)
@@ -657,8 +657,8 @@ def create_app(oidc_blueprint=None):
 
         if local:
             access_token = oidc_blueprint.session.token['access_token']
-            auth_data = utils.getUserAuthData(access_token, cred, cred_id)
             try:
+                auth_data = utils.getUserAuthData(access_token, cred, cred_id)f
                 response = im.get_cloud_images(cred_id, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
@@ -677,8 +677,8 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def getusage(cred_id=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
         try:
+            auth_data = utils.getUserAuthData(access_token, cred, cred_id)
             response = im.get_cloud_quotas(cred_id, auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -809,7 +809,11 @@ def create_app(oidc_blueprint=None):
             flash("No correct image specified.", "error")
             return redirect(url_for('showinfrastructures'))
 
-        auth_data = utils.getUserAuthData(access_token, cred, cred_id, True)
+        auth_data = ""
+        try:
+            auth_data = utils.getUserAuthData(access_token, cred, cred_id, True)
+        except Exception:
+            pass
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
@@ -954,8 +958,8 @@ def create_app(oidc_blueprint=None):
 
         access_token = oidc_blueprint.session.token['access_token']
 
-        auth_data = utils.getUserAuthData(access_token, cred)
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'radl', auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -979,8 +983,8 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
         form_data = request.form.to_dict()
 
-        auth_data = utils.getUserAuthData(access_token, cred)
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'radl', auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
@@ -1019,10 +1023,10 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def manage_inf(infid=None, op=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred)
         reload = None
 
         try:
+            auth_data = utils.getUserAuthData(access_token, cred)
             if op == "descr":
                 form_data = request.form.to_dict()
                 if 'description' in form_data and form_data['description'] != "":
