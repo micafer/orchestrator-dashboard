@@ -100,13 +100,15 @@ class Credentials:
         for cred in self.get_creds(userid, 1):
             if cred["type"] == new_cred["type"] and (not cred_id or cred_id != cred['id']):
                 isequal = True
+                if new_cred["id"] == cred["id"]:
+                    return 1, ("Duplicated ID.")
                 for k in cred.keys():
                     if k not in ["id", "enabled"]:
                         if k not in new_cred or cred[k] != new_cred[k]:
                             isequal = False
                             break
                 if isequal:
-                    return 1, "Duplicated"
+                    return 1, "Credentials already available."
 
                 if new_cred["type"] in no_host_types:
                     return 2, ("There is already a " + new_cred["type"] + " Credentials " +

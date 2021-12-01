@@ -904,7 +904,7 @@ def create_app(oidc_blueprint=None):
                     val_res, val_msg = cred.validate_cred(get_cred_id(), creds)
                     if val_res != 0:
                         if val_res == 1:
-                            flash("Credentials already available. Not addded.", 'info')
+                            flash("%s Not addded." % val_msg, 'info')
                         elif val_res == 2:
                             flash(val_msg, 'warning')
                 if val_res != 1:
