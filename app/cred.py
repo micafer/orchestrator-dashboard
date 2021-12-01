@@ -24,6 +24,7 @@ Class to manage user credentials.
 Temporary will migrate DB creds to Vault.
 """
 
+from hashlib import new
 from app.db_cred import DBCredentials
 from app.vault_cred import VaultCredentials
 
@@ -96,12 +97,12 @@ class Credentials:
             new_cred = self.get_cred(cred_id, userid)
 
         no_host_types = ["EC2", "GCE", "Azure", "linode", "Orange"]
-        for cred in self.get_creds(userid):
-            if cred["enabled"] and cred["type"] == new_cred["type"] and (not cred_id or cred_id != cred['id']):
+        for cred in self.get_creds(userid, 1):
+            if cred["type"] == new_cred["type"] and (not cred_id or cred_id != cred['id']):
                 isequal = True
                 for k in cred.keys():
                     if k not in ["id", "enabled"]:
-                        if cred[k] != new_cred[k]:
+                        if k not in new_cred or cred[k] != new_cred[k]:
                             isequal = False
                             break
                 if isequal:
