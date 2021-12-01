@@ -91,6 +91,8 @@ class VaultCredentials(Credentials):
         if creds:
             old_data = creds["data"]
             if serviceid in creds["data"]:
+                if insert:
+                    raise Exception("Duplicated Credential ID!.")
                 service_data = json.loads(creds["data"][serviceid])
                 service_data.update(data)
                 creds["data"][serviceid] = service_data
