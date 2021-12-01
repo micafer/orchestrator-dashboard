@@ -111,6 +111,42 @@ class TestVaultCredentials(unittest.TestCase):
         self.assertEqual(json.loads(client.secrets.kv.v1.create_or_update_secret.call_args_list[3][0][1]['credid']),
                          exp_res)
 
+    @patch("hvac.Client")
+    @patch("requests.post")
+    def test_creds_enc(self, post, hvac):
+        response = MagicMock()
+        response.json.return_value = {"auth": {"entity_id": "entity_id", "client_token": "client_token"}}
+        post.return_value = response
+
+        client = MagicMock()
+        client.secrets.kv.v1.read_secret.return_value = None
+        response2 = MagicMock()
+        client.secrets.kv.v1.create_or_update_secret.return_value = response2
+
+        hvac.return_value = client
+
+        creds = VaultCredentials("http://some.com", key='ZMiCBQwtVu2HE6TS4METx84d4LhqmZ5NJtgiTjJzbeU=')
+        creds.write_creds("credid", "token", {"id": "credid", "type": "type", "username":
+                                              "user", "password": "pass"}, True)
+        self.assertEqual(client.secrets.kv.v1.create_or_update_secret.call_args_list[0][0][0], "entity_id")
+        exp_res = {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1}
+        res = json.loads(
+            creds._decrypt(client.secrets.kv.v1.create_or_update_secret.call_args_list[0][0][1]['credid']))
+        self.assertEqual(res, exp_res)
+
+        client.secrets.kv.v1.read_secret.return_value = {"data": {"credid": creds._encrypt(json.dumps(exp_res))}}
+        res = creds.get_cred("credid", "token")
+        self.assertEquals(res, exp_res)
+
+        creds.delete_cred("credid", "token")
+        self.assertEqual(client.secrets.kv.v1.create_or_update_secret.call_args_list[1][0][1], {})
+
+        client.secrets.kv.v1.read_secret.return_value = {"data": {"credid": creds._encrypt(json.dumps(exp_res))}}
+        creds.enable_cred("credid", "token", 0)
+        exp_res["enabled"] = 0
+        res = json.loads(creds._decrypt(client.secrets.kv.v1.create_or_update_secret.call_args_list[2][0][1]['credid']))
+        self.assertEqual(res, exp_res)
+
 
 if __name__ == '__main__':
     unittest.main()

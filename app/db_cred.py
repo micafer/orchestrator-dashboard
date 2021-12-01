@@ -19,7 +19,6 @@
 # specific language governing permissions and limitations
 # under the License.
 """Class to manage user credentials using a DB backend with encryption."""
-from cryptography.fernet import Fernet
 from app.cred import Credentials
 from app.db import DataBase
 from flask import json
@@ -28,22 +27,7 @@ from flask import json
 class DBCredentials(Credentials):
 
     def __init__(self, cred_db_url, key=None):
-        self.key = None
-        if key:
-            self.key = Fernet(key)
-        super().__init__(cred_db_url)
-
-    def _encrypt(self, message):
-        if self.key:
-            return self.key.encrypt(message.encode())
-        else:
-            return message
-
-    def _decrypt(self, message):
-        if self.key:
-            return self.key.decrypt(message)
-        else:
-            return message
+        super().__init__(cred_db_url, key)
 
     def _get_creds_db(self):
         db = DataBase(self.url)

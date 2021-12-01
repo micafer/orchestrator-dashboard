@@ -20,11 +20,26 @@
 # under the License.
 """Class to manage user credentials."""
 
-
 class Credentials:
 
-    def __init__(self, url):
+    def __init__(self, url, key=None):
         self.url = url
+        self.key = None
+        if key:
+            from cryptography.fernet import Fernet
+            self.key = Fernet(key)
+
+    def _encrypt(self, message):
+        if self.key:
+            return self.key.encrypt(message.encode())
+        else:
+            return message
+
+    def _decrypt(self, message):
+        if self.key:
+            return self.key.decrypt(message)
+        else:
+            return message
 
     def get_creds(self, userid, enabled=None):
         raise NotImplementedError("Should have implemented this")

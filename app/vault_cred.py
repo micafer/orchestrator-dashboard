@@ -27,11 +27,11 @@ from app.cred import Credentials
 
 class VaultCredentials(Credentials):
 
-    def __init__(self, vault_url, role=None):
+    def __init__(self, vault_url, role=None, key=None):
         self.vault_path = "credentials/"
         self.role = role
         self.client = None
-        super().__init__(vault_url)
+        super().__init__(vault_url, key)
 
     def _login(self, token):
         login_url = self.url + '/v1/auth/jwt/login'
@@ -64,7 +64,7 @@ class VaultCredentials(Credentials):
         try:
             creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
             for cred_json in creds["data"].values():
-                new_item = json.loads(cred_json)
+                new_item = self._decrypt(json.loads(cred_json))
                 if enabled is None or enabled == new_item['enabled']:
                     data.append(new_item)
         except Exception:
@@ -76,7 +76,7 @@ class VaultCredentials(Credentials):
         vault_entity_id = self._login(token)
         creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
         if serviceid in creds["data"]:
-            return json.loads(creds["data"][serviceid])
+            return json.loads(self._decrypt(creds["data"][serviceid]))
         else:
             return None
 
@@ -93,7 +93,7 @@ class VaultCredentials(Credentials):
             if serviceid in creds["data"]:
                 if insert:
                     raise Exception("Duplicated Credential ID!.")
-                service_data = json.loads(creds["data"][serviceid])
+                service_data = self._decrypt(json.loads(creds["data"][serviceid]))
                 service_data.update(data)
                 creds["data"][serviceid] = service_data
             else:
@@ -103,7 +103,7 @@ class VaultCredentials(Credentials):
             old_data = {serviceid: data}
             old_data[serviceid]['enabled'] = 1
 
-        old_data[serviceid] = json.dumps(old_data[serviceid])
+        old_data[serviceid] = self._encrypt(json.dumps(old_data[serviceid]))
         response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
                                                                      old_data,
                                                                      mount_point=self.vault_path)
@@ -125,9 +125,9 @@ class VaultCredentials(Credentials):
         vault_entity_id = self._login(token)
         creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
         if serviceid in creds["data"]:
-            service_data = json.loads(creds["data"][serviceid])
+            service_data = json.loads(self._decrypt(creds["data"][serviceid]))
             service_data["enabled"] = enable
-            creds["data"][serviceid] = json.dumps(service_data)
+            creds["data"][serviceid] = self._encrypt(json.dumps(service_data))
             response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
                                                                          creds["data"],
                                                                          method="PUT",
