@@ -30,71 +30,73 @@ from app.vault_cred import VaultCredentials
 
 class Credentials:
 
-    def __init__(self, vault_url, db_url, session, oidc_session, key=None, role=None):
+    def __init__(self, vault_url, db_url, key=None, role=None):
         self.db_client = DBCredentials(db_url, key)
         self.vault_client = None
         if vault_url:
             self.vault_client = VaultCredentials(vault_url, role)
 
-        self.session = session
-        self.oidc_session = oidc_session
-
-    def get_creds(self, enabled=None):
+    def get_creds(self, userid, enabled=None):
         res = []
+        (token, db_userid) = userid
         if self.vault_client:
-            res = self.vault_client.get_creds(self.oidc_session.token['access_token'], enabled)
+            res = self.vault_client.get_creds(token, enabled)
 
-        db_res = self.db_client.get_creds(self.session['userid'], enabled)
+        db_res = self.db_client.get_creds(db_userid, enabled)
         if db_res:
             res.extend(db_res)
             if self.vault_client:
                 # Move the data to the Vault server
                 for cred in db_res:
                     try:
-                        self.vault_client.write_creds(cred["id"], self.oidc_session.token['access_token'], cred)
-                        self.db_client.delete_cred(cred["id"], self.session['userid'])
+                        self.vault_client.write_creds(cred["id"], token, cred)
+                        self.db_client.delete_cred(cred["id"], db_userid)
                     except Exception:
                         pass
 
         return res
 
-    def get_cred(self, serviceid):
+    def get_cred(self, serviceid, userid):
         res = None
+        (token, db_userid) = userid
         if self.vault_client:
-            res = self.vault_client.get_cred(serviceid, self.oidc_session.token['access_token'])
+            res = self.vault_client.get_cred(serviceid, token)
         if res:
             return res
         else:
-            return self.db_client.get_cred(serviceid, self.session['userid'])
+            return self.db_client.get_cred(serviceid, db_userid)
 
-    def write_creds(self, serviceid, data, insert=False):
+    def write_creds(self, serviceid, userid, data, insert=False):
+        (token, db_userid) = userid
         if self.vault_client:
-            self.vault_client.write_creds(serviceid, self.oidc_session.token['access_token'], data)
+            self.vault_client.write_creds(serviceid, token, data)
         else:
-            self.db_client.write_creds(serviceid, self.session['userid'], data, insert)
+            self.db_client.write_creds(serviceid, db_userid, data, insert)
 
-    def delete_cred(self, serviceid):
+    def delete_cred(self, serviceid, userid):
+        (token, db_userid) = userid
         if self.vault_client:
-            self.vault_client.delete_cred(serviceid, self.oidc_session.token['access_token'])
-        self.db_client.delete_cred(serviceid, self.session['userid'])
+            self.vault_client.delete_cred(serviceid, token)
+        self.db_client.delete_cred(serviceid, db_userid)
 
-    def enable_cred(self, serviceid, enable=1):
+    def enable_cred(self, serviceid, userid, enable=1):
+        (token, db_userid) = userid
         if self.vault_client:
-            self.vault_client.enable_cred(serviceid, self.oidc_session.token['access_token'], int(enable))
+            self.vault_client.enable_cred(serviceid, token, int(enable))
         else:
-            self.db_client.enable_cred(serviceid, self.session['userid'], int(enable))
+            self.db_client.enable_cred(serviceid, db_userid, int(enable))
 
-    def validate_cred(self, new_cred):
+    def validate_cred(self, userid, new_cred):
         """ Validates the credential with the availabe ones.
         Returns: 0 if no problem, 1 if it is duplicated, or 2 if the site is the same
         """
         cred_id = None
         if isinstance(new_cred, str):
             cred_id = new_cred
-            new_cred = self.get_cred(cred_id)
+            new_cred = self.get_cred(cred_id, userid)
 
         no_host_types = ["EC2", "GCE", "Azure", "linode", "Orange"]
-        for cred in self.get_creds():
+        for cred in self.get_creds(userid):
             if cred["enabled"] and cred["type"] == new_cred["type"] and (not cred_id or cred_id != cred['id']):
                 isequal = True
                 for k in cred.keys():

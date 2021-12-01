@@ -104,10 +104,10 @@ def getStaticVOs():
     return list(set(res))
 
 
-def get_site_info(cred_id, cred):
+def get_site_info(cred_id, cred, userid):
     domain = None
 
-    cred_data = cred.get_cred(cred_id)
+    cred_data = cred.get_cred(cred_id, userid)
     vo = cred_data['vo']
 
     for site in list(getCachedSiteList().values()):
@@ -149,11 +149,11 @@ def getCachedSiteList(force=False):
     return SITE_LIST
 
 
-def getIMUserAuthData(access_token, cred):
+def getIMUserAuthData(access_token, cred, userid):
     if g.settings.im_auth == "Bearer":
         return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = %s" % access_token
-    for cred in cred.get_creds(1):
+    for cred in cred.get_creds(userid, 1):
         res += "\\nid = %s" % cred['id']
         if cred['type'] == "InfrastructureManager":
             for key, value in cred.items():
@@ -162,13 +162,13 @@ def getIMUserAuthData(access_token, cred):
     return res
 
 
-def getUserAuthData(access_token, cred, cred_id=None, full=False):
+def getUserAuthData(access_token, creds, userid, cred_id=None, full=False):
     if g.settings.im_auth == "Bearer" and not full:
         return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = %s" % access_token
 
     fedcloud_sites = None
-    for cred in cred.get_creds(1):
+    for cred in creds.get_creds(userid, 1):
         if cred_id is None or cred_id == cred['id']:
             res += "\\nid = %s" % cred['id']
             if cred['type'] != "fedcloud":

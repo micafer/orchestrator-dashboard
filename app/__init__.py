@@ -27,8 +27,8 @@ import logging
 from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
-from app.cred import Credentials
 from app.settings import Settings
+from app.cred import Credentials
 from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app import utils, appdb, db
@@ -49,6 +49,13 @@ def create_app(oidc_blueprint=None):
     app.secret_key = "8210f566-4981-11ea-92d1-f079596e599b"
     app.config.from_json('config.json')
     settings = Settings(app.config)
+
+    if 'CREDS_KEY' in os.environ:
+        key = os.environ['CREDS_KEY']
+    else:
+        key = None
+    cred = Credentials(settings.vault_url, settings.db_url, key)
+
     CSRFProtect(app)
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
@@ -91,12 +98,6 @@ def create_app(oidc_blueprint=None):
             redirect_to='home'
         )
     app.register_blueprint(oidc_blueprint, url_prefix="/login")
-
-    if 'CREDS_KEY' in os.environ:
-        key = os.environ['CREDS_KEY']
-    else:
-        key = None
-    cred = Credentials(settings.vault_url, settings.db_url, session, oidc_blueprint.session, key)
 
     @app.before_request
     def before_request_checks():
@@ -232,8 +233,8 @@ def create_app(oidc_blueprint=None):
         vmid = request.args['vmId']
         infid = request.args['infId']
 
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_vm_info(infid, vmid, auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
@@ -344,8 +345,8 @@ def create_app(oidc_blueprint=None):
     def managevm(op=None, infid=None, vmid=None):
         access_token = oidc_blueprint.session.token['access_token']
 
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             if op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data, [vmid])
             elif op == "resize":
@@ -381,9 +382,9 @@ def create_app(oidc_blueprint=None):
         if 'reload' in request.args:
             reload_infid = request.args['reload']
 
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         inf_list = []
         try:
-            auth_data = utils.getIMUserAuthData(access_token, cred)
             inf_list = im.get_inf_list(auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
@@ -411,8 +412,8 @@ def create_app(oidc_blueprint=None):
         if not infid:
             return {"state": "error", "vm_states": {}}
 
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             state = im.get_inf_state(infid, auth_data)
             try:
                 infra.write_infra(infid, {"state": state})
@@ -465,9 +466,9 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def template(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         template = ""
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'tosca', auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -505,10 +506,10 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def inflog(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         log = "Not found"
         vms = 0
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'contmsg', auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -524,9 +525,9 @@ def create_app(oidc_blueprint=None):
     def vmlog(infid=None, vmid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         log = "Not found"
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_vm_contmsg(infid, vmid, auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -541,9 +542,9 @@ def create_app(oidc_blueprint=None):
     def infoutputs(infid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         outputs = {}
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'outputs', auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -568,8 +569,8 @@ def create_app(oidc_blueprint=None):
         infra_name = ""
         if inf_id:
             access_token = oidc_blueprint.session.token['access_token']
+            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
             try:
-                auth_data = utils.getUserAuthData(access_token, cred)
                 response = im.get_inf_property(inf_id, 'tosca', auth_data)
                 if not response.ok:
                     raise Exception(response.text)
@@ -607,7 +608,7 @@ def create_app(oidc_blueprint=None):
         app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
         try:
-            creds = cred.get_creds(1)
+            creds = cred.get_creds(get_cred_id(), 1)
         except Exception as ex:
             flash("Error getting user credentials: %s" % ex, "error")
             creds = []
@@ -657,8 +658,8 @@ def create_app(oidc_blueprint=None):
 
         if local:
             access_token = oidc_blueprint.session.token['access_token']
+            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
             try:
-                auth_data = utils.getUserAuthData(access_token, cred, cred_id)f
                 response = im.get_cloud_images(cred_id, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
@@ -668,7 +669,7 @@ def create_app(oidc_blueprint=None):
                 res += '<option name="selectedSiteImage" value=%s>%s</option>' % (ex, ex)
 
         else:
-            site, _, vo = utils.get_site_info(cred_id, cred)
+            site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
             for image_name, image_id in appdb.get_images(site['id'], vo):
                 res += '<option name="selectedImage" value=%s>%s</option>' % (image_id, image_name)
         return res
@@ -677,8 +678,8 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def getusage(cred_id=None):
         access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
         try:
-            auth_data = utils.getUserAuthData(access_token, cred, cred_id)
             response = im.get_cloud_quotas(cred_id, auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -779,7 +780,7 @@ def create_app(oidc_blueprint=None):
         app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
         cred_id = form_data['extra_opts.selectedCred']
-        cred_data = cred.get_cred(cred_id)
+        cred_data = cred.get_cred(cred_id, get_cred_id())
         access_token = oidc_blueprint.session.token['access_token']
 
         image = None
@@ -787,7 +788,7 @@ def create_app(oidc_blueprint=None):
         pub_network_id = None
         if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
             if form_data['extra_opts.selectedImage'] != "":
-                site, _, vo = utils.get_site_info(cred_id, cred)
+                site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
                 if cred_data['type'] == 'fedcloud' and "networks" in site and vo in site["networks"]:
                     if "private" in site["networks"][vo]:
@@ -809,11 +810,7 @@ def create_app(oidc_blueprint=None):
             flash("No correct image specified.", "error")
             return redirect(url_for('showinfrastructures'))
 
-        auth_data = ""
-        try:
-            auth_data = utils.getUserAuthData(access_token, cred, cred_id, True)
-        except Exception:
-            pass
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id, True)
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
@@ -861,7 +858,7 @@ def create_app(oidc_blueprint=None):
         creds = {}
 
         try:
-            creds = cred.get_creds()
+            creds = cred.get_creds(get_cred_id())
             # Get the project_id in case it has changed
             utils.get_project_ids(creds)
         except Exception as e:
@@ -880,7 +877,7 @@ def create_app(oidc_blueprint=None):
             res = {}
             try:
                 if cred_id:
-                    res = cred.get_cred(cred_id)
+                    res = cred.get_cred(cred_id, get_cred_id())
                     cred_type = res['type']
             except Exception as ex:
                 flash("Error reading credentials %s!" % ex, 'error')
@@ -904,7 +901,7 @@ def create_app(oidc_blueprint=None):
                     del creds['csrf_token']
                 val_res = 0
                 if not cred_id:
-                    val_res, val_msg = cred.validate_cred(creds)
+                    val_res, val_msg = cred.validate_cred(get_cred_id(), creds)
                     if val_res != 0:
                         if val_res == 1:
                             flash("Credentials already available. Not addded.", 'info')
@@ -913,7 +910,7 @@ def create_app(oidc_blueprint=None):
                 if val_res != 1:
                     # Get project_id to save it to de DB
                     utils.get_project_ids([creds])
-                    cred.write_creds(creds["id"], creds, cred_id in [None, ''])
+                    cred.write_creds(creds["id"], get_cred_id(), creds, cred_id in [None, ''])
                     if val_res == 0:
                         flash("Credentials successfully written!", 'success')
             except db.IntegrityError:
@@ -929,7 +926,7 @@ def create_app(oidc_blueprint=None):
 
         cred_id = request.args.get('cred_id', "")
         try:
-            cred.delete_cred(cred_id)
+            cred.delete_cred(cred_id, get_cred_id())
             flash("Credentials successfully deleted!", 'success')
         except Exception as ex:
             flash("Error deleting credentials %s!" % ex, 'error')
@@ -943,10 +940,10 @@ def create_app(oidc_blueprint=None):
         enable = request.args.get('enable', 0)
         try:
             if enable == '1':
-                val_res, val_msg = cred.validate_cred(cred_id)
+                val_res, val_msg = cred.validate_cred(get_cred_id(), cred_id)
                 if val_res == 2:
                     flash(val_msg, 'warning')
-            cred.enable_cred(cred_id, enable)
+            cred.enable_cred(cred_id, get_cred_id(), enable)
         except Exception as ex:
             flash("Error updating credentials %s!" % ex, 'error')
 
@@ -958,8 +955,8 @@ def create_app(oidc_blueprint=None):
 
         access_token = oidc_blueprint.session.token['access_token']
 
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'radl', auth_data)
             if not response.ok:
                 raise Exception(response.text)
@@ -983,8 +980,8 @@ def create_app(oidc_blueprint=None):
         access_token = oidc_blueprint.session.token['access_token']
         form_data = request.form.to_dict()
 
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             response = im.get_inf_property(infid, 'radl', auth_data)
         except Exception as ex:
             flash("Error: %s." % ex, 'error')
@@ -1023,10 +1020,10 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def manage_inf(infid=None, op=None):
         access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
         reload = None
 
         try:
-            auth_data = utils.getUserAuthData(access_token, cred)
             if op == "descr":
                 form_data = request.form.to_dict()
                 if 'description' in form_data and form_data['description'] != "":
@@ -1128,6 +1125,9 @@ def create_app(oidc_blueprint=None):
     def delete_infra(infid):
         infra.delete_infra(infid)
         scheduler.delete_job('delete_infra_%s' % infid)
+
+    def get_cred_id():
+        return (oidc_blueprint.session.token['access_token'], session['userid'])
 
     return app
 
