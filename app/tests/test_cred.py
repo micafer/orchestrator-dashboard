@@ -102,14 +102,17 @@ class TestVaultCredentials(unittest.TestCase):
         res = creds.get_cred("credid", "user")
         self.assertEquals(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
 
-        creds.delete_cred("credid", "token")
-        self.assertEqual(client.secrets.kv.v1.create_or_update_secret.call_args_list[1][0][1], {})
-
-        client.secrets.kv.v1.read_secret.return_value = {"data": {"credid": json.dumps(exp_res)}}
         creds.enable_cred("credid", "token", 0)
-        exp_res["enabled"] = 0
-        self.assertEqual(json.loads(client.secrets.kv.v1.create_or_update_secret.call_args_list[3][0][1]['credid']),
-                         exp_res)
+        self.assertEqual(json.loads(client.secrets.kv.v1.create_or_update_secret.call_args_list[2][0][1]['credid']),
+                         {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 0})
+
+        creds.delete_cred("credid", "token")
+        self.assertEqual(client.secrets.kv.v1.delete_secret.call_args_list[0][0], ("entity_id",))
+
+        client.secrets.kv.v1.read_secret.return_value = {"data": {"credid": json.dumps(exp_res),
+                                                                  "credid2": ""}}
+        creds.delete_cred("credid", "token")
+        self.assertEqual(client.secrets.kv.v1.create_or_update_secret.call_args_list[3][0][1], {"credid2": ""})
 
 
 if __name__ == '__main__':
