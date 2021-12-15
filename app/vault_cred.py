@@ -117,9 +117,9 @@ class VaultCredentials(Credentials):
             del creds["data"][serviceid]
             if creds["data"]:
                 response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
-                                                                            creds["data"],
-                                                                            method="PUT",
-                                                                            mount_point=self.vault_path)
+                                                                             creds["data"],
+                                                                             method="PUT",
+                                                                             mount_point=self.vault_path)
             else:
                 response = self.client.secrets.kv.v1.delete_secret(vault_entity_id,
                                                                    mount_point=self.vault_path)
