@@ -327,7 +327,7 @@
                           </div>
                           <div class="col">
                             {% set memory_parts = memory.split() %}
-                            Memory (GB): <input name="memory" class="col-sm-12" type="number" value="{{ memory_parts[0] }}" required/>
+                            Memory (GB): <input name="memory" class="col-sm-12" type="number" value="{{ memory_parts[0] | int }}" required/>
                           </div>
                         </div>
 
