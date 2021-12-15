@@ -112,10 +112,14 @@ class VaultCredentials():
         creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
         if serviceid in creds["data"]:
             del creds["data"][serviceid]
-            response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
-                                                                         creds["data"],
-                                                                         method="PUT",
-                                                                         mount_point=self.vault_path)
+            if creds["data"]:
+                response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
+                                                                            creds["data"],
+                                                                            method="PUT",
+                                                                            mount_point=self.vault_path)
+            else:
+                response = self.client.secrets.kv.v1.delete_secret(vault_entity_id,
+                                                                   mount_point=self.vault_path)
             response.raise_for_status()
 
     def enable_cred(self, serviceid, token, enable=1):
