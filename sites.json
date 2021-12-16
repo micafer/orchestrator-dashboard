@@ -13,8 +13,8 @@
         },
         "networks": {
             "cryoem.instruct-eric.eu": {
-                "private": "78-128-250-pers-proj-net",
-                "public": "public-cesnet-78-128-250-PERSONAL"
+                "private": "group-project-network",
+                "public": "public-muni-147-251-21-GROUP"
             }
         }
     },
