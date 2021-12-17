@@ -370,11 +370,13 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
     @patch("app.utils.avatar")
+    @patch("app.utils.get_site_info")
     @patch("app.db_cred.DBCredentials.get_cred")
-    def test_submit(self, get_cred, avatar, post, user_data):
+    def test_submit(self, get_cred, get_site_info, avatar, post, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         post.side_effect = self.post_response
         get_cred.return_value = {"id": "credid", "type": "fedcloud"}
+        get_site_info.return_value = {}, "", "vo"
         self.login(avatar)
         params = {'extra_opts.selectedImage': '',
                   'extra_opts.selectedSiteImage': 'IMAGE_NAME',
