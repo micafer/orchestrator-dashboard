@@ -1,16 +1,13 @@
-tosca_definitions_version: tosca_simple_yaml_1_0
 
+tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
-
 description: >
   Launch a cluster with Scipion via VNC
-
 metadata:
   display_name: Scipion on SLURM cluster
   icon: images/scipion.png
   tag: beta
-
 topology_template:
   inputs:
     vnc_pass:
@@ -23,52 +20,68 @@ topology_template:
       description: Cryosparc license id
       required: no
       default: 'a3dc0cc0-3181-11ea-84d0-8b3771c7f13b'
-    master_instance_type: # Need GPU to make cryosparc work
-      type: string
-      description: Instance type of Scipion master node
+    num_gpus_master:
+      type: integer
+      description: Number of GPUs to assing to the master
       required: yes
-      #default: 'g1.c08r31-K20m' #IISAS-FedCloud GPU
-      #default: 'm1.medium' #IISAS-FedCloud no GPU
-      #default: 'cm4.large' #IFCA no GPU
-      default: 'g7.8xlarge' #IFCA GPU
-      #default: 'hpc.8core-64ram-nvidia-1080-glados' #CESNET GPU
-      #default: 'hpc.64core-512ram-nvidia-t4' # CESNET GPU
-      #default: 'standard.medium' #CESNET no GPU
-
-    worker_instance_type:
-      type: string
-      description: Instance type of Scipion worker node
+      default: 1
+    num_cpus_master:
+      type: integer
+      description: Numbers of CPUs to assign to the master
       required: yes
-      #default: 'm1.xlarge' #IISAS-FedCloud
-      #default: 'g7.8xlarge' #IFCA
-      default: 'cm4.large' #IFCA no GPU
-      #default: 'standard.medium' #CESNET
-      #default: 'hpc.64core-512ram-nvidia-t4' # CESNET GPU
+      default: 8
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+    mem_size_master:
+      type: scalar-unit.size
+      description: Ammount of RAM (GB) to assign to the master
+      default: 30 GB
+      required: yes
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
+    num_gpus_worker:
+      type: integer
+      description: Number of GPUs to assing to the worker
+      required: yes
+      default: 1
+    num_cpus_worker:
+      type: integer
+      description: Numbers of CPUs to assign to the worker
+      required: yes
+      default: 8
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+    mem_size_worker:
+      type: scalar-unit.size
+      description: Ammount of RAM (GB) to assign to the worker
+      default: 30 GB
+      required: yes
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
     network_name_pub:
       type: string
       description: Public network name (only needed for CESNET = public-muni-147-251-21-GROUP)
       required: no
-      #default: 'public-muni-147-251-21-GROUP'
+      default: ''
     network_name_priv:
       type: string
       description: Private network name (only needed for CESNET = group-project-network)
       required: no
-      #default: 'group-project-network'
+      default: ''
     disk_size:
       type: scalar-unit.size
       description: Size of the disk to be attached to the FE instance
       default: 100 GB
       constraints:
-        - valid_values: [ 100 GB, 500 GB, 1 TB, 2 TB, 5 TB, 8TB ]
+        - valid_values: [ 100 GB, 500 GB, 1 TB, 5 TB, 8TB ]
     workers_num:
       type: integer
       description: Number of worker nodes in cluster
-      default: 0
+      default: 1
       constraints:
         - valid_values: [ 0, 1 ]
 
   node_templates:
-
     pub_network:
       type: tosca.nodes.network.Network
       properties:
@@ -120,13 +133,12 @@ topology_template:
                 source: 5904
         host:
           properties:
-            instance_type: { get_input: master_instance_type }
+            num_gpus: { get_input: num_gpus_master }
+            num_cpus: { get_input: num_cpus_master }
+            mem_size: { get_input: mem_size_master }
+            gpu_vendor: 'nvidia'
         os:
           properties:
-            #image: 'ost://cloud.ui.savba.sk:5000/2a1c0a0e-529a-4b44-894f-32a4e3f6357e' #IISAS-FedCloud
-            #image: 'ost://api.cloud.ifca.es/1bf25f1c-0140-430b-b0ff-40aec42a5520' #IFCA
-            #image: 'ost://identity.cloud.muni.cz/e8d75fc1-ac32-4851-90b5-b4c925e9e6f8' #CESNET NO GPU
-            #image: 'ost://identity.cloud.muni.cz/6e60eb4a-aeae-400a-927c-e3643d827601' #CESNET GPU
             type: linux
       requirements:
         - local_storage:
@@ -143,7 +155,7 @@ topology_template:
       interfaces:
         Standard:
           configure:
-            implementation: https://raw.githubusercontent.com/CERIT-SC/scipion-docker/master/ansible_master.yaml
+            implementation: https://raw.githubusercontent.com/I2PC/scipion-docker/devel/ansible_master.yaml
             inputs:
               vnc_pass: { get_input: vnc_pass }
               cryosparc_license: { get_input: cryosparc_license }
@@ -154,6 +166,9 @@ topology_template:
           type: tosca.artifacts.AnsibleGalaxy.role
         nfs_role:
           file: indigo-dc.nfs,master
+          type: tosca.artifacts.AnsibleGalaxy.role
+        docker_role:
+          file: grycap.docker,master
           type: tosca.artifacts.AnsibleGalaxy.role
 
     lrms_wn:
@@ -167,14 +182,13 @@ topology_template:
             dns_name: scipion-wn-#N#
         host:
           properties:
-            instance_type: { get_input: worker_instance_type }
+            num_gpus: { get_input: num_gpus_worker }
+            num_cpus: { get_input: num_cpus_worker }
+            mem_size: { get_input: mem_size_worker }
+            gpu_vendor: 'nvidia'
         os:
           properties:
             type: linux
-            #image: 'ost://cloud.ui.savba.sk:5000/2a1c0a0e-529a-4b44-894f-32a4e3f6357e' #IISAS-FedCloud
-            #image: 'ost://api.cloud.ifca.es/1bf25f1c-0140-430b-b0ff-40aec42a5520' #IFCA
-            #image: 'ost://identity.cloud.muni.cz/6e60eb4a-aeae-400a-927c-e3643d827601' #CESNET GPU
-            #image: 'ost://identity.cloud.muni.cz/e8d75fc1-ac32-4851-90b5-b4c925e9e6f8' #CESNET NO GPU
 
     wn:
       type: tosca.nodes.SoftwareComponent
@@ -183,7 +197,7 @@ topology_template:
       interfaces:
         Standard:
           configure:
-            implementation: https://raw.githubusercontent.com/CERIT-SC/scipion-docker/master/ansible_worker.yaml
+            implementation: https://raw.githubusercontent.com/I2PC/scipion-docker/devel/ansible_worker.yaml
             inputs:
               slurm_front_end_ip: { get_attribute: [ lrms_server, private_address, 0 ] }
       artifacts:
@@ -193,11 +207,13 @@ topology_template:
         nfs_role:
           file: indigo-dc.nfs,master
           type: tosca.artifacts.AnsibleGalaxy.role
+        docker_role:
+          file: grycap.docker,master
+          type: tosca.artifacts.AnsibleGalaxy.role
     my_block_storage:
       type: BlockStorage
       properties:
         size: { get_input: disk_size }
-
   outputs:
-    master_node_vnc:
+    master_node_ip:
       value: { concat: [ 'https://', get_attribute: [ lrms_server, public_address, 0 ], ':5904/?resize=remote' ] }
