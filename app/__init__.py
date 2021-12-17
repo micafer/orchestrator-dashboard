@@ -796,7 +796,7 @@ def create_app(oidc_blueprint=None):
                         priv_network_id = site["networks"][vo]["private"]
                     if "public" in site["networks"][vo]:
                         pub_network_id = site["networks"][vo]["public"]
-    
+
             if form_data['extra_opts.selectedImage'] != "":
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
             elif form_data['extra_opts.selectedSiteImage'] != "":
