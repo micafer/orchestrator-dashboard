@@ -57,16 +57,6 @@ topology_template:
       required: yes
       constraints:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
-    network_name_pub:
-      type: string
-      description: Public network name (only needed for CESNET = public-muni-147-251-21-GROUP)
-      required: no
-      default: ''
-    network_name_priv:
-      type: string
-      description: Private network name (only needed for CESNET = group-project-network)
-      required: no
-      default: ''
     disk_size:
       type: scalar-unit.size
       description: Size of the disk to be attached to the FE instance
@@ -85,7 +75,6 @@ topology_template:
       type: tosca.nodes.network.Network
       properties:
         network_type: public
-        network_name: { get_input: network_name_pub }
 
     server_pub_port:
       type: tosca.nodes.network.Port
@@ -99,7 +88,6 @@ topology_template:
       type: tosca.nodes.network.Network
       properties:
         network_type: private
-        network_name: { get_input: network_name_priv }
 
     server_port:
       type: tosca.nodes.network.Port
