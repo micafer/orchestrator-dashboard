@@ -18,7 +18,7 @@ topology_template:
       type: string
       description: Cryosparc license id
       required: no
-      default: 'a3dc0cc0-3181-11ea-84d0-8b3771c7f13b'
+      default: 'xxx'
     num_gpus_master:
       type: integer
       description: Number of GPUs to assing to the master
