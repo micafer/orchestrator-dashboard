@@ -789,14 +789,16 @@ def create_app(oidc_blueprint=None):
         priv_network_id = None
         pub_network_id = None
         if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
-            if form_data['extra_opts.selectedImage'] != "":
+            if cred_data['type'] == 'fedcloud':
                 site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
-                image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
-                if cred_data['type'] == 'fedcloud' and "networks" in site and vo in site["networks"]:
+                if "networks" in site and vo in site["networks"]:
                     if "private" in site["networks"][vo]:
                         priv_network_id = site["networks"][vo]["private"]
                     if "public" in site["networks"][vo]:
                         pub_network_id = site["networks"][vo]["public"]
+    
+            if form_data['extra_opts.selectedImage'] != "":
+                image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
             elif form_data['extra_opts.selectedSiteImage'] != "":
                 image = form_data['extra_opts.selectedSiteImage']
         else:
