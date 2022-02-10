@@ -27,10 +27,11 @@ from app.cred import Credentials
 
 class VaultCredentials(Credentials):
 
-    def __init__(self, vault_url, role=None):
+    def __init__(self, vault_url, role=None, ssl_verify=False):
         self.vault_path = "credentials/"
         self.role = role
         self.client = None
+        self.ssl_verify = ssl_verify
         super().__init__(vault_url)
 
     def _login(self, token):
@@ -41,7 +42,7 @@ class VaultCredentials(Credentials):
         else:
             data = '{ "jwt": "' + token + '" }'
 
-        response = requests.post(login_url, data=data, verify=False, timeout=5)
+        response = requests.post(login_url, data=data, verify=self.ssl_verify, timeout=5)
 
         if not response.ok:
             raise Exception("Error getting Vault token: {} - {}".format(response.status_code, response.text))
@@ -51,7 +52,7 @@ class VaultCredentials(Credentials):
         vault_auth_token = deserialized_response["auth"]["client_token"]
         vault_entity_id = deserialized_response["auth"]["entity_id"]
 
-        self.client = hvac.Client(url=self.url, token=vault_auth_token, verify=False)
+        self.client = hvac.Client(url=self.url, token=vault_auth_token, verify=self.ssl_verify)
         if not self.client.is_authenticated():
             raise Exception("Error authenticating against Vault with token: {}".format(vault_auth_token))
 
