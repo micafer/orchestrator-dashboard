@@ -194,7 +194,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
                         res += "; api_version  = %s" % site_info['api_version']
 
                     project_ids = getCachedProjectIDs(site_info["id"])
-                    if cred['vo'] in project_ids:
+                    if cred['vo'] in project_ids and project_ids[cred['vo']]:
                         projectid = project_ids[cred['vo']]
                 else:
                     print("Error %s not in list of FedCloud sites." % cred['host'], file=sys.stderr)
