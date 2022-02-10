@@ -131,7 +131,7 @@ class VaultCredentials(Credentials):
         creds = self.client.secrets.kv.v1.read_secret(path=vault_entity_id, mount_point=self.vault_path)
         if serviceid in creds["data"]:
             service_data = json.loads(creds["data"][serviceid])
-            service_data["enabled"] = enable
+            service_data["enabled"] = int(enable)
             creds["data"][serviceid] = json.dumps(service_data)
             response = self.client.secrets.kv.v1.create_or_update_secret(vault_entity_id,
                                                                          creds["data"],
