@@ -68,7 +68,7 @@ class Credentials:
                     return 2, ("There is already a " + new_cred["type"] + " Credentials " +
                                " It may cause problems authenticating with the Provider." +
                                " Please disable/remove one of the Credentials.")
-                elif new_cred["type"] not in ['EGI', 'OpenStack']:  # these types has no problem
+                elif new_cred["type"] not in ['EGI', 'OpenStack', 'fedcloud']:  # these types has no problem
                     if new_cred["host"] and cred["host"] == new_cred["host"]:
                         return 2, ("This site has already a Credential with same site URL." +
                                    " It may cause problems authenticating with the Site." +
