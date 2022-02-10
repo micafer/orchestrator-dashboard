@@ -42,7 +42,7 @@ class VaultCredentials(Credentials):
         else:
             data = '{ "jwt": "' + token + '" }'
 
-        response = requests.post(login_url, data=data, verify=self.ssl_verify = ssl_verify, timeout=5)
+        response = requests.post(login_url, data=data, verify=self.ssl_verify, timeout=5)
 
         if not response.ok:
             raise Exception("Error getting Vault token: {} - {}".format(response.status_code, response.text))
