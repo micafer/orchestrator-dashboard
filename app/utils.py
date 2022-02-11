@@ -21,6 +21,7 @@
 """Util functions."""
 
 import json
+from urllib3 import Retry
 import yaml
 import requests
 import os
@@ -273,6 +274,14 @@ def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
     return toscaTemplates
 
 
+def toscaHasImages(template):
+    for node in list(template['topology_template']['node_templates'].values()):
+        if node["type"] == "tosca.nodes.indigo.Compute":
+            if not node.get("capabilities", {}).get("os", {}).get("properties", {}).get("image", {}):
+                return False
+    return True
+
+
 def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
     toscaInfoOrder = toscaInfo = {}
     for tosca in toscaTemplates:
@@ -286,6 +295,7 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                                     "icon": "https://cdn4.iconfinder.com/data/icons/mosaicon-04/512/websettings-512.png"
                                 },
                                 "enable_config_form": False,
+                                "fixed_images": toscaHasImages(template),
                                 "inputs": {},
                                 "tabs": {}}
 
