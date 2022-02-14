@@ -21,6 +21,7 @@
 """Util functions."""
 
 import json
+from urllib.parse import urlparse
 from urllib3 import Retry
 import yaml
 import requests
@@ -274,12 +275,20 @@ def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
     return toscaTemplates
 
 
-def toscaHasImages(template):
+def toscaShowImagesSites(template):
+    show_sites = True
     for node in list(template['topology_template']['node_templates'].values()):
         if node["type"] == "tosca.nodes.indigo.Compute":
-            if not node.get("capabilities", {}).get("os", {}).get("properties", {}).get("image", {}):
-                return False
-    return True
+            image = node.get("capabilities", {}).get("os", {}).get("properties", {}).get("image", {})
+            if not image:
+                return True, True
+            else:
+                image_url = urlparse(image)
+                if image_url.scheme == "appdb":
+                    if image_url.path:
+                        show_sites = False
+                
+    return False, show_sites
 
 
 def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
@@ -288,6 +297,7 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
         with io.open(toscaDir + tosca) as stream:
             template = yaml.full_load(stream)
 
+            show_images, show_sites = toscaShowImagesSites(template)
             toscaInfo[tosca] = {"valid": True,
                                 "description": "TOSCA Template",
                                 "metadata": {
@@ -295,7 +305,8 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                                     "icon": "https://cdn4.iconfinder.com/data/icons/mosaicon-04/512/websettings-512.png"
                                 },
                                 "enable_config_form": False,
-                                "fixed_images": toscaHasImages(template),
+                                "show_images": show_images,
+                                "show_sites": show_sites,
                                 "inputs": {},
                                 "tabs": {}}
 

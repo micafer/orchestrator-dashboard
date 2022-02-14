@@ -67,6 +67,7 @@ topology_template:
         os:
           properties:
             type: linux
+            image: appdb://CESGA/egi.ubuntu.20.04
       # Add dummy task to activate context
       interfaces:
         Standard:

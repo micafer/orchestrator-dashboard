@@ -37,7 +37,11 @@
             {% else %}
                 {% include 'default_form.html' %}
             {% endif %}
+            {% if template['show_images'] %}
             <button type="submit" class="btn btn-success submitBtn" disabled>Submit</button>
+            {% else %}
+            <button type="submit" class="btn btn-success submitBtn">Submit</button>
+            {% endif %}
             <button id="cancelBtn" type=button class="btn btn-small btn-primary" onclick="location.href='{{ url_for('home') }}'">
                 <span class="fas fa-ban mr-2"></span>Cancel</button>
             </form>

@@ -2,7 +2,11 @@
 <br>
 <div id="confScheduling">
   <div class="form-group">
+    {% if template['show_images'] or template['show_sites']%}
       <h5>Cloud Provider:</h5>
+    {% else %}
+      <h5>Cloud Provider fixed in TOSCA</h5>
+    {% endif %}
   </div>
 
   
@@ -11,6 +15,7 @@
 
   <script>
 
+{% if template['show_sites'] %}
    var config = {};
    config["gen"] = {
        type: 'pie',
@@ -74,7 +79,33 @@
            window.myPies[resource_types[i]].update();
        }
    }
+{% endif %}
 
+{% if not template['show_images'] %}
+   {% if template['show_sites'] %}
+   function changedCred() {
+        var select = document.getElementById('selectedCred');
+        var cred_type = select.options[select.selectedIndex].getAttribute("data-type");
+        if (cred_type == 'fedcloud') {
+            $('#fedcloudUsage').show();
+            loadSiteInfo();
+        } else if (cred_type == 'OpenStack') {
+            var tenant_id = select.options[select.selectedIndex].getAttribute("data-tenant-id");
+            if (tenant_id == "") {
+                $('#fedcloudUsage').hide();
+            } else {
+                $('#fedcloudUsage').show();
+                loadSiteInfo();
+            }
+        } else if (cred_type == 'OpenNebula') {
+            $('#fedcloudUsage').show();
+            loadSiteInfo();
+        } else if (cred_type == 'Orange' || cred_type == 'Linode' || cred_type == 'GCE') {
+            $('#fedcloudUsage').hide();
+        }
+   }
+   {% endif %}
+{% else %}
    function changedCred() {
         var select = document.getElementById('selectedCred');
         var cred_type = select.options[select.selectedIndex].getAttribute("data-type");
@@ -156,6 +187,9 @@
         });
    }
 
+{% endif %}
+
+{% if template['show_sites'] %}
    function loadSiteInfo() {
         $('#divLoadingUsage').show();
         $.ajax({
@@ -202,6 +236,7 @@
             }
         });
    }
+{% endif %}
 
    function activateSubmit() {
        $(".submitBtn").attr("disabled", false);
@@ -215,6 +250,7 @@
       <div class="form-row">
        <div class="form-group col-md-6">
 
+        {% if template['show_sites'] %}
            <div class="form-group">
                <label>Select Cloud Provider:</label>
                {% if not creds %}
@@ -233,7 +269,9 @@
                 </select>
                {% endif %}
            </div>
+        {% endif %}
 
+        {% if template['show_images'] %}
            <div class="form-group" id="cloudImages" style="display: none;">
             <label>Set image ID:</label>
             <input placeholder="Image ID" type="text" class="form-control" id="imageID" name="extra_opts.imageID" value="" oninput="activateSubmit()">
@@ -256,10 +294,12 @@
                   <option name="selectedSiteImage" value="">Select provider</option>
               </select>
            </div>
+        {% endif %}
 
        </div>
        <div class="form-group col-md-6">
 
+        {% if template['show_sites'] %}
            <div class="form-group" id="fedcloudUsage" style="display: none;">
                <label>Site Resource Usage:</label>
                <div id="divLoadingUsage" style="display: none; position: absolute; margin-left: 40px; margin-top: 30px; padding:10px; background-color:white; z-index: 3;">
@@ -285,6 +325,7 @@
                    </div>
                </div>
            </div>
+        {% endif %}
 
        </div>
       </div>
