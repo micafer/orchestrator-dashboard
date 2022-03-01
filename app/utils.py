@@ -321,6 +321,8 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                                                 toscaInfo[tosca]['inputs'][key]["tab"] = value["tab"]
                                             if "tag_type" in value:
                                                 toscaInfo[tosca]['inputs'][key]["tag_type"] = value["tag_type"]
+                                            if "pattern" in value:
+                                                toscaInfo[tosca]['inputs'][key]["pattern"] = value["pattern"]
                                         if "tabs" in pars_data:
                                             toscaInfo[tosca]['tabs'] = pars_data["tabs"]
 
