@@ -34,6 +34,8 @@ inputs:
 
     function_memory:
       tab: OSCAR function
+      pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+      tag_type: text
 
     function_cpu:
       tab: OSCAR function

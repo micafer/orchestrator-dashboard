@@ -7,6 +7,7 @@ metadata:
   display_name: Launch a FaaS function on top of an OSCAR Virtual Cluster
   icon: images/oscar.png
   web: https://grycap.github.io/oscar/
+  tag: FaaS
 
 description: Template for launching a FaaS function on top of an OSCAR Virtual Cluster
 
@@ -79,9 +80,9 @@ topology_template:
       default: ""
       required: yes
     function_memory:
-      type: scalar-unit.size
+      type: string
       description: Amount of Memory to assing to the function
-      default: 128 GB
+      default: 128Mi
       required: yes
     function_cpu:
       type: float
@@ -160,7 +161,7 @@ topology_template:
             path: { get_input: function_output }
       requirements:
         - host: oscar
-
+        - dependency: dns_reg
 
     oscar:
       type: tosca.nodes.indigo.OSCAR

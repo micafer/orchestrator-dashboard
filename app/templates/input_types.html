@@ -17,7 +17,7 @@
 
     <!-- text type -->
     {% if value.tag_type == "text" %}
-      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
+      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%} {% if value.pattern is defined %}pattern="{{value.pattern}}"{%endif%}/>
     <!-- end select type -->
 
     <!-- hidden text type -->
