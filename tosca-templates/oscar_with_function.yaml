@@ -81,7 +81,7 @@ topology_template:
     function_memory:
       type: scalar-unit.size
       description: Amount of Memory to assing to the function
-      default: 128 GiB
+      default: 128 GB
       required: yes
     function_cpu:
       type: float
