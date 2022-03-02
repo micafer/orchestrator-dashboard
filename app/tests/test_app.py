@@ -148,6 +148,10 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"uri-list": [{"uri": "VM_URI"}]}
+        elif url == "/im/infrastructures/infid/authentication":
+            resp.ok = True
+            resp.status_code = 200
+            resp.text = ""
 
         return resp
 
@@ -205,6 +209,21 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('http://localhost/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
                           ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.post')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_manageinf_change_user(self, flash, avatar, post, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        post.side_effect = self.post_response
+        self.login(avatar)
+        params = {"token": "token"}
+        res = self.client.post('/manage_inf/infid/change_user', data=params)
+        self.assertEqual(302, res.status_code)
+        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertEquals(flash.call_args_list[0][0],
+                          ("Infrastructure owner successfully changed.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
