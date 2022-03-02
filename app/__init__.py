@@ -1086,7 +1086,7 @@ def create_app(oidc_blueprint=None):
                                               overwrite, auth_data)
                 else:
                     flash("Empty token. Owner not changed.", 'warning')
-                    
+                flash("Infrastructure owner successfully changed.", "success")
         except Exception as ex:
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 
