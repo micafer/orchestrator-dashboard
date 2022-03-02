@@ -1075,6 +1075,18 @@ def create_app(oidc_blueprint=None):
                 if not response.ok:
                     raise Exception(response.text)
                 flash("Reconfiguration process successfuly started.", "success")
+            elif op == "change_user":
+                form_data = request.form.to_dict()
+                overwrite = False
+                if 'overwrite' in form_data and form_data['overwrite'] != "0":
+                    overwrite = True
+
+                if 'token' in form_data and form_data['token'] != '':
+                    response = im.change_user(infid, form_data['token'].strip(),
+                                              overwrite, auth_data)
+                else:
+                    flash("Empty token. Owner not changed.", 'warning')
+                    
         except Exception as ex:
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 

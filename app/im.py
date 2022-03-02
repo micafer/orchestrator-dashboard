@@ -144,3 +144,16 @@ class InfrastructureManager():
         response = requests.put(url, headers=headers, data=radl, timeout=self.timeout)
 
         return response
+
+    def change_user(self, infid, token, overwrite, auth_data):
+        if token:
+            new_auth = '{"token":"%s"}' % token
+        else:
+            raise Exception("Empty token.")
+
+        headers = {"Authorization": auth_data}
+        url = "%s/infrastructures/%s/authentication" % (self.im_url, infid)
+        if overwrite:
+            url += "?overwrite=1"
+        
+        return requests.post(url, headers=headers, timeout=self.timeout, data=new_auth)

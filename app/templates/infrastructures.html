@@ -170,6 +170,7 @@
                           <a id="delete_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_confirm_{{infId}}').modal('show');"><span class="fas fa-trash-alt mr-2 grey-text"></span>Delete</a>
                           <a id="delete_recreate_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_recreate_confirm_{{infId}}').modal('show');"><span class="fas fa-redo mr-2 grey-text"></span>Delete & Recreate</a>
                           <a id="reconfigure_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#reconfigure_confirm_{{infId}}').modal('show');"><span class="fas fa-recycle mr-2 grey-text"></span>Reconfigure</a>
+                          <a id="change_auth_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#change_auth_{{infId}}').modal('show');"><span class="fas fa-users mr-2 grey-text"></span>Change Owner</a>
                       </div>
                     </td>
                 </tr>
@@ -319,6 +320,39 @@
                         <a class="btn btn-primary updateCancelBtn" role="button" data-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success UpdateBtn" role="button">Update</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Modal Change user inf. -->
+                <div class="modal fade" id="change_auth_{{infId}}" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="change_auth_label_{{infId}}">Change/Add Owner</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="{{ url_for('manage_inf', infid=infId, op='change_user') }}" method="post">
+                          <div class="container-fluid">
+                            <div class="form-group">
+                            <div class="row">
+                              <div class="col-md-4">
+                                <label for="token">Access Token</label>
+                              </div>
+                              <div class="col-md-8">
+                                <textarea name="token" rows="2"></textarea>
+                              </div>
+                            </div>
+                            </div>
+                          </div>
+                      <div class="modal-footer">
+                        <a class="btn btn-primary ChangeUserBtn" role="button" data-dismiss="modal">Cancel</a>
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-success ChangeUserBtn" role="button">Change</button>
+                          <input type="checkbox" name="overwrite" value="1"> Overwrite
                         </form>
                       </div>
                     </div>
