@@ -155,5 +155,5 @@ class InfrastructureManager():
         url = "%s/infrastructures/%s/authentication" % (self.im_url, infid)
         if overwrite:
             url += "?overwrite=1"
-        
+
         return requests.post(url, headers=headers, timeout=self.timeout, data=new_auth)
