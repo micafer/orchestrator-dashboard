@@ -152,7 +152,7 @@ class InfrastructureManager():
             raise Exception("Empty token.")
 
         headers = {"Authorization": auth_data}
-        url = "%s/infrastructures/%s/authentication" % (self.im_url, infid)
+        url = "%s/infrastructures/%s/authorization" % (self.im_url, infid)
         if overwrite:
             url += "?overwrite=1"
 
