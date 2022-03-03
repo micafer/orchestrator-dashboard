@@ -89,6 +89,12 @@
       alert("The infrastructure will be deleted even if sonme resources are not correctly deleted. Only check this if you know what you are doing!");
     }
   }
+
+  function showOverwriteMessage(check) {
+    if (check.checked) {
+      alert("The infrastructure will be transfered to the new user. You will loose the control of it!");
+    }
+  }
 </script>
 <div class="container-fluid">
 {% include 'flashed_messages.html' %}
@@ -349,10 +355,10 @@
                             </div>
                           </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary ChangeUserBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-primary cancelChangeUserBtn" role="button" data-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success ChangeUserBtn" role="button">Add</button>
-                          <input type="checkbox" name="overwrite" value="1"> Overwrite
+                          <input type="checkbox" name="overwrite" value="1" onclick="showOverwriteMessage(this);"> Overwrite
                         </form>
                       </div>
                     </div>
@@ -465,6 +471,15 @@ $(document).ready(function () {
       $(this).parent().find(".updateCancelBtn").addClass("disabled", true);
       $(this).addClass("disabled", true);
       $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...` );
+  });
+});
+
+$(document).ready(function () {
+  $(".ChangeUserBtn").click(function () {
+      // add spinner to button
+      $(this).parent().find(".cancelChangeUserBtn").addClass("disabled", true);
+      $(this).addClass("disabled", true);
+      $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...` );
   });
 });
 </script>
