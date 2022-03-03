@@ -1084,6 +1084,8 @@ def create_app(oidc_blueprint=None):
                 if 'token' in form_data and form_data['token'] != '':
                     response = im.change_user(infid, form_data['token'].strip(),
                                               overwrite, auth_data)
+                    if not response.ok:
+                        raise Exception(response.text)
                 else:
                     flash("Empty token. Owner not changed.", 'warning')
                 flash("Infrastructure owner successfully changed.", "success")
