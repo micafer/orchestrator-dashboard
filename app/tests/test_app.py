@@ -148,7 +148,7 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.json.return_value = {"uri-list": [{"uri": "VM_URI"}]}
-        elif url == "/im/infrastructures/infid/authentication":
+        elif url == "/im/infrastructures/infid/authorization":
             resp.ok = True
             resp.status_code = 200
             resp.text = ""
