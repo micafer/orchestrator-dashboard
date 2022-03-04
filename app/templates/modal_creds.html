@@ -159,21 +159,30 @@
 {% elif cred_type == "Azure" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Subscription ID" name="subscription_id" class="col-sm-12" type="text" id="subscription_id" value="{{ creds['subscription_id'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+            <input placeholder="Client ID" name="client_id" class="col-sm-12" type="text" id="client_id" value="{{ creds['client_id'] if creds else '' }}" required/>
+          </div>
+        </div>
+        <hr/>
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
           </div>
           <div class="col">
               <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
           </div>
         </div>
-
+        <hr/>
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Subscription ID" name="subscription_id" class="col-sm-12" type="text" id="subscription_id" value="{{ creds['subscription_id'] if creds else '' }}" required/>
+              <input placeholder="Client Secret" name="secret" class="col-sm-12" type="text" id="secret"/>
           </div>
           <div class="col">
+              <input placeholder="Tenant ID" name="tenant" class="col-sm-12" type="tenant" id="tenant" value="{{ creds['tenant'] if creds else '' }}"/>
           </div>
         </div>
-
 {% elif cred_type == "Orange" %}
         <div class="row form-group">
           <div class="col">
