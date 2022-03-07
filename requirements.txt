@@ -5,7 +5,7 @@ requests==2.26.0
 PyYAML==6.0.0
 packaging==21.2
 xmltodict==0.12.0
-radl==1.1.5
+radl==1.1.6
 cryptography==3.4.8
 apscheduler==3.8.0 # 3.8.1 version fails
 Flask-APScheduler==1.12.2

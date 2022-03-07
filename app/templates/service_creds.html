@@ -71,6 +71,9 @@
                         <strong>Tenant: </strong> {{cred["tenant"]}}
                         {% endif %}
                         {% if 'subscription_id' in cred%}
+                          {% if 'tenant' in cred %}
+                          <br>
+                          {% endif %}
                         <strong>Subscription ID: </strong> {{cred["subscription_id"]}}
                         {% endif %}
                         {% if 'project' in cred%}
