@@ -119,7 +119,13 @@
             } else {
                 document.getElementById('imageID').setAttribute("placeholder", "Image ID");
             }
-            $('#cloudImages').show();
+            if (cred_type == 'OSCAR') {
+                // OSCAR do not set images
+                $('#cloudImages').hide();
+                activateSubmit();
+            } else {
+                $('#cloudImages').show();
+            }
             $('#fedcloudImages').hide();
             $('#siteImages').hide();
             $('#fedcloudUsage').hide();
@@ -223,12 +229,14 @@
                 <select class="js-example-basic-single js-states form-control" id="selectedCred" name="extra_opts.selectedCred" onchange="changedCred();">
                     <option name="selectedCred" value=""> - Select Cloud site - </option>
                     {% for cred in creds %}
+                    {% if cred[type] not in ["InfrastructureManager"] %}
                     <option data-tenant-id="{{cred['tenant_id'] if 'tenant_id' in cred else '' }}" data-type="{{ cred['type'] }}" name="selectedCred" value={{ cred['id'] }}>
                         {{ cred['id'] }}
                         {%- if cred['type'] == 'fedcloud' and ((session['vos'] and cred['vo'] not in session['vos']) or 'project_id' not in cred) %}
                         (Warn)
                         {%- endif %}
                     </option>
+                    {% endif %}
                     {% endfor %}
                 </select>
                {% endif %}

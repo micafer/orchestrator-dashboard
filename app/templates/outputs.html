@@ -20,10 +20,14 @@
                       <button class="btn btn-success btn-sm" id="copyBtn"><i class="fa fa-copy"></i> Copy to clipboard</button>
 
                       {% else %}
-                        {% if value.startswith("{") or value.startswith("[") %}
-                        <pre>{{ value | tojson_pretty() | safe | replace("\\n", "\n") }}</pre>
+                        {% if value is string %}
+                          {% if value.startswith("{") or value.startswith("[") %}
+                          <pre>{{ value | tojson_pretty() | safe | replace("\\n", "\n") }}</pre>
+                          {% else %}
+                          {{ value }}
+                          {% endif %}
                         {% else %}
-                        {{ value }}
+                          <pre>{{ value | tojson_pretty() | safe }}</pre>
                         {% endif %}
                       {% endif %}
                     {% else %}

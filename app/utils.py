@@ -155,8 +155,8 @@ def getIMUserAuthData(access_token, cred, userid):
     res = "type = InfrastructureManager; token = %s" % access_token
     for cred in cred.get_creds(userid):
         if cred['enabled']:
-            res += "\\nid = %s" % cred['id']
             if cred['type'] == "InfrastructureManager":
+                res += "\\nid = %s" % cred['id']
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
                         res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
