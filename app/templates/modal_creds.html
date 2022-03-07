@@ -250,6 +250,23 @@
           </div>
         </div>
 
+{% elif cred_type == "OSCAR" %}
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Host" name="host" class="col-sm-12" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+          </div>
+        </div>
 
 {% else %}
 
