@@ -119,7 +119,13 @@
             } else {
                 document.getElementById('imageID').setAttribute("placeholder", "Image ID");
             }
-            $('#cloudImages').show();
+            if (cred_type == 'OSCAR') {
+                // OSCAR do not set images
+                $('#cloudImages').hide();
+                activateSubmit();
+            } else {
+                $('#cloudImages').show();
+            }
             $('#fedcloudImages').hide();
             $('#siteImages').hide();
             $('#fedcloudUsage').hide();

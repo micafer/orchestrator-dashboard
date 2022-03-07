@@ -724,6 +724,8 @@ def create_app(oidc_blueprint=None):
 
     def set_inputs_to_template(template, inputs):
         # Add the image to all compute nodes
+        if 'inputs' not in template['topology_template']:
+            return template
 
         for name, value in template['topology_template']['inputs'].items():
             if name in inputs:
@@ -819,6 +821,8 @@ def create_app(oidc_blueprint=None):
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
 
+        if 'metadata' not in template:
+            template['metadata'] = {}
         template['metadata']['filename'] = request.args.get('template')
 
         if priv_network_id and pub_network_id:
