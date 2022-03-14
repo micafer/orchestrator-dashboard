@@ -59,7 +59,7 @@ class InfrastructureManager():
         if response.status_code == 404:
             # This case appears when the Inf existed in the list operation
             # but no when the state function is called.
-            {"state": "deleting", "vm_states": {}}
+            return {"state": "deleting", "vm_states": {}}
         response.raise_for_status()
         inf_state = response.json()
         return inf_state['state']
