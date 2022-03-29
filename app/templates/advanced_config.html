@@ -29,15 +29,17 @@
                  borderWidth: 0
                }
            },
-           legend: {
-               display: false
-           },
            responsive: false,
-           title: {
-               display: true,
-               text: 'VCPUs',
-               padding: 0
-           }
+           plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'VCPUs',
+                    padding: 0
+                }   
+            }
        }
    };
 
@@ -47,10 +49,10 @@
        config[resource_types[i]] = JSON.parse(JSON.stringify(config["gen"]));;    
    }
 
-   config["ram"].options.title.text = "RAM (GB)"
-   config["instances"].options.title.text = "Instances"
-   config["floating_ips"].options.title.text = "Float IPs"
-   config["security_groups"].options.title.text = "SGs"
+   config["ram"].options.plugins.title.text = "RAM (GB)"
+   config["instances"].options.plugins.title.text = "Instances"
+   config["floating_ips"].options.plugins.title.text = "Float IPs"
+   config["security_groups"].options.plugins.title.text = "SGs"
 
    window.onload = function() {
        window.myPies = {};

@@ -112,6 +112,7 @@
             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Advanced</a>
             <div class="dropdown-menu">
               <a class="dropdown-item" href="{{ url_for("show_settings") }}">Settings</a>
+              <a class="dropdown-item" href="{{ url_for("show_stats") }}">Stats</a>
             </div>
           </li>
           {% if session["external_links"]|length > 0 %}

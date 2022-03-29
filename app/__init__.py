@@ -1154,6 +1154,38 @@ def create_app(oidc_blueprint=None):
         else:
             return session['userid']
 
+    @app.route('/stats')
+    @authorized_with_valid_token
+    def show_stats():
+        access_token = oidc_blueprint.session.token['access_token']
+
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
+        infs = []
+        vms = []
+        cpus = []
+        mems = []
+        labels = []
+        try:
+            inf_count = 0
+            vm_count = 0
+            memory_count = 0
+            cpu_count = 0
+            for inf_stat in im.get_stats(auth_data):
+                inf_count += 1
+                infs.append(inf_count)
+                vm_count += inf_stat['vm_count']
+                vms.append(vm_count)
+                memory_count += inf_stat['memory_size'] / 1024
+                mems.append(memory_count)
+                cpu_count += inf_stat['cpu_count']
+                cpus.append(cpu_count)
+                labels.append(inf_stat['creation_date'][:10])
+                
+        except Exception as ex:
+            flash("Error: %s." % ex, 'error')
+
+        return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels)
+
     return app
 
 
