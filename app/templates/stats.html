@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Stats{% endblock %}
 {% block content %}
+{% include 'flashed_messages.html' %}
 
 <script src="{{ url_for('static', filename='chart/Chart.min.js') }}"></script>
 
@@ -10,7 +11,23 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h4 class="font-weight-bold text-primary">IM User Stats</h4>
+          <div class="row">
+            <div class="col-md-7">
+              <!-- Title -->
+              <h4 class="font-weight-bold text-primary">IM User Stats</h4>
+            </div>
+            <div class="col-md-5 text-right">
+              <!-- Button -->
+              <form action="{{ url_for('show_stats') }}">
+                <div class="input-group text-right">
+                  <input type="date" value = "" class="form-control col-md-4" name="init_date">
+                  <input type="date" value = "" class="form-control col-md-4" name="end_date">
+                  <input type=submit class='btn btn-primary' value="Update"/>
+                </div>
+              </form>
+            </div>
+          </div> <!-- / .row -->
+        </div>
         </div>
         <div class="card-body">
 

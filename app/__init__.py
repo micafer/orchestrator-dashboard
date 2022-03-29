@@ -1157,6 +1157,8 @@ def create_app(oidc_blueprint=None):
     @app.route('/stats')
     @authorized_with_valid_token
     def show_stats():
+        init_date = request.args.get('init_date')
+        end_date = request.args.get('end_date')
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
@@ -1170,7 +1172,7 @@ def create_app(oidc_blueprint=None):
             vm_count = 0
             memory_count = 0
             cpu_count = 0
-            for inf_stat in im.get_stats(auth_data):
+            for inf_stat in im.get_stats(auth_data, init_date, end_date):
                 inf_count += 1
                 infs.append(inf_count)
                 vm_count += inf_stat['vm_count']
@@ -1182,7 +1184,7 @@ def create_app(oidc_blueprint=None):
                 labels.append(inf_stat['creation_date'][:10])
                 
         except Exception as ex:
-            flash("Error: %s." % ex, 'error')
+            flash("Error Getting Stats: %s." % ex, 'error')
 
         return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels)
 
