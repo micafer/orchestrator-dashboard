@@ -20,6 +20,7 @@
 # under the License.
 """Main Flask App file."""
 
+import datetime
 import yaml
 import io
 import os
@@ -1186,7 +1187,8 @@ def create_app(oidc_blueprint=None):
         except Exception as ex:
             flash("Error Getting Stats: %s." % ex, 'error')
 
-        return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels)
+        return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels,
+                               today=datetime.datetime.today().strftime('%Y-%m-%d'))
 
     return app
 
