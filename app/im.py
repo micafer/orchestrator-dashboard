@@ -25,7 +25,7 @@ import requests
 
 class InfrastructureManager():
 
-    def __init__(self, im_url, timeout=60):
+    def __init__(self, im_url, timeout=120):
         self.im_url = im_url
         self.timeout = timeout
 

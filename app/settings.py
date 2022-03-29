@@ -38,7 +38,7 @@ class Settings:
         self.static_sites_url = config.get('STATIC_SITES_URL', "")
         self.appdb_cache_timeout = config.get('APPDB_CACHE_TIMEOUT', 3600)
         self.debug_oidc_token = config.get('DEBUG_OIDC_TOKEN', None)
-        self.imTimeout = config.get('IM_TIMEOUT', 60)
+        self.imTimeout = config.get('IM_TIMEOUT', 120)
         self.checkToscaChangesTime = config.get('CHECK_TOSCA_CHANGES_TIME', 120)
         self.vault_url = config.get('VAULT_URL', None)
         self.im_auth = config.get('IM_AUTH', None)
