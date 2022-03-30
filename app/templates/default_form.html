@@ -14,7 +14,7 @@
         {% set min_length = value.constraints | selectattr('min_length') | map(attribute='min_length') | list  %}
         {% set max_length = value.constraints | selectattr('max_length') | map(attribute='max_length') | list  %}
         <div class="form-group">
-          <label for="{{key}}">{% if value.description %}{{value.description}}{% else %}{{key}}{% endif %}</label>
+          <label for="{{key}}" style="white-space: pre-wrap;">{% if value.description %}{{value.description}}{% else %}{{key}}{% endif %}</label>
 
 	  <!-- select type if constraints are defined -->
 	  {% set constraints = value.constraints | selectattr('valid_values') | map(attribute='valid_values') | list  %}
