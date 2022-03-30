@@ -4,6 +4,7 @@
 {% include 'flashed_messages.html' %}
 
 <script src="{{ url_for('static', filename='chart/Chart.min.js') }}"></script>
+<script src="{{ url_for('static', filename='chart/chartjs-adapter-date-fns.bundle.min.js') }}"></script>
 
 <div class="container-fluid">
 
@@ -20,8 +21,8 @@
               <!-- Button -->
               <form action="{{ url_for('show_stats') }}">
                 <div class="input-group text-right">
-                  <input type="date" max="{{today}}" id="init_date" class="form-control col-md-4" name="init_date">
-                  <input type="date" max="{{today}}" id="end_date" class="form-control col-md-4" name="end_date">
+                  <input type="date" value="{{init_date}}" max="{{today}}" id="init_date" class="form-control col-md-4" name="init_date">
+                  <input type="date" value="{{end_date}}" max="{{today}}" id="end_date" class="form-control col-md-4" name="end_date">
                   <input type=submit class='btn btn-primary' value="Update"/>
                 </div>
               </form>
@@ -74,6 +75,11 @@
               type: 'line',
               data: data,
               options: {
+                elements: {
+                  point:{
+                        radius: 0
+                    }
+                },
                 responsive: true,
                 interaction: {
                   mode: 'index',
@@ -87,11 +93,19 @@
                 },
                 scales: {
                   x: {
+                    type: 'time',
+                    time: {
+                      round: 'day',
+                      minUnit: 'day',
+                      displayFormats: {
+                        day: 'MMM dd yyyy'
+                      }
+                    },
                     display: true,
                     title: {
                       display: true,
                       text: 'Date'
-                    }
+                    },
                   },
                   y: {
                     type: 'linear',

@@ -1196,13 +1196,14 @@ def create_app(oidc_blueprint=None):
                 mems.append(memory_count)
                 cpu_count += inf_stat['cpu_count']
                 cpus.append(cpu_count)
-                labels.append(inf_stat['creation_date'][:10])
+                labels.append(inf_stat['creation_date'])
                 
         except Exception as ex:
             flash("Error Getting Stats: %s." % ex, 'error')
 
         return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels,
-                               today=datetime.datetime.today().strftime('%Y-%m-%d'))
+                               today=datetime.datetime.today().strftime('%Y-%m-%d'), init_date=init_date or "",
+                               end_date=end_date or "")
 
     return app
 
