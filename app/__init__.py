@@ -328,8 +328,11 @@ def create_app(oidc_blueprint=None):
             str_outports = ""
             if outports:
                 for port in outports:
+                    remote_cidr = ""
+                    if port.get_remote_cidr() != "0.0.0.0/0":
+                        remote_cidr = "%s-" % port.get_remote_cidr()
                     str_outports += Markup('<i class="fas fa-project-diagram"></i> <span class="badge '
-                                           'badge-secondary">%s</span>' % port.get_remote_port())
+                                           'badge-secondary">%s%s</span>' % (remote_cidr, port.get_remote_port()))
                     if not port.is_range():
                         if port.get_remote_port() != port.get_local_port():
                             str_outports += Markup(' <i class="fas fa-long-arrow-alt-right">'
@@ -587,6 +590,8 @@ def create_app(oidc_blueprint=None):
                             for port_value in input_value["default"].values():
                                 if inputs[input_name]:
                                     inputs[input_name] += ","
+                                if 'remote_cidr' in port_value and port_value['remote_cidr']:
+                                    inputs[input_name] += str(port_value['remote_cidr']) + "-"
                                 inputs[input_name] += str(port_value['source'])
                         else:
                             inputs[input_name] = input_value["default"]
@@ -746,7 +751,16 @@ def create_app(oidc_blueprint=None):
                     ports_value = {}
                     for port in ports:
                         # Should we also open UDP?
-                        ports_value["port_%s" % port] = {"protocol": "tcp", "source": int(port)}
+                        remote_cidr = None
+                        if "-" in port:
+                            parts = port.split("-")
+                            port_num = int(parts[1])
+                            remote_cidr = parts[0]
+                        else:
+                            port_num = int(port)
+                        ports_value["port_%s" % port] = {"protocol": "tcp", "source": port_num}
+                        if remote_cidr:
+                            ports_value["port_%s" % port]["remote_cidr"] = remote_cidr
                     value["default"] = ports_value
                 else:
                     value["default"] = inputs[name]
