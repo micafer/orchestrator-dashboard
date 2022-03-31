@@ -1181,8 +1181,7 @@ def create_app(oidc_blueprint=None):
             end_date = str(today)
 
         if not init_date and init:
-            init_date = today - datetime.timedelta(days = 365)
-            init_date = str(init_date.date())
+            init_date = str(today - datetime.timedelta(days = 365))
 
         access_token = oidc_blueprint.session.token['access_token']
 
