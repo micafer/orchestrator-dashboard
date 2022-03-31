@@ -1212,10 +1212,11 @@ def create_app(oidc_blueprint=None):
                     site_name = inf_stat['cloud_host']
                     if site_name in fedcloud_sites:
                         site_name = fedcloud_sites[site_name]
-                    if site_name not in cloud_hosts:
-                        cloud_hosts.append(site_name)
-                elif inf_stat['cloud_type'] and inf_stat['cloud_type'] not in cloud_hosts:
-                    cloud_hosts.append(inf_stat['cloud_type'])
+                elif inf_stat['cloud_type']:
+                    site_name = inf_stat['cloud_type']
+
+                if site_name not in cloud_hosts:
+                    cloud_hosts.append(site_name)
 
                 inf_count += 1
                 infs.append(inf_count)
@@ -1226,10 +1227,7 @@ def create_app(oidc_blueprint=None):
                 cpu_count += inf_stat['cpu_count']
                 cpus.append(cpu_count)
                 labels.append(inf_stat['creation_date'])
-                if inf_stat['cloud_host']:
-                    clouds.append(inf_stat['cloud_host'])
-                else:
-                    clouds.append(inf_stat['cloud_type'])
+                clouds.append(site_name)
                 
         except Exception as ex:
             flash("Error Getting Stats: %s." % ex, 'error')
