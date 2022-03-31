@@ -1181,7 +1181,7 @@ def create_app(oidc_blueprint=None):
             end_date = str(today)
 
         if not init_date and init:
-            init_date = str(today - datetime.timedelta(days = 180))
+            init_date = str(today - datetime.timedelta(days=180))
 
         access_token = oidc_blueprint.session.token['access_token']
 
@@ -1228,7 +1228,7 @@ def create_app(oidc_blueprint=None):
                 cpus.append(cpu_count)
                 labels.append(inf_stat['creation_date'])
                 clouds.append(site_name)
-                
+
         except Exception as ex:
             flash("Error Getting Stats: %s." % ex, 'error')
 
