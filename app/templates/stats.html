@@ -13,14 +13,20 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3">
           <div class="row">
-            <div class="col-md-7">
+            <div class="col-md-6">
               <!-- Title -->
               <h4 class="font-weight-bold text-primary">IM User Stats</h4>
             </div>
-            <div class="col-md-5 text-right">
+            <div class="col-md-6 text-right">
               <!-- Button -->
               <form action="{{ url_for('show_stats') }}">
                 <div class="input-group text-right">
+                  <select class="form-control col-md-4" name="cloud_host">
+                    <option value="">- Cloud Site -</option>
+                    {% for host in cloud_hosts %}
+                      <option {% if cloud_host == host %}selected{%endif%} value="{{ host }}">{{ host }}</option>
+                    {% endfor %}
+                    </select>
                   <input type="date" value="{{init_date}}" max="{{today}}" id="init_date" class="form-control col-md-4" name="init_date">
                   <input type="date" value="{{end_date}}" max="{{today}}" id="end_date" class="form-control col-md-4" name="end_date">
                   <input type=submit class='btn btn-primary' value="Update"/>

@@ -1175,43 +1175,62 @@ def create_app(oidc_blueprint=None):
         init = request.args.get('init')
         init_date = request.args.get('init_date')
         end_date = request.args.get('end_date')
+        cloud_host = request.args.get('cloud_host', "")
         today = datetime.datetime.today().date()
 
         if not end_date:
             end_date = str(today)
 
         if not init_date and init:
-            init_date = str(today - datetime.timedelta(days = 365))
+            init_date = str(today - datetime.timedelta(days = 180))
 
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
+        fedcloud_sites = None
         infs = []
         vms = []
         cpus = []
         mems = []
         labels = []
+        cloud_hosts = []
+        site_name = None
         try:
             inf_count = 0
             vm_count = 0
             memory_count = 0
             cpu_count = 0
             for inf_stat in im.get_stats(auth_data, init_date, end_date):
-                inf_count += 1
-                infs.append(inf_count)
-                vm_count += inf_stat['vm_count']
-                vms.append(vm_count)
-                memory_count += inf_stat['memory_size'] / 1024
-                mems.append(memory_count)
-                cpu_count += inf_stat['cpu_count']
-                cpus.append(cpu_count)
-                labels.append(inf_stat['creation_date'])
+                if inf_stat['cloud_host']:
+                    # only load this data if a EGI Cloud site appears
+                    if fedcloud_sites is None:
+                        fedcloud_sites = {}
+                        for site in list(utils.getCachedSiteList().values()):
+                            site_host = urlparse(site['url'])[1].split(":")[0]
+                            fedcloud_sites[site_host] = site["name"]
+
+                    site_name = inf_stat['cloud_host']
+                    if site_name in fedcloud_sites:
+                        site_name = fedcloud_sites[site_name]
+                    if site_name not in cloud_hosts:
+                        cloud_hosts.append(site_name)
+                if not cloud_host or (cloud_host and site_name == cloud_host):
+                    inf_count += 1
+                    infs.append(inf_count)
+                    vm_count += inf_stat['vm_count']
+                    vms.append(vm_count)
+                    memory_count += inf_stat['memory_size'] / 1024
+                    mems.append(memory_count)
+                    cpu_count += inf_stat['cpu_count']
+                    cpus.append(cpu_count)
+                    labels.append(inf_stat['creation_date'])
                 
         except Exception as ex:
             flash("Error Getting Stats: %s." % ex, 'error')
 
         return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels,
-                               today=str(today), init_date=init_date or "", end_date=end_date or "")
+                               today=str(today), init_date=init_date or "", end_date=end_date or "",
+                               cloud_hosts=cloud_hosts, cloud_host=cloud_host)
 
     return app
 
