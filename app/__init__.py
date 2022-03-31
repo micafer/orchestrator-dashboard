@@ -1172,7 +1172,6 @@ def create_app(oidc_blueprint=None):
     @app.route('/stats')
     @authorized_with_valid_token
     def show_stats():
-        init = request.args.get('init')
         init_date = request.args.get('init_date')
         end_date = request.args.get('end_date')
         today = datetime.datetime.today().date()
@@ -1180,7 +1179,7 @@ def create_app(oidc_blueprint=None):
         if not end_date:
             end_date = str(today)
 
-        if not init_date and init:
+        if not init_date:
             init_date = str(today - datetime.timedelta(days=180))
 
         access_token = oidc_blueprint.session.token['access_token']
