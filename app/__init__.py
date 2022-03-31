@@ -1196,10 +1196,6 @@ def create_app(oidc_blueprint=None):
         clouds = []
         site_name = None
         try:
-            inf_count = 0
-            vm_count = 0
-            memory_count = 0
-            cpu_count = 0
             for inf_stat in im.get_stats(auth_data, init_date, end_date):
                 if inf_stat['cloud_host']:
                     # only load this data if a EGI Cloud site appears
@@ -1218,14 +1214,10 @@ def create_app(oidc_blueprint=None):
                 if site_name not in cloud_hosts:
                     cloud_hosts.append(site_name)
 
-                inf_count += 1
-                infs.append(inf_count)
-                vm_count += inf_stat['vm_count']
-                vms.append(vm_count)
-                memory_count += inf_stat['memory_size'] / 1024
-                mems.append(memory_count)
-                cpu_count += inf_stat['cpu_count']
-                cpus.append(cpu_count)
+                infs.append(1)
+                vms.append(inf_stat['vm_count'])
+                mems.append((inf_stat['memory_size'] / 1024))
+                cpus.append(inf_stat['cpu_count'])
                 labels.append(inf_stat['creation_date'])
                 clouds.append(site_name)
 

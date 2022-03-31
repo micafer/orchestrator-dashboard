@@ -20,19 +20,47 @@
   const cpus = {{ cpus }};
   const mems = {{ mems }};
 
+  var data_infs = [];
+  var inf_count = 0;
+  var data_vms = [];
+  var vms_count = 0;
+  var data_cpus = [];
+  var cpus_count = 0;
+  var data_mems = [];
+  var mems_count = 0;
+  for (var i=1; i<clouds.length; i++) {
+    inf_count += infs[i];
+    data_infs.push(inf_count);
+    vms_count += vms[i];
+    data_vms.push(vms_count);
+    cpus_count += cpus[i];
+    data_cpus.push(cpus_count);
+    mems_count += mems[i];
+    data_mems.push(mems_count);
+  }
+
+
   function filterByCloud(cloud) {
     const ctx = document.getElementById('statsChart');
     var finf = [0];
+    var inf_count = 0
     var fvms = [0];
+    var vms_count = 0;
     var fcpus = [0];
+    var cpus_count = 0
     var fmems = [0];
+    var mems_count = 0
     var flabels = [labels[0]];
     for (var i=1; i<clouds.length; i++) {
       if (cloud == "" || clouds[i] == cloud) {
-        finf.push(infs[i]);
-        fvms.push(vms[i]);
-        fcpus.push(cpus[i]);
-        fmems.push(mems[i]);
+        inf_count += infs[i];
+        finf.push(inf_count);
+        vms_count += vms[i];
+        fvms.push(vms_count);
+        cpus_count += cpus[i];
+        fcpus.push(cpus_count);
+        mems_count += mems[i];
+        fmems.push(mems_count);
         flabels.push(labels[i]);
       }
     }
@@ -91,31 +119,31 @@
 
           <canvas id="statsChart" height="80px"></canvas>
 
-          <script>
+          <script>      
             var data = {
               labels: labels,
               datasets: [
                 {
                   label: 'Infrastructures',
-                  data: infs,
+                  data: data_infs,
                   borderColor: 'rgba(255, 99, 132, 1)',
                   backgroundColor: 'rgba(255, 99, 132, 0.2)'
                 },
                 {
                   label: 'VMs',
-                  data: vms,
+                  data: data_vms,
                   borderColor: 'rgba(54, 162, 235, 1)',
                   backgroundColor: 'rgba(54, 162, 235, 0.2)'
                 },
                 {
                   label: 'VCPUs',
-                  data: cpus,
+                  data: data_cpus,
                   borderColor: 'rgba(255, 206, 86, 1)',
                   backgroundColor: 'rgba(255, 206, 86, 0.2)'
                 },
                 {
                   label: 'Memory in GB',
-                  data: mems,
+                  data: data_mems,
                   borderColor: 'rgba(153, 102, 255, 1)',
                   backgroundColor: 'rgba(153, 102, 255, 0.2)'
                 }
