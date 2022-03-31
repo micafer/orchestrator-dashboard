@@ -1175,7 +1175,6 @@ def create_app(oidc_blueprint=None):
         init = request.args.get('init')
         init_date = request.args.get('init_date')
         end_date = request.args.get('end_date')
-        cloud_host = request.args.get('cloud_host', "")
         today = datetime.datetime.today().date()
 
         if not end_date:
@@ -1194,6 +1193,7 @@ def create_app(oidc_blueprint=None):
         mems = []
         labels = []
         cloud_hosts = []
+        clouds = []
         site_name = None
         try:
             inf_count = 0
@@ -1214,23 +1214,29 @@ def create_app(oidc_blueprint=None):
                         site_name = fedcloud_sites[site_name]
                     if site_name not in cloud_hosts:
                         cloud_hosts.append(site_name)
-                if not cloud_host or (cloud_host and site_name == cloud_host):
-                    inf_count += 1
-                    infs.append(inf_count)
-                    vm_count += inf_stat['vm_count']
-                    vms.append(vm_count)
-                    memory_count += inf_stat['memory_size'] / 1024
-                    mems.append(memory_count)
-                    cpu_count += inf_stat['cpu_count']
-                    cpus.append(cpu_count)
-                    labels.append(inf_stat['creation_date'])
+                elif inf_stat['cloud_type'] and inf_stat['cloud_type'] not in cloud_hosts:
+                    cloud_hosts.append(inf_stat['cloud_type'])
+
+                inf_count += 1
+                infs.append(inf_count)
+                vm_count += inf_stat['vm_count']
+                vms.append(vm_count)
+                memory_count += inf_stat['memory_size'] / 1024
+                mems.append(memory_count)
+                cpu_count += inf_stat['cpu_count']
+                cpus.append(cpu_count)
+                labels.append(inf_stat['creation_date'])
+                if inf_stat['cloud_host']:
+                    clouds.append(inf_stat['cloud_host'])
+                else:
+                    clouds.append(inf_stat['cloud_type'])
                 
         except Exception as ex:
             flash("Error Getting Stats: %s." % ex, 'error')
 
         return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels,
                                today=str(today), init_date=init_date or "", end_date=end_date or "",
-                               cloud_hosts=cloud_hosts, cloud_host=cloud_host)
+                               cloud_hosts=cloud_hosts, clouds=clouds)
 
     return app
 

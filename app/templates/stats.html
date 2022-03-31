@@ -6,6 +6,51 @@
 <script src="{{ url_for('static', filename='chart/Chart.min.js') }}"></script>
 <script src="{{ url_for('static', filename='chart/chartjs-adapter-date-fns.bundle.min.js') }}"></script>
 
+<script>
+  const clouds = [];
+  {%- for elem in clouds %}
+  clouds.push("{{elem}}");
+  {%- endfor %}
+  const labels = [];
+  {%- for elem in labels %}
+  labels.push("{{elem}}");
+  {%- endfor %}
+  const infs = {{ infs }};
+  const vms = {{ vms }};
+  const cpus = {{ cpus }};
+  const mems = {{ mems }};
+
+  function filterByCloud(cloud) {
+    const ctx = document.getElementById('statsChart');
+    var finf = [];
+    var fvms = [];
+    var fcpus = [];
+    var fmems = [];
+    var flabels = [];
+    for (var i=1; i<clouds.length; i++) {
+      if (cloud == "" || clouds[i] == cloud) {
+        finf.push(infs[i]);
+        fvms.push(vms[i]);
+        fcpus.push(cpus[i]);
+        fmems.push(mems[i]);
+        flabels.push(labels[i]);
+      }
+    }
+
+    myChart.data.datasets[0].data = finf;
+    myChart.data.datasets[1].data = fvms;
+    myChart.data.datasets[2].data = fcpus;
+    myChart.data.datasets[3].data = fmems;
+    myChart.data.labels = flabels;
+    if (cloud != "") {
+      myChart.options.plugins.title.text = cloud;
+    } else {
+      myChart.options.plugins.title.text = 'All Cloud Sites';
+    }
+    myChart.update();
+  }
+</script>
+
 <div class="container-fluid">
 
     <br>
@@ -21,7 +66,7 @@
               <!-- Button -->
               <form action="{{ url_for('show_stats') }}">
                 <div class="input-group text-right">
-                  <select class="form-control col-md-4" name="cloud_host">
+                  <select class="form-control col-md-4" name="cloud_host" onchange="javascript:filterByCloud(this.value)">
                     <option value="">- Cloud Site -</option>
                     {% for host in cloud_hosts %}
                       <option {% if cloud_host == host %}selected{%endif%} value="{{ host }}">{{ host }}</option>
@@ -41,36 +86,30 @@
           <canvas id="statsChart" height="80px"></canvas>
 
           <script>
-            const ctx = document.getElementById('statsChart');
-
-            const labels = [];
-            {%- for elem in labels %}
-            labels.push("{{elem}}");
-            {%- endfor %}
-            const data = {
+            var data = {
               labels: labels,
               datasets: [
                 {
                   label: 'Infrastructures',
-                  data: {{ infs }},
+                  data: infs,
                   borderColor: 'rgba(255, 99, 132, 1)',
                   backgroundColor: 'rgba(255, 99, 132, 0.2)'
                 },
                 {
                   label: 'VMs',
-                  data: {{ vms }},
+                  data: vms,
                   borderColor: 'rgba(54, 162, 235, 1)',
                   backgroundColor: 'rgba(54, 162, 235, 0.2)'
                 },
                 {
                   label: 'VCPUs',
-                  data: {{ cpus }},
+                  data: cpus,
                   borderColor: 'rgba(255, 206, 86, 1)',
                   backgroundColor: 'rgba(255, 206, 86, 0.2)'
                 },
                 {
                   label: 'Memory in GB',
-                  data: {{ mems }},
+                  data: mems,
                   borderColor: 'rgba(153, 102, 255, 1)',
                   backgroundColor: 'rgba(153, 102, 255, 0.2)'
                 }
@@ -93,8 +132,8 @@
                 },
                 plugins: {
                   title: {
-                    display: false,
-                    text: 'Infrastructure Manager Stats'
+                    display: true,
+                    text: 'All Cloud Sites'
                   }
                 },
                 scales: {
@@ -121,6 +160,8 @@
                 }
               },
             };
+
+            const ctx = document.getElementById('statsChart');
             const myChart = new Chart(ctx, config);
           </script>
         </div>
