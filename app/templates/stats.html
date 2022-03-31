@@ -38,7 +38,7 @@
             const ctx = document.getElementById('statsChart');
 
             const labels = [];
-            {% for elem in labels %}
+            {%- for elem in labels %}
             labels.push("{{elem}}");
             {%- endfor %}
             const data = {

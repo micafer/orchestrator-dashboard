@@ -1172,8 +1172,18 @@ def create_app(oidc_blueprint=None):
     @app.route('/stats')
     @authorized_with_valid_token
     def show_stats():
+        init = request.args.get('init')
         init_date = request.args.get('init_date')
         end_date = request.args.get('end_date')
+        today = datetime.datetime.today().date()
+
+        if not end_date:
+            end_date = str(today)
+
+        if not init_date and init:
+            init_date = today - datetime.timedelta(days = 365)
+            init_date = str(init_date.date())
+
         access_token = oidc_blueprint.session.token['access_token']
 
         auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
@@ -1202,8 +1212,7 @@ def create_app(oidc_blueprint=None):
             flash("Error Getting Stats: %s." % ex, 'error')
 
         return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels,
-                               today=datetime.datetime.today().strftime('%Y-%m-%d'), init_date=init_date or "",
-                               end_date=end_date or "")
+                               today=str(today), init_date=init_date or "", end_date=end_date or "")
 
     return app
 
