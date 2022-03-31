@@ -22,11 +22,11 @@
 
   function filterByCloud(cloud) {
     const ctx = document.getElementById('statsChart');
-    var finf = [];
-    var fvms = [];
-    var fcpus = [];
-    var fmems = [];
-    var flabels = [];
+    var finf = [0];
+    var fvms = [0];
+    var fcpus = [0];
+    var fmems = [0];
+    var flabels = [labels[0]];
     for (var i=1; i<clouds.length; i++) {
       if (cloud == "" || clouds[i] == cloud) {
         finf.push(infs[i]);
@@ -36,6 +36,12 @@
         flabels.push(labels[i]);
       }
     }
+
+    finf.push(finf[finf.length-1]);
+    fvms.push(fvms[fvms.length-1]);
+    fcpus.push(fcpus[fcpus.length-1]);
+    fmems.push(fmems[fmems.length-1]);
+    flabels.push(labels[labels.length-1]);
 
     myChart.data.datasets[0].data = finf;
     myChart.data.datasets[1].data = fvms;
