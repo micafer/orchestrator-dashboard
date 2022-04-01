@@ -21,67 +21,53 @@
   const cpus = {{ cpus }};
   const mems = {{ mems }};
 
-  // compute the accumulated values to use in the chart
+  // to store the accumulated values to use in the chart
   var data_infs = [];
-  var inf_count = 0;
   var data_vms = [];
-  var vms_count = 0;
   var data_cpus = [];
-  var cpus_count = 0;
   var data_mems = [];
-  var mems_count = 0;
-  for (var i=1; i<clouds.length; i++) {
-    inf_count += infs[i];
-    data_infs.push(inf_count);
-    vms_count += vms[i];
-    data_vms.push(vms_count);
-    cpus_count += cpus[i];
-    data_cpus.push(cpus_count);
-    mems_count += mems[i];
-    data_mems.push(mems_count);
-  }
-
+  var data_labels = [];
 
   function filterByCloud(cloud) {
     const ctx = document.getElementById('statsChart');
     // Add a 0 in the initial time
-    var finf = [0];
+    data_infs = [0];
     var inf_count = 0
-    var fvms = [0];
+    data_vms = [0];
     var vms_count = 0;
-    var fcpus = [0];
+    data_cpus = [0];
     var cpus_count = 0
-    var fmems = [0];
+    data_mems = [0];
     var mems_count = 0
-    var flabels = [labels[0]];
+    data_labels = [labels[0]];
     // filter the values by cloud
     for (var i=1; i<clouds.length; i++) {
       if (cloud == "" || clouds[i] == cloud) {
         inf_count += infs[i];
-        finf.push(inf_count);
+        data_infs.push(inf_count);
         vms_count += vms[i];
-        fvms.push(vms_count);
+        data_vms.push(vms_count);
         cpus_count += cpus[i];
-        fcpus.push(cpus_count);
+        data_cpus.push(cpus_count);
         mems_count += mems[i];
-        fmems.push(mems_count);
-        flabels.push(labels[i]);
+        data_mems.push(mems_count);
+        data_labels.push(labels[i]);
       }
     }
 
     // add the last value on the end time
-    finf.push(finf[finf.length-1]);
-    fvms.push(fvms[fvms.length-1]);
-    fcpus.push(fcpus[fcpus.length-1]);
-    fmems.push(fmems[fmems.length-1]);
-    flabels.push(labels[labels.length-1]);
+    data_infs.push(data_infs[data_infs.length-1]);
+    data_vms.push(data_vms[data_vms.length-1]);
+    data_cpus.push(data_cpus[data_cpus.length-1]);
+    data_mems.push(data_mems[data_mems.length-1]);
+    data_labels.push(labels[labels.length-1]);
 
     // update the chart
-    myChart.data.datasets[0].data = finf;
-    myChart.data.datasets[1].data = fvms;
-    myChart.data.datasets[2].data = fcpus;
-    myChart.data.datasets[3].data = fmems;
-    myChart.data.labels = flabels;
+    myChart.data.datasets[0].data = data_infs;
+    myChart.data.datasets[1].data = data_vms;
+    myChart.data.datasets[2].data = data_cpus;
+    myChart.data.datasets[3].data = data_mems;
+    myChart.data.labels = data_labels;
     if (cloud != "") {
       myChart.options.plugins.title.text = cloud;
     } else {
@@ -100,7 +86,7 @@
           <div class="row">
             <div class="col-md-6">
               <!-- Title -->
-              <h4 class="font-weight-bold text-primary">IM User Stats</h4>
+              <h4 class="font-weight-bold text-primary">Infrastructures Deployed by the user</h4>
             </div>
             <div class="col-md-6 text-right">
               <!-- Button -->
@@ -209,6 +195,7 @@
 
             const ctx = document.getElementById('statsChart');
             const myChart = new Chart(ctx, config);
+            filterByCloud("");
           </script>
         </div>
     </div>
