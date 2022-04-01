@@ -1186,13 +1186,14 @@ def create_app(oidc_blueprint=None):
 
         auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         fedcloud_sites = None
-        infs = []
-        vms = []
-        cpus = []
-        mems = []
-        labels = []
+        # Add an element in the first date
+        infs = [0]
+        vms = [0]
+        cpus = [0]
+        mems = [0]
+        labels = ["%s 00:00:00" % init_date]
         cloud_hosts = []
-        clouds = []
+        clouds = [""]
         site_name = None
         try:
             for inf_stat in im.get_stats(auth_data, init_date, end_date):
@@ -1219,6 +1220,14 @@ def create_app(oidc_blueprint=None):
                 cpus.append(inf_stat['cpu_count'])
                 labels.append(inf_stat['creation_date'])
                 clouds.append(site_name)
+
+            # Add an element in the last date
+            infs.append(0)
+            vms.append(0)
+            mems.append(0)
+            cpus.append(0)
+            labels.append("%s 23:59:59" % end_date)
+            clouds.append("")
 
         except Exception as ex:
             flash("Error Getting Stats: %s." % ex, 'error')
