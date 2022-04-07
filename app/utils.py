@@ -28,7 +28,6 @@ import io
 import ast
 import time
 import sys
-from radl.radl import outport
 from radl.radl_json import parse_radl
 from flask import flash, g
 from app import appdb

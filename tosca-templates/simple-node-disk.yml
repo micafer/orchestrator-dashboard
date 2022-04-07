@@ -45,7 +45,9 @@ topology_template:
       type: map
       entry_schema:
         type: PortSpec
-      description: Comma separated list of ports to be Opened in the Cloud site (eg. 22,80,443)
+      description: |
+        Comma separated list of ports to be Opened in the Cloud site (eg. 22,80,443).
+        You can also include the remote CIDR (eg. 8.8.0.0/24-22,9.9.9.0/24-80,443).
       default: 22
 
   node_templates:
