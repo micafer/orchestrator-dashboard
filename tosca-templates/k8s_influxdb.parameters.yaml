@@ -53,6 +53,9 @@ inputs:
     admin_token:
       tab: InfluxDB Data
 
+    grafana_password:
+      tab: InfluxDB Data
+
 tabs:
   - HW Data
   - Kubernetes Data
