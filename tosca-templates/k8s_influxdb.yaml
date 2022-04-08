@@ -217,13 +217,13 @@ topology_template:
                 secretKeyRef:
                   name: telegraf-creds
                   key: INFLUXDB_BUCKET
-          outputs:
-            - influxdb: {}
-            - influxdb_v2:
-                urls: ['http://influxdb:8086/'']
-                organization: '$INFLUXDB_ORG'
-                bucket: '$INFLUXDB_BUCKET'
-                token: '$INFLUXDB_TOKEN'
+          config:
+            outputs:
+              - influxdb_v2:
+                  urls: ['http://influxdb:8086/']
+                  organization: '$INFLUXDB_ORG'
+                  bucket: '$INFLUXDB_BUCKET'
+                  token: '$INFLUXDB_TOKEN'
       requirements:
         - host: front
         - dependency: telegraf-secret
