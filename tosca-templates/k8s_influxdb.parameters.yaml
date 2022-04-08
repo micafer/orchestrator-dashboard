@@ -29,6 +29,9 @@ inputs:
     kube_admin_token:
       tab: Kubernetes Data
 
+    kube_admin_token:
+      tab: Kubernetes Data
+
     kube_version:
       tab: Kubernetes Data
 
