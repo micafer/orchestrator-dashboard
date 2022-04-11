@@ -1174,6 +1174,7 @@ def create_app(oidc_blueprint=None):
     def show_stats():
         init_date = request.args.get('init_date')
         end_date = request.args.get('end_date')
+        active = request.args.get('active')
         today = datetime.datetime.today().date()
 
         if not end_date:
@@ -1186,6 +1187,7 @@ def create_app(oidc_blueprint=None):
 
         auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         fedcloud_sites = None
+        inf_actives = []
         # Add an element in the first date
         infs = [0]
         vms = [0]
@@ -1214,12 +1216,41 @@ def create_app(oidc_blueprint=None):
                 if site_name not in cloud_hosts:
                     cloud_hosts.append(site_name)
 
+                if active:
+                    curr_date = datetime.datetime.strptime(inf_stat['creation_date'], "%Y-%m-%d %H:%M:%S")
+                    inf_list = list(inf_actives)
+                    for inf in inf_list:
+                        del_time = datetime.datetime.strptime(inf[4], "%Y-%m-%d %H:%M:%S")
+                        if del_time <= curr_date:
+                            infs.append(-1)
+                            vms.append(inf[0]*-1)
+                            mems.append(inf[1]*-1.0)
+                            cpus.append(inf[2]*-1)
+                            clouds.append(inf[3])
+                            labels.append(inf[4])
+                            inf_actives.remove(inf)
+
+                    inf_actives.append((inf_stat['vm_count'], (inf_stat['memory_size'] / 1024),
+                                        inf_stat['cpu_count'], site_name, "%s 12:00:00" % inf_stat['last_date']))
+
                 infs.append(1)
                 vms.append(inf_stat['vm_count'])
                 mems.append((inf_stat['memory_size'] / 1024))
                 cpus.append(inf_stat['cpu_count'])
                 labels.append(inf_stat['creation_date'])
                 clouds.append(site_name)
+
+            if active:
+                curr_date = datetime.datetime.strptime("%s 23:59:59" % end_date, "%Y-%m-%d %H:%M:%S")
+                for inf in inf_actives:
+                    del_time = datetime.datetime.strptime(inf[4], "%Y-%m-%d %H:%M:%S")
+                    if del_time <= curr_date:
+                        infs.append(-1)
+                        vms.append(inf[0])
+                        mems.append(inf[1])
+                        cpus.append(inf[2])
+                        clouds.append(inf[3])
+                        labels.append(inf[4])
 
             # Add an element in the last date
             infs.append(0)
