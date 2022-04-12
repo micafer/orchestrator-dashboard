@@ -16,6 +16,10 @@
             "cryoem.instruct-eric.eu": {
                 "private": "group-project-network",
                 "public": "public-muni-147-251-21-GROUP"
+            },
+            "vo.eoscfuture-sp.panosc.eu": {
+                "private": "group-project-network",
+                "public": "public-muni-147-251-21-GROUP"
             }
         }
     },
