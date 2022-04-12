@@ -42,3 +42,4 @@ class Settings:
         self.checkToscaChangesTime = config.get('CHECK_TOSCA_CHANGES_TIME', 120)
         self.vault_url = config.get('VAULT_URL', None)
         self.im_auth = config.get('IM_AUTH', None)
+        self.vo_map = config.get('VO_MAP', {})
