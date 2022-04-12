@@ -127,6 +127,9 @@ def getUserVOs(entitlements):
             vo = elem[22:22 + elem[22:].find(':')]
             if vo:
                 vos.append(vo)
+        elif elem in g.settings.vo_map:
+            vos.append(g.settings.vo_map[elem])
+
     return vos
 
 
