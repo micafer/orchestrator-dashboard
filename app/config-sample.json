@@ -19,5 +19,6 @@
     "APPDB_CACHE_TIMEOUT": 3600,
     "CHECK_TOSCA_CHANGES_TIME": 120,
     "IM_TIMEOUT": 60,
-    "VAULT_URL": ""
+    "VAULT_URL": "",
+    "VO_MAP": {}
 }
