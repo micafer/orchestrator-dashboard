@@ -183,7 +183,7 @@ topology_template:
         install_metrics: true
         install_nfs_client: true
         install_ingress: true
-        version: 1.19.13
+        version: 1.23.6
         cert_manager: true
         cert_user_email: { get_input: cert_user_email }
         public_dns_name: { concat: [ get_property: [dns_reg, record_name], '.', get_property: [dns_reg, domain_name] ] }
@@ -228,7 +228,7 @@ topology_template:
       type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
-        version: 1.19.13
+        version: 1.23.6
       capabilities:
         wn:
           properties:
