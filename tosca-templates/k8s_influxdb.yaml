@@ -14,7 +14,7 @@ topology_template:
     wn_num:
       type: integer
       description: Number of WNs in the cluster
-      default: 1
+      default: 2
       required: yes
     fe_cpus:
       type: integer
@@ -70,9 +70,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.21.9"
+      default: "1.23.5"
       constraints:
-      - valid_values: [ "1.21.9", "1.22.6", "1.23.2", "1.20.15", "1.19.16" ]
+      - valid_values: ["1.23.5", "1.22.8", "1.21.11" ]
     kube_cert_manager:
       type: boolean
       description: Flag to install Cert-Manager
@@ -106,7 +106,127 @@ topology_template:
       description: Token of the full admin user
       default: admintoken
 
+    grafana_password:
+      type: string
+      description: Password of the grafana admin user
+      default: grafanapass
+
   node_templates:
+
+    grafana-secret:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec:
+          concat:
+            - |-
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: grafana-secrets
+                  namespace: ai-sprint-mon
+                stringData:
+                  admin-user: grafana
+                  admin-password: 
+            - get_input: grafana_password
+      requirements:
+        - host: lrms_front_end
+        - dependency: influxdb
+
+    grafana:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: ai-sprint-mon
+        repository_name: grafana
+        repository_url: "https://grafana.github.io/helm-charts"
+        name: grafana
+        values_file: |
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          admin:
+            existingSecret: grafana-secrets
+            userKey: admin-user
+            passwordKey: admin-password
+          persistence:
+            type: pvc
+            enabled: true
+            accessModes:
+              - ReadWriteOnce
+          ingress:
+            enabled: true
+            annotations:
+              kubernetes.io/ingress.class: nginx
+            path: /grafana/
+            hosts: []
+          grafana.ini:
+            server:
+              root_url: '%(protocol)s://%(domain)s:%(http_port)s/grafana/'
+              serve_from_sub_path: true
+      requirements:
+        - host: front
+        - dependency: grafana-secret
+
+    telegraf-secret:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec:
+          concat:
+            - |-
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: telegraf-creds
+                  namespace: ai-sprint-mon
+                stringData:
+                  INFLUXDB_TOKEN: "
+            - get_input: admin_token
+            - |-
+                "
+                  INFLUXDB_BUCKET: "
+            - get_input: bucket_name
+            - |-
+                "
+                  INFLUXDB_ORG: 
+            - get_input: org_name
+      requirements:
+        - host: lrms_front_end
+        - dependency: influxdb
+
+    telegraf:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: ai-sprint-mon
+        repository_name: influxdata
+        repository_url: "https://helm.influxdata.com/"
+        name: telegraf-ds
+        values_file: |
+          env:
+            - name: INFLUXDB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-creds
+                  key: INFLUXDB_TOKEN
+            - name: INFLUXDB_ORG
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-creds
+                  key: INFLUXDB_ORG
+            - name: INFLUXDB_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-creds
+                  key: INFLUXDB_BUCKET
+          config:
+            outputs:
+              - influxdb_v2:
+                  urls: ['http://influxdb:8086/']
+                  organization: '$INFLUXDB_ORG'
+                  bucket: '$INFLUXDB_BUCKET'
+                  token: '$INFLUXDB_TOKEN'
+      requirements:
+        - host: front
+        - dependency: telegraf-secret
 
     influxdb_ingress:
       type: tosca.nodes.indigo.KubernetesObject
@@ -116,7 +236,7 @@ topology_template:
           kind: Ingress
           metadata:
             name: influxdb
-            namespace: influxdb
+            namespace: ai-sprint-mon
             annotations:
               kubernetes.io/ingress.class: nginx
           spec:
@@ -137,6 +257,7 @@ topology_template:
     influxdb:
       type: tosca.nodes.indigo.Helm.Chart
       properties:
+        namespace: ai-sprint-mon
         repository_name: bitnami
         repository_url: "https://charts.bitnami.com/bitnami"
         name: influxdb
@@ -157,7 +278,7 @@ topology_template:
         endpoint:
           properties:
             ports:
-              https_port:
+              http_port:
                 protocol: tcp
                 source: 80
               https_port:
@@ -240,3 +361,5 @@ topology_template:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
     influxdb_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/' ] }
+    grafana_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/grafana/' ] }

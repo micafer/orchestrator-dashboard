@@ -4,8 +4,21 @@
   <title>{% block title %}{% endblock %}</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Add favicon -->
+  <link rel="apple-touch-icon" sizes="180x180"
+    href="{{ url_for('static', filename='images/favicon_io/apple-touch-icon.png') }}">
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon_io/favicon-32x32.png') }}">
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon_io/favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='images/favicon_io/site.webmanifest') }}">
   <!-- BS4-->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <!-- FontAwesome-->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <!-- Cookie Consent -->
+  <script src="{{ url_for('static', filename='js/cookieconsent-4.0.1.min.js') }}"></script>
+{% if home is not defined %}
+  <!-- General Bootstrap JS -->
   <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
@@ -26,20 +39,7 @@
   <script src="{{ url_for('static', filename='js/bootstrap4-toggle.min.js') }}"></script>
   <!-- Latest compiled and minified JavaScript -->
   <script src="{{ url_for('static', filename='js/bootstrap-show-password.min.js') }}"></script>
-  <!-- FontAwesome-->
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
-    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-  <!-- Add favicon -->
-  <link rel="apple-touch-icon" sizes="180x180"
-    href="{{ url_for('static', filename='images/favicon_io/apple-touch-icon.png') }}">
-  <link rel="icon" href="{{ url_for('static', filename='images/favicon_io/favicon-32x32.png') }}">
-  <link rel="icon" href="{{ url_for('static', filename='images/favicon_io/favicon-16x16.png') }}">
-  <link rel="manifest" href="{{ url_for('static', filename='images/favicon_io/site.webmanifest') }}">
-  <!-- Dotdotdot -->
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dotdotdot.js') }}"></script>
-  <!-- Cookie Consent -->
-  <script src="{{ url_for('static', filename='js/cookieconsent-4.0.1.min.js') }}"></script>
-
+{% endif %}
   <style>
   .cookieconsent-com---palette-dark .cc-nb-okagree {
     background-color: #ffc107;
