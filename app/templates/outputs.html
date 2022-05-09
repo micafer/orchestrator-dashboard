@@ -21,10 +21,22 @@
 
                       {% else %}
                         {% if value is string %}
-                          {% if value.startswith("{") or value.startswith("[") %}
-                          <pre>{{ value | tojson_pretty() | safe | replace("\\n", "\n") }}</pre>
+                          {% if value|length > 1024 %}
+                            <div class="d-none" id="text-val-{{ field }}">{{ value | replace("\\n", "\n") }}</div>
+                            <button class="btn btn-primary btn-sm" id="downloadBtn{{ field }}"><i class="fa fa-download"></i> Download</button>
+                            <script>
+                              document.getElementById("downloadBtn{{ field }}").addEventListener("click", function(){
+                                  var text = document.getElementById("text-val-{{ field }}").innerHTML;
+                                  var filename = "{{ field }}.txt";
+                                  download(filename, text);
+                              }, false);
+                            </script>
                           {% else %}
-                          {{ value }}
+                            {% if value.startswith("{") or value.startswith("[") %}
+                            <pre>{{ value | tojson_pretty() | safe | replace("\\n", "\n") }}</pre>
+                            {% else %}
+                            {{ value }}
+                            {% endif %}
                           {% endif %}
                         {% else %}
                           <pre>{{ value | tojson_pretty() | safe }}</pre>
@@ -61,7 +73,6 @@ function download(filename, text) {
 document.getElementById("downloadBtn").addEventListener("click", function(){
     var text = document.getElementById("text-val").innerHTML;
     var filename = "key.pem";
-
     download(filename, text);
 }, false);
 
@@ -82,8 +93,6 @@ function copyToClipBoard(text) {
 
 document.getElementById("copyBtn").addEventListener("click", function(){
   var text = document.getElementById("text-val").innerHTML;
-
-
   copyToClipBoard(text);
 }, false);
 

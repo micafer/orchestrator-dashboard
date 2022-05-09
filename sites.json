@@ -9,9 +9,9 @@
             "biomed": "eca73ad6a84d4c0088063505c36349ab",
             "vo.indigo-datacloud.eu": "25cb49baedbf40a194729ff6802c8491",
             "umsa.cerit-sc.cz": "10e31299a9b548fdbe36e4dbe571168e",
-	          "cryoem.instruct-eric.eu": "d0ebf0fad0a04be19f93fdf794469544",
-	          "vo.eoscfuture-sp.panosc.eu": "c91eeff7bf7845bc901b319512f2ebdb",
-	          "vo.pangeo.eu": "05e0ff6e03774082aadacc75bfc1d783"
+	    "cryoem.instruct-eric.eu": "d0ebf0fad0a04be19f93fdf794469544",
+	    "vo.eoscfuture-sp.panosc.eu": "c91eeff7bf7845bc901b319512f2ebdb",
+	    "vo.pangeo.eu": "05e0ff6e03774082aadacc75bfc1d783"
         },
         "networks": {
             "cryoem.instruct-eric.eu": {
