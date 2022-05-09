@@ -72,9 +72,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.21.9"
+      default: "1.23.6"
       constraints:
-      - valid_values: [ "1.21.9", "1.22.6", "1.23.2", "1.20.15", "1.19.16" ]
+      - valid_values: [ "1.23.6", "1.22.9", "1.21.12" ]
     cri_runtime:
       type: string
       description: CRI Runtime to use with Kubernetes
@@ -234,3 +234,5 @@ topology_template:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
     kubeapps_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
+    kubeconfig:
+      value: { get_attribute: [ front, ansible_output, lrms_front_end_front_conf_front, tasks, kube_conf, output ] }

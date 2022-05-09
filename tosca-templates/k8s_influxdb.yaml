@@ -70,9 +70,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.23.5"
+      default: "1.23.6"
       constraints:
-      - valid_values: ["1.23.5", "1.22.8", "1.21.11" ]
+      - valid_values: [ "1.23.6", "1.22.9", "1.21.12" ]
     kube_cert_manager:
       type: boolean
       description: Flag to install Cert-Manager
