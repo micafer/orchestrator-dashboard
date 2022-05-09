@@ -791,6 +791,25 @@ def create_app(oidc_blueprint=None):
                     continue
         return template
 
+    def add_ssh_key_to_template(template):
+        sshkey = ssh_key.get_ssh_key(session['userid'])
+        if sshkey:
+            artifact = "https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/add_ssh_key.yml"
+
+            computers = []
+            for node_name, node in template['topology_template']['node_templates'].items():
+                if node["type"] in ["tosca.nodes.indigo.Compute", "tosca.nodes.Compute"]:
+                    computers.append(node_name)
+
+            for computer in computers:
+                ssh_node = {"type": "tosca.nodes.ec3.Application",
+                            "interfaces": {"Standard": {"configure": {"implementation":  artifact,
+                                                                      "inputs": {"ssh_key": sshkey}}}},
+                            "requirements": [{"host": computer}]}
+                template['topology_template']['node_templates']["dash_ssh_key_%s" % computer] = ssh_node
+
+        return template
+
     @app.route('/submit', methods=['POST'])
     @authorized_with_valid_token
     def createdep():
@@ -847,6 +866,8 @@ def create_app(oidc_blueprint=None):
         template = add_image_to_template(template, image)
 
         template = add_auth_to_template(template, auth_data)
+
+        template = add_ssh_key_to_template(template)
 
         # Specially added for OSCAR clusters
         template = add_record_name_to_template(template, utils.generate_random_name())
