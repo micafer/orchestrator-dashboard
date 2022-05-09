@@ -803,7 +803,7 @@ def create_app(oidc_blueprint=None):
 
             for computer in computers:
                 ssh_node = {"type": "tosca.nodes.ec3.Application",
-                            "interfaces": {"Standard": {"configure": {"implementation":  artifact,
+                            "interfaces": {"Standard": {"configure": {"implementation": artifact,
                                                                       "inputs": {"ssh_key": sshkey}}}},
                             "requirements": [{"host": computer}]}
                 template['topology_template']['node_templates']["dash_ssh_key_%s" % computer] = ssh_node
