@@ -537,3 +537,38 @@ class IMDashboardTests(unittest.TestCase):
                         "floating_ips": {"used": 1, "limit": 10},
                         "security_groups": {"used": 1, "limit": 10}}
         self.assertEquals(expected_res, json.loads(res.data))
+
+    @patch("app.utils.avatar")
+    @patch("app.ssh_key.SSHKey.get_ssh_key")
+    def test_get_ssh_key(self, get_ssh_key, avatar):
+        self.login(avatar)
+        get_ssh_key.return_value = ["ssh-rsa AAAAB3NzaC..."]
+        res = self.client.get('/ssh_key')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b'ssh-rsa AAAAB3NzaC...', res.data)
+
+    @patch("app.utils.avatar")
+    @patch("app.ssh_key.SSHKey.write_ssh_key")
+    @patch("app.flash")
+    def test_write_ssh_key(self, flash, write_ssh_key, avatar):
+        self.login(avatar)
+        key = ("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD2581vX45pELFhzX7j5f8G3luuKU00IXNYYPm4kWlC/bS8Do73LjJkSdJ/ETEzA"
+               "lq99DBqehqmbFPa5OgRBqZmM/W278DimwMe8Alq/0droT9KlrrIetR42Q7ODGQq7+Z0plcy4J8R4HNVLQ4zSACIVXGjBhf9Ruii1R"
+               "R139qEzz3v0DlLRdj+p4Y7o4qKkxFvZwVMsXboasGMZQoc1GRAZlNq7sCQr2yUrneh43Id1dRhqEgPWjPzzi9UXUbeXvKsqx0gsGr"
+               "+ttuEqy3SM2ZBuhD6xrpAUGrr0TrJBJnVVBKL31zFSu6GcDtVyjoYGJhM/vU9VuBrUHO+qYIrcGP7VaPSOgTSj7V3OLD7pp8kYmFP"
+               "vLKleDSI/eiKO0nH/J6W2mGa1J6FDFaIIsLIyERdgakjvrkecfv/YfqPWkUGp1xnzNugkOug1ZMQHfuSs7Ag+kVP3TDPQoAo8u2Yy"
+               "EwbLK/vVSFlTe5eaotfCmiltVu3UaPYM8QylCCTW7QCncE= micafer@jonsu")
+        res = self.client.post('/write_ssh_key', data={'sshkey': key})
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/ssh_key', res.headers['location'])
+        self.assertLessEqual(flash.call_count, 0)
+
+    @patch("app.utils.avatar")
+    @patch("app.ssh_key.SSHKey.delete_ssh_key")
+    @patch("app.flash")
+    def test_delete_ssh_key(self, flash, delete_ssh_key, avatar):
+        self.login(avatar)
+        res = self.client.get('/delete_ssh_key')
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/ssh_key', res.headers['location'])
+        self.assertEquals(flash.call_args_list[0][0], ("SSH Key successfully deleted!", 'success'))
