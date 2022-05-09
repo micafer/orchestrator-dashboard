@@ -196,3 +196,5 @@ topology_template:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
     kubeapps_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
+    kubeconfig:
+      value: { get_attribute: [ front, ansible_output, lrms_front_end_front_conf_front, tasks, kube_conf, output ] }
