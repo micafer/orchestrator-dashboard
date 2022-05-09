@@ -32,6 +32,7 @@ from app.db_cred import DBCredentials
 from app.vault_cred import VaultCredentials
 from app.infra import Infrastructures
 from app.im import InfrastructureManager
+from app.ssh_key import SSHKey
 from app import utils, appdb, db
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError
 from werkzeug.exceptions import Forbidden
@@ -61,6 +62,7 @@ def create_app(oidc_blueprint=None):
     CSRFProtect(app)
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
+    ssh_key = SSHKey(settings.db_url)
 
     # To Reload internally the site cache
     scheduler = APScheduler()
@@ -1111,6 +1113,38 @@ def create_app(oidc_blueprint=None):
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 
         return redirect(url_for('showinfrastructures', reload=reload))
+
+    @app.route('/ssh_key')
+    @authorized_with_valid_token
+    def get_ssh_key():
+
+        key = ssh_key.get_ssh_key(session['userid'])
+        return render_template('ssh_keys.html', sshkey=key)
+
+    @app.route('/delete_ssh_key')
+    @authorized_with_valid_token
+    def delete_ssh_key():
+
+        try:
+            ssh_key.delete_ssh_key(session['userid'])
+            flash("SSH Key successfully deleted!", 'success')
+        except Exception as ex:
+            flash("Error deleting SSH Key %s!" % ex, 'error')
+
+        return redirect(url_for('get_ssh_key'))
+
+    @app.route('/write_ssh_key', methods=['POST'])
+    @authorized_with_valid_token
+    def write_ssh_key():
+
+        key = request.form['sshkey']
+        if key == "" or str(SSHKey.check_ssh_key(key.encode())) != "0":
+            flash("Invaild SSH public key. Please insert a correct one.", 'warning')
+            return redirect(url_for('get_ssh_key'))
+
+        ssh_key.write_ssh_key(session['userid'], key)
+
+        return redirect(url_for('get_ssh_key'))
 
     @app.route('/logout')
     def logout():
