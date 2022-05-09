@@ -138,6 +138,7 @@
               <a class="dropdown-item text-right disabled">{{ session['userid'] }}</a>
               <div class="dropdown-divider"></div>
               <a class="dropdown-item text-right" href="{{ url_for("manage_creds") }}">Cloud Credentials</a>
+	      <a class="dropdown-item text-right" href="{{ url_for("get_ssh_key") }}">SSH Key</a>
               <a class="dropdown-item text-right" href="{{ url_for("logout") }}">Logout</a>
             </div>
           </li>
