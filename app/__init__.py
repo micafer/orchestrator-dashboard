@@ -408,6 +408,25 @@ def create_app(oidc_blueprint=None):
                 infrastructures[inf_id]['name'] = infra_data["name"]
             if 'state' in infra_data:
                 infrastructures[inf_id]['state'] = infra_data["state"]
+            if 'site' in infra_data:
+                site_info = ""
+                if "site_name" in infra_data["site"]:
+                    site_info += "Site: " + infra_data["site"]["site_name"]
+                else:
+                    if "host" in infra_data["site"]:
+                        site_info += "Host: " + infra_data["site"]["host"]
+                    if "tenant" in infra_data["site"]:
+                        site_info += "<br>Tenant: " + infra_data["site"]["tenant"]
+
+                if "subscription_id" in infra_data["site"]:
+                    site_info += "Subs. ID: " + infra_data["site"]["subscription_id"]
+                if "vo" in infra_data["site"]:
+                    site_info += "<br>VO: " + infra_data["site"]["vo"]
+                if "project" in infra_data["site"]:
+                    site_info += "Project: " + infra_data["site"]["project"]
+
+                infrastructures[inf_id]['cloud_type'] = infra_data["site"]["type"]
+                infrastructures[inf_id]['site'] = Markup(site_info)
 
         return render_template('infrastructures.html', infrastructures=infrastructures, reload=reload_infid)
 
@@ -821,6 +840,7 @@ def create_app(oidc_blueprint=None):
         cred_data = cred.get_cred(cred_id, get_cred_id())
         access_token = oidc_blueprint.session.token['access_token']
 
+        site = {}
         image = None
         priv_network_id = None
         pub_network_id = None
@@ -885,8 +905,15 @@ def create_app(oidc_blueprint=None):
                 raise Exception(response.text)
 
             try:
+                # Remove all sensible data
+                for elem in ["password", "username", "token", "proxy", "private_key", "client_id", "secret"]:
+                    if elem in cred_data:
+                        del cred_data[elem]
+                if "name" in site:
+                    cred_data["site_name"] = site["name"]
                 inf_id = os.path.basename(response.text)
                 infra.write_infra(inf_id, {"name": form_data['infra_name'],
+                                           "site": cred_data,
                                            "state": {"state": "pending", "vm_states": {}}})
             except Exception as ex:
                 flash("Error storing Infrastructure name: %s" % str(ex), "warning")
