@@ -121,11 +121,13 @@
             <!--Table head-->
               <thead>
                 <tr>
-                  <th style="width: 15%" scope="col">Name</th>
-                  <th style="width: 35%" scope="col">Infrastructure uuid</th>
-                  <th style="width: 15%" scope="col">Status</th>
-                  <th style="width: 20%" scope="col">VMs</th>
-                  <th style="width: 15%" scope="col">Actions</th>
+                  <th style="width: 10%" scope="col">Name</th>
+                  <th style="width: 30%" scope="col">Infrastructure uuid</th>
+                  <th style="width: 5%" scope="col">Cloud Type</th>
+                  <th style="width: 15%" scope="col">Cloud Info</th>
+                  <th style="width: 10%" scope="col">Status</th>
+                  <th style="width: 17%" scope="col">VMs</th>
+                  <th style="width: 13%" scope="col">Actions</th>
                 </tr>
               </thead>
               <!--Table head-->
@@ -145,7 +147,12 @@
                     <th>
                       {{infId}}
                     </th>
-
+                    <th>
+                      <img height="35" src="{{ url_for('static', filename='images/' + infInfo['cloud_type'] + 'Row.png') }}"/>
+                    </th>
+                    <th>
+                      {{infInfo["site"]}}
+                    </th>
                     <td>
                       <div id="{{infId}}_state">
                        Loading <div style="display: none;" id="{{infId}}_state_spinner" class="spinner-border spinner-border-sm"></div>
