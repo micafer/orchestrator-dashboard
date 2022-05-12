@@ -910,7 +910,8 @@ def create_app(oidc_blueprint=None):
                 for elem in ["password", "username", "token", "proxy", "private_key", "client_id", "secret"]:
                     if elem in cred_data:
                         del cred_data[elem]
-                cred_data["site_name"] = site["name"]
+                if "name" in site:
+                    cred_data["site_name"] = site["name"]
                 inf_id = os.path.basename(response.text)
                 infra.write_infra(inf_id, {"name": form_data['infra_name'],
                                            "site": cred_data,
