@@ -34,31 +34,46 @@ class SSHKey():
         db = DataBase(self.url)
         if db.connect():
             if not db.table_exists("ssh_keys"):
-                db.execute("CREATE TABLE ssh_keys(userid VARCHAR(255) PRIMARY KEY, ssh_key VARCHAR(255))")
+                if db.db_type == DataBase.MYSQL:
+                    db.execute("CREATE TABLE ssh_keys(rowid INTEGER NOT NULL AUTO_INCREMENT UNIQUE, "
+                               "description VARCHAR(255), userid VARCHAR(255), ssh_key VARCHAR(255))")
+                elif db.db_type == DataBase.SQLITE:
+                    db.execute("CREATE TABLE ssh_keys(userid VARCHAR(255), description VARCHAR(255), "
+                               "ssh_key VARCHAR(255))")
         else:
             raise Exception("Error connecting DB: %s" % self.url)
         return db
 
-    def get_ssh_key(self, userid):
+    def get_ssh_keys(self, userid):
         db = self._get_ssh_db()
-        res = db.select("select ssh_key from ssh_keys where userid = %s", (userid,))
+        res = db.select("select rowid, description, ssh_key from ssh_keys where userid = %s", (userid,))
         db.close()
 
         if len(res) > 0:
-            return res[0][0]
+            return res
+        else:
+            return []
+
+    def get_ssh_key(self, keyid):
+        db = self._get_ssh_db()
+        res = db.select("select description, ssh_key from ssh_keys where rowid = %s", (keyid,))
+        db.close()
+
+        if len(res) > 0:
+            return res[0]
         else:
             return None
 
-    def write_ssh_key(self, userid, ssh_key):
+    def write_ssh_key(self, userid, ssh_key, desc):
         db = self._get_ssh_db()
 
-        db.execute("replace into ssh_keys (userid, ssh_key) values (%s, %s)",
-                   (userid, ssh_key))
+        db.execute("insert into ssh_keys (userid, ssh_key, description) values (%s, %s, %s)",
+                   (userid, ssh_key, desc))
         db.close()
 
-    def delete_ssh_key(self, userid):
+    def delete_ssh_key(self, userid, keyid):
         db = self._get_ssh_db()
-        db.execute("delete from ssh_keys where userid = %s", (userid,))
+        db.execute("delete from ssh_keys where userid = %s and rowid = %s", (userid, keyid))
         db.close()
 
     @staticmethod

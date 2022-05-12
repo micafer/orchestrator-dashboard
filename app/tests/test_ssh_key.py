@@ -30,18 +30,32 @@ class TestSSHKey(unittest.TestCase):
 
     def test_ssh_key(self):
         sshkey = SSHKey("sqlite:///tmp/ssh.db")
-        res = sshkey.get_ssh_key("userid")
-        self.assertIsNone(res)
+        res = sshkey.get_ssh_keys("userid")
+        self.assertEqual(res, [])
 
-        sshkey.write_ssh_key("userid", "ssh-rsa AAAAB3NzaC...")
+        sshkey.write_ssh_key("userid", "ssh-rsa AAAAB3NzaC...", "SSH 1")
 
-        res = sshkey.get_ssh_key("userid")
-        self.assertEqual(res, "ssh-rsa AAAAB3NzaC...")
+        res = sshkey.get_ssh_keys("userid")
+        self.assertEqual(res, [(1, "SSH 1", "ssh-rsa AAAAB3NzaC...")])
 
-        res = sshkey.delete_ssh_key("userid")
+        sshkey.write_ssh_key("userid", "ssh-rsa AAAAB3NzaC...", "SSH 2")
 
-        res = sshkey.get_ssh_key("userid")
-        self.assertIsNone(res)
+        res = sshkey.get_ssh_keys("userid")
+        self.assertEqual(res, [(1, "SSH 1", "ssh-rsa AAAAB3NzaC..."),
+                               (2, "SSH 2", "ssh-rsa AAAAB3NzaC...")])
+
+        res = sshkey.delete_ssh_key("userid", 1)
+
+        res = sshkey.get_ssh_keys("userid")
+        self.assertEqual(res, [(2, "SSH 2", "ssh-rsa AAAAB3NzaC...")])
+
+        res = sshkey.get_ssh_key(2)
+        self.assertEqual(res, ("SSH 2", "ssh-rsa AAAAB3NzaC..."))
+
+        res = sshkey.delete_ssh_key("userid", 2)
+
+        res = sshkey.get_ssh_keys("userid")
+        self.assertEqual(res, [])
 
     def test_check_ssh_key(self):
         key = ("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD2581vX45pELFhzX7j5f8G3luuKU00IXNYYPm4kWlC/bS8Do73LjJkSdJ/ETEzA"
