@@ -148,10 +148,14 @@
                       {{infId}}
                     </th>
                     <th>
+                      {% if "cloud_type" in infInfo and infInfo["cloud_type"] %}
                       <img height="35" src="{{ url_for('static', filename='images/' + infInfo['cloud_type'] + 'Row.png') }}"/>
+                      {% endif %}
                     </th>
                     <th>
+                      {% if "site" in infInfo %}
                       {{infInfo["site"]}}
+                      {% endif %}
                     </th>
                     <td>
                       <div id="{{infId}}_state">
