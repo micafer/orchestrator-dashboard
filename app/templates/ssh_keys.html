@@ -1,73 +1,120 @@
 {% extends "base.html" %}
+{% block title %}SSH Keys{% endblock %}
 {% block content %}
-<br>
-<div class="container">
-  {% include 'flashed_messages.html' %}
+
+<div class="container-fluid">
+
+    {% include 'flashed_messages.html' %}
+    <br>
+
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h4 class="font-weight-bold text-primary">SSH keys management</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <!-- Title -->
+              <h4 class="font-weight-bold text-primary">SSH Keys</h4>
+            </div>
+            <div class="col-md-6 text-right">
+              <button type=button id="updateBtn" class="btn btn-small btn-primary" data-toggle="modal" data-target="#newModal"><i class='fas fa-plus m-1'></i>New SSH Key</button>
+            </div>
+          </div> <!-- / .row -->
         </div>
-
         <div class="card-body">
 
-            SSH keys allow you to establish a secure connection between your computer and your virtual server(s).
+        <div class="table-responsive">
+            <table id="tableSSHKeys" class="table table-bordered table-striped table-hover" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>SSH Key</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ssh_key in ssh_keys %}
+                    <tr>
+                      <td>{{ssh_key[1]}}</td>
+                      <td>{{ssh_key[2] | truncate(32, True, " . . . ")}}{{ssh_key[2][-32:]}}</td>
+                      <td>
+                        <button type=button id="deleteBtn" data-id="{{ssh_key[0]}}" data-type="{{ssh_key[1]}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+          </div>
 
-            {% if sshkey is not none %}
-
-            <hr>
-            <div class="form-group">
-                <label for="ssh_public_key"><b>Your SSH key:</b></label>
-                <textarea class="form-control" rows="5" id="ssh_public_key" readonly>{{ sshkey }}</textarea>
-            </div>
-
-            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete_confirm" data-backdrop="static" data-keyboard="false">
-                <span class="fas fa-trash-alt mr-2"></span>Delete
-            </button>
-            <!-- Modal DELETE -->
-            <div class="modal fade" id="delete_confirm" role="dialog">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="delete_confirm_label">Confirm SSH key pair deletion</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                  </div>
-                  <div class="modal-body">
-                    Do you really want to delete the SSH key pair ?
-                  </div>
-                  <div class="modal-footer">
-                    <a id="cancelBtn" class="btn btn-primary text-white" role="button" data-dismiss="modal">Cancel</a>
-                    <a id="deleteBtn" class="btn btn-danger text-white" role="button" onclick="location.href='{{ url_for('delete_ssh_key') }}'">Delete SSH Key Pair</a>
-                  </div>
-                </div>
+	      <!-- Modal Add SSH Key-->
+        <div class="modal fade" id="newModal" tabindex="-1" role="dialog">
+          <form id="credForm" action="{{ url_for('write_ssh_key') }}" method="post">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="get_secret">SSH Key</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
               </div>
-            </div>
-
-            {% else %}
-
-            <hr>
-            <form id="update_sshkey" action="{{ url_for('write_ssh_key') }}" method="post">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <div class="modal-body">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-group">
-                    <label for="update_ssh_public_key"><b>Upload SSH public key</b></label>
+                    <label for="ssh_key_desc"><b>Description</b></label>
+                    <input placeholder="Description" name="desc" class="col-sm-12" type="text" required/>
+                    <label for="update_ssh_public_key"><b>SSH public key</b></label>
                     <p>Paste your public SSH key, Don't use your private SSH key.</p>
                     <textarea class="form-control" rows="5" id="update_ssh_public_key" name="sshkey"></textarea>
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary"><span class="fas fa-upload mr-2"></span> Upload</button>
-            </form>
-            {% endif %}
+              </div>
+              <div class="modal-footer">
+                <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                <button type="submit" class="btn btn-success updateBtn"><span class="fas fa-upload mr-2"></span> Upload</button>
+              </div>
+            </div>
+          </div>
+          </form>
         </div>
+        <!-- Modal to delete credentials -->
+	      <div class="modal fade" id="deleteModal" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Confirm SSH Key deletion</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+              <div class="modal-body">
+                Do you really want to delete your SSH Key?
+              </div>
+              <div class="modal-footer">
+                <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                <a class="btn btn-danger deleteBtn" role="button" href="">Delete</a>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
     </div>
 </div>
 
 <script>
+
+
 $(document).ready(function () {
-    $("#deleteBtn").click(function () {
+    $(".deleteBtn").click(function () {
         // add spinner to button
         $(this).parent().find(".cancelBtn").addClass("disabled", true);
         $(this).addClass("disabled", true);
         $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...` );
     });
 });
-</script>
 
+$(document).ready(function () {
+  $('#deleteModal').on('show.bs.modal', function (event) {
+     var button = $(event.relatedTarget) // Button that triggered the modal
+     var ssh_id = button.data('id')
+     var ssh_desc = button.data('type')
+     var modal = $(this)
+     modal.find('.modal-body').html('Do you really want to delete your SSH Key "' + ssh_desc + '"?');
+     modal.find(".deleteBtn")[0].setAttribute("href", "{{url_for('delete_ssh_key')}}?ssh_id="+ssh_id);
+  });
+});
+
+</script>
 {% endblock %}

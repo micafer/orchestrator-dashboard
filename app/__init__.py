@@ -792,9 +792,8 @@ def create_app(oidc_blueprint=None):
                     continue
         return template
 
-    def add_ssh_key_to_template(template):
-        sshkey = ssh_key.get_ssh_key(session['userid'])
-        if sshkey:
+    def add_ssh_keys_to_template(template):
+        for num, _, sshkey in ssh_key.get_ssh_keys(session['userid']):
             artifact = "https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/add_ssh_key.yml"
 
             computers = []
@@ -807,7 +806,7 @@ def create_app(oidc_blueprint=None):
                             "interfaces": {"Standard": {"configure": {"implementation": artifact,
                                                                       "inputs": {"ssh_key": sshkey}}}},
                             "requirements": [{"host": computer}]}
-                template['topology_template']['node_templates']["dash_ssh_key_%s" % computer] = ssh_node
+                template['topology_template']['node_templates']["dash_ssh_key_%s_%s" % (computer, num)] = ssh_node
 
         return template
 
@@ -868,7 +867,7 @@ def create_app(oidc_blueprint=None):
 
         template = add_auth_to_template(template, auth_data)
 
-        template = add_ssh_key_to_template(template)
+        template = add_ssh_keys_to_template(template)
 
         # Specially added for OSCAR clusters
         template = add_record_name_to_template(template, utils.generate_random_name())
@@ -1136,37 +1135,39 @@ def create_app(oidc_blueprint=None):
 
         return redirect(url_for('showinfrastructures', reload=reload))
 
-    @app.route('/ssh_key')
+    @app.route('/ssh_keys')
     @authorized_with_valid_token
-    def get_ssh_key():
+    def get_ssh_keys():
 
-        key = ssh_key.get_ssh_key(session['userid'])
-        return render_template('ssh_keys.html', sshkey=key)
+        ssh_keys = ssh_key.get_ssh_keys(session['userid'])
+        return render_template('ssh_keys.html', ssh_keys=ssh_keys)
 
     @app.route('/delete_ssh_key')
     @authorized_with_valid_token
     def delete_ssh_key():
 
         try:
-            ssh_key.delete_ssh_key(session['userid'])
+            keyid = request.args['ssh_id']
+            ssh_key.delete_ssh_key(session['userid'], keyid)
             flash("SSH Key successfully deleted!", 'success')
         except Exception as ex:
             flash("Error deleting SSH Key %s!" % ex, 'error')
 
-        return redirect(url_for('get_ssh_key'))
+        return redirect(url_for('get_ssh_keys'))
 
     @app.route('/write_ssh_key', methods=['POST'])
     @authorized_with_valid_token
     def write_ssh_key():
 
         key = request.form['sshkey']
+        desc = request.form['desc']
         if key == "" or str(SSHKey.check_ssh_key(key.encode())) != "0":
             flash("Invaild SSH public key. Please insert a correct one.", 'warning')
-            return redirect(url_for('get_ssh_key'))
+            return redirect(url_for('get_ssh_keys'))
 
-        ssh_key.write_ssh_key(session['userid'], key)
+        ssh_key.write_ssh_key(session['userid'], key, desc)
 
-        return redirect(url_for('get_ssh_key'))
+        return redirect(url_for('get_ssh_keys'))
 
     @app.route('/logout')
     def logout():

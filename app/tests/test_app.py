@@ -570,11 +570,11 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'const vms = [2];', res.data)
 
     @patch("app.utils.avatar")
-    @patch("app.ssh_key.SSHKey.get_ssh_key")
-    def test_get_ssh_key(self, get_ssh_key, avatar):
+    @patch("app.ssh_key.SSHKey.get_ssh_keys")
+    def test_get_ssh_keys(self, get_ssh_keys, avatar):
         self.login(avatar)
-        get_ssh_key.return_value = ["ssh-rsa AAAAB3NzaC..."]
-        res = self.client.get('/ssh_key')
+        get_ssh_keys.return_value = [(1, "desc", "ssh-rsa AAAAB3NzaC...")]
+        res = self.client.get('/ssh_keys')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'ssh-rsa AAAAB3NzaC...', res.data)
 
@@ -589,7 +589,7 @@ class IMDashboardTests(unittest.TestCase):
                "+ttuEqy3SM2ZBuhD6xrpAUGrr0TrJBJnVVBKL31zFSu6GcDtVyjoYGJhM/vU9VuBrUHO+qYIrcGP7VaPSOgTSj7V3OLD7pp8kYmFP"
                "vLKleDSI/eiKO0nH/J6W2mGa1J6FDFaIIsLIyERdgakjvrkecfv/YfqPWkUGp1xnzNugkOug1ZMQHfuSs7Ag+kVP3TDPQoAo8u2Yy"
                "EwbLK/vVSFlTe5eaotfCmiltVu3UaPYM8QylCCTW7QCncE= micafer@jonsu")
-        res = self.client.post('/write_ssh_key', data={'sshkey': key})
+        res = self.client.post('/write_ssh_key', data={'sshkey': key, 'desc': 'desc'})
         self.assertEqual(302, res.status_code)
         self.assertIn('/ssh_key', res.headers['location'])
         self.assertLessEqual(flash.call_count, 0)
@@ -599,7 +599,7 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.flash")
     def test_delete_ssh_key(self, flash, delete_ssh_key, avatar):
         self.login(avatar)
-        res = self.client.get('/delete_ssh_key')
+        res = self.client.get('/delete_ssh_key?ssh_id=1')
         self.assertEqual(302, res.status_code)
         self.assertIn('/ssh_key', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("SSH Key successfully deleted!", 'success'))
