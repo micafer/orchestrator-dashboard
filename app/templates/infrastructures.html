@@ -135,7 +135,7 @@
               <tbody>
                 {% for infId, infInfo in infrastructures.items() %}
                 <tr>
-                    <td scope="row">
+                    <th scope="row">
                       <a id="desc_{{infId}}_a" href="#" onclick="$('#edit_dest_{{infId}}').modal('show');">
                       {% if infInfo["name"] != "" %}
                         {{infInfo["name"]}}
@@ -143,10 +143,10 @@
                         N/A
                       {% endif %}
                       </a>
-                    </td>
-                    <td>
+                    </th>
+                    <th>
                       {{infId}}
-                    </td>
+                    </th>
                     <td>
                       {% if "cloud_type" in infInfo and infInfo["cloud_type"] %}
                       <img height="35" src="{{ url_for('static', filename='images/' + infInfo['cloud_type'] + 'Row.png') }}"/>
