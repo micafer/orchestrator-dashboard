@@ -122,9 +122,9 @@
               <thead>
                 <tr>
                   <th style="width: 10%" scope="col">Name</th>
-                  <th style="width: 25%" scope="col">Infrastructure uuid</th>
-                  <th style="width: 5%" scope="col">Cloud Type</th>
-                  <th style="width: 20%" scope="col">Cloud Info</th>
+                  <th style="width: 25%; white-space: nowrap;" scope="col">Infrastructure uuid</th>
+                  <th style="width: 5%; white-space: nowrap;" scope="col">Cloud Type</th>
+                  <th style="width: 20%; white-space: nowrap;" scope="col">Cloud Info</th>
                   <th style="width: 10%" scope="col">Status</th>
                   <th style="width: 17%" scope="col">VMs</th>
                   <th style="width: 13%" scope="col">Actions</th>
@@ -135,7 +135,7 @@
               <tbody>
                 {% for infId, infInfo in infrastructures.items() %}
                 <tr>
-                    <td scope="row">
+                    <th scope="row">
                       <a id="desc_{{infId}}_a" href="#" onclick="$('#edit_dest_{{infId}}').modal('show');">
                       {% if infInfo["name"] != "" %}
                         {{infInfo["name"]}}
@@ -143,10 +143,10 @@
                         N/A
                       {% endif %}
                       </a>
-                    </td>
-                    <td>
+                    </th>
+                    <th>
                       {{infId}}
-                    </td>
+                    </th>
                     <td>
                       {% if "cloud_type" in infInfo and infInfo["cloud_type"] %}
                       <img height="35" src="{{ url_for('static', filename='images/' + infInfo['cloud_type'] + 'Row.png') }}"/>
