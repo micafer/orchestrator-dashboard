@@ -122,9 +122,9 @@
               <thead>
                 <tr>
                   <th style="width: 10%" scope="col">Name</th>
-                  <th style="width: 25%" scope="col">Infrastructure uuid</th>
-                  <th style="width: 5%" scope="col">Cloud Type</th>
-                  <th style="width: 20%" scope="col">Cloud Info</th>
+                  <th style="width: 25%; white-space: nowrap;" scope="col">Infrastructure uuid</th>
+                  <th style="width: 5%; white-space: nowrap;" scope="col">Cloud Type</th>
+                  <th style="width: 20%; white-space: nowrap;" scope="col">Cloud Info</th>
                   <th style="width: 10%" scope="col">Status</th>
                   <th style="width: 17%" scope="col">VMs</th>
                   <th style="width: 13%" scope="col">Actions</th>
@@ -147,16 +147,16 @@
                     <th>
                       {{infId}}
                     </th>
-                    <th>
+                    <td>
                       {% if "cloud_type" in infInfo and infInfo["cloud_type"] %}
                       <img height="35" src="{{ url_for('static', filename='images/' + infInfo['cloud_type'] + 'Row.png') }}"/>
                       {% endif %}
-                    </th>
-                    <th>
+                    </td>
+                    <td>
                       {% if "site" in infInfo %}
                       {{infInfo["site"]}}
                       {% endif %}
-                    </th>
+                    </td>
                     <td>
                       <div id="{{infId}}_state">
                        Loading <div style="display: none;" id="{{infId}}_state_spinner" class="spinner-border spinner-border-sm"></div>
