@@ -955,7 +955,8 @@ def create_app(oidc_blueprint=None):
             except Exception as ex:
                 flash("Error reading credentials %s!" % ex, 'error')
 
-            return render_template('modal_creds.html', creds=res, cred_id=cred_id, cred_type=cred_type)
+            return render_template('modal_creds.html', creds=res, cred_id=cred_id,
+                                   cred_type=cred_type, vos=utils.getUserVOs(session))
         else:
             app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
