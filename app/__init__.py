@@ -653,7 +653,7 @@ def create_app(oidc_blueprint=None):
     @app.route('/vos')
     def getvos():
         res = ""
-        for vo in utils.getUserVOs(session):
+        for vo in utils.getVOs(session):
             res += '<option name="selectedVO" value=%s>%s</option>' % (vo, vo)
         return res
 
@@ -950,7 +950,7 @@ def create_app(oidc_blueprint=None):
                 flash("Error reading credentials %s!" % ex, 'error')
 
             return render_template('modal_creds.html', creds=res, cred_id=cred_id,
-                                   cred_type=cred_type, vos=utils.getUserVOs(session))
+                                   cred_type=cred_type, vos=utils.getVOs(session))
         else:
             app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 

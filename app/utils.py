@@ -794,7 +794,7 @@ def get_project_ids(creds):
     return creds
 
 
-def getUserVOs(session):
+def getVOs(session):
     vos = getStaticVOs()
     vos.extend(appdb.get_vo_list())
     vos = list(set(vos))
