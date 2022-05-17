@@ -653,13 +653,7 @@ def create_app(oidc_blueprint=None):
     @app.route('/vos')
     def getvos():
         res = ""
-        vos = utils.getStaticVOs()
-        vos.extend(appdb.get_vo_list())
-        vos = list(set(vos))
-        vos.sort()
-        if "vos" in session and session["vos"]:
-            vos = [vo for vo in vos if vo in session["vos"]]
-        for vo in vos:
+        for vo in utils.getUserVOs(session):
             res += '<option name="selectedVO" value=%s>%s</option>' % (vo, vo)
         return res
 
