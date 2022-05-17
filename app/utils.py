@@ -792,3 +792,13 @@ def get_project_ids(creds):
                     cred['project_id'] = project_ids[cred['vo']]
 
     return creds
+
+
+def getVOs(session):
+    vos = getStaticVOs()
+    vos.extend(appdb.get_vo_list())
+    vos = list(set(vos))
+    vos.sort()
+    if "vos" in session and session["vos"]:
+        vos = [vo for vo in vos if vo in session["vos"]]
+    return vos

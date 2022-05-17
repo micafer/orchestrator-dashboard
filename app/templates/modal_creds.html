@@ -6,21 +6,6 @@
       });
     });
 
-    function loadVOs() {
-       $('#selectedVO').empty();
-       $('#selectedVO').append("<option value=''>Loading VOs ...</option>");
-       $.ajax({
-           method: "GET",
-           url: "{{ url_for('home') }}vos",
-           success : function(text)
-           {
-               $('#selectedVO').empty();
-               $('#selectedVO').append("<option value=''> - Select one VO - </option>");
-               $('#selectedVO').append(text);
-           }
-       });
-   }
-
     function loadSites() {
        $('#selectedSite').empty();
        $('#selectedSite').append("<option value=''>Loading Sites ...</option>");
@@ -231,15 +216,15 @@
         </div>
 
 {% elif cred_type == "fedcloud" %}
-        <script>
-          loadVOs();
-        </script>
 
         <div class="row form-group">
           <div class="col">
             <label>Select VO:</label>
             <select class="js-example-basic-single js-states form-control" id="selectedVO" name="vo" onchange="loadSites()" required>
-                <option name="selectedVO" value="">  </option>
+                <option name="selectedVO" value="">- Select one VO -</option>
+              {% for vo in vos %}
+                <option name="selectedVO" value="{{ vo }}">{{ vo }}</option>
+              {% endfor %}
             </select>
 
             <label>Select provider:</label>
