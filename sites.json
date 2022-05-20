@@ -106,12 +106,12 @@
         "url": "https://controller.ceta-ciemat.es:5000",
         "id": "7540G0",
         "vos": {
-            "eosc-synergy.eu": "0819ebde41fd4c0d95560fc23dc575a4",
-            "covid19.eosc-synergy.eu": "e3716e9fb6a241fd91469a6ee05358a1",
-            "o3as.data.kit.edu": "91b83525d63c48d78740e6799cfed2c4",
-            "worsica.vo.incd.pt": "38414631e27c485eae87f6dcb3082873",
-            "fedcloud.egi.eu": "aa7f62b244c946038c093d0bf05827a1",
-            "lagoproject.net": "9d234e59f4734ebdaf1e271067e40978"
+            "eosc-synergy.eu": "8e0f99db8b7845d38512f0ddce9049e3",
+            "covid19.eosc-synergy.eu": "4eda27e5514c496b9878e2b87a7c8515",
+            "o3as.data.kit.edu": "b8f5431e14e64c1ca2264f44ce6b0567",
+            "worsica.vo.incd.pt": "ef3e041a01a44915a3654c7c09af1fb1",
+            "fedcloud.egi.eu": "8ad2ac56f33540cdbfbd45ad5095d924",
+            "lagoproject.net": "3afddede673548a99dc5c2e819baf5a8"
         }
     },
     {
