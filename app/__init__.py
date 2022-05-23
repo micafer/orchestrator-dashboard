@@ -494,7 +494,7 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def template(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         template = ""
         try:
             response = im.get_inf_property(infid, 'tosca', auth_data)
@@ -534,7 +534,7 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def inflog(infid=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         log = "Not found"
         vms = 0
         try:
@@ -553,7 +553,7 @@ def create_app(oidc_blueprint=None):
     def vmlog(infid=None, vmid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         log = "Not found"
         try:
             response = im.get_vm_contmsg(infid, vmid, auth_data)
@@ -570,7 +570,7 @@ def create_app(oidc_blueprint=None):
     def infoutputs(infid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         outputs = {}
         try:
             response = im.get_inf_property(infid, 'outputs', auth_data)
@@ -597,7 +597,7 @@ def create_app(oidc_blueprint=None):
         infra_name = ""
         if inf_id:
             access_token = oidc_blueprint.session.token['access_token']
-            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+            auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
             try:
                 response = im.get_inf_property(inf_id, 'tosca', auth_data)
                 if not response.ok:
@@ -653,13 +653,7 @@ def create_app(oidc_blueprint=None):
     @app.route('/vos')
     def getvos():
         res = ""
-        vos = utils.getStaticVOs()
-        vos.extend(appdb.get_vo_list())
-        vos = list(set(vos))
-        vos.sort()
-        if "vos" in session and session["vos"]:
-            vos = [vo for vo in vos if vo in session["vos"]]
-        for vo in vos:
+        for vo in utils.getVOs(session):
             res += '<option name="selectedVO" value=%s>%s</option>' % (vo, vo)
         return res
 
@@ -955,7 +949,8 @@ def create_app(oidc_blueprint=None):
             except Exception as ex:
                 flash("Error reading credentials %s!" % ex, 'error')
 
-            return render_template('modal_creds.html', creds=res, cred_id=cred_id, cred_type=cred_type)
+            return render_template('modal_creds.html', creds=res, cred_id=cred_id,
+                                   cred_type=cred_type, vos=utils.getVOs(session))
         else:
             app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
@@ -1028,7 +1023,7 @@ def create_app(oidc_blueprint=None):
 
         access_token = oidc_blueprint.session.token['access_token']
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         try:
             response = im.get_inf_property(infid, 'radl', auth_data)
             if not response.ok:
