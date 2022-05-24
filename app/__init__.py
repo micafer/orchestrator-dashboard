@@ -599,6 +599,8 @@ def create_app(oidc_blueprint=None):
         selected_tosca = None
         inf_id = request.args.get('inf_id', None)
         childs = request.args.get('childs', None)
+        if childs:
+            childs = childs.split(",")
 
         inputs = {}
         infra_name = ""
@@ -626,6 +628,8 @@ def create_app(oidc_blueprint=None):
                             inputs[input_name] = input_value["default"]
                 if 'filename' in data['metadata'] and data['metadata']['filename']:
                     selected_tosca = data['metadata']['filename']
+                if 'childs' in data['metadata'] and data['metadata']['childs']:
+                    childs = data['metadata']['childs']
             except Exception as ex:
                 flash("Error getting TOSCA template inputs: \n%s" % ex, "error")
 
@@ -646,7 +650,7 @@ def create_app(oidc_blueprint=None):
         selected_template = copy.deepcopy(toscaInfo[selected_tosca])
         if "childs" in toscaInfo[selected_tosca]["metadata"]:
             if childs:
-                for child in childs.split(","):
+                for child in childs:
                     if child in toscaInfo:
                         child_templates[child] = toscaInfo[child]
                         if "inputs" in toscaInfo[child]:
