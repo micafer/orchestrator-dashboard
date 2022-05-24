@@ -673,10 +673,10 @@ def create_app(oidc_blueprint=None):
         utils.get_project_ids(creds)
 
         return render_template('createdep.html',
-                            template=selected_template,
-                            selectedTemplate=selected_tosca,
-                            creds=creds, input_values=inputs,
-                            infra_name=infra_name, child_templates=child_templates)
+                               template=selected_template,
+                               selectedTemplate=selected_tosca,
+                               creds=creds, input_values=inputs,
+                               infra_name=infra_name, child_templates=child_templates)
 
     @app.route('/vos')
     def getvos():
@@ -909,7 +909,7 @@ def create_app(oidc_blueprint=None):
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
-        
+
         for child in childs:
             with io.open(settings.toscaDir + child) as stream:
                 template = _merge_templates(template, yaml.full_load(stream))
