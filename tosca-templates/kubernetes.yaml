@@ -9,6 +9,7 @@ metadata:
   order: 5
   childs:
     - minio.yaml
+    - argo.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 

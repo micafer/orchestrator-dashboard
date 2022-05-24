@@ -27,11 +27,14 @@
                 {% if child_templates %}
                 <br><strong>AddOns: </strong>
                 {% for name, child_template in child_templates.items() %}
-                    {% if 'metadata' in child_template and 'name' in child_template['metadata'] and child_template['metadata']['name'] %}
-                    {{ child_template['metadata']['name'] }}, 
-                    {% else %}
-                    {{ name }}, 
-                    {% endif %}
+                    {%- if 'metadata' in child_template and 'name' in child_template['metadata'] and child_template['metadata']['name'] -%}
+                    {{ child_template['metadata']['name'] }}
+                    {%- else -%}
+                    {{ name }}
+                    {%- endif -%}
+                    {%- if loop.index != loop.length -%}
+                    ,
+                    {% endif -%}
                 {% endfor %}
                 {% endif %}
             </div>

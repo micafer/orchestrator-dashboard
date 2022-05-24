@@ -163,6 +163,11 @@ def create_app(oidc_blueprint=None):
         if "filter" in session:
             template_filter = session["filter"]
 
+        templates = {}
+        for name, tosca in toscaInfo.items():
+            if "parents" not in tosca["metadata"]:
+                templates[name] = tosca
+
         if template_filter:
             session["filter"] = template_filter
             templates = {}

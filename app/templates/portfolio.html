@@ -7,7 +7,8 @@
   function AddChild(link, template) {
     if (selected_templates.includes(template)) {
       document.getElementById(template).classList.remove("bg-success");
-      selected_templates.pop(template);
+      pos = selected_templates.indexOf(template);
+      selected_templates.splice(pos, 1)
       link.innerHTML = "<span class='fas fa-plus mr-2'></span>Add";
       link.classList.remove("badge-danger");
       link.classList.add("badge-primary");
@@ -90,8 +91,9 @@
 
   </div>
   {% if parent %}
-  <button type=button class='btn btn-outline-primary' onclick='location.href="{{ url_for('configure', selected_tosca=parent) }}&childs=" + selected_templates'>Create</button>
-
+  <div class="input-group mb-4">
+  <button type=button class='btn btn-outline-primary' onclick='location.href="{{ url_for('configure', selected_tosca=parent) }}&childs=" + selected_templates'>Configure</button>
+  </div>
   {% endif %}
 </div>
 
