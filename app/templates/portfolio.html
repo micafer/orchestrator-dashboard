@@ -6,14 +6,14 @@
   let selected_templates = Array();
   function AddChild(link, template) {
     if (selected_templates.includes(template)) {
-      document.getElementById(template).classList.remove("bg-success");
+      document.getElementById(template).classList.remove("selected-addon");
       pos = selected_templates.indexOf(template);
       selected_templates.splice(pos, 1)
       link.innerHTML = "<span class='fas fa-plus mr-2'></span>Add";
       link.classList.remove("badge-danger");
       link.classList.add("badge-primary");
     } else {
-      document.getElementById(template).classList.add("bg-success");
+      document.getElementById(template).classList.add("selected-addon");
       selected_templates.push(template);
       link.innerHTML = "<span class='fas fa-minus mr-2'></span>Remove";
       link.classList.remove("badge-primary");
@@ -131,6 +131,10 @@ $(".tosca-descr").dotdotdot({
 
 
 <style>
+
+.selected-addon {
+  background-color: rgb(9, 139, 179, 0.5);
+}
 
 .wrapper {
   position: relative;
