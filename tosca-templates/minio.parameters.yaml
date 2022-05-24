@@ -1,0 +1,9 @@
+inputs:
+    minio_accesskey:
+      tab: MinIO Data
+
+    minio_secretkey:
+      tab: MinIO Data
+
+tabs:
+  - MinIO Data

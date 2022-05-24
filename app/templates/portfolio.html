@@ -2,6 +2,25 @@
 {% block title %}Portfolio{% endblock %}
 {% block content %}
 
+<script>
+  let selected_templates = Array();
+  function AddChild(link, template) {
+    if (selected_templates.includes(template)) {
+      document.getElementById(template).classList.remove("bg-success");
+      selected_templates.pop(template);
+      link.innerHTML = "<span class='fas fa-plus mr-2'></span>Add";
+      link.classList.remove("badge-danger");
+      link.classList.add("badge-primary");
+    } else {
+      document.getElementById(template).classList.add("bg-success");
+      selected_templates.push(template);
+      link.innerHTML = "<span class='fas fa-minus mr-2'></span>Remove";
+      link.classList.remove("badge-primary");
+      link.classList.add("badge-danger");
+    }
+  } 
+</script>
+
 <div class="container mt-2" id="cardsContainer" xmlns="http://www.w3.org/1999/html">
   {% include 'flashed_messages.html' %}
     <div class="input-group mb-4">
@@ -10,6 +29,13 @@
       </div>
       <input id="cardFilter" class="form-control py-2 border" type="text" onkeyup="cardFilter()" placeholder="Search...">
     </div>
+    {% if parent %}
+    <div class="input-group mb-4">
+      <h5 class="font-weight-bold text-primary">
+        Select AddOns:
+      </h5>
+    </div>
+    {% endif %}
 
   <div class="card-deck">
 
@@ -18,7 +44,7 @@
     <div class="card-group">
     {% endif %}
 
-        <div class="card mb-4" style="width: 20rem; max-height: 25rem;">
+        <div class="card mb-4" style="width: 20rem; max-height: 25rem;" id="{{tosca_filename}}">
             <div class="card-body">
                 <h5 class="card-title text-center">
 		  <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
@@ -46,7 +72,11 @@
 		</h5>
                 <p id="toscaDescription" class="card-text tosca-descr"><small>{{tosca['description']}}</small></p>
                 <a selector="toscaDescription" class="text-left badge badge-pill badge-info read_more" tabindex="0" data-toggle="popover" title="Full description" data-trigger="focus" data-content="{{tosca['description']}}">Read More</a>
+                {% if parent %}
+                <a href="#" onclick="AddChild(this, '{{tosca_filename}}')" class="badge badge-pill badge-primary"><span class='fas fa-plus mr-2'></span>Add</a>
+                {% else %}
                 <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge badge-pill badge-primary">Configure</a>
+                {% endif %}
             </div>
         </div>
     {% if loop.index % 3 == 0 %}
@@ -57,7 +87,12 @@
     </div>
     {% endif %}
 
+
   </div>
+  {% if parent %}
+  <button type=button class='btn btn-outline-primary' onclick='location.href="{{ url_for('configure', selected_tosca=parent) }}&childs=" + selected_templates'>Create</button>
+
+  {% endif %}
 </div>
 
 <script>

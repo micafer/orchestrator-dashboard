@@ -24,10 +24,23 @@
                 {% if 'metadata' in template and 'web' in template['metadata'] and template['metadata']['web'] %}
                 (<a taget="_blank" href="{{template['metadata']['web']}}">{{template['metadata']['web']}}</a>)
                 {% endif %}
+                {% if child_templates %}
+                <br><strong>AddOns: </strong>
+                {% for name, child_template in child_templates.items() %}
+                    {% if 'metadata' in child_template and 'name' in child_template['metadata'] and child_template['metadata']['name'] %}
+                    {{ child_template['metadata']['name'] }}, 
+                    {% else %}
+                    {{ name }}, 
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
             </div>
 
             <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post" onsubmit="return onSubmit();">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                {% if child_templates %}
+                <input type="hidden" name="extra_opts.childs" value="{{ ','.join(child_templates.keys()) }}"/>
+                {% endif %}
                 <div class="form-group">
                     <label for="additional_description">Infrastructure Name</label>
                     <input type="text" class="form-control" id="infra_name" name="infra_name" placeholder="description" value="{{ infra_name }}" maxlength="60" required>

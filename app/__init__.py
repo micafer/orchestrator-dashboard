@@ -24,6 +24,7 @@ import yaml
 import io
 import os
 import logging
+import copy
 from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
@@ -177,7 +178,7 @@ def create_app(oidc_blueprint=None):
             session['userid'] = "a_very_long_user_id_00000000000000000000000000000000000000000000@egi.es"
             session['username'] = "username"
             session['gravatar'] = ""
-            return render_template('portfolio.html', templates=templates)
+            return render_template('portfolio.html', templates=templates, parent=None)
         else:
             if not oidc_blueprint.session.authorized:
                 return redirect(url_for('login'))
@@ -225,7 +226,7 @@ def create_app(oidc_blueprint=None):
                 else:
                     session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
 
-                return render_template('portfolio.html', templates=templates)
+                return render_template('portfolio.html', templates=templates, parent=None)
             else:
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
@@ -592,6 +593,7 @@ def create_app(oidc_blueprint=None):
     def configure():
         selected_tosca = None
         inf_id = request.args.get('inf_id', None)
+        childs = request.args.get('childs', None)
 
         inputs = {}
         infra_name = ""
@@ -635,7 +637,24 @@ def create_app(oidc_blueprint=None):
             flash("InvalidTOSCA template name: %s" % selected_tosca, "error")
             return redirect(url_for('home'))
 
-        app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
+        child_templates = {}
+        selected_template = copy.deepcopy(toscaInfo[selected_tosca])
+        if "childs" in toscaInfo[selected_tosca]["metadata"]:
+            if childs:
+                for child in childs.split(","):
+                    if child in toscaInfo:
+                        child_templates[child] = toscaInfo[child]
+                        if "inputs" in toscaInfo[child]:
+                            selected_template["inputs"].update(toscaInfo[child]["inputs"])
+                        if "tabs" in toscaInfo[child]:
+                            selected_template["tabs"].extend(toscaInfo[child]["tabs"])
+            else:
+                for child in toscaInfo[selected_tosca]["metadata"]["childs"]:
+                    if child in toscaInfo:
+                        child_templates[child] = toscaInfo[child]
+                return render_template('portfolio.html', templates=child_templates, parent=selected_tosca)
+        else:
+            app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
         try:
             creds = cred.get_creds(get_cred_id(), 1)
@@ -645,10 +664,10 @@ def create_app(oidc_blueprint=None):
         utils.get_project_ids(creds)
 
         return render_template('createdep.html',
-                               template=toscaInfo[selected_tosca],
-                               selectedTemplate=selected_tosca,
-                               creds=creds, input_values=inputs,
-                               infra_name=infra_name)
+                            template=selected_template,
+                            selectedTemplate=selected_tosca,
+                            creds=creds, input_values=inputs,
+                            infra_name=infra_name, child_templates=child_templates)
 
     @app.route('/vos')
     def getvos():
@@ -824,6 +843,14 @@ def create_app(oidc_blueprint=None):
 
         return template
 
+    def _merge_templates(template, new_template):
+        for item in ["inputs", "node_templates", "outputs"]:
+            if item in new_template["topology_template"]:
+                if item not in template["topology_template"]:
+                    template["topology_template"][item] = {}
+                template["topology_template"][item].update(new_template["topology_template"][item])
+        return template
+
     @app.route('/submit', methods=['POST'])
     @authorized_with_valid_token
     def createdep():
@@ -832,6 +859,9 @@ def create_app(oidc_blueprint=None):
 
         app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
+        childs = []
+        if 'extra_opts.childs' in form_data:
+            childs = form_data['extra_opts.childs'].split(",")
         cred_id = form_data['extra_opts.selectedCred']
         cred_data = cred.get_cred(cred_id, get_cred_id())
         access_token = oidc_blueprint.session.token['access_token']
@@ -870,10 +900,15 @@ def create_app(oidc_blueprint=None):
 
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
+        
+        for child in childs:
+            with io.open(settings.toscaDir + child) as stream:
+                template = _merge_templates(template, yaml.full_load(stream))
 
         if 'metadata' not in template:
             template['metadata'] = {}
         template['metadata']['filename'] = request.args.get('template')
+        template['metadata']['childs'] = childs
 
         if priv_network_id and pub_network_id:
             template = add_network_id_to_template(template, priv_network_id, pub_network_id)

@@ -7,6 +7,8 @@ metadata:
   display_name: Launch a Kubernetes Virtual Cluster
   icon: images/kubernetes.png
   order: 5
+  childs:
+    - minio.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 
