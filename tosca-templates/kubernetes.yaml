@@ -10,6 +10,7 @@ metadata:
   childs:
     - minio.yaml
     - argo.yaml
+    - influxdb.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 
