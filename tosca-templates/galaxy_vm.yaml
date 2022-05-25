@@ -7,11 +7,9 @@ description: >
   TOSCA template for deploying a Galaxy Server using a local LRMS.
 
 metadata:
-  name: Galaxy
   display_name: Deploy a Galaxy portal
   icon: images/galaxy.png
-  parents:
-   - single-node-disk.yml
+  tag: VM
 
 topology_template:
 

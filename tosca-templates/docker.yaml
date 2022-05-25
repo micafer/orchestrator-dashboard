@@ -1,0 +1,37 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: >
+  Launch a set of computing nodes with Docker and Docker Compose installed.
+
+metadata:
+  name: Docker + Compose
+  display_name: Install Docker + Docker Compose
+  icon: images/docker.png
+  parents:
+   - single-node-disk.yml
+
+topology_template:  
+
+  node_templates:
+
+    docker:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: simple_node 
+      artifacts:
+        docker_role:
+          file: grycap.docker
+          type: tosca.artifacts.AnsibleGalaxy.role
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/docker.yml
+
+  outputs:
+    node_ip:
+      value: { get_attribute: [ simple_node, public_address, 0 ] }
+    node_creds:
+      value: { get_attribute: [ simple_node, endpoint, credential, 0 ] }

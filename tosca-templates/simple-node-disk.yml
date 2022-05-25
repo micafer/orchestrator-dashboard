@@ -10,6 +10,9 @@ metadata:
   display_name: Start a virtual machine with extra HD
   icon: images/vm-icon-disk.png
   tag: VM
+  childs:
+   - docker.yaml
+   - galaxy.yaml
 
 topology_template:
 
