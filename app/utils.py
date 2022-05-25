@@ -288,7 +288,7 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                                 },
                                 "enable_config_form": False,
                                 "inputs": {},
-                                "tabs": {}}
+                                "tabs": []}
 
             if 'topology_template' not in template:
                 toscaInfo[tosca]["valid"] = False

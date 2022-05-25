@@ -173,10 +173,8 @@ def create_app(oidc_blueprint=None):
             templates = {}
             for k, v in toscaInfo.items():
                 if 'description' and v['description']:
-                    if v['description'].find(template_filter) != -1:
+                    if v['description'].find(template_filter) != -1 and "parents" not in tosca["metadata"]:
                         templates[k] = v
-        else:
-            templates = toscaInfo
 
         if settings.debug_oidc_token:
             session["vos"] = None

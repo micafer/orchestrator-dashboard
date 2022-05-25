@@ -10,6 +10,8 @@ metadata:
   name: Docker + Compose
   display_name: Install Docker + Docker Compose
   icon: images/docker.png
+  tag: SW
+  tag_color: blue
   parents:
    - single-node-disk.yml
 

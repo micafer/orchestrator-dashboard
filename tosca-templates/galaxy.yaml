@@ -10,24 +10,14 @@ metadata:
   name: Galaxy
   display_name: Deploy a Galaxy portal
   icon: images/galaxy.png
+  tag: SW
+  tag_color: blue
   parents:
    - single-node-disk.yml
 
 topology_template:
 
   inputs:
-    number_cpus:
-      type: integer
-      description: Number of cpus required for the Galaxy server
-      default: 1
-      constraints:
-      - valid_values: [ 1, 2, 4, 8, 16, 32, 64 ]
-    memory_size:
-      type: string
-      description: RAM memory required for the Galaxy server
-      default: 4 GB
-      constraints:
-      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
 
     admin_email:
       type: string
@@ -52,36 +42,14 @@ topology_template:
         admin_password: { get_input: admin_password }
       requirements:
         - lrms: local_lrms
-        - host: galaxy_server
+        - host: simple_node
 
     # type to describe a Galaxy not using any LRMS but using the local system
     local_lrms:
       type: tosca.nodes.indigo.LRMS.FrontEnd.Local
       requirements:
-        - host: galaxy_server
-
-    galaxy_server:
-      type: tosca.nodes.indigo.Compute
-      capabilities:
-        endpoint:
-          properties:
-            network_name: PUBLIC
-            ports:
-              http_port:
-                protocol: tcp
-                source: 80
-        # Host container properties
-        host:
-         properties:
-           num_cpus: { get_input: number_cpus }
-           mem_size: { get_input: memory_size }
-        # Guest Operating System properties
-        os:
-          properties:
-            # host Operating System image properties
-            type: linux
-            distribution: ubuntu
+        - host: simple_node
 
   outputs:
     galaxy_url:
-      value: { concat: [ 'https://', get_attribute: [ galaxy_server, public_address, 0 ], ':8443/' ] }
+      value: { concat: [ 'https://', get_attribute: [ simple_node, public_address, 0 ], ':8443/' ] }
