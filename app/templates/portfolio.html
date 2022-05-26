@@ -92,8 +92,10 @@
   </div>
   {% if parent %}
   <div class="input-group mb-4 justify-content-center align-items-center">
-  <button type=button class='btn btn-primary' onclick='location.href="{{ url_for('configure', selected_tosca=parent) }}&childs=" + selected_templates'>Configure</button>
-  </div>
+    <button type=button class="btn btn-outline-secondary" onclick="history.back()"><span class="fas fa-arrow-left mr-2"></span> Back</button>
+    &nbsp;
+    <button type=button class='btn btn-primary' onclick='location.href="{{ url_for('configure', selected_tosca=parent) }}&childs=" + selected_templates'>Configure <span class="fas fa-arrow-right mr-2"></span></button>
+</div>
   {% endif %}
 </div>
 
