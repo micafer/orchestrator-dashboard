@@ -11,6 +11,7 @@ metadata:
     - minio.yaml
     - argo.yaml
     - influxdb.yaml
+    - kubernetes_elastic.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 

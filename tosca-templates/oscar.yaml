@@ -8,6 +8,9 @@ metadata:
   icon: images/oscar.png
   order: 2
   web: https://grycap.github.io/oscar/
+  childs:
+    - oscar_elastic.yaml
+    - oscar_function.yaml
 
 description: Template for launching an OSCAR Virtual Cluster
 
