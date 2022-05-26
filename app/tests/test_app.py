@@ -342,9 +342,13 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.db_cred.DBCredentials.get_creds")
     def test_configure(self, get_creds, avatar):
         self.login(avatar)
+        res = self.client.get('/configure?selected_tosca=simple-node-disk.yml')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b"Select AddOns:", res.data)
+
         get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "vo": "voname"},
                                   {"id": "credid1", "type": "OpenStack", "host": "site_url1", "tenant_id": "tenid"}]
-        res = self.client.get('/configure?selected_tosca=simple-node-disk.yml')
+        res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&childs=users.yml')
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Launch a compute node getting the IP and SSH credentials to access via ssh", res.data)
         self.assertIn(b'<option data-tenant-id="" data-type="fedcloud" name="selectedCred" '
