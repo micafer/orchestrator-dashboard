@@ -1,0 +1,10 @@
+inputs:
+    admin_email:
+      tab: Galaxy Data
+
+    admin_password:
+      tab: Galaxy Data
+
+tabs:
+  - Galaxy Data
+
