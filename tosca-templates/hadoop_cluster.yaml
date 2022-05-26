@@ -6,6 +6,8 @@ imports:
 metadata:
   display_name: Launch a Hadoop Virtual Cluster
   icon: images/hadoop.jpg
+  childs:
+   - spark_hadoop.yaml
  
 description: TOSCA template for launching a Hadoop Cluster.
 

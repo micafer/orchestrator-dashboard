@@ -1,0 +1,43 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Spack
+  display_name: Add Sparck to the Hadoop Virtual Cluster
+  icon: images/hadoop_spark.png
+  parents:
+   - hadoop_cluster.yaml
+ 
+description: TOSCA template for launching a Hadoop Cluster with Spark.
+
+topology_template:
+
+  node_templates:
+
+    spark_wn:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: hadoop_wn 
+      artifacts:
+        docker_role:
+          file: grycap.spark
+          type: tosca.artifacts.AnsibleGalaxy.role
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/spark/spark_install.yml
+
+    spark_master:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: hadoop_server 
+      artifacts:
+        docker_role:
+          file: grycap.spark
+          type: tosca.artifacts.AnsibleGalaxy.role
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/spark/spark_install.yml

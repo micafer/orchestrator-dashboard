@@ -8,7 +8,7 @@ description: >
   (Search passwords in /var/tmp/passwordfile_userXX)
 
 metadata:
-  Name: Add Users
+  name: Add Users
   display_name: Add a set of users
   icon: images/user-icon.png
   tag: SYS

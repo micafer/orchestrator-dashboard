@@ -17,6 +17,16 @@ inputs:
     ports:
       tab: VM Data
 
+    num_gpus:
+      tab: GPU Data
+
+    gpu_vendor:
+      tab: GPU Data
+
+    gpu_model:
+      tab: GPU Data
 tabs:
   - VM Data
+  - GPU Data
+
 

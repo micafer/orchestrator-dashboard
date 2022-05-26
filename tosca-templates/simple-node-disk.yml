@@ -46,6 +46,24 @@ topology_template:
       type: string
       description: Path to mount the extra disk
       default: /mnt/disk
+
+    num_gpus:
+      type: integer
+      description: Number of GPUs to assing to this VM
+      default: 0
+      constraints:
+      - valid_values: [ 0, 1, 2, 3, 4 ]
+    gpu_vendor:
+      type: string
+      description: GPU Vendor
+      default: ''
+      constraints:
+      - valid_values: [ '', 'NVIDIA', 'AMD' ]
+    gpu_model:
+      type: string
+      description: GPU Model
+      default: ''
+
     ports:
       type: map
       entry_schema:
@@ -64,6 +82,9 @@ topology_template:
           properties:
             network_name: PUBLIC
             ports: { get_input: ports }
+            num_gpus: { get_input: num_gpus }
+            gpu_vendor: { get_input: gpu_vendor }
+            gpu_model: { get_input: gpu_model }
         scalable:
           properties:
             count: { get_input: num_instances }
