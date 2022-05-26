@@ -15,6 +15,7 @@ metadata:
    - docker.yaml
    - galaxy.yaml
    - users.yml
+   - ssh_keys.yml
 
 topology_template:
 

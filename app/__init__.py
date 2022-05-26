@@ -50,7 +50,7 @@ def create_app(oidc_blueprint=None):
     app = Flask(__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
     app.secret_key = "8210f566-4981-11ea-92d1-f079596e599b"
-    app.config.from_json('config.json')
+    app.config.from_file("config.json", load=json.load)
     settings = Settings(app.config)
     if settings.vault_url:
         cred = VaultCredentials(settings.vault_url)
