@@ -1,0 +1,22 @@
+inputs:
+    num_cpus:
+      tab: VM Data
+
+    mem_size:
+      tab: VM Data
+
+    num_instances:
+      tab: VM Data
+
+    storage_size:
+      tab: VM Data
+
+    mount_path:
+      tab: VM Data
+
+    ports:
+      tab: VM Data
+
+tabs:
+  - VM Data
+
