@@ -84,9 +84,6 @@ topology_template:
           properties:
             network_name: PUBLIC
             ports: { get_input: ports }
-            num_gpus: { get_input: num_gpus }
-            gpu_vendor: { get_input: gpu_vendor }
-            gpu_model: { get_input: gpu_model }
         scalable:
           properties:
             count: { get_input: num_instances }
@@ -94,6 +91,9 @@ topology_template:
           properties:
             num_cpus: { get_input: num_cpus }
             mem_size: { get_input: mem_size }
+            num_gpus: { get_input: num_gpus }
+            gpu_vendor: { get_input: gpu_vendor }
+            gpu_model: { get_input: gpu_model }
         os:
           properties:
             type: linux
