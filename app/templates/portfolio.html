@@ -76,7 +76,7 @@
                 {% if parent %}
                 <a href="#" onclick="AddChild(this, '{{tosca_filename}}')" class="badge badge-pill badge-primary"><span class='fas fa-plus mr-2'></span>Add</a>
                 {% else %}
-                <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge badge-pill badge-primary">Configure</a>
+                <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge badge-pill badge-primary">{% if 'childs' in tosca['metadata'] %}Select AddOns{% else %}Configure{% endif %}</a>
                 {% endif %}
             </div>
         </div>
@@ -260,7 +260,7 @@ function cardFilter() {
     cardContainer = document.getElementById("cardsContainer");
     cards = cardContainer.getElementsByClassName("card");
     for (i = 0; i < cards.length; i++) {
-        title = cards[i].querySelector(".card-body .card-title");
+        title = cards[i].querySelector(".card-text");
         if (title.innerText.toUpperCase().indexOf(filter) > -1) {
             cards[i].style.display = "";
         } else {
