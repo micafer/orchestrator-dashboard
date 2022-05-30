@@ -206,7 +206,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.post('/manage_inf/infid/stop')
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
                           ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
 
@@ -221,7 +221,7 @@ class IMDashboardTests(unittest.TestCase):
         params = {"token": "token"}
         res = self.client.post('/manage_inf/infid/change_user', data=params)
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
                           ("Infrastructure owner successfully changed.", 'success'))
 
@@ -247,7 +247,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.post('/managevm/stop/infid/0')
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/vminfo?infId=infid&vmId=0', res.headers['location'])
+        self.assertIn('/vminfo?infId=infid&vmId=0', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'success'))
 
     @patch("app.utils.getUserAuthData")
@@ -260,7 +260,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.post('/managevm/terminate/infid/0')
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0",
                                                        'success'))
 
@@ -274,7 +274,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.post('/manage_inf/infid/reconfigure')
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Reconfiguration process successfuly started.", 'success'))
 
     @patch("app.utils.getUserAuthData")
@@ -335,7 +335,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.post('/manage_inf/infid/delete')
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'success'))
 
     @patch("app.utils.avatar")
@@ -410,7 +410,7 @@ class IMDashboardTests(unittest.TestCase):
                   'mount_path': '/mnt/disk'}
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertIn('/infrastructures', res.headers['location'])
 
     @patch('app.utils.get_site_info')
     @patch("app.utils.getUserAuthData")
@@ -433,7 +433,7 @@ class IMDashboardTests(unittest.TestCase):
                   'mount_path': '/mnt/disk'}
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
-        self.assertIn('http://localhost/infrastructures', res.headers['location'])
+        self.assertIn('/infrastructures', res.headers['location'])
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_creds")
