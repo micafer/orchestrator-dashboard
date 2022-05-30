@@ -20,23 +20,26 @@
 # under the License.
 """Util functions."""
 
-import json
-import yaml
-import requests
-import os
-import io
 import ast
-import time
+import io
+import json
+import os
 import sys
-import urllib3
-from radl.radl_json import parse_radl
-from flask import flash, g
-from app import appdb
+import time
+from collections import OrderedDict
 from fnmatch import fnmatch
 from hashlib import md5
 from random import randint
-from collections import OrderedDict
+
+import requests
+import urllib3
+import yaml
+from flask import flash, g
+from radl.radl_json import parse_radl
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+from app import appdb
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -173,7 +176,11 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
     for cred in cred.get_creds(userid):
         if cred['enabled'] and (cred_id is None or cred_id == cred['id']):
             res += "\\nid = %s" % cred['id']
-            if cred['type'] != "fedcloud":
+            if cred['type'] == "CH":
+                # Add the Cloud&Heat provider as OpenStack
+                res += "; type = OpenStack; host = https://identity-f1a.cloudandheat.com:5000; auth_version = 3.x_password; "
+                res += " username = %s; tenant = %s; password = '%s'" % (cred['username'], cred['tenant'], cred['password'])
+            elif cred['type'] != "fedcloud":
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
                         res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
