@@ -178,7 +178,8 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
             res += "\\nid = %s" % cred['id']
             if cred['type'] == "CH":
                 # Add the Cloud&Heat provider as OpenStack
-                res += "; type = OpenStack; host = https://identity-f1a.cloudandheat.com:5000; auth_version = 3.x_password; "
+                res += "; type = OpenStack; auth_version = 3.x_password;"
+                res += " host = https://identity-%s.cloudandheat.com:5000;" % cred['region']
                 res += " username = %s; tenant = %s; password = '%s'" % (cred['username'], cred['tenant'], cred['password'])
             elif cred['type'] != "fedcloud":
                 for key, value in cred.items():
