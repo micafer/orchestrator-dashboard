@@ -181,6 +181,8 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
                 res += "; type = OpenStack; auth_version = 3.x_password;"
                 res += " host = https://identity-%s.cloudandheat.com:5000;" % cred['region']
                 res += " username = %s; tenant = %s; password = '%s'" % (cred['username'], cred['tenant'], cred['password'])
+                if "tenant_id" in cred:
+                    res += "; tenant_id = %s;" % cred["tenant_id"]
             elif cred['type'] != "fedcloud":
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
