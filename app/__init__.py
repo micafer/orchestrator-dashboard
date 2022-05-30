@@ -647,7 +647,7 @@ def create_app(oidc_blueprint=None):
         child_templates = {}
         selected_template = copy.deepcopy(toscaInfo[selected_tosca])
         if "childs" in toscaInfo[selected_tosca]["metadata"]:
-            if childs:
+            if childs is not None:
                 for child in childs:
                     if child in toscaInfo:
                         child_templates[child] = toscaInfo[child]
