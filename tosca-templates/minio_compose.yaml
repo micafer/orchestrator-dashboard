@@ -5,12 +5,12 @@ imports:
 
 metadata:
   name: MinIO
-  display_name: Launch MinIO server on top of a Kubernetes Virtual Cluster
-  icon: images/k8s_minio.png
+  display_name: Launch MinIO server
+  icon: images/minio.png
   parents:
     - kubernetes.yaml
 
-description: TOSCA template for launching Argo Workflows on top of a Kubernetes Virtual Cluster.
+description: Launch MinIO server.
 
 topology_template:
   inputs:
@@ -32,21 +32,19 @@ topology_template:
       type: tosca.nodes.ec3.Application
       artifacts:
         docker_role:
-          file: grycap.kubeminio
+          file: grycap.docker
           type: tosca.artifacts.AnsibleGalaxy.role
       interfaces:
         Standard:
           configure:
-            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/minio.yml
+            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/minio_compose.yaml
             inputs:
-                minio_accesskey: { get_input: minio_accesskey }
-                minio_secretkey: { get_input: minio_secretkey }
-                enable_ingress: true
+                admin_user: { get_input: minio_accesskey }
+                admin_pass: { get_input: minio_secretkey }
       requirements:
-        - host: front
-        - dependency: lrms_front_end
+        - host: simple_node
 
   outputs:
     minio_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':30300/' ] }
+      value: { concat: [ 'https://', get_attribute: [ front, simple_node, 0 ], ':9001/' ] }
 
