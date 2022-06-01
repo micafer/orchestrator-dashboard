@@ -8,7 +8,7 @@ metadata:
   display_name: Launch MinIO server
   icon: images/minio.png
   parents:
-    - kubernetes.yaml
+    - simple_node.yaml
 
 description: Launch MinIO server.
 

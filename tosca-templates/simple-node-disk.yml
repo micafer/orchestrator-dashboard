@@ -17,6 +17,7 @@ metadata:
    - galaxy.yaml
    - users.yml
    - ssh_keys.yml
+   - minio_compose.yaml
 
 topology_template:
 

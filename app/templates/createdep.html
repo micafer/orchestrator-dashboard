@@ -15,6 +15,19 @@
             {% else %}
             Template: {{selectedTemplate}}
             {% endif %}
+            {% if child_templates %}
+             + 
+            {% for name, child_template in child_templates.items() %}
+                {%- if 'metadata' in child_template and 'name' in child_template['metadata'] and child_template['metadata']['name'] -%}
+                {{ child_template['metadata']['name'] }}
+                {%- else -%}
+                {{ name }}
+                {%- endif -%}
+                {%- if loop.index != loop.length -%}
+                ,
+                {% endif -%}
+            {% endfor %}
+            {% endif %}
             </h4>
         </div>
 
@@ -23,19 +36,6 @@
                 <strong>Description:</strong> {{template['description']}}
                 {% if 'metadata' in template and 'web' in template['metadata'] and template['metadata']['web'] %}
                 (<a taget="_blank" href="{{template['metadata']['web']}}">{{template['metadata']['web']}}</a>)
-                {% endif %}
-                {% if child_templates %}
-                <br><strong>AddOns: </strong>
-                {% for name, child_template in child_templates.items() %}
-                    {%- if 'metadata' in child_template and 'name' in child_template['metadata'] and child_template['metadata']['name'] -%}
-                    {{ child_template['metadata']['name'] }}
-                    {%- else -%}
-                    {{ name }}
-                    {%- endif -%}
-                    {%- if loop.index != loop.length -%}
-                    ,
-                    {% endif -%}
-                {% endfor %}
                 {% endif %}
             </div>
 

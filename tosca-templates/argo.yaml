@@ -4,7 +4,7 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 metadata:
-  name: Argo CD
+  name: Argo Workflows
   display_name: Launch Argo Workflows on top of a Kubernetes Virtual Cluster
   icon: images/k8s_argo.png
   parents:
