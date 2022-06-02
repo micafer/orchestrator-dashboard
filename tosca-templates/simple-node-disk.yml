@@ -5,11 +5,19 @@ imports:
 
 description: >
   Launch a compute node getting the IP and SSH credentials to access via ssh with an extra HD disk.
+  Galaxy, Docker, Add Users and Add SSH Keys addons available.
 
 metadata:
   display_name: Start a virtual machine with extra HD
   icon: images/vm-icon-disk.png
   tag: VM
+  order: 1
+  childs:
+   - docker.yaml
+   - galaxy.yaml
+   - users.yml
+   - ssh_keys.yml
+   - minio_compose.yaml
 
 topology_template:
 
@@ -41,6 +49,24 @@ topology_template:
       type: string
       description: Path to mount the extra disk
       default: /mnt/disk
+
+    num_gpus:
+      type: integer
+      description: Number of GPUs to assing to this VM
+      default: 0
+      constraints:
+      - valid_values: [ 0, 1, 2, 3, 4 ]
+    gpu_vendor:
+      type: string
+      description: GPU Vendor
+      default: ''
+      constraints:
+      - valid_values: [ '', 'NVIDIA', 'AMD' ]
+    gpu_model:
+      type: string
+      description: GPU Model
+      default: ''
+
     ports:
       type: map
       entry_schema:
@@ -66,6 +92,9 @@ topology_template:
           properties:
             num_cpus: { get_input: num_cpus }
             mem_size: { get_input: mem_size }
+            num_gpus: { get_input: num_gpus }
+            gpu_vendor: { get_input: gpu_vendor }
+            gpu_model: { get_input: gpu_model }
         os:
           properties:
             type: linux

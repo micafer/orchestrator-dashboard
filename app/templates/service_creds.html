@@ -30,6 +30,7 @@
                 <a class="dropdown-item" data-id="" data-type="Kubernetes" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/KubernetesRow.png') }}"/></a>
                 <a class="dropdown-item" data-id="" data-type="InfrastructureManager" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/InfrastructureManagerRow.png') }}"/></a>
                 <a class="dropdown-item" data-id="" data-type="OSCAR" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OSCARRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="CH" data-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/CHRow.png') }}"/></a>
               </div>
             </div>
           </div> <!-- / .row -->
@@ -78,6 +79,9 @@
                         {% endif %}
                         {% if 'project' in cred%}
                         <strong>Project: </strong> {{cred["project"]}}
+                        {% endif %}
+                        {% if 'region' in cred%}
+                        <strong>Region: </strong> {{cred["region"]}}
                         {% endif %}
                       </td>
                       <td>

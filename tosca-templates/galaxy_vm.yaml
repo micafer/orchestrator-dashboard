@@ -1,0 +1,18 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: >
+  TOSCA template for deploying a Galaxy Server using a local LRMS.
+
+metadata:
+  display_name: Deploy a Galaxy portal
+  icon: images/galaxy.png
+  tag: VM
+  link: 
+    parent: simple-node-disk.yml
+    childs:
+      - galaxy.yaml
+
+topology_template: {}

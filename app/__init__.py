@@ -24,6 +24,7 @@ import yaml
 import io
 import os
 import logging
+import copy
 from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
@@ -49,7 +50,7 @@ def create_app(oidc_blueprint=None):
     app = Flask(__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
     app.secret_key = "8210f566-4981-11ea-92d1-f079596e599b"
-    app.config.from_json('config.json')
+    app.config.from_file("config.json", load=json.load)
     settings = Settings(app.config)
     if settings.vault_url:
         cred = VaultCredentials(settings.vault_url)
@@ -162,22 +163,25 @@ def create_app(oidc_blueprint=None):
         if "filter" in session:
             template_filter = session["filter"]
 
+        templates = {}
+        for name, tosca in toscaInfo.items():
+            if "parents" not in tosca["metadata"]:
+                templates[name] = tosca
+
         if template_filter:
             session["filter"] = template_filter
             templates = {}
             for k, v in toscaInfo.items():
                 if 'description' and v['description']:
-                    if v['description'].find(template_filter) != -1:
+                    if v['description'].find(template_filter) != -1 and "parents" not in tosca["metadata"]:
                         templates[k] = v
-        else:
-            templates = toscaInfo
 
         if settings.debug_oidc_token:
             session["vos"] = None
             session['userid'] = "a_very_long_user_id_00000000000000000000000000000000000000000000@egi.es"
             session['username'] = "username"
             session['gravatar'] = ""
-            return render_template('portfolio.html', templates=templates)
+            return render_template('portfolio.html', templates=templates, parent=None)
         else:
             if not oidc_blueprint.session.authorized:
                 return redirect(url_for('login'))
@@ -225,7 +229,7 @@ def create_app(oidc_blueprint=None):
                 else:
                     session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
 
-                return render_template('portfolio.html', templates=templates)
+                return render_template('portfolio.html', templates=templates, parent=None)
             else:
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
@@ -592,6 +596,9 @@ def create_app(oidc_blueprint=None):
     def configure():
         selected_tosca = None
         inf_id = request.args.get('inf_id', None)
+        childs = request.args.get('childs', None)
+        if childs:
+            childs = childs.split(",")
 
         inputs = {}
         infra_name = ""
@@ -619,6 +626,8 @@ def create_app(oidc_blueprint=None):
                             inputs[input_name] = input_value["default"]
                 if 'filename' in data['metadata'] and data['metadata']['filename']:
                     selected_tosca = data['metadata']['filename']
+                if 'childs' in data['metadata'] and data['metadata']['childs']:
+                    childs = data['metadata']['childs']
             except Exception as ex:
                 flash("Error getting TOSCA template inputs: \n%s" % ex, "error")
 
@@ -635,7 +644,24 @@ def create_app(oidc_blueprint=None):
             flash("InvalidTOSCA template name: %s" % selected_tosca, "error")
             return redirect(url_for('home'))
 
-        app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
+        child_templates = {}
+        selected_template = copy.deepcopy(toscaInfo[selected_tosca])
+        if "childs" in toscaInfo[selected_tosca]["metadata"]:
+            if childs is not None:
+                for child in childs:
+                    if child in toscaInfo:
+                        child_templates[child] = toscaInfo[child]
+                        if "inputs" in toscaInfo[child]:
+                            selected_template["inputs"].update(toscaInfo[child]["inputs"])
+                        if "tabs" in toscaInfo[child]:
+                            selected_template["tabs"].extend(toscaInfo[child]["tabs"])
+            else:
+                for child in toscaInfo[selected_tosca]["metadata"]["childs"]:
+                    if child in toscaInfo:
+                        child_templates[child] = toscaInfo[child]
+                return render_template('portfolio.html', templates=child_templates, parent=selected_tosca)
+        else:
+            app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
         try:
             creds = cred.get_creds(get_cred_id(), 1)
@@ -645,10 +671,10 @@ def create_app(oidc_blueprint=None):
         utils.get_project_ids(creds)
 
         return render_template('createdep.html',
-                               template=toscaInfo[selected_tosca],
+                               template=selected_template,
                                selectedTemplate=selected_tosca,
                                creds=creds, input_values=inputs,
-                               infra_name=infra_name)
+                               infra_name=infra_name, child_templates=child_templates)
 
     @app.route('/vos')
     def getvos():
@@ -824,6 +850,14 @@ def create_app(oidc_blueprint=None):
 
         return template
 
+    def _merge_templates(template, new_template):
+        for item in ["inputs", "node_templates", "outputs"]:
+            if item in new_template["topology_template"]:
+                if item not in template["topology_template"]:
+                    template["topology_template"][item] = {}
+                template["topology_template"][item].update(new_template["topology_template"][item])
+        return template
+
     @app.route('/submit', methods=['POST'])
     @authorized_with_valid_token
     def createdep():
@@ -832,6 +866,9 @@ def create_app(oidc_blueprint=None):
 
         app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
+        childs = []
+        if 'extra_opts.childs' in form_data:
+            childs = form_data['extra_opts.childs'].split(",")
         cred_id = form_data['extra_opts.selectedCred']
         cred_data = cred.get_cred(cred_id, get_cred_id())
         access_token = oidc_blueprint.session.token['access_token']
@@ -871,9 +908,14 @@ def create_app(oidc_blueprint=None):
         with io.open(settings.toscaDir + request.args.get('template')) as stream:
             template = yaml.full_load(stream)
 
+        for child in childs:
+            with io.open(settings.toscaDir + child) as stream:
+                template = _merge_templates(template, yaml.full_load(stream))
+
         if 'metadata' not in template:
             template['metadata'] = {}
         template['metadata']['filename'] = request.args.get('template')
+        template['metadata']['childs'] = childs
 
         if priv_network_id and pub_network_id:
             template = add_network_id_to_template(template, priv_network_id, pub_network_id)

@@ -8,45 +8,16 @@ description: >
 
 
 metadata:
-  display_name: SLURM virtual cluster with a GlusterFS shared Volume. 
+  name: GlusterFS
+  display_name: Add a GlusterFS shared Volume.
   icon: images/slurm_glusterfs.png
   tag: beta
+  parents:
+   - slurm_cluster.yaml
 
 topology_template:
   inputs:
-    wn_num:
-      type: integer
-      description: Number of WNs in the cluster
-      default: 2
-      required: yes
-    fe_cpus:
-      type: integer
-      description: Number of CPUs for the front-end node
-      default: 1
-      required: yes
-      constraints:
-      - valid_values: [ 1, 2, 4, 8, 16, 32, 64 ]
-    fe_mem:
-      type: scalar-unit.size
-      description: Amount of Memory for the front-end node
-      default: 1 GB
-      required: yes
-      constraints:
-      - valid_values: [ 1 GB, 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
-    wn_cpus:
-      type: integer
-      description: Number of CPUs for the WNs
-      default: 1
-      required: yes
-      constraints:
-      - valid_values: [ 1, 2, 4, 8, 16, 32, 64 ]
-    wn_mem:
-      type: scalar-unit.size
-      description: Amount of Memory for the WNs
-      default: 1 GB
-      required: yes
-      constraints:
-      - valid_values: [ 1 GB, 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+
     gluster_mount_path:
       type: string
       description: Path where GlusterFS volume will be mounted
@@ -55,7 +26,7 @@ topology_template:
     gluster_replicas:
       type: integer
       description: Number of replicas of the GlusterFS volume
-      default: 2
+      default: 1
       required: no
 
   node_templates:
@@ -68,15 +39,7 @@ topology_template:
         fe_ip: { get_attribute: [ lrms_server, private_address, 0 ] }
         brick_dir: /data
         brick_name: volname
-        replicas: 2
-
-    lrms_front_end:
-      type: tosca.nodes.indigo.LRMS.FrontEnd.Slurm
-      properties:
-        wn_ips: { get_attribute: [ lrms_wn, private_address ] }
-        nfs: false
-      requirements:
-        - host: lrms_server
+        replicas: { get_input: [ gluster_replicas ] }
 
     lrms_server:
       type: tosca.nodes.indigo.Compute
@@ -91,8 +54,6 @@ topology_template:
             mem_size: { get_input: fe_mem }
         os:
           properties:
-            distribution: ubuntu
-            version: 18.04
             type: linux
       artifacts:
         glusterfs_role:
@@ -140,8 +101,6 @@ topology_template:
             mem_size: { get_input: wn_mem }
         os:
           properties:
-            distribution: ubuntu
-            version: 18.04
             type: linux
       artifacts:
         glusterfs_role:
@@ -168,8 +127,4 @@ topology_template:
                       gluster_options: { get_property: [ TARGET, options ] }
                       gluster_replicas: { get_property: [ TARGET, replicas ] }
 
-  outputs:
-    cluster_ip:
-      value: { get_attribute: [ lrms_server, public_address, 0 ] }
-    cluster_creds:
-      value: { get_attribute: [ lrms_server, endpoint, credential, 0 ] }
+

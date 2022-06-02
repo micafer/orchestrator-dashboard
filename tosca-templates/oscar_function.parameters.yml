@@ -1,33 +1,4 @@
 inputs:
-    wn_num:
-      tab: HW Data
-
-    fe_cpus:
-      tab: HW Data
-
-    fe_mem:
-      tab: HW Data
-
-    wn_cpus:
-      tab: HW Data
-
-    wn_mem:
-      tab: HW Data
-    
-    storage_size:
-      tab: HW Data
-
-    admin_token:
-      tab: OSCAR parameters
-
-    oscar_password:
-      tab: OSCAR parameters
-
-    minio_password:
-      tab: OSCAR parameters
-
-    cert_user_email:
-      tab: OSCAR parameters
 
     function_name:
       tab: OSCAR function
@@ -54,6 +25,4 @@ inputs:
       tab: OSCAR function
 
 tabs:
-  - HW Data
-  - OSCAR parameters
   - OSCAR function

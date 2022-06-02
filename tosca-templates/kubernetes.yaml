@@ -7,6 +7,11 @@ metadata:
   display_name: Launch a Kubernetes Virtual Cluster
   icon: images/kubernetes.png
   order: 5
+  childs:
+    - minio.yaml
+    - argo.yaml
+    - influxdb.yaml
+    - kubernetes_elastic.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 

@@ -39,7 +39,9 @@ class TestUtils(unittest.TestCase):
             cred.get_creds.return_value = [{'enabled': 1, 'type': 'OpenNebula', 'id': 'one',
                                             'username': 'user', 'password': 'pass'},
                                            {'enabled': 1, 'type': 'fedcloud', 'id': 'fed',
-                                            'host': 'https://api.cloud.ifca.es:5000', 'vo': 'vo_name'}]
+                                            'host': 'https://api.cloud.ifca.es:5000', 'vo': 'vo_name'},
+                                           {'enabled': 1, 'type': 'CH', 'id': 'ch', 'region': 'f1a',
+                                            'username': 'user', 'password': 'pass', 'tenant': 'tenant'}]
             getCachedSiteList.return_value = {
                 'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '11548G0'},
                 'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca'}
@@ -53,7 +55,10 @@ class TestUtils(unittest.TestCase):
                                     " username = user; password = pass\\n"
                                     "id = fed; type = OpenStack; username = egi.eu;"
                                     " tenant = openid; auth_version = 3.x_oidc_access_token; host ="
-                                    " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id"))
+                                    " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id\\n"
+                                    "id = ch; type = OpenStack; auth_version = 3.x_password;"
+                                    " host = https://identity-f1a.cloudandheat.com:5000; username = user;"
+                                    " tenant = tenant; password = 'pass'"))
 
             flask_context.g.settings.im_auth = "Bearer"
             res = utils.getUserAuthData("token", cred, "user")

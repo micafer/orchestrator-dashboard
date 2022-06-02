@@ -10,7 +10,10 @@ description: >
 metadata:
   display_name: SLURM virtual cluster
   icon: images/slurm.png
-
+  childs:
+   - slurm_elastic.yaml
+   - slurm_galaxy.yml
+   - glusterfs.yml
 
 topology_template:
   inputs:

@@ -1,0 +1,22 @@
+inputs:
+
+    org_name:
+      tab: InfluxDB Data
+
+    bucket_name:
+      tab: InfluxDB Data
+
+    admin_username:
+      tab: InfluxDB Data
+
+    admin_password:
+      tab: InfluxDB Data
+
+    admin_token:
+      tab: InfluxDB Data
+
+    grafana_password:
+      tab: InfluxDB Data
+
+tabs:
+  - InfluxDB Data

@@ -1,0 +1,8 @@
+inputs:
+    ssh_key:
+      tab: SSH Data
+      tag_type: textarea
+
+tabs:
+  - SSH Data
+

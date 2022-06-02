@@ -1,0 +1,39 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: >
+  Launch a compute node getting the IP and SSH credentials to access via ssh and with pre-created users 
+  (Search passwords in /var/tmp/passwordfile_userXX)
+
+metadata:
+  name: Add Users
+  display_name: Add a set of users
+  icon: images/user-icon.png
+  tag: SYS
+  tag_color: purple
+  parents:
+    - single-node-disk.yml
+
+topology_template:
+
+  inputs:        
+
+    user_num:
+      type: integer
+      description: Number of users to be created in the VM
+      default: 1
+
+  node_templates:
+
+    create_users:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: simple_node 
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/create_users.yml
+            inputs:
+              user_num: { get_input: user_num }

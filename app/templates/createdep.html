@@ -15,6 +15,19 @@
             {% else %}
             Template: {{selectedTemplate}}
             {% endif %}
+            {% if child_templates %}
+             + 
+            {% for name, child_template in child_templates.items() %}
+                {%- if 'metadata' in child_template and 'name' in child_template['metadata'] and child_template['metadata']['name'] -%}
+                {{ child_template['metadata']['name'] }}
+                {%- else -%}
+                {{ name }}
+                {%- endif -%}
+                {%- if loop.index != loop.length -%}
+                ,
+                {% endif -%}
+            {% endfor %}
+            {% endif %}
             </h4>
         </div>
 
@@ -28,6 +41,9 @@
 
             <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post" onsubmit="return onSubmit();">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                {% if child_templates %}
+                <input type="hidden" name="extra_opts.childs" value="{{ ','.join(child_templates.keys()) }}"/>
+                {% endif %}
                 <div class="form-group">
                     <label for="additional_description">Infrastructure Name</label>
                     <input type="text" class="form-control" id="infra_name" name="infra_name" placeholder="description" value="{{ infra_name }}" maxlength="60" required>
@@ -58,7 +74,7 @@
 
 function onSubmit() {
 {% if g.analytics_tag %}
-    gtag('event', 'submit', {'event_category' : '{{selectedTemplate}}', 'event_label' : 'Submit'});
+    gtag('event', 'submit', {'event_category' : '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}', 'event_label' : 'Submit'});
 {% endif %}
     return true;
 }

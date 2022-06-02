@@ -4,13 +4,13 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 metadata:
-  display_name: Launch Argo Workflows on top of a Kubernetes Virtual Cluster
-  icon: images/k8s_argo.png
+  display_name: Launch MinIO server on top of a Kubernetes Virtual Cluster
+  icon: images/k8s_minio.png
   link: 
     parent: kubernetes.yaml
     childs:
-      - argo.yaml
+      - minio.yaml
 
-description: TOSCA template for launching Argo Workflows on top of a Kubernetes Virtual Cluster.
+description: Launch MinIO server on top of a Kubernetes Virtual Cluster.
 
 topology_template: {}

@@ -5,13 +5,13 @@ imports:
 
 metadata:
   name: Elastic
-  display_name: Make Kubernetes Virtual Cluster Elastic
+  display_name: Make SLURM Virtual Cluster Elastic
   icon: images/elasticity.png
   tag: elastic
   parents:
-   - kubernetes.yaml
+   - slurm_cluster.yaml
 
-description: TOSCA template for launching a Elastic Kubernetes Virtual Cluster.
+description: TOSCA template for launching a Elastic SLURM Virtual Cluster.
 
 topology_template:
   inputs:
@@ -56,17 +56,14 @@ topology_template:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/use_external_im.yml
 
     wn_node:
-      type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes
+      type: tosca.nodes.indigo.LRMS.WorkerNode.Slurm
       capabilities:
         wn:
           properties:
             max_instances: { get_input: max_wn_num }
             min_instances: 0
       properties:
-        front_end_ip: { get_attribute: [ front, private_address, 0 ] }
-        version: { get_input: kube_version }
-        nvidia_support: { get_input: kube_nvidia_support }
-        cri_runtime: { get_input: cri_runtime }
+        front_end_ip: { get_attribute: [ lrms_server, private_address, 0 ] }
+        public_front_end_ip: { get_attribute: [ lrms_server, public_address, 0 ] }
       requirements:
-        - host: wn
-
+        - host: lrms_wn
