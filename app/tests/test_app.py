@@ -344,7 +344,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b"Select AddOns:", res.data)
+        self.assertIn(b"Select Optional Features:", res.data)
 
         get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "vo": "voname"},
                                   {"id": "credid1", "type": "OpenStack", "host": "site_url1", "tenant_id": "tenid"}]
