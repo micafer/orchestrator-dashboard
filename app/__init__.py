@@ -142,7 +142,8 @@ def create_app(oidc_blueprint=None):
         else:
             access_token = oidc_blueprint.session.token['access_token']
         return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=imUrl,
-                               access_token=access_token, vault_url=settings.vault_url)
+                               access_token=access_token, vault_url=settings.vault_url,
+                               version=settings.version)
 
     @app.route('/login')
     def login():
