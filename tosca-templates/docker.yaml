@@ -17,6 +17,20 @@ metadata:
 
 topology_template:  
 
+  inputs:
+
+    nvidia_support:
+      type: boolean
+      description: Flag to add the NVIDIA drivers and NVIDIA-Docker packages
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
+
+    driver_version:
+      type: string
+      description: NVIDIA Driver version to install
+      default: "510"
+
   node_templates:
 
     docker:
@@ -31,9 +45,7 @@ topology_template:
         Standard:
           configure:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/docker.yml
+            inputs:
+              docker_nvidia_support: { get_input: nvidia_support }
+              docker_nvidia_driver_version: { get_input: driver_version }
 
-  outputs:
-    node_ip:
-      value: { get_attribute: [ simple_node, public_address, 0 ] }
-    node_creds:
-      value: { get_attribute: [ simple_node, endpoint, credential, 0 ] }
