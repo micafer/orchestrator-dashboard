@@ -28,12 +28,22 @@ topology_template:
 
   node_templates:
 
-    argo:
+    minio:
       type: tosca.nodes.ec3.Application
       artifacts:
         docker_role:
           file: grycap.kubeminio
           type: tosca.artifacts.AnsibleGalaxy.role
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              minio:
+                protocol: tcp
+                source: 30300
+              minio_console:
+                protocol: tcp
+                source: 30303
       interfaces:
         Standard:
           configure:
