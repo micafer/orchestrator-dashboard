@@ -4,8 +4,8 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 metadata:
-  name: InfluxDB
-  display_name: Launch an InfluxDB on top of a Kubernetes Virtual Cluster
+  name: Prometheus
+  display_name: Launch Prometheus + Grafana  on top of a Kubernetes Virtual Cluster
   icon: images/prometheus.png
   parents:
    - kubernetes.yaml
@@ -35,13 +35,12 @@ topology_template:
             ingress:
               enabled: true
               ingressClassName: nginx
-              paths: ["/grafana"]
+              paths: ['/grafana']
             grafana.ini:
               server:
-                root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
+                root_url: '%(protocol)s://%(domain)s:%(http_port)s/grafana/'
                 serve_from_sub_path: true
         values: 
-          grafana.ingress.hosts: []
           grafana.adminPassword: grycap01
       requirements:
         - host: front
