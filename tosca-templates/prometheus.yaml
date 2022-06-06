@@ -1,0 +1,52 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: InfluxDB
+  display_name: Launch an InfluxDB on top of a Kubernetes Virtual Cluster
+  icon: images/prometheus.png
+  parents:
+   - kubernetes.yaml
+
+description: TOSCA template for launching an Prometheus + Grafana on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+  inputs:
+
+    admin_password:
+      type: string
+      description: Password of the Grafana admin user (user admin)
+      default: adminpass
+
+
+  node_templates:
+
+    prometheus:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: prometheus
+        repository_name: prometheus-community
+        repository_url: "https://prometheus-community.github.io/helm-charts"
+        name: kube-prometheus-stack
+        values_file: |
+          grafana:
+            ingress:
+              enabled: true
+              ingressClassName: nginx
+              paths: ["/grafana"]
+            grafana.ini:
+              server:
+                root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
+                serve_from_sub_path: true
+        values: 
+          grafana.ingress.hosts: []
+          grafana.adminPassword: grycap01
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
+
+  outputs:
+    grafana_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/grafana/' ] }
