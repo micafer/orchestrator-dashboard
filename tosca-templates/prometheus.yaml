@@ -41,7 +41,7 @@ topology_template:
                 root_url: '%(protocol)s://%(domain)s:%(http_port)s/grafana/'
                 serve_from_sub_path: true
         values: 
-          grafana.adminPassword: grycap01
+          grafana.adminPassword: { get_input: admin_password }
       requirements:
         - host: front
         - dependency: lrms_front_end
