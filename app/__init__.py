@@ -1235,6 +1235,35 @@ def create_app(oidc_blueprint=None):
 
         return redirect(url_for('get_ssh_keys'))
 
+    @app.route('/changeimage/<infid>', methods=['GET', 'POST'])
+    @authorized_with_valid_token
+    def changeimage(infid=None):
+
+        if request.method == 'GET':
+            access_token = oidc_blueprint.session.token['access_token']
+
+            auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
+            try:
+                response = im.get_inf_property(infid, 'radl', auth_data)
+                if not response.ok:
+                    raise Exception(response.text)
+
+                try:
+                    radl = radl_parse.parse_radl(response.text)
+                    image_url = urlparse(radl.systems[0].getValue('disk.0.image.url'))
+                except Exception as ex:
+                    flash("Error parsing RADL: \n%s" % str(ex), 'error')
+
+                return render_template('change_image.html', infid=infid, image_url=image_url)
+            except Exception as ex:
+                flash("Error getting RADL: \n%s" % ex, 'error')
+                return redirect(url_for('showinfrastructures'))
+            
+        else:    
+            key = request.form['sshkey']
+
+        return redirect(url_for('get_ssh_keys'))
+
     @app.route('/logout')
     def logout():
         session.clear()
