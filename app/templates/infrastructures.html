@@ -178,7 +178,7 @@
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu">
-                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="{{ url_for('addresourcesform', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
+                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="{{ url_for('addresources', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
                           <a id="template_{{infId}}_a" class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
                           <a id="log_{{infId}}_a" class="dropdown-item" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
                           <a id="outputs_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#outputs_{{infId}}').modal('show');"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>

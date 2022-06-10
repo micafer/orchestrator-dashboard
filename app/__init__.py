@@ -1060,72 +1060,87 @@ def create_app(oidc_blueprint=None):
 
         return redirect(url_for('manage_creds'))
 
-    @app.route('/addresourcesform/<infid>')
-    @authorized_with_valid_token
-    def addresourcesform(infid=None):
-
-        access_token = oidc_blueprint.session.token['access_token']
-
-        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
-        try:
-            response = im.get_inf_property(infid, 'radl', auth_data)
-            if not response.ok:
-                raise Exception(response.text)
-
-            systems = []
-            try:
-                radl = radl_parse.parse_radl(response.text)
-                systems = radl.systems
-            except Exception as ex:
-                flash("Error parsing RADL: \n%s" % str(ex), 'error')
-
-            return render_template('addresource.html', infid=infid, systems=systems)
-        except Exception as ex:
-            flash("Error getting RADL: \n%s" % ex, 'error')
-            return redirect(url_for('showinfrastructures'))
-
-    @app.route('/addresources/<infid>', methods=['POST'])
+    @app.route('/addresources/<infid>', methods=['POST', 'GET'])
     @authorized_with_valid_token
     def addresources(infid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
-        form_data = request.form.to_dict()
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
-        try:
-            response = im.get_inf_property(infid, 'radl', auth_data)
-        except Exception as ex:
-            flash("Error: %s." % ex, 'error')
-
-        if response.ok:
-            radl = None
+        if request.method == 'GET':
+            auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
             try:
-                radl = radl_parse.parse_radl(response.text)
-                radl.deploys = []
-                for system in radl.systems:
-                    sys_dep = deploy(system.name, 0)
-                    if "%s_num" % system.name in form_data:
-                        vm_num = int(form_data["%s_num" % system.name])
-                        if vm_num > 0:
-                            sys_dep.vm_number = vm_num
-                    radl.deploys.append(sys_dep)
-            except Exception as ex:
-                flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
+                response = im.get_inf_property(infid, 'radl', auth_data)
+                if not response.ok:
+                    raise Exception(response.text)
 
-            if radl:
+                systems = []
+                image_url_str = None
+                image_url = None
                 try:
-                    response = im.addresource_inf(infid, str(radl), auth_data)
+                    radl = radl_parse.parse_radl(response.text)
+                    systems = radl.systems
+                    image_url_str = systems[0].getValue("disk.0.image.url")
+                    image_url = urlparse(image_url_str)
+                except Exception as ex:
+                    flash("Error parsing RADL: \n%s" % str(ex), 'error')
+
+                images = None
+                try:
+                    infra_data = infra.get_infra(infid)
+                    cred_id = infra_data["site"]["id"]
+                    auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
+                    response = im.get_cloud_images(cred_id, auth_data)
                     if not response.ok:
                         raise Exception(response.text)
-                    num = len(response.json()["uri-list"])
-                    flash("%d nodes added successfully" % num, 'success')
+                    images = [(image['uri'], image['name'], image['uri'] == image_url_str) for image in response.json()["images"]]
                 except Exception as ex:
-                    flash("Error adding nodes: \n%s\n%s" % (ex, response.text), 'error')
+                    app.logger.warn('Error getting site images: %s', (ex))
 
-            return redirect(url_for('showinfrastructures'))
+                return render_template('addresource.html', infid=infid, systems=systems,
+                                       image_url=image_url, images=images)
+            except Exception as ex:
+                flash("Error getting RADL: \n%s" % ex, 'error')
+                return redirect(url_for('showinfrastructures'))
         else:
-            flash("Error getting RADL: \n%s" % (response.text), 'error')
-            return redirect(url_for('showinfrastructures'))
+            form_data = request.form.to_dict()
+
+            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+            try:
+                response = im.get_inf_property(infid, 'radl', auth_data)
+            except Exception as ex:
+                flash("Error: %s." % ex, 'error')
+
+            if response.ok:
+                radl = None
+                try:
+                    radl = radl_parse.parse_radl(response.text)
+                    radl.deploys = []
+                    for system in radl.systems:
+                        if 'newImage' in form_data and form_data['newImage']:
+                            system.setValue('disk.0.image.url', form_data['newImage'])
+                        sys_dep = deploy(system.name, 0)
+                        if "%s_num" % system.name in form_data:
+                            vm_num = int(form_data["%s_num" % system.name])
+                            if vm_num > 0:
+                                sys_dep.vm_number = vm_num
+                        radl.deploys.append(sys_dep)
+                except Exception as ex:
+                    flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
+
+                if radl:
+                    try:
+                        response = im.addresource_inf(infid, str(radl), auth_data)
+                        if not response.ok:
+                            raise Exception(response.text)
+                        num = len(response.json()["uri-list"])
+                        flash("%d nodes added successfully" % num, 'success')
+                    except Exception as ex:
+                        flash("Error adding nodes: \n%s\n%s" % (ex, response.text), 'error')
+
+                return redirect(url_for('showinfrastructures'))
+            else:
+                flash("Error getting RADL: \n%s" % (response.text), 'error')
+                return redirect(url_for('showinfrastructures'))
 
     @app.route('/manage_inf/<infid>/<op>', methods=['POST'])
     @authorized_with_valid_token
@@ -1232,35 +1247,6 @@ def create_app(oidc_blueprint=None):
             return redirect(url_for('get_ssh_keys'))
 
         ssh_key.write_ssh_key(session['userid'], key, desc)
-
-        return redirect(url_for('get_ssh_keys'))
-
-    @app.route('/changeimage/<infid>', methods=['GET', 'POST'])
-    @authorized_with_valid_token
-    def changeimage(infid=None):
-
-        if request.method == 'GET':
-            access_token = oidc_blueprint.session.token['access_token']
-
-            auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
-            try:
-                response = im.get_inf_property(infid, 'radl', auth_data)
-                if not response.ok:
-                    raise Exception(response.text)
-
-                try:
-                    radl = radl_parse.parse_radl(response.text)
-                    image_url = urlparse(radl.systems[0].getValue('disk.0.image.url'))
-                except Exception as ex:
-                    flash("Error parsing RADL: \n%s" % str(ex), 'error')
-
-                return render_template('change_image.html', infid=infid, image_url=image_url)
-            except Exception as ex:
-                flash("Error getting RADL: \n%s" % ex, 'error')
-                return redirect(url_for('showinfrastructures'))
-            
-        else:    
-            key = request.form['sshkey']
 
         return redirect(url_for('get_ssh_keys'))
 
