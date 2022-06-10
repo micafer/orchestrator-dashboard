@@ -1,0 +1,37 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: Install NVIDIA Drivers
+
+metadata:
+  name: NVIDIA Drivers
+  display_name: Install NVIDIA Drivers
+  icon: images/nvidia.png
+  tag: SW
+  tag_color: blue
+  parents:
+    - single-node-disk.yml
+
+topology_template:
+
+  inputs:        
+
+    driver_version:
+      type: string
+      description: NVIDIA Driver version to install
+      default: "510"
+
+  node_templates:
+
+    create_users:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        - host: simple_node 
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/nvidia.yml
+            inputs:
+              nvidia_driver_branch: { get_input: driver_version }
