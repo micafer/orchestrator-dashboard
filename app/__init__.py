@@ -1092,7 +1092,8 @@ def create_app(oidc_blueprint=None):
                     response = im.get_cloud_images(cred_id, auth_data)
                     if not response.ok:
                         raise Exception(response.text)
-                    images = [(image['uri'], image['name'], image['uri'] == image_url_str) for image in response.json()["images"]]
+                    images = [(image['uri'], image['name'], image['uri'] == image_url_str)
+                              for image in response.json()["images"]]
                 except Exception as ex:
                     app.logger.warn('Error getting site images: %s', (ex))
 
