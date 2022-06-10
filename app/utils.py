@@ -813,4 +813,6 @@ def getVOs(session):
     vos.sort()
     if "vos" in session and session["vos"]:
         vos = [vo for vo in vos if vo in session["vos"]]
+    elif not g.settings.debug_oidc_token:
+        vos = []
     return vos
