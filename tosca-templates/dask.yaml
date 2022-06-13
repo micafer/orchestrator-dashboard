@@ -1,0 +1,50 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Dask
+  display_name: Launch Dask on top of a Kubernetes Virtual Cluster
+  icon: images/dask.png
+  parents:
+    - kubernetes.yaml
+
+description: TOSCA template for launching Dask on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+
+  node_templates:
+
+    dask:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: dask-gateway
+        repository_name: dask-gateway
+        repository_url: "https://helm.dask.org"
+        name: dask-gateway
+        values: 
+          traefik.service.type: NodePort
+          traefik.service.ports.web.nodePort: "30080"
+          traefik.service.ports.tcp.nodePort: "30200"
+          gateway.prefix: /gateway
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              web:
+                protocol: tcp
+                source: 30080
+              tcp:
+                protocol: tcp
+                source: 30200
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
+
+  outputs:
+    dask_gateway_traefic_web:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':30080/' ] }
+    dask_gateway_traefic_tcp:
+      value: { concat: [ get_attribute: [ front, public_address, 0 ], ':30200' ] }
+
