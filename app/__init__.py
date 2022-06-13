@@ -367,7 +367,8 @@ def create_app(oidc_blueprint=None):
                 memory = int(form_data['memory'])
                 system_name = form_data['system_name']
 
-                radl = "system %s (cpu.count >= %d and memory.size >= %dg)" % (system_name, cpu, memory)
+                radl = "system %s (cpu.count >= %d and memory.size >= %dg and instance_type = '')" % (system_name,
+                                                                                                      cpu, memory)
                 response = im.resize_vm(infid, vmid, radl, auth_data)
             else:
                 response = im.manage_vm(op, infid, vmid, auth_data)
