@@ -14,6 +14,13 @@ description: TOSCA template for launching Dask on top of a Kubernetes Virtual Cl
 
 topology_template:
 
+  inputs:
+
+    dask_password:
+      type: string
+      description: Password for the Simple auth method
+      default: dask_pass
+
   node_templates:
 
     dask:
@@ -27,7 +34,7 @@ topology_template:
           traefik.service.type: NodePort
           traefik.service.ports.web.nodePort: "30080"
           traefik.service.ports.tcp.nodePort: "30200"
-          gateway.prefix: /gateway
+          gateway.auth.simple.password: { get_input: dask_password }
       capabilities:
         endpoint:
           properties:
