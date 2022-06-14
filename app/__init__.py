@@ -279,6 +279,12 @@ def create_app(oidc_blueprint=None):
                 del vminfo["provider.host"]
             if "disk.0.os.name" in vminfo:
                 del vminfo["disk.0.os.name"]
+            if "gpu.count" in vminfo and vminfo["gpu.count"] <= 0:
+                del vminfo["gpu.count"]
+                if "gpu.model" in vminfo:
+                    del vminfo["gpu.model"]
+                if "gpu.vendor" in vminfo:
+                    del vminfo["gpu.vendor"]
 
             cont = 0
             while "net_interface.%s.connection" % cont in vminfo:

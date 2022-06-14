@@ -1,0 +1,7 @@
+inputs:
+    dask_password:
+      tab: Dask Data
+
+tabs:
+  - Dask Data
+

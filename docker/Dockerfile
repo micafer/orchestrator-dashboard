@@ -19,7 +19,7 @@ ENV WORKER_TYPE "gthread"
 ENV TIMEOUT 180
 ENV ENABLE_HTTPS False
 ENV WORKERS 4
-ENV THREADS 4
+ENV THREADS 1
 
 COPY ./docker/start.sh /start.sh
 
