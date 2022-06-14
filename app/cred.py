@@ -26,7 +26,7 @@ class Credentials:
     def __init__(self, url):
         self.url = url
 
-    def get_creds(self, userid, enabled=None):
+    def get_creds(self, userid, enabled=None, filter=None):
         raise NotImplementedError("Should have implemented this")
 
     def get_cred(self, serviceid, userid):

@@ -58,7 +58,7 @@ class VaultCredentials(Credentials):
 
         return vault_entity_id
 
-    def get_creds(self, token, enabled=None):
+    def get_creds(self, token, enabled=None, filter=None):
         vault_entity_id = self._login(token)
         data = []
 
@@ -67,7 +67,11 @@ class VaultCredentials(Credentials):
             for cred_json in creds["data"].values():
                 new_item = json.loads(cred_json)
                 if enabled is None or enabled == new_item['enabled']:
-                    data.append(new_item)
+                    if filter:
+                        if all([elem in new_item and filter[elem] in new_item[elem] for elem in list(filter.keys())]):
+                            data.append(new_item)
+                    else:
+                        data.append(new_item)
         except Exception:
             pass
 

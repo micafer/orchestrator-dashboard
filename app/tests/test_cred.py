@@ -44,6 +44,15 @@ class TestDBCredentials(unittest.TestCase):
         res = creds.get_cred("credid", "user")
         self.assertEquals(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
 
+        res = creds.get_creds("user")
+        self.assertEquals(res, [{"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1}])
+
+        res = creds.get_creds("user", filter={"type": "type"})
+        self.assertEquals(res, [{"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1}])
+
+        res = creds.get_creds("user", filter={"type": "type1"})
+        self.assertEquals(res, [])
+
         creds.delete_cred("credid", "user")
         res = creds.get_cred("credid", "user")
         self.assertEquals(res, {})
@@ -63,6 +72,12 @@ class TestDBCredentials(unittest.TestCase):
         creds.enable_cred("credid", "user", 0)
         res = creds.get_cred("credid", "user")
         self.assertEquals(res["enabled"], 0)
+
+        res = creds.get_creds("user", filter={"type": "type"})
+        self.assertEquals(res, [{"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 0}])
+
+        res = creds.get_creds("user", filter={"type": "type1"})
+        self.assertEquals(res, [])
 
         creds.delete_cred("credid", "user")
         res = creds.get_cred("credid", "user")
@@ -105,6 +120,12 @@ class TestVaultCredentials(unittest.TestCase):
         creds.enable_cred("credid", "token", 0)
         self.assertEqual(json.loads(client.secrets.kv.v1.create_or_update_secret.call_args_list[2][0][1]['credid']),
                          {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 0})
+
+        res = creds.get_creds("user", filter={"type": "type"})
+        self.assertEquals(res, [{"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 0}])
+
+        res = creds.get_creds("user", filter={"type": "type1"})
+        self.assertEquals(res, [])
 
         creds.delete_cred("credid", "token")
         self.assertEqual(client.secrets.kv.v1.delete_secret.call_args_list[0][0], ("entity_id",))

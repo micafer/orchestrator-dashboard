@@ -25,7 +25,7 @@ import requests
 
 class InfrastructureManager():
 
-    def __init__(self, im_url, timeout=60):
+    def __init__(self, im_url, timeout=120):
         self.im_url = im_url
         self.timeout = timeout
 
@@ -117,9 +117,11 @@ class InfrastructureManager():
         url = "%s/infrastructures/%s" % (self.im_url, infid)
         return requests.post(url, headers=headers, data=payload, timeout=self.timeout)
 
-    def get_cloud_images(self, cloud_id, auth_data):
+    def get_cloud_images(self, cloud_id, auth_data, filters=None):
         headers = {"Authorization": auth_data}
         url = "%s/clouds/%s/images" % (self.im_url, cloud_id)
+        if filters:
+            url += "?filters=%s" % filters
         return requests.get(url, headers=headers, timeout=self.timeout)
 
     def get_cloud_quotas(self, cloud_id, auth_data):

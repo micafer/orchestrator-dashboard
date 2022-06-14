@@ -15,6 +15,8 @@
   <li class="nav-item"><a class="nav-link" data-id="#InputValues" data-toggle="tab" href=#InputValues>Input Values</a></li>
 {% endif %}
 <li class="nav-item"><a class="nav-link {% if not creds %} active{%endif%}" data-id="#Advanced" data-toggle="tab" href=#Advanced>Cloud Provider Selection</a></li> <!-- always create advanced tab -->
+<li class="nav-item"><a class="nav-link" data-id="#Auto" data-toggle="tab" href=#Auto>EGI Auto Provider Selection</a></li>
+
 </ul>
   <!-- end tab creation section -->
 
@@ -51,6 +53,12 @@
   <br>
   <div id="Advanced" class="tab-pane fade {% if not creds %}show active{%endif%}">
     {% include 'advanced_config.html' %}
+  </div>
+
+  <!-- auto -->
+  <br>
+  <div id="Auto" class="tab-pane fade">
+    {% include 'auto_config.html' %}
   </div>
 </div>
 

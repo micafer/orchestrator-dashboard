@@ -713,23 +713,47 @@ def create_app(oidc_blueprint=None):
     def getimages(cred_id=None):
         res = ""
         local = request.args.get('local', None)
-
-        if local:
+        if cred_id == "appdbis" or local:
             access_token = oidc_blueprint.session.token['access_token']
-            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
-            try:
-                response = im.get_cloud_images(cred_id, auth_data)
-                if not response.ok:
-                    raise Exception(response.text)
-                for image in response.json()["images"]:
-                    res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image['uri'], image['name'])
-            except Exception as ex:
-                res += '<option name="selectedSiteImage" value=%s>%s</option>' % (ex, ex)
+            vo = request.args.get("vo", None)
+            filters = ""
 
+            if local:
+                auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
+            else:
+                auth_data = utils.getAppDBISUserAuthData(access_token)
+                filters = ""
+                for elem in ["app", "distribution", "version", "vo"]:
+                    if request.args.get(elem, None):
+                        if filters:
+                            filters += ","
+                        filters += "%s=%s" % (elem,request.args.get(elem, None))
+
+                try:
+                    response = im.get_cloud_images(cred_id, auth_data, filters)
+                    if not response.ok:
+                        raise Exception(response.text)
+                    for image in response.json()["images"]:
+                        if cred_id == "appdbis":
+                            site_url = urlparse(image['uri'])
+                            sites = cred.get_creds(get_cred_id(), filter={"host": site_url.hostname,
+                                                                          "vo": vo,
+                                                                          "type": "fedcloud"})
+                            site_id = ""
+                            if sites:
+                                site_id = sites[0]["id"]
+                            res += '<option name="selectedSiteImage" data-id="%s" value=%s>%s</option>' % (site_id,
+                                                                                                        image['uri'],
+                                                                                                        image['name'])
+                        else:
+                            res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image['uri'], image['name'])
+                except Exception as ex:
+                    res += '<option name="selectedSiteImage" value=%s>%s</option>' % (ex, ex)
         else:
             site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
             for image_name, image_id in appdb.get_images(site['id'], vo):
                 res += '<option name="selectedImage" value=%s>%s</option>' % (image_id, image_name)
+
         return res
 
     @app.route('/usage/<cred_id>')
