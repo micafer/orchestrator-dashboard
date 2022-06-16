@@ -1,0 +1,13 @@
+inputs:
+    dask_password:
+      tab: Dask Data
+
+    jupyterhub_token:
+      tab: Dask Data
+
+    dask_version:
+      tab: Dask Data
+
+tabs:
+  - Dask Data
+

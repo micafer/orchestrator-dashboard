@@ -1,0 +1,84 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Pangeo
+  display_name: Launch Pangeo on top of a Kubernetes Virtual Cluster
+  icon: images/pangeo.png
+  parents:
+    - kubernetes.yaml
+
+description: TOSCA template for launching Pangeo on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+
+  inputs:
+
+    dask_password:
+      type: string
+      description: Password for the Simple auth method
+      default: dask_pass
+    dask_version:
+      type: string
+      description: Dask-Hub version
+      default: 2022.5.0
+      constraints:
+      - valid_values: [ "2022.5.0", "2022.4.1", "2022.3.0", "2022.2.1" ]
+    jupyterhub_token:
+      type: string
+      description: Jupyterhub auth token
+      default: 11a8120f55c6992d819b9b33ef825120d9a752f738fca1d659c06b436053cd02
+
+  node_templates:
+
+    dask:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: daskhub
+        repository_name: dask
+        repository_url: "https://helm.dask.org"
+        name: daskhub
+        values_file: |
+          jupyterhub:
+            proxy:
+              service:
+                type: ClusterIP
+            scheduling:
+              podPriority:
+                enabled: true
+              userPlaceholder:
+                # Specify three dummy user pods will be used as placeholders
+                replicas: 1
+              userScheduler:
+                enabled: true
+            singleuser:
+              serviceAccountName: daskkubernetes
+              image:
+                name: guillaumeeb/pangeo-ml-notebook # Image to use for singleuser environment. Must include dask-kubernetes.
+                tag: 2021.11.14
+          dask-gateway:
+            enabled: false
+            gateway:
+              auth:
+                type: simple
+          dask-kubernetes:
+            enabled: true
+          jupyterhub:
+            hub:
+              baseUrl: /jupyterhub/
+            ingress:
+              enabled: true
+              annotations: { kubernetes.io/ingress.class: nginx }
+        values: 
+          jupyterhub.proxy.secretToken: { get_input: jupyterhub_token }
+          dask-gateway.gateway.auth.simple.password: { get_input: dask_password }
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
+
+  outputs:
+    pangeo_jupyter_hub_url:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/jupyterhub/' ] }
+
