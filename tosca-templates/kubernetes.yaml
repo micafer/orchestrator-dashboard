@@ -12,6 +12,7 @@ metadata:
     - argo.yaml
     - influxdb.yaml
     - kubernetes_elastic.yaml
+    - daskhub.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 
