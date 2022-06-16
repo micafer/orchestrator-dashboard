@@ -8,6 +8,9 @@ inputs:
     dask_version:
       tab: Dask Data
 
+    jupyterhub_image_name:
+      tab: Dask Data
+
 tabs:
   - Dask Data
 
