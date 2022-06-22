@@ -1,0 +1,60 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Kubeapps
+  display_name: Launch Kubeapps on top of a Kubernetes Virtual Cluster
+  icon: images/kubeapps-logo.png
+  parents:
+   - kubernetes.yaml
+
+description: TOSCA template for launching Kubeapps on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+
+  node_templates:
+
+    kubeapps:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: kubeapps
+        repository_name: bitnami
+        repository_url: "https://charts.bitnami.com/bitnami"
+        name: kubeapps
+        values:
+          ingress.enabled: "false"
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
+
+    kubeapps_ingress:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kubeapps
+            namespace: kubeapps
+            annotations:
+              kubernetes.io/ingress.class: nginx
+          spec:
+            rules:
+            - http:
+                paths:
+                - path: /kubeapps
+                  backend:
+                    service:
+                      name: kubeapps
+                      port:
+                        number: 80
+                  pathType: Prefix
+      requirements:
+        - host: lrms_front_end
+
+  outputs:
+    kubeapps_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
+
