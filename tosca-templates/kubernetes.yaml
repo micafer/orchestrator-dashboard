@@ -8,6 +8,7 @@ metadata:
   icon: images/kubernetes.png
   order: 5
   childs:
+    - kubeapps.yml
     - minio.yaml
     - argo.yaml
     - influxdb.yaml
@@ -86,12 +87,6 @@ topology_template:
       default: "docker"
       constraints:
       - valid_values: [ docker, containerd ]
-    install_kubeapps:
-      type: boolean
-      description: Flag to set the kubeapps UI to be installed
-      default: true
-      constraints:
-      - valid_values: [ true, false ]
     kube_nvidia_support:
       type: boolean
       description: Flag to add NVIDIA support
@@ -130,7 +125,7 @@ topology_template:
         admin_username:  kubeuser
         install_nfs_client: true
         admin_token: { get_input: admin_token }
-        install_kubeapps:  { get_input: install_kubeapps }
+        install_kubeapps: false
         version: { get_input: kube_version }
         nvidia_support: { get_input: kube_nvidia_support }
         cert_manager: { get_input: kube_cert_manager }
@@ -200,7 +195,5 @@ topology_template:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
     api_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
-    kubeapps_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/kubeapps/' ] }
     kubeconfig:
       value: { get_attribute: [ front, ansible_output, lrms_front_end_front_conf_front, tasks, kube_conf, output ] }
