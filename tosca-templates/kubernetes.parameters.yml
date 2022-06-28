@@ -35,9 +35,6 @@ inputs:
     cri_runtime:
       tab: Kubernetes Data
 
-    install_kubeapps:
-      tab: Kubernetes Data
-
     kube_nvidia_support:
       tab: Kubernetes Data
 
