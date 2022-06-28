@@ -31,6 +31,21 @@ topology_template:
       description: NVIDIA Driver version to install
       default: "510"
 
+    git_repo:
+      type: string
+      description: Git repository to clone and perform a docker-compose up
+      default: ""
+
+    git_branch:
+      type: string
+      description: Git repository branch to clone and perform a docker-compose up
+      default: "master"
+
+    git_folder:
+      type: string
+      description: Subfolder in the Git repository to clone and perform a docker-compose up
+      default: ""
+
   node_templates:
 
     docker:
@@ -48,4 +63,7 @@ topology_template:
             inputs:
               docker_nvidia_support: { get_input: nvidia_support }
               docker_nvidia_driver_version: { get_input: driver_version }
+              docker_compose_git: { get_input: git_repo }
+              compose_folder: { get_input: git_folder }
+              repo_branch: { get_input: git_branch }
 
