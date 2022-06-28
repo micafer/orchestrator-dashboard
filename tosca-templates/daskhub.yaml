@@ -4,13 +4,13 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 metadata:
-  name: Duskhub
-  display_name: Launch Duskhub on top of a Kubernetes Virtual Cluster
+  name: Daskhub
+  display_name: Launch Daskhub on top of a Kubernetes Virtual Cluster
   icon: images/dask.png
   parents:
     - kubernetes.yaml
 
-description: TOSCA template for launching Duskhub on top of a Kubernetes Virtual Cluster.
+description: TOSCA template for launching Daskhub on top of a Kubernetes Virtual Cluster.
 
 topology_template:
 

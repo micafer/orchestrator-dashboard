@@ -501,11 +501,11 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
     @patch("app.utils.avatar")
-    def test_addresourcesform(self, avatar, get, user_data):
+    def test_addresources_get(self, avatar, get, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         get.side_effect = self.get_response
         self.login(avatar)
-        res = self.client.get('/addresourcesform/infid')
+        res = self.client.get('/addresources/infid')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'infid', res.data)
         self.assertIn(b'wn', res.data)
