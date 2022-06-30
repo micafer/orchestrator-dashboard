@@ -1,0 +1,60 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Vault
+  display_name: Launch Hashicorp Vault on top of a Kubernetes Virtual Cluster
+  icon: images/vault.png
+  parents:
+   - kubernetes.yaml
+
+description: TOSCA template for launching Hashicorp Vault on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+
+  node_templates:
+
+    vault:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: vault
+        repository_name: hashicorp
+        repository_url: "https://helm.releases.hashicorp.com"
+        name: vault
+        values: 
+          ui.enabled: "true"
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
+
+    vault_ingress:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          kind: Ingress
+          apiVersion: networking.k8s.io/v1
+          metadata:
+            name: vault
+            namespace: vault
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              nginx.ingress.kubernetes.io/rewrite-target: /$1
+          spec:
+            rules:
+              - http:
+                  paths:
+                    - path: /(.*)
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: vault-ui
+                          port:
+                            number: 8200
+      requirements:
+        - host: lrms_front_end
+
+  outputs:
+    grafana_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/ui/' ] }
