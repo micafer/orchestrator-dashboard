@@ -86,9 +86,9 @@ def create_app(oidc_blueprint=None):
     logging.basicConfig(level=numeric_level)
 
     oidc_base_url = app.config['OIDC_BASE_URL']
-    oidc_token_url = oidc_base_url + '/token'
-    oidc_refresh_url = oidc_base_url + '/token'
-    oidc_authorization_url = oidc_base_url + '/authorize'
+    oidc_token_url = app.config['OIDC_TOKEN_URL']
+    oidc_refresh_url = app.config['OIDC_REFRESH_URL']
+    oidc_authorization_url = app.config['OIDC_AUTHORIZE_URL']
 
     if not oidc_blueprint:
         oidc_blueprint = OAuth2ConsumerBlueprint(

@@ -28,7 +28,6 @@ topology_template:
       properties:
         im_auth: ""
         powermanager_plugin: im
-        kube_token: { get_input: admin_token }
         config_options:
           - { section: 'scheduling', option: 'IDLE_TIME', value: '300' }
           - { section: 'scheduling', option: 'RECONSIDER_JOB_TIME', value: '60' }

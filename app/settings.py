@@ -30,6 +30,9 @@ class Settings:
         self.imUrl = config['IM_URL']
         self.oidcName = config['OIDC_NAME']
         self.oidcUrl = config['OIDC_BASE_URL']
+        self.oidcTokenUrl = config.get('OIDC_TOKEN_URL', self.oidcUrl + "/token")
+        self.oidcRefresUrl = config.get('OIDC_REFRESH_URL', self.oidcUrl + "/token")
+        self.oidcAuthorizeUrl = config.get('OIDC_AUTHORIZE_URL', self.oidcUrl + "/authorize")
         self.tempSlamUrl = config.get('SLAM_URL') if config.get('SLAM_URL') else ""
         self.external_links = config.get('EXTERNAL_LINKS') if config.get('EXTERNAL_LINKS') else []
         self.oidcGroups = config.get('OIDC_GROUP_MEMBERSHIP')
