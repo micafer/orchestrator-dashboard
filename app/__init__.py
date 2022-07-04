@@ -124,7 +124,7 @@ def create_app(oidc_blueprint=None):
 
                     if oidc_blueprint.session.token['expires_in'] < 20:
                         app.logger.debug("Force refresh token")
-                        oidc_blueprint.session.get('/userinfo')
+                        oidc_blueprint.session.get(settings.oidcUserInfoPath)
                 except (InvalidTokenError, TokenExpiredError):
                     flash("Token expired.", 'warning')
                     return logout()
