@@ -188,7 +188,7 @@ def create_app(oidc_blueprint=None):
                 return redirect(url_for('login'))
 
             try:
-                account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + "/userinfo")
+                account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + settings.oidcUserInfoPath)
             except (InvalidTokenError, TokenExpiredError):
                 flash("Token expired.", 'warning')
                 return logout()
