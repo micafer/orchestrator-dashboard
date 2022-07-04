@@ -6,6 +6,7 @@
     "OIDC_TOKEN_URL": "https://aai-dev.egi.eu/oidc/token",
     "OIDC_REFRESH_URL": "https://aai-dev.egi.eu/oidc/token",
     "OIDC_AUTHORIZE_URL": "https://aai-dev.egi.eu/oidc/authorize",
+    "OIDC_USER_INFO_PATH": "/userinfo",
     "OIDC_GROUP_MEMBERSHIP": [  ],
     "OIDC_SCOPES": "openid email profile offline_access eduperson_entitlement",
     "IM_URL": "https://appsgrycap.i3m.upv.es:31443/im",
