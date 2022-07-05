@@ -118,6 +118,9 @@ topology_template:
               vnc_port:
                 protocol: tcp
                 source: 5904
+              docker_ssh_port:
+                protocol: tcp
+                source: 2222
         host:
           properties:
             num_gpus: { get_input: num_gpus_master }
