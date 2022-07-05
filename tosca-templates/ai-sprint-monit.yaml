@@ -17,29 +17,34 @@ topology_template:
 
     org_name:
       type: string
-      description: Name of organization
+      description: Name of the InfluxDB organization
       default: org
     bucket_name:
       type: string
-      description: Name of the bucket
+      description: Name of the InfluxDB bucket
       default: bucket
 
     admin_username:
       type: string
-      description: Name of the full admin user
+      description: Name of the InfluxDB full admin user
       default: admin
     admin_password:
       type: string
-      description: Password of the full admin user
+      description: Password of the InfluxDB full admin user
       default: adminpass
     admin_token:
       type: string
-      description: Token of the full admin user
+      description: Token of the InfluxDB full admin user
       default: admintoken
     dns_name:
       type: string
       description: DNS domain to access monitoring endpoints influxdb, elasticsearch, grafana and kibana
       default: ai-sprint.local
+
+    grafana_admin_password:
+      type: string
+      description: Password of the Grafana 'admin' user
+      default: adminpass
 
     GITLAB_REGISTRY_TOKEN:
       type: string
@@ -72,6 +77,7 @@ topology_template:
               admin_password: { get_input: admin_password }
               admin_token: { get_input: admin_token }
               dns_name: { get_input: dns_name }
+              grafana_admin_password: { get_input: grafana_admin_password }
       requirements:
         - host: front
         - dependency: lrms_front_end
