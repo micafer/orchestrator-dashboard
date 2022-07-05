@@ -1,0 +1,87 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: AI-SPRINT Mon
+  display_name: Launch AI-SPRINT Monitorization on top of a Kubernetes Virtual Cluster
+  icon: images/k8s_influxdb.png
+  parents:
+    - kubernetes.yaml
+
+description: TOSCA template for launching AI-SPRINT Monitorization on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+  inputs:
+
+    org_name:
+      type: string
+      description: Name of organization
+      default: org
+    bucket_name:
+      type: string
+      description: Name of the bucket
+      default: bucket
+
+    admin_username:
+      type: string
+      description: Name of the full admin user
+      default: admin
+    admin_password:
+      type: string
+      description: Password of the full admin user
+      default: adminpass
+    admin_token:
+      type: string
+      description: Token of the full admin user
+      default: admintoken
+    dns_name:
+      type: string
+      description: DNS domain to access monitoring endpoints influxdb, elasticsearch, grafana and kibana
+      default: ai-sprint.local
+
+    GITLAB_REGISTRY_TOKEN:
+      type: string
+      description: GitLab token to access the ai-sprint registry
+      default: ''
+    GITLAB_REGISTRY_EMAIL:
+      type: string
+      description: GitLab email to access the ai-sprint
+      default: ''
+    GITLAB_REPO_TOKEN:
+      type: string
+      description: GitLab token to access the ai-sprint repos
+      default: ''
+
+  node_templates:
+
+    ai_sprint_monit:
+      type: tosca.nodes.ec3.Application
+      interfaces:
+        Standard:
+          configure:
+            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/ai-monitoring/ai-sprint-monit.yaml
+            inputs:
+              GITLAB_REGISTRY_TOKEN: { get_input: GITLAB_REGISTRY_TOKEN }
+              GITLAB_REPO_TOKEN: { get_input: GITLAB_REPO_TOKEN }
+              GITLAB_REGISTRY_EMAIL: { get_input: GITLAB_REGISTRY_EMAIL }
+              org_name: { get_input: org_name }
+              bucket_name: { get_input: bucket_name }
+              admin_username: { get_input: admin_username }
+              admin_password: { get_input: admin_password }
+              admin_token: { get_input: admin_token }
+              dns_name: { get_input: dns_name }
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
+
+  outputs:
+    influx_dashboard:
+      value: { concat: [ 'https://influxdb.', get_input: dns_name, '/' ] }
+    grafana_dashboard:
+      value: { concat: [ 'https://grafana.', get_input: dns_name, '/' ] }
+    elasticsearch_dashboard:
+      value: { concat: [ 'https://elasticsearch.', get_input: dns_name, '/' ] }
+    kibana_dashboard:
+      value: { concat: [ 'https://kibana.', get_input: dns_name, '/' ] }
