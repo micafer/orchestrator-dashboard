@@ -163,7 +163,7 @@ def create_app(oidc_blueprint=None):
             return redirect(url_for('home'))
         else:
             if not oidc_blueprint.session.authorized:
-                return redirect(url_for('login'))
+                return render_template('home.html', oidc_name=settings.oidcName)
 
             try:
                 account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + settings.oidcUserInfoPath)
@@ -1274,7 +1274,7 @@ def create_app(oidc_blueprint=None):
             oidc_blueprint.session.get("/logout")
         except Exception as ex:
             app.logger.warn("Error in OIDC logout: %s" % ex)
-        return redirect(url_for('login'))
+        return render_template('home.html', oidc_name=settings.oidcName)
 
     @app.errorhandler(403)
     def forbidden(error):
