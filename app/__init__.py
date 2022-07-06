@@ -210,10 +210,10 @@ def create_app(oidc_blueprint=None):
                             user_groups = account_info_json['eduperson_entitlement']
                         if not set(settings.oidcGroups).issubset(user_groups):
                             app.logger.debug("No match on group membership. User group membership: " +
-                                            json.dumps(user_groups))
+                                             json.dumps(user_groups))
                             message = Markup('You need to be a member of the following groups: {0}. <br>'
-                                            ' Please, visit <a href="{1}">{1}</a> and apply for the requested '
-                                            'membership.'.format(json.dumps(settings.oidcGroups), settings.oidcUrl))
+                                             ' Please, visit <a href="{1}">{1}</a> and apply for the requested '
+                                             'membership.'.format(json.dumps(settings.oidcGroups), settings.oidcUrl))
                             raise Forbidden(description=message)
 
                     session['userid'] = account_info_json['sub']
