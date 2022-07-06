@@ -15,7 +15,7 @@ RUN apk add --no-cache --virtual .build-deps gcc libc-dev git libffi-dev openssl
 
 EXPOSE 5001
 
-ENV WORKER_TYPE "gthread"
+ENV WORKER_TYPE "sync"
 ENV TIMEOUT 180
 ENV ENABLE_HTTPS False
 ENV WORKERS 4
