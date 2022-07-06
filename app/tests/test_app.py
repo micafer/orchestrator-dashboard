@@ -170,12 +170,6 @@ class IMDashboardTests(unittest.TestCase):
         avatar.return_value = ""
         return self.client.get('/login')
 
-    def test_index_with_no_login(self):
-        self.oauth.session.authorized = False
-        res = self.client.get('/')
-        self.assertEqual(200, res.status_code)
-        self.assertIn(b'Login with ', res.data)
-
     @patch("app.utils.avatar")
     def test_index(self, avatar):
         res = self.login(avatar)
