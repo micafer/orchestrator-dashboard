@@ -154,16 +154,38 @@ def create_app(oidc_blueprint=None):
         session.clear()
         if template_filter:
             session["filter"] = template_filter
+        return render_template('home.html', oidc_name=settings.oidcName)
+
+    @app.route('/')
+    def home():
+        template_filter = None
+        if 'filter' in request.args:
+            template_filter = request.args['filter']
+        if "filter" in session:
+            template_filter = session["filter"]
+
+        templates = {}
+        for name, tosca in toscaInfo.items():
+            if "parents" not in tosca["metadata"]:
+                templates[name] = tosca
+
+        if template_filter:
+            session["filter"] = template_filter
+            templates = {}
+            for k, v in toscaInfo.items():
+                if 'description' and v['description']:
+                    if v['description'].find(template_filter) != -1 and "parents" not in tosca["metadata"]:
+                        templates[k] = v
 
         if settings.debug_oidc_token:
             session["vos"] = None
             session['userid'] = "a_very_long_user_id_00000000000000000000000000000000000000000000@egi.es"
             session['username'] = "username"
             session['gravatar'] = ""
-            return redirect(url_for('home'))
+            return render_template('portfolio.html', templates=templates, parent=None)
         else:
             if not oidc_blueprint.session.authorized:
-                return render_template('home.html', oidc_name=settings.oidcName)
+                return redirect(url_for('login'))
 
             try:
                 account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + settings.oidcUserInfoPath)
@@ -208,34 +230,10 @@ def create_app(oidc_blueprint=None):
                 else:
                     session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
 
-                return redirect(url_for('home'))
+                return render_template('portfolio.html', templates=templates, parent=None)
             else:
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
-
-    @app.route('/')
-    @authorized_with_valid_token
-    def home():
-        template_filter = None
-        if 'filter' in request.args:
-            template_filter = request.args['filter']
-        if "filter" in session:
-            template_filter = session["filter"]
-
-        templates = {}
-
-        if template_filter:
-            session["filter"] = template_filter
-            for name, tosca in toscaInfo.items():
-                if 'description' and tosca['description']:
-                    if tosca['description'].find(template_filter) != -1 and "parents" not in tosca["metadata"]:
-                        templates[name] = tosca
-        else:
-            for name, tosca in toscaInfo.items():
-                if "parents" not in tosca["metadata"]:
-                    templates[name] = tosca
-
-        return render_template('portfolio.html', templates=templates, parent=None)
 
     @app.route('/vminfo')
     @authorized_with_valid_token
@@ -1220,7 +1218,6 @@ def create_app(oidc_blueprint=None):
                         raise Exception(response.text)
                 else:
                     flash("Empty token. Owner not changed.", 'warning')
-                flash("Infrastructure owner successfully changed.", "success")
             elif op == "removeresources":
                 form_data = request.form.to_dict()
                 vm_list = form_data.get('vm_list')
@@ -1228,6 +1225,7 @@ def create_app(oidc_blueprint=None):
                 if not response.ok:
                     raise Exception(response.text)
                 flash("VMs %s successfully deleted." % vm_list, "success")
+                flash("Infrastructure owner successfully changed.", "success")
         except Exception as ex:
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 
@@ -1274,7 +1272,7 @@ def create_app(oidc_blueprint=None):
             oidc_blueprint.session.get("/logout")
         except Exception as ex:
             app.logger.warn("Error in OIDC logout: %s" % ex)
-        return render_template('home.html', oidc_name=settings.oidcName)
+        return redirect(url_for('login'))
 
     @app.errorhandler(403)
     def forbidden(error):
