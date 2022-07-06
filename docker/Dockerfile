@@ -10,12 +10,12 @@ COPY ./tosca-templates /opt/tosca-templates
 ENV PYTHONPATH=/app
 
 RUN apk add --no-cache --virtual .build-deps gcc libc-dev git libffi-dev openssl-dev\
-    && pip3 install meinheld==1.0.2 gunicorn==20.1.0 && pip3 install -r /app/requirements.txt \
+    && pip3 install gunicorn==20.1.0 && pip3 install -r /app/requirements.txt \
     && apk del .build-deps gcc libc-dev git libffi-dev openssl-dev
 
 EXPOSE 5001
 
-ENV WORKER_TYPE "egg:meinheld#gunicorn_worker"
+ENV WORKER_TYPE "sync"
 ENV TIMEOUT 180
 ENV ENABLE_HTTPS False
 ENV WORKERS 4
