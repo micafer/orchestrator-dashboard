@@ -1,0 +1,34 @@
+inputs:
+
+    org_name:
+      tab: InfluxDB Data
+
+    bucket_name:
+      tab: InfluxDB Data
+
+    admin_username:
+      tab: InfluxDB Data
+
+    admin_password:
+      tab: InfluxDB Data
+
+    admin_token:
+      tab: InfluxDB Data
+
+    dns_name:
+      tab: InfluxDB Data
+
+    GITLAB_REGISTRY_TOKEN:
+      tab: InfluxDB Data
+
+    GITLAB_REGISTRY_EMAIL:
+      tab: InfluxDB Data
+
+    GITLAB_REPO_TOKEN:
+      tab: InfluxDB Data
+
+    grafana_admin_password:
+      tab: InfluxDB Data
+
+tabs:
+  - InfluxDB Data

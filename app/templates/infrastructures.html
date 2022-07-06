@@ -179,6 +179,7 @@
                         </button>
                         <div class="dropdown-menu">
                           <a id="addresources_{{infId}}_a" class="dropdown-item" href="{{ url_for('addresources', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
+                          <a id="deletevms_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#deletevms_{{infId}}').modal('show');"><span class="fas fa-minus mr-2 grey-text"></span>Remove nodes</a>
                           <a id="template_{{infId}}_a" class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
                           <a id="log_{{infId}}_a" class="dropdown-item" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
                           <a id="outputs_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#outputs_{{infId}}').modal('show');"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
@@ -343,6 +344,31 @@
                   </div>
                 </div>
 
+                <!-- Modal DELETE VMs -->
+                <div class="modal fade" id="deletevms_{{infId}}" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="delete_vms_label_{{infId}}">Delete VMs from the infrastructure</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                        Set a comma separated list of the VM IDs to delete from the infrastructure {{infInfo["name"]}}" with ID {{infId}}.
+                      <form action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post">
+                        <div class="form-group">
+                        <input class="form-control" type="text" name="vm_list" pattern="[0-9]{1,3}(,[0-9]{1,3})*" />
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-danger deleteVMsBtn" role="button">Delete</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Modal Change user inf. -->
                 <div class="modal fade" id="change_auth_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
@@ -375,6 +401,8 @@
                     </div>
                   </div>
                 </div>
+
+
 
                 <script>
                   $(document).ready(function () {
@@ -442,6 +470,15 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     $(".deleteBtn").click(function () {
+        // add spinner to button
+        $(this).parent().find(".cancelBtn").addClass("disabled", true);
+        $(this).addClass("disabled", true);
+        $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...` );
+    });
+});
+
+$(document).ready(function () {
+    $(".deleteVMsBtn").click(function () {
         // add spinner to button
         $(this).parent().find(".cancelBtn").addClass("disabled", true);
         $(this).addClass("disabled", true);

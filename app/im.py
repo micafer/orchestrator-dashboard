@@ -157,3 +157,10 @@ class InfrastructureManager():
             url += "?overwrite=1"
 
         return requests.post(url, headers=headers, timeout=self.timeout, data=new_auth)
+
+    def remove_resources(self, infid, vm_list, auth_data):
+        headers = {"Authorization": auth_data}
+        url = "%s/infrastructures/%s/vms/%s" % (self.im_url, infid, vm_list)
+        response = requests.delete(url, headers=headers, timeout=self.timeout)
+
+        return response
