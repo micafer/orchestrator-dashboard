@@ -168,13 +168,18 @@ class IMDashboardTests(unittest.TestCase):
                                                                     "urn:mace:egi.eu:group:vo:role=r#aai.egi.eu"]}
         self.oauth.session.get.return_value = account_info
         avatar.return_value = ""
-        return self.client.get('/login')
+        return self.client.get('/')
+
+    def test_index_with_no_login(self):
+        self.oauth.session.authorized = False
+        res = self.client.get('/')
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/login', res.headers['location'])
 
     @patch("app.utils.avatar")
     def test_index(self, avatar):
         res = self.login(avatar)
-        self.assertEqual(302, res.status_code)
-        self.assertIn('/', res.headers['location'])
+        self.assertEqual(200, res.status_code)
 
     @patch("app.utils.avatar")
     def test_settings(self, avatar):
