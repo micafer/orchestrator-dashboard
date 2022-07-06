@@ -213,7 +213,6 @@ def create_app(oidc_blueprint=None):
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return redirect(url_for('login'))
 
-
     @app.route('/')
     @authorized_with_valid_token
     def home():
