@@ -125,6 +125,9 @@ class IMDashboardTests(unittest.TestCase):
         if url == "/im/infrastructures/infid/vms/0":
             resp.ok = True
             resp.status_code = 200
+        elif url == "/im/infrastructures/infid/vms/1,2":
+            resp.ok = True
+            resp.status_code = 200
         elif url == "/im/infrastructures/infid":
             resp.ok = True
             resp.status_code = 200
