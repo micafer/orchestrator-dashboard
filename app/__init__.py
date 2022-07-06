@@ -1221,6 +1221,13 @@ def create_app(oidc_blueprint=None):
                 else:
                     flash("Empty token. Owner not changed.", 'warning')
                 flash("Infrastructure owner successfully changed.", "success")
+            elif op == "removeresources":
+                form_data = request.form.to_dict()
+                vm_list = form_data.get('vm_list')
+                response = im.remove_resources(infid, vm_list, auth_data)
+                if not response.ok:
+                    raise Exception(response.text)
+                flash("VMs %s successfully deleted." % vm_list, "success")
         except Exception as ex:
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 
