@@ -25,12 +25,16 @@
 
       // Set VMs
       var vms = '';
+      var delete_vms = '';
       $.each( data["vm_states"], function( vmId, vmState ) {
         var tooltip = getSpanFromState(vmState) + vmState + '</span>';
         vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-toggle="tooltip" data-placement="top" data-html="true" title="' + tooltip + '">';
         vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
+        delete_vms += '<a class="btn btn-outline-secondary btn-sm" href="#" role="button" onclick="addVMtoDel(this,\'' + infid + '\',\'' + vmId + '\')">';
+        delete_vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
       });
       $('#' + infid + '_vms').html(vms);
+      $('#deletevms_' + infid + '_body').html(delete_vms);
       $('[data-toggle="tooltip"]').tooltip();
       if (data["state"] == "stopped") {
         $('#stop_' + infid + '_a').hide()
@@ -96,16 +100,22 @@
     }
   }
 
-  function validateVMIDs(form) {
-        // add spinner to button
-        if (form.checkValidity()) {
-          $(".cancelBtn").addClass("disabled", true);
-          $(".deleteVMsBtn").addClass("disabled", true);
-          $(".deleteVMsBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...` );
-          return true;
-        } else {
-          return false;
-        }
+  let delete_vms = {};
+  function addVMtoDel(btn, infId, vmId) {
+    if (!(infId in delete_vms)) {
+      delete_vms[infId] = Array();
+    }
+    if (delete_vms[infId].includes(vmId)) {
+      pos = delete_vms[infId].indexOf(vmId);
+      delete_vms[infId].splice(pos, 1);
+      btn.classList.remove("btn-secondary");
+      btn.classList.add("btn-outline-secondary");
+    } else {
+      delete_vms[infId].push(vmId);
+      btn.classList.remove("btn-outline-secondary");
+      btn.classList.add("btn-secondary");
+    }
+    $("#vm_list_" + infId).val(delete_vms[infId].join(','));
   }
 </script>
 <div class="container-fluid">
@@ -204,9 +214,6 @@
                       </div>
                     </td>
                 </tr>
-                <script>
-                  loadInfrState('{{infId}}', '{{infInfo["state"] | tojson | safe}}');
-                </script>
 
                 <!-- Modal DELETE RECREATE -->
                 <!-- Put modal here to avoid problem with table collapse -->
@@ -361,17 +368,14 @@
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="delete_vms_label_{{infId}}">Delete VMs from the infrastructure</h5>
+                        <h5 class="modal-title" id="delete_vms_label_{{infId}}">Select VMs to delete</h5>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                       </div>
-                      <div class="modal-body">
-                        Set a comma separated list of the VM IDs to delete from the infrastructure {{infInfo["name"]}}" with ID {{infId}}.
-                      <form action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
-                        <div class="form-group">
-                        <input class="form-control" type="text" name="vm_list" pattern="[0-9]{1,3}(,[0-9]{1,3})*" />
-                        </div>
+                      <div class="modal-body text-center" id="deletevms_{{infId}}_body">
                       </div>
                       <div class="modal-footer">
+                        <form action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
+                          <input type="hidden" name="vm_list" id="vm_list_{{infId}}" />
                         <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteVMsBtn" role="button">Delete</button>
@@ -417,6 +421,8 @@
 
 
                 <script>
+                  loadInfrState('{{infId}}', '{{infInfo["state"] | tojson | safe}}');
+
                   $(document).ready(function () {
                     $('#outputs_{{infId}}').on('hidden.bs.modal', function () {
                       var modal = $(this)
@@ -470,6 +476,15 @@
 
 
 <script>
+
+$(document).ready(function () {
+    $(".deleteVMsBtn").click(function () {
+        // add spinner to button
+        $(this).parent().find(".cancelBtn").addClass("disabled", true);
+        $(this).addClass("disabled", true);
+        $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...` );
+    });
+});
 
 $(document).ready(function () {
     $(".deleteRecreateBtn").click(function () {
