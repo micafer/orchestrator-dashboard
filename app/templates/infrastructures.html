@@ -95,6 +95,18 @@
       alert("The infrastructure will be transfered to the new user. You will loose the control of it!");
     }
   }
+
+  function validateVMIDs(form) {
+        // add spinner to button
+        if (form.checkValidity()) {
+          $(".cancelBtn").addClass("disabled", true);
+          $(".deleteVMsBtn").addClass("disabled", true);
+          $(".deleteVMsBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...` );
+          return true;
+        } else {
+          return false;
+        }
+  }
 </script>
 <div class="container-fluid">
 {% include 'flashed_messages.html' %}
@@ -354,7 +366,7 @@
                       </div>
                       <div class="modal-body">
                         Set a comma separated list of the VM IDs to delete from the infrastructure {{infInfo["name"]}}" with ID {{infId}}.
-                      <form action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post">
+                      <form action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
                         <div class="form-group">
                         <input class="form-control" type="text" name="vm_list" pattern="[0-9]{1,3}(,[0-9]{1,3})*" />
                         </div>
@@ -470,15 +482,6 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     $(".deleteBtn").click(function () {
-        // add spinner to button
-        $(this).parent().find(".cancelBtn").addClass("disabled", true);
-        $(this).addClass("disabled", true);
-        $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...` );
-    });
-});
-
-$(document).ready(function () {
-    $(".deleteVMsBtn").click(function () {
         // add spinner to button
         $(this).parent().find(".cancelBtn").addClass("disabled", true);
         $(this).addClass("disabled", true);
