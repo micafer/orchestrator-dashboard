@@ -187,7 +187,9 @@ def create_app(oidc_blueprint=None):
             if not oidc_blueprint.session.authorized:
                 return redirect(url_for('login'))
 
-            if 'userid' not in session or not session['userid']:
+            if 'userid' in session and session['userid']:
+                return render_template('portfolio.html', templates=templates, parent=None)
+            else:
                 # Only contact userinfo endpoint first time in session
                 try:
                     account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + settings.oidcUserInfoPath)
@@ -232,10 +234,10 @@ def create_app(oidc_blueprint=None):
                     else:
                         session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
 
-                return render_template('portfolio.html', templates=templates, parent=None)
-            else:
-                flash("Error getting User info: \n" + account_info.text, 'error')
-                return render_template('home.html', oidc_name=settings.oidcName)
+                    return render_template('portfolio.html', templates=templates, parent=None)
+                else:
+                    flash("Error getting User info: \n" + account_info.text, 'error')
+                    return render_template('home.html', oidc_name=settings.oidcName)
 
     @app.route('/vminfo')
     @authorized_with_valid_token
