@@ -1177,11 +1177,14 @@ def create_app(oidc_blueprint=None):
                     raise Exception(response.text)
                 flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'success')
                 reload = infid
-            elif op in ["delete", "delete-recreate"]:
+            elif op in ["delete"]:
                 form_data = request.form.to_dict()
                 force = False
+                recreate = False
                 if 'force' in form_data and form_data['force'] != "0":
                     force = True
+                if 'recreate' in form_data and form_data['recreate'] != "0":
+                    recreate = True
                 # Specially added for OSCAR clusters
                 success, msg = utils.delete_dns_record(infid, im, auth_data)
                 if not success:
@@ -1201,7 +1204,7 @@ def create_app(oidc_blueprint=None):
                 except Exception as dex:
                     app.logger.error('Error setting infra state to deleting.: %s', (dex))
 
-                if op == "delete-recreate":
+                if recreate:
                     return redirect(url_for('configure', inf_id=infid))
 
             elif op == "reconfigure":
