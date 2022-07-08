@@ -205,6 +205,8 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
                     site_info = fedcloud_sites[cred['host']]
                     if 'api_version' in site_info:
                         res += "; api_version  = %s" % site_info['api_version']
+                    if 'identity_method' in site_info:
+                        res = res.replace("tenant = openid", "tenant = %s" % site_info['identity_method'])
 
                     project_ids = getCachedProjectIDs(site_info["id"])
                     if cred['vo'] in project_ids and project_ids[cred['vo']]:

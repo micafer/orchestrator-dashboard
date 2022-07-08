@@ -9,10 +9,10 @@
             "biomed": "eca73ad6a84d4c0088063505c36349ab",
             "vo.indigo-datacloud.eu": "25cb49baedbf40a194729ff6802c8491",
             "umsa.cerit-sc.cz": "10e31299a9b548fdbe36e4dbe571168e",
-	    "cryoem.instruct-eric.eu": "d0ebf0fad0a04be19f93fdf794469544",
-	    "vo.eoscfuture-sp.panosc.eu": "c91eeff7bf7845bc901b319512f2ebdb",
-	    "vo.pangeo.eu": "05e0ff6e03774082aadacc75bfc1d783",
-	    "training.egi.eu": "eae2aa7f26334104906106bca4b82ae3"
+            "cryoem.instruct-eric.eu": "d0ebf0fad0a04be19f93fdf794469544",
+            "vo.eoscfuture-sp.panosc.eu": "c91eeff7bf7845bc901b319512f2ebdb",
+            "vo.pangeo.eu": "05e0ff6e03774082aadacc75bfc1d783",
+            "training.egi.eu": "eae2aa7f26334104906106bca4b82ae3"
         },
         "networks": {
             "cryoem.instruct-eric.eu": {
@@ -164,8 +164,16 @@
         "id": "7535G0",
         "vos": {
             "vo.lethe-project.eu": "f064d2b5f42a4704958f3bfbff7404bd",
-	    "vo.operas-eu.org": "bc4fed7e87514dd884924c77cad714bc"
+	        "vo.operas-eu.org": "bc4fed7e87514dd884924c77cad714bc"
         }
+    },
+    {
+        "name": "INFN-CLOUD-BARI",
+        "url": "https://cloud.recas.ba.infn.it:5000",
+        "id": "8016G0",
+        "vos": {
+            "vo.seadatanet.org": "50c9ea335b7d429296eb1623a97ff311"
+        },
+        "identity_method": "oidc"
     }
-
 ]
