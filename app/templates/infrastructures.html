@@ -139,7 +139,7 @@
 
             <div class="table-responsive">
               <br>
-            <table class="table table-striped table-hover" id="tableUserDeployments" width="100%" cellspacing="0" style="padding-bottom: 100px;">
+            <table class="table table-striped table-hover" id="tableUserDeployments" width="100%" cellspacing="0" style="padding-bottom: 20px;">
             <!--Table head-->
               <thead>
                 <tr>
@@ -208,36 +208,13 @@
                           <a id="stop_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#stop_confirm_{{infId}}').modal('show');"><span class="fas fa-pause mr-2 grey-text"></span>Stop</a>
                           <a id="start_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#start_confirm_{{infId}}').modal('show');"><span class="fas fa-play mr-2 grey-text"></span>Start</a>
                           <a id="delete_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_confirm_{{infId}}').modal('show');"><span class="fas fa-trash-alt mr-2 grey-text"></span>Delete</a>
-                          <a id="delete_recreate_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_recreate_confirm_{{infId}}').modal('show');"><span class="fas fa-redo mr-2 grey-text"></span>Delete & Recreate</a>
                           <a id="reconfigure_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#reconfigure_confirm_{{infId}}').modal('show');"><span class="fas fa-recycle mr-2 grey-text"></span>Reconfigure</a>
                           <a id="change_auth_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#change_auth_{{infId}}').modal('show');"><span class="fas fa-users mr-2 grey-text"></span>Change Owner</a>
                       </div>
                     </td>
                 </tr>
 
-                <!-- Modal DELETE RECREATE -->
-                <!-- Put modal here to avoid problem with table collapse -->
-                <div class="modal fade" id="delete_recreate_confirm_{{infId}}" role="dialog">
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="delete_recreate_confirm_label_{{infId}}">Confirm Infrastructure deletion</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      </div>
-                      <div class="modal-body">
-                        Do you really want to DELETE & Recreate the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
-                      </div>
-                      <div class="modal-footer">
-                        <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='delete-recreate') }}" method="post">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                          <button type="submit" class="btn btn-danger deleteRecreateBtn" role="button">Delete-Recreate</button>
-                          <input type="checkbox" name="force" value="1" onclick="showForceMessage(this);"> Force
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
                 <!-- Modal DELETE -->
                 <!-- Put modal here to avoid problem with table collapse -->
                 <div class="modal fade" id="delete_confirm_{{infId}}" role="dialog">
@@ -256,6 +233,7 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteBtn" role="button">Delete</button>
                           <input type="checkbox" name="force" value="1" onclick="showForceMessage(this);"> Force
+                          <input type="checkbox" name="recreate" value="1"> Recreate
                         </form>
                       </div>
                     </div>
@@ -479,15 +457,6 @@
 
 $(document).ready(function () {
     $(".deleteVMsBtn").click(function () {
-        // add spinner to button
-        $(this).parent().find(".cancelBtn").addClass("disabled", true);
-        $(this).addClass("disabled", true);
-        $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...` );
-    });
-});
-
-$(document).ready(function () {
-    $(".deleteRecreateBtn").click(function () {
         // add spinner to button
         $(this).parent().find(".cancelBtn").addClass("disabled", true);
         $(this).addClass("disabled", true);
