@@ -638,7 +638,7 @@ def create_app(oidc_blueprint=None):
                             inputs[input_name] = input_value["default"]
                 if 'filename' in data['metadata'] and data['metadata']['filename']:
                     selected_tosca = data['metadata']['filename']
-                if 'childs' in data['metadata'] and data['metadata']['childs']:
+                if 'childs' in data['metadata']:
                     childs = data['metadata']['childs']
             except Exception as ex:
                 flash("Error getting TOSCA template inputs: \n%s" % ex, "error")
