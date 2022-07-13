@@ -25,12 +25,16 @@
 
       // Set VMs
       var vms = '';
+      var delete_vms = '';
       $.each( data["vm_states"], function( vmId, vmState ) {
         var tooltip = getSpanFromState(vmState) + vmState + '</span>';
         vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-toggle="tooltip" data-placement="top" data-html="true" title="' + tooltip + '">';
         vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
+        delete_vms += '<a class="btn btn-outline-secondary btn-sm" href="#" role="button" onclick="addVMtoDel(this,\'' + infid + '\',\'' + vmId + '\')">';
+        delete_vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
       });
       $('#' + infid + '_vms').html(vms);
+      $('#deletevms_' + infid + '_body').html(delete_vms);
       $('[data-toggle="tooltip"]').tooltip();
       if (data["state"] == "stopped") {
         $('#stop_' + infid + '_a').hide()
@@ -94,6 +98,24 @@
     if (check.checked) {
       alert("The infrastructure will be transfered to the new user. You will loose the control of it!");
     }
+  }
+
+  let delete_vms = {};
+  function addVMtoDel(btn, infId, vmId) {
+    if (!(infId in delete_vms)) {
+      delete_vms[infId] = Array();
+    }
+    if (delete_vms[infId].includes(vmId)) {
+      pos = delete_vms[infId].indexOf(vmId);
+      delete_vms[infId].splice(pos, 1);
+      btn.classList.remove("btn-secondary");
+      btn.classList.add("btn-outline-secondary");
+    } else {
+      delete_vms[infId].push(vmId);
+      btn.classList.remove("btn-outline-secondary");
+      btn.classList.add("btn-secondary");
+    }
+    $("#vm_list_" + infId).val(delete_vms[infId].join(','));
   }
 </script>
 <div class="container-fluid">
@@ -178,46 +200,21 @@
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu">
-                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="{{ url_for('addresourcesform', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
+                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="{{ url_for('addresources', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
+                          <a id="deletevms_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#deletevms_{{infId}}').modal('show');"><span class="fas fa-minus mr-2 grey-text"></span>Remove nodes</a>
                           <a id="template_{{infId}}_a" class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
                           <a id="log_{{infId}}_a" class="dropdown-item" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
                           <a id="outputs_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#outputs_{{infId}}').modal('show');"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
                           <a id="stop_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#stop_confirm_{{infId}}').modal('show');"><span class="fas fa-pause mr-2 grey-text"></span>Stop</a>
                           <a id="start_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#start_confirm_{{infId}}').modal('show');"><span class="fas fa-play mr-2 grey-text"></span>Start</a>
                           <a id="delete_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_confirm_{{infId}}').modal('show');"><span class="fas fa-trash-alt mr-2 grey-text"></span>Delete</a>
-                          <a id="delete_recreate_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_recreate_confirm_{{infId}}').modal('show');"><span class="fas fa-redo mr-2 grey-text"></span>Delete & Recreate</a>
                           <a id="reconfigure_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#reconfigure_confirm_{{infId}}').modal('show');"><span class="fas fa-recycle mr-2 grey-text"></span>Reconfigure</a>
                           <a id="change_auth_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#change_auth_{{infId}}').modal('show');"><span class="fas fa-users mr-2 grey-text"></span>Change Owner</a>
                       </div>
                     </td>
                 </tr>
-                <script>
-                  loadInfrState('{{infId}}', '{{infInfo["state"] | tojson | safe}}');
-                </script>
 
-                <!-- Modal DELETE RECREATE -->
-                <!-- Put modal here to avoid problem with table collapse -->
-                <div class="modal fade" id="delete_recreate_confirm_{{infId}}" role="dialog">
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="delete_recreate_confirm_label_{{infId}}">Confirm Infrastructure deletion</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      </div>
-                      <div class="modal-body">
-                        Do you really want to DELETE & Recreate the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
-                      </div>
-                      <div class="modal-footer">
-                        <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='delete-recreate') }}" method="post">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                          <button type="submit" class="btn btn-danger deleteRecreateBtn" role="button">Delete-Recreate</button>
-                          <input type="checkbox" name="force" value="1" onclick="showForceMessage(this);"> Force
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
                 <!-- Modal DELETE -->
                 <!-- Put modal here to avoid problem with table collapse -->
                 <div class="modal fade" id="delete_confirm_{{infId}}" role="dialog">
@@ -236,6 +233,7 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteBtn" role="button">Delete</button>
                           <input type="checkbox" name="force" value="1" onclick="showForceMessage(this);"> Force
+                          <input type="checkbox" name="recreate" value="1"> Recreate
                         </form>
                       </div>
                     </div>
@@ -343,6 +341,28 @@
                   </div>
                 </div>
 
+                <!-- Modal DELETE VMs -->
+                <div class="modal fade" id="deletevms_{{infId}}" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="delete_vms_label_{{infId}}">Select VMs to delete</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body text-center" id="deletevms_{{infId}}_body">
+                      </div>
+                      <div class="modal-footer">
+                        <form action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
+                          <input type="hidden" name="vm_list" id="vm_list_{{infId}}" />
+                        <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-danger deleteVMsBtn" role="button">Delete</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Modal Change user inf. -->
                 <div class="modal fade" id="change_auth_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
@@ -376,7 +396,11 @@
                   </div>
                 </div>
 
+
+
                 <script>
+                  loadInfrState('{{infId}}', '{{infInfo["state"] | tojson | safe}}');
+
                   $(document).ready(function () {
                     $('#outputs_{{infId}}').on('hidden.bs.modal', function () {
                       var modal = $(this)
@@ -432,7 +456,7 @@
 <script>
 
 $(document).ready(function () {
-    $(".deleteRecreateBtn").click(function () {
+    $(".deleteVMsBtn").click(function () {
         // add spinner to button
         $(this).parent().find(".cancelBtn").addClass("disabled", true);
         $(this).addClass("disabled", true);

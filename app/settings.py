@@ -24,12 +24,16 @@
 class Settings:
     def __init__(self, config):
         """Creator function."""
-        self.version = "2.3.0"
+        self.version = "2.4.1"
         self.toscaDir = config.get('TOSCA_TEMPLATES_DIR', '') + "/"
         self.toscaParamsDir = config.get('TOSCA_PARAMETERS_DIR', '') + "/"
         self.imUrl = config['IM_URL']
         self.oidcName = config['OIDC_NAME']
         self.oidcUrl = config['OIDC_BASE_URL']
+        self.oidcTokenUrl = config.get('OIDC_TOKEN_URL', self.oidcUrl + "/token")
+        self.oidcRefresUrl = config.get('OIDC_REFRESH_URL', self.oidcUrl + "/token")
+        self.oidcAuthorizeUrl = config.get('OIDC_AUTHORIZE_URL', self.oidcUrl + "/authorize")
+        self.oidcUserInfoPath = config.get('OIDC_USER_INFO_PATH', "/userinfo")
         self.tempSlamUrl = config.get('SLAM_URL') if config.get('SLAM_URL') else ""
         self.external_links = config.get('EXTERNAL_LINKS') if config.get('EXTERNAL_LINKS') else []
         self.oidcGroups = config.get('OIDC_GROUP_MEMBERSHIP')

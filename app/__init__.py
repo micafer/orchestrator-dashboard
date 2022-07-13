@@ -85,10 +85,10 @@ def create_app(oidc_blueprint=None):
 
     logging.basicConfig(level=numeric_level)
 
-    oidc_base_url = app.config['OIDC_BASE_URL']
-    oidc_token_url = oidc_base_url + '/token'
-    oidc_refresh_url = oidc_base_url + '/token'
-    oidc_authorization_url = oidc_base_url + '/authorize'
+    oidc_base_url = settings.oidcUrl
+    oidc_token_url = settings.oidcTokenUrl
+    oidc_refresh_url = settings.oidcRefresUrl
+    oidc_authorization_url = settings.oidcAuthorizeUrl
 
     if not oidc_blueprint:
         oidc_blueprint = OAuth2ConsumerBlueprint(
@@ -124,7 +124,7 @@ def create_app(oidc_blueprint=None):
 
                     if oidc_blueprint.session.token['expires_in'] < 20:
                         app.logger.debug("Force refresh token")
-                        oidc_blueprint.session.get('/userinfo')
+                        oidc_blueprint.session.get(settings.oidcUserInfoPath)
                 except (InvalidTokenError, TokenExpiredError):
                     flash("Token expired.", 'warning')
                     return logout()
@@ -187,53 +187,57 @@ def create_app(oidc_blueprint=None):
             if not oidc_blueprint.session.authorized:
                 return redirect(url_for('login'))
 
-            try:
-                account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + "/userinfo")
-            except (InvalidTokenError, TokenExpiredError):
-                flash("Token expired.", 'warning')
-                return logout()
-
-            if account_info.ok:
-                account_info_json = account_info.json()
-
-                session["vos"] = None
-                if 'eduperson_entitlement' in account_info_json:
-                    session["vos"] = utils.getUserVOs(account_info_json['eduperson_entitlement'])
-
-                if settings.oidcGroups:
-                    user_groups = []
-                    if 'groups' in account_info_json:
-                        user_groups = account_info_json['groups']
-                    elif 'eduperson_entitlement' in account_info_json:
-                        user_groups = account_info_json['eduperson_entitlement']
-                    if not set(settings.oidcGroups).issubset(user_groups):
-                        app.logger.debug("No match on group membership. User group membership: " +
-                                         json.dumps(user_groups))
-                        message = Markup('You need to be a member of the following groups: {0}. <br>'
-                                         ' Please, visit <a href="{1}">{1}</a> and apply for the requested '
-                                         'membership.'.format(json.dumps(settings.oidcGroups), settings.oidcUrl))
-                        raise Forbidden(description=message)
-
-                session['userid'] = account_info_json['sub']
-                if 'name' in account_info_json:
-                    session['username'] = account_info_json['name']
-                else:
-                    session['username'] = ""
-                    if 'given_name' in account_info_json:
-                        session['username'] = account_info_json['given_name']
-                    if 'family_name' in account_info_json:
-                        session['username'] += " " + account_info_json['family_name']
-                    if session['username'] == "":
-                        session['username'] = account_info_json['sub']
-                if 'email' in account_info_json:
-                    session['gravatar'] = utils.avatar(account_info_json['email'], 26)
-                else:
-                    session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
-
+            if 'userid' in session and session['userid']:
                 return render_template('portfolio.html', templates=templates, parent=None)
             else:
-                flash("Error getting User info: \n" + account_info.text, 'error')
-                return render_template('home.html', oidc_name=settings.oidcName)
+                # Only contact userinfo endpoint first time in session
+                try:
+                    account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + settings.oidcUserInfoPath)
+                except (InvalidTokenError, TokenExpiredError):
+                    flash("Token expired.", 'warning')
+                    return logout()
+
+                if account_info.ok:
+                    account_info_json = account_info.json()
+
+                    session["vos"] = None
+                    if 'eduperson_entitlement' in account_info_json:
+                        session["vos"] = utils.getUserVOs(account_info_json['eduperson_entitlement'])
+
+                    if settings.oidcGroups:
+                        user_groups = []
+                        if 'groups' in account_info_json:
+                            user_groups = account_info_json['groups']
+                        elif 'eduperson_entitlement' in account_info_json:
+                            user_groups = account_info_json['eduperson_entitlement']
+                        if not set(settings.oidcGroups).issubset(user_groups):
+                            app.logger.debug("No match on group membership. User group membership: " +
+                                             json.dumps(user_groups))
+                            message = Markup('You need to be a member of the following groups: {0}. <br>'
+                                             ' Please, visit <a href="{1}">{1}</a> and apply for the requested '
+                                             'membership.'.format(json.dumps(settings.oidcGroups), settings.oidcUrl))
+                            raise Forbidden(description=message)
+
+                    session['userid'] = account_info_json['sub']
+                    if 'name' in account_info_json:
+                        session['username'] = account_info_json['name']
+                    else:
+                        session['username'] = ""
+                        if 'given_name' in account_info_json:
+                            session['username'] = account_info_json['given_name']
+                        if 'family_name' in account_info_json:
+                            session['username'] += " " + account_info_json['family_name']
+                        if session['username'] == "":
+                            session['username'] = account_info_json['sub']
+                    if 'email' in account_info_json:
+                        session['gravatar'] = utils.avatar(account_info_json['email'], 26)
+                    else:
+                        session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
+
+                    return render_template('portfolio.html', templates=templates, parent=None)
+                else:
+                    flash("Error getting User info: \n" + account_info.text, 'error')
+                    return render_template('home.html', oidc_name=settings.oidcName)
 
     @app.route('/vminfo')
     @authorized_with_valid_token
@@ -634,7 +638,7 @@ def create_app(oidc_blueprint=None):
                             inputs[input_name] = input_value["default"]
                 if 'filename' in data['metadata'] and data['metadata']['filename']:
                     selected_tosca = data['metadata']['filename']
-                if 'childs' in data['metadata'] and data['metadata']['childs']:
+                if 'childs' in data['metadata']:
                     childs = data['metadata']['childs']
             except Exception as ex:
                 flash("Error getting TOSCA template inputs: \n%s" % ex, "error")
@@ -1091,72 +1095,88 @@ def create_app(oidc_blueprint=None):
 
         return redirect(url_for('manage_creds'))
 
-    @app.route('/addresourcesform/<infid>')
-    @authorized_with_valid_token
-    def addresourcesform(infid=None):
-
-        access_token = oidc_blueprint.session.token['access_token']
-
-        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
-        try:
-            response = im.get_inf_property(infid, 'radl', auth_data)
-            if not response.ok:
-                raise Exception(response.text)
-
-            systems = []
-            try:
-                radl = radl_parse.parse_radl(response.text)
-                systems = radl.systems
-            except Exception as ex:
-                flash("Error parsing RADL: \n%s" % str(ex), 'error')
-
-            return render_template('addresource.html', infid=infid, systems=systems)
-        except Exception as ex:
-            flash("Error getting RADL: \n%s" % ex, 'error')
-            return redirect(url_for('showinfrastructures'))
-
-    @app.route('/addresources/<infid>', methods=['POST'])
+    @app.route('/addresources/<infid>', methods=['POST', 'GET'])
     @authorized_with_valid_token
     def addresources(infid=None):
 
         access_token = oidc_blueprint.session.token['access_token']
-        form_data = request.form.to_dict()
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
-        try:
-            response = im.get_inf_property(infid, 'radl', auth_data)
-        except Exception as ex:
-            flash("Error: %s." % ex, 'error')
-
-        if response.ok:
-            radl = None
+        if request.method == 'GET':
+            auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
             try:
-                radl = radl_parse.parse_radl(response.text)
-                radl.deploys = []
-                for system in radl.systems:
-                    sys_dep = deploy(system.name, 0)
-                    if "%s_num" % system.name in form_data:
-                        vm_num = int(form_data["%s_num" % system.name])
-                        if vm_num > 0:
-                            sys_dep.vm_number = vm_num
-                    radl.deploys.append(sys_dep)
-            except Exception as ex:
-                flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
+                response = im.get_inf_property(infid, 'radl', auth_data)
+                if not response.ok:
+                    raise Exception(response.text)
 
-            if radl:
+                systems = []
+                image_url_str = None
+                image_url = None
                 try:
-                    response = im.addresource_inf(infid, str(radl), auth_data)
+                    radl = radl_parse.parse_radl(response.text)
+                    systems = radl.systems
+                    image_url_str = systems[0].getValue("disk.0.image.url")
+                    image_url = urlparse(image_url_str)
+                except Exception as ex:
+                    flash("Error parsing RADL: \n%s" % str(ex), 'error')
+
+                images = None
+                try:
+                    infra_data = infra.get_infra(infid)
+                    cred_id = infra_data["site"]["id"]
+                    auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
+                    response = im.get_cloud_images(cred_id, auth_data)
                     if not response.ok:
                         raise Exception(response.text)
-                    num = len(response.json()["uri-list"])
-                    flash("%d nodes added successfully" % num, 'success')
+                    images = [(image['uri'], image['name'], image['uri'] == image_url_str)
+                              for image in response.json()["images"]]
                 except Exception as ex:
-                    flash("Error adding nodes: \n%s\n%s" % (ex, response.text), 'error')
+                    app.logger.warn('Error getting site images: %s', (ex))
 
-            return redirect(url_for('showinfrastructures'))
+                return render_template('addresource.html', infid=infid, systems=systems,
+                                       image_url=image_url, images=images)
+            except Exception as ex:
+                flash("Error getting RADL: \n%s" % ex, 'error')
+                return redirect(url_for('showinfrastructures'))
         else:
-            flash("Error getting RADL: \n%s" % (response.text), 'error')
-            return redirect(url_for('showinfrastructures'))
+            form_data = request.form.to_dict()
+
+            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+            try:
+                response = im.get_inf_property(infid, 'radl', auth_data)
+            except Exception as ex:
+                flash("Error: %s." % ex, 'error')
+
+            if response.ok:
+                radl = None
+                try:
+                    radl = radl_parse.parse_radl(response.text)
+                    radl.deploys = []
+                    for system in radl.systems:
+                        if 'newImage' in form_data and form_data['newImage']:
+                            system.setValue('disk.0.image.url', form_data['newImage'])
+                        sys_dep = deploy(system.name, 0)
+                        if "%s_num" % system.name in form_data:
+                            vm_num = int(form_data["%s_num" % system.name])
+                            if vm_num > 0:
+                                sys_dep.vm_number = vm_num
+                        radl.deploys.append(sys_dep)
+                except Exception as ex:
+                    flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
+
+                if radl:
+                    try:
+                        response = im.addresource_inf(infid, str(radl), auth_data)
+                        if not response.ok:
+                            raise Exception(response.text)
+                        num = len(response.json()["uri-list"])
+                        flash("%d nodes added successfully" % num, 'success')
+                    except Exception as ex:
+                        flash("Error adding nodes: \n%s\n%s" % (ex, response.text), 'error')
+
+                return redirect(url_for('showinfrastructures'))
+            else:
+                flash("Error getting RADL: \n%s" % (response.text), 'error')
+                return redirect(url_for('showinfrastructures'))
 
     @app.route('/manage_inf/<infid>/<op>', methods=['POST'])
     @authorized_with_valid_token
@@ -1181,11 +1201,14 @@ def create_app(oidc_blueprint=None):
                     raise Exception(response.text)
                 flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'success')
                 reload = infid
-            elif op in ["delete", "delete-recreate"]:
+            elif op in ["delete"]:
                 form_data = request.form.to_dict()
                 force = False
+                recreate = False
                 if 'force' in form_data and form_data['force'] != "0":
                     force = True
+                if 'recreate' in form_data and form_data['recreate'] != "0":
+                    recreate = True
                 # Specially added for OSCAR clusters
                 success, msg = utils.delete_dns_record(infid, im, auth_data)
                 if not success:
@@ -1205,7 +1228,7 @@ def create_app(oidc_blueprint=None):
                 except Exception as dex:
                     app.logger.error('Error setting infra state to deleting.: %s', (dex))
 
-                if op == "delete-recreate":
+                if recreate:
                     return redirect(url_for('configure', inf_id=infid))
 
             elif op == "reconfigure":
@@ -1227,6 +1250,13 @@ def create_app(oidc_blueprint=None):
                 else:
                     flash("Empty token. Owner not changed.", 'warning')
                 flash("Infrastructure owner successfully changed.", "success")
+            elif op == "removeresources":
+                form_data = request.form.to_dict()
+                vm_list = form_data.get('vm_list')
+                response = im.remove_resources(infid, vm_list, auth_data)
+                if not response.ok:
+                    raise Exception(response.text)
+                flash("VMs %s successfully deleted." % vm_list, "success")
         except Exception as ex:
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 

@@ -125,6 +125,9 @@ class IMDashboardTests(unittest.TestCase):
         if url == "/im/infrastructures/infid/vms/0":
             resp.ok = True
             resp.status_code = 200
+        elif url == "/im/infrastructures/infid/vms/1,2":
+            resp.ok = True
+            resp.status_code = 200
         elif url == "/im/infrastructures/infid":
             resp.ok = True
             resp.status_code = 200
@@ -501,11 +504,11 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
     @patch("app.utils.avatar")
-    def test_addresourcesform(self, avatar, get, user_data):
+    def test_addresources_get(self, avatar, get, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         get.side_effect = self.get_response
         self.login(avatar)
-        res = self.client.get('/addresourcesform/infid')
+        res = self.client.get('/addresources/infid')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'infid', res.data)
         self.assertIn(b'wn', res.data)
@@ -576,3 +579,16 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('/ssh_key', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("SSH Key successfully deleted!", 'success'))
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.delete')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_removeresources(self, flash, avatar, delete, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        delete.side_effect = self.delete_response
+        self.login(avatar)
+        res = self.client.post('/manage_inf/infid/removeresources', data={'vm_list': '1,2'})
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEquals(flash.call_args_list[0][0], ("VMs 1,2 successfully deleted.", 'success'))

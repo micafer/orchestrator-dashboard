@@ -44,7 +44,7 @@ class TestUtils(unittest.TestCase):
                                             'username': 'user', 'password': 'pass', 'tenant': 'tenant'}]
             getCachedSiteList.return_value = {
                 'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '11548G0'},
-                'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca'}
+                'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca', 'identity_method': 'oidc'}
             }
             getCachedProjectIDs.return_value = {"vo_name_st": "project_id_st", "vo_name": "project_id"}
 
@@ -54,7 +54,7 @@ class TestUtils(unittest.TestCase):
             self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = one; type = OpenNebula;"
                                     " username = user; password = pass\\n"
                                     "id = fed; type = OpenStack; username = egi.eu;"
-                                    " tenant = openid; auth_version = 3.x_oidc_access_token; host ="
+                                    " tenant = oidc; auth_version = 3.x_oidc_access_token; host ="
                                     " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id\\n"
                                     "id = ch; type = OpenStack; auth_version = 3.x_password;"
                                     " host = https://identity-f1a.cloudandheat.com:5000; username = user;"

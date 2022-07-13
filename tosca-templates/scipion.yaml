@@ -59,14 +59,14 @@ topology_template:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
     disk_size:
       type: scalar-unit.size
-      description: Size of the disk to be attached to the FE instance
+      description: Size of the external disk attached to the server
       default: 100 GB
       constraints:
         - valid_values: [ 100 GB, 500 GB, 1 TB, 5 TB, 8TB ]
     workers_num:
       type: integer
       description: Number of worker nodes in cluster
-      default: 1
+      default: 0
       constraints:
         - valid_values: [ 0, 1 ]
 
@@ -118,6 +118,9 @@ topology_template:
               vnc_port:
                 protocol: tcp
                 source: 5904
+              docker_ssh_port:
+                protocol: tcp
+                source: 2222
         host:
           properties:
             num_gpus: { get_input: num_gpus_master }
