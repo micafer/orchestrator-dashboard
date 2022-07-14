@@ -948,7 +948,7 @@ def create_app(oidc_blueprint=None):
             cred_data['type'] = 'fedcloud'
             cred_data['vo'] = form_data.get('extra_opts.selectedVO')
             cred_data['host'] = "https://%s" % urlparse(image).netloc
-            cred_data['id'] = "%s-%s" % (urlparse(image).hostname, vo)
+            cred_data['id'] = "%s-%s" % (urlparse(image).hostname, cred_data['vo'])
 
             # Search for the site in the creds
             sites = cred.get_creds(get_cred_id(), filter={"host": urlparse(image).hostname,
