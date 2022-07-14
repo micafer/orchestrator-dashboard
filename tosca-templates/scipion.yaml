@@ -145,7 +145,7 @@ topology_template:
       interfaces:
         Standard:
           configure:
-            implementation: https://raw.githubusercontent.com/I2PC/scipion-docker/devel/ansible_master.yaml
+            implementation: https://raw.githubusercontent.com/I2PC/scipion-docker/master/ansible_master.yaml
             inputs:
               vnc_pass: { get_input: vnc_pass }
               cryosparc_license: { get_input: cryosparc_license }
@@ -187,7 +187,7 @@ topology_template:
       interfaces:
         Standard:
           configure:
-            implementation: https://raw.githubusercontent.com/I2PC/scipion-docker/devel/ansible_worker.yaml
+            implementation: https://raw.githubusercontent.com/I2PC/scipion-docker/master/ansible_worker.yaml
             inputs:
               slurm_front_end_ip: { get_attribute: [ lrms_server, private_address, 0 ] }
       artifacts:
