@@ -945,15 +945,14 @@ def create_app(oidc_blueprint=None):
             return redirect(url_for('showinfrastructures'))
 
         if cred_data['type'] == 'AppDBIS':
-            vo = form_data.get('extra_opts.selectedVO')
             cred_data['type'] = 'fedcloud'
-            cred_data['vo'] = vo
+            cred_data['vo'] = form_data.get('extra_opts.selectedVO')
             cred_data['host'] = "https://%s" % urlparse(image).netloc
             cred_data['id'] = "%s-%s" % (urlparse(image).hostname, vo)
 
             # Search for the site in the creds
             sites = cred.get_creds(get_cred_id(), filter={"host": urlparse(image).hostname,
-                                                          "vo": vo,
+                                                          "vo": cred_data['vo'],
                                                           "type": "fedcloud"})
             if sites:
                 cred_id = sites[0]["id"]

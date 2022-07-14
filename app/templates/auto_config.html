@@ -30,7 +30,9 @@
                 $('#egiAutoImages').show();
                 $(".searchBtn").html('Search');
                 $(".searchBtn").attr("disabled", false);
-                activateSubmit();
+                if (text.indexOf("ost://") != -1) {
+                  activateSubmit();
+                }
             },
             error : function(error)
             {
