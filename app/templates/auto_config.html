@@ -2,7 +2,7 @@
 <br>
 <div id="confScheduling">
   <div class="form-group">
-      <h5>EGI Automtic Cloud Provider selection:</h5>
+      <h5>EGI Search Sites/Images:</h5>
   </div>
 
   
@@ -93,10 +93,10 @@
            <div class="form-group" id="egiAutoImages" style="display: none;">
               <label>
                 Select Image from site.
-                Sites are ordered by the amount of free VMs available.
+                Sites are ordered by the amount of free VMs available reported by <a href="https://appdb.egi.eu/" target="_blank">AppDB</a>.
               </label>
-              <select class="js-example-basic-single js-states form-control" id="autoSelectedImage" name="extra_opts.selectedImage" onchange="activateSubmit()">
-                  <option name="selectedImage" value="">-</option>
+              <select class="js-example-basic-single js-states form-control" id="autoSelectedImage" name="extra_opts.autoSelectedImage" onchange="activateSubmit()">
+                  <option name="autoSelectedImage" value="">-</option>
               </select>
             </div>
        </div>

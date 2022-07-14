@@ -746,9 +746,9 @@ def create_app(oidc_blueprint=None):
                             site_id = ""
                             if sites:
                                 site_id = sites[0]["id"]
-                            res += '<option name="selectedSiteImage" data-id="%s" value=%s>%s</option>' % (site_id,
-                                                                                                        image['uri'],
-                                                                                                        image['name'])
+                            res += '<option name="autoSelectedImage" data-id="%s" value=%s>%s</option>' % (site_id,
+                                                                                                           image['uri'],
+                                                                                                           image['name'])
                         else:
                             res += '<option name="selectedSiteImage" value=%s>%s</option>' % (image['uri'], image['name'])
                 except Exception as ex:
@@ -906,14 +906,17 @@ def create_app(oidc_blueprint=None):
         if 'extra_opts.childs' in form_data:
             childs = form_data['extra_opts.childs'].split(",")
         cred_id = form_data['extra_opts.selectedCred']
-        cred_data = cred.get_cred(cred_id, get_cred_id())
+        if cred_id == '':
+            cred_data = {'type': 'AppDBIS'}
+        else:
+            cred_data = cred.get_cred(cred_id, get_cred_id())
         access_token = oidc_blueprint.session.token['access_token']
 
         site = {}
         image = None
         priv_network_id = None
         pub_network_id = None
-        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
+        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE', 'AppDBIS']:
             if cred_data['type'] == 'fedcloud':
                 site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
                 if "networks" in site and vo in site["networks"]:
@@ -926,6 +929,8 @@ def create_app(oidc_blueprint=None):
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
             elif form_data['extra_opts.selectedSiteImage'] != "":
                 image = form_data['extra_opts.selectedSiteImage']
+            elif form_data.get('extra_opts.autoSelectedImage'):
+                image = form_data['extra_opts.autoSelectedImage']
         else:
             image_id = form_data['extra_opts.imageID']
             protocol_map = {
@@ -938,6 +943,24 @@ def create_app(oidc_blueprint=None):
         if not image:
             flash("No correct image specified.", "error")
             return redirect(url_for('showinfrastructures'))
+
+        if cred_data['type'] == 'AppDBIS':
+            vo = form_data.get('extra_opts.selectedVO')
+            cred_data['type'] = 'fedcloud'
+            cred_data['vo'] = vo
+            cred_data['host'] = "https://%s" % urlparse(image).netloc
+            cred_data['id'] = "%s-%s" % (urlparse(image).hostname, vo)
+
+            # Search for the site in the creds
+            sites = cred.get_creds(get_cred_id(), filter={"host": urlparse(image).hostname,
+                                                          "vo": vo,
+                                                          "type": "fedcloud"})
+            if sites:
+                cred_id = sites[0]["id"]
+            else:
+                # If it does not exist add the new site in the creds
+                cred.write_creds(cred_data["id"], get_cred_id(), cred_data, True)
+                cred_id = cred_data["id"]
 
         auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id, True)
 

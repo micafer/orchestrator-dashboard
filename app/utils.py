@@ -152,9 +152,11 @@ def getCachedSiteList(force=False):
 
     return SITE_LIST
 
-def getAppDBISUserAuthData(access_token):
+def getAppDBISUserAuthData(access_token, vo = None):
     res = "type = InfrastructureManager; token = %s\\n" % access_token
     res += "id = appdbis; type = AppDBIS; token = %s" % access_token
+    if vo:
+        res += "; vo = %s" % vo
     return res
 
 def getIMUserAuthData(access_token, cred, userid):
