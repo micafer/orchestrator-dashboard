@@ -57,6 +57,10 @@
            }
        });
    }
+
+   function activateSearch() {
+    $(".searchBtn").attr("disabled", false);
+   }
    </script>
 
 
@@ -68,7 +72,7 @@
 
           <div class="form-group">
             <label>Select VO:</label>
-            <select class="js-example-basic-single js-states form-control" id="selectedVO" name="extra_opts.selectedVO">
+            <select class="js-example-basic-single js-states form-control" id="selectedVO" name="extra_opts.selectedVO" onchange="activateSearch()">
                 <option name="extra_opts.selectedVO" value="">-</option>
             </select>
           </div>
@@ -90,7 +94,7 @@
             <input type="text" class="form-control" id="app" name="extra_opts.app">
           </div>
 
-          <button type="button" class="btn btn-success searchBtn" onclick="searchImages()">Search</button>
+          <button type="button" class="btn btn-success searchBtn" disabled onclick="searchImages()">Search</button>
 
            <div class="form-group" id="egiAutoImages" style="display: none;">
               <label>
