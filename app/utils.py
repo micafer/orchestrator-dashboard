@@ -107,20 +107,20 @@ def getStaticVOs():
 
 def get_site_info(cred_id, cred, userid):
     domain = None
-    site = {}
+    res_site = {}
 
     cred_data = cred.get_cred(cred_id, userid)
     vo = cred_data['vo']
 
     for site in list(getCachedSiteList().values()):
         if site['url'] == cred_data['host']:
+            res_site = site
+            project_ids = getCachedProjectIDs(site["id"])
+            if vo in project_ids:
+                domain = project_ids[vo]
             break
 
-    project_ids = getCachedProjectIDs(site["id"])
-    if vo in project_ids:
-        domain = project_ids[vo]
-
-    return site, domain, vo
+    return res_site, domain, vo
 
 
 def getUserVOs(entitlements):
