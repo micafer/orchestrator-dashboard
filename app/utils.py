@@ -107,6 +107,7 @@ def getStaticVOs():
 
 def get_site_info(cred_id, cred, userid):
     domain = None
+    site = {}
 
     cred_data = cred.get_cred(cred_id, userid)
     vo = cred_data['vo']
