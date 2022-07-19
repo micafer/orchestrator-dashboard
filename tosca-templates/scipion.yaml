@@ -136,7 +136,7 @@ topology_template:
             relationship:
               type: AttachesTo
               properties:
-                location: /home/scipionuser/ScipionUserData
+                location: /home/scipionuser/volume-data
 
     front:
       type: tosca.nodes.SoftwareComponent
