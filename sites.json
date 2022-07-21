@@ -31,8 +31,7 @@
                 "private": "auto_allocated_network",
                 "public": "public-cesnet-78-128-251-GROUP"
             }
-        },
-	"identity_method": "oidc"
+        }
     },
     {
         "name": "NCG-INGRID-PT",
