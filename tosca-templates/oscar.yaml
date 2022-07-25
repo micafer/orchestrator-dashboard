@@ -215,9 +215,11 @@ topology_template:
             type: linux
 
   outputs:
+    oscarui_endpoint:
+      value: { concat: [ 'https://ui.oscar.grycap.net?endpoint=https://', get_property: [dns_reg, record_name], '.', get_property: [dns_reg, domain_name], '&username=admin&password', get_input: oscar_password  ] }
     dashboard_endpoint:
       value: { concat: [ 'https://', get_property: [dns_reg, record_name], '.', get_property: [dns_reg, domain_name], '/dashboard/' ] }
-    oscarui_endpoint:
+    local_oscarui_endpoint:
       value: { concat: [ 'https://', get_property: [dns_reg, record_name], '.', get_property: [dns_reg, domain_name], '/' ] }
     minio_endpoint:
       value: { concat: [ 'https://', get_property: [dns_reg_minio, record_name], '.', get_property: [dns_reg_minio, domain_name], '/' ] }
