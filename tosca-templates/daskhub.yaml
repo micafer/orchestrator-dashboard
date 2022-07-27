@@ -105,6 +105,8 @@ topology_template:
                   else:
                       print('dask-gateway service not found. Did you set jupyterhub.hub.services.dask-gateway.apiToken?')
             singleuser:
+              extraEnv:
+                DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE: '{JUPYTER_IMAGE_SPEC}'
               defaultUrl: '/lab'  # Use jupyterlab by defualt.
               memory:
                 guarantee: 500M
