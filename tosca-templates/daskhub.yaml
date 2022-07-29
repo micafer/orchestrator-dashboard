@@ -104,7 +104,35 @@ topology_template:
                           break
                   else:
                       print('dask-gateway service not found. Did you set jupyterhub.hub.services.dask-gateway.apiToken?')
+                01-optionHandler: |
+                  # Configure options to
+                  # 1. Have the default worker image match the singleuser image
+                  # 2. Place bounds on worker CPU and Memory requests
+                  # 3. Accept a mapping of environment variables to pass to workers.
+                  from dask_gateway_server.options import Options, Float, String, Mapping
+                  def cluster_options(user):
+                      def option_handler(options):
+                          if ':' not in options.image:
+                              raise ValueError('When specifying an image you must also provide a tag')
+                          return {
+                              'worker_cores': 0.88 * min(options.worker_cores / 2, 1),
+                              'worker_cores_limit': options.worker_cores,
+                              'worker_memory': '%fG' % (0.9 * options.worker_memory),
+                              'worker_memory_limit': '%fG' % options.worker_memory,
+                              'image': options.image,
+                              'environment': options.environment,
+                          }
+                      return Options(
+                          Float('worker_cores', 1, min=1, max=16, label='Worker Cores'),
+                          Float('worker_memory', 8, min=8, max=128, label='Worker Memory (GiB)'),
+                          String('image', default='pangeo/pangeo-notebook:latest', label='Image'),
+                          Mapping('environment', {}, label='Environment Variables'),
+                          handler=option_handler,
+                      )
+                  c.Backend.cluster_options = cluster_options
             singleuser:
+              extraEnv:
+                DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE: '{JUPYTER_IMAGE_SPEC}'
               defaultUrl: '/lab'  # Use jupyterlab by defualt.
               memory:
                 guarantee: 500M
