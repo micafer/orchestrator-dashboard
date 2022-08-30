@@ -214,6 +214,8 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
                         res += "; api_version  = %s" % site_info['api_version']
                     if 'identity_method' in site_info:
                         res = res.replace("tenant = openid", "tenant = %s" % site_info['identity_method'])
+                    if 'region' in site_info:
+                        res += "; service_region = %s" % site_info['region']
 
                     project_ids = getCachedProjectIDs(site_info["id"])
                     if cred['vo'] in project_ids and project_ids[cred['vo']]:
