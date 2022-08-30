@@ -3,24 +3,24 @@
   imports:
     - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
   
-  description: TOSCA template for deploying an instance for OpenBioMaps using the type SoftwareComponent
+  description: TOSCA template for deploying a OpenBioMaps server with a compute node
   
   metadata:
-    display_name: Deploy a OpenBioMaps portal
+    display_name: Deploy a OpenBioMaps portal and Compute node
     icon: images/obm.png
-    tag: VM
+    tag: beta
 
   topology_template:
     inputs:
       number_cpus:
         type: integer
-        description: number of cpus required for the instance
+        description: number of cpus required for the OBM instance
         default: 4
         constraints:
         - valid_values: [ 2, 4, 8, 16, 32 ]
       memory_size:
         type: string
-        description: ram memory required for the instance
+        description: ram memory required for the OBM instance
         default: 2 GB
         constraints:
         - valid_values: [ 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
@@ -47,6 +47,19 @@
         description: "Or URL of the second disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
         default: ""
 
+      ci_number_cpus:
+        type: integer
+        description: number of cpus required for the Compute instance
+        default: 4
+        constraints:
+        - valid_values: [ 2, 4, 8, 16, 32 ]
+      ci_memory_size:
+        type: string
+        description: ram memory required for the Compute instance
+        default: 2 GB
+        constraints:
+        - valid_values: [ 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB ]
+
     node_templates:
 
       obm:
@@ -54,7 +67,7 @@
         capabilities:
           admin_endpoint:
             properties:
-              port: 9880
+              port: 80
               protocol: tcp
         requirements:
           - host: obm_server 
@@ -66,6 +79,8 @@
           Standard:
             configure:
               implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/obm_install.yml
+              inputs:
+                 obm_compute_node_ip: { get_attribute: [ obm_compute_node, private_address, 0 ] }
 
       obm_server:
         type: tosca.nodes.indigo.Compute
@@ -118,6 +133,45 @@
          size: { get_input: disk_size2 }
          volume_id: { get_input: volume_id2 }
 
+      obb_compute:
+        type: tosca.nodes.SoftwareComponent
+        requirements:
+          - host: obm_compute_node 
+        artifacts:
+          docker_role:
+            file: grycap.docker
+            type: tosca.artifacts.AnsibleGalaxy.role
+        interfaces:
+          Standard:
+            configure:
+              implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/obm_compute_install.yml
+
+      obm_compute_node:
+        type: tosca.nodes.indigo.Compute
+        capabilities:
+          endpoint:
+            properties:
+              network_name: PUBLIC
+              ports:
+                http_port:
+                  protocol: tcp
+                  source: 80
+                https_port:
+                  protocol: tcp
+                  source: 443
+          host:
+           properties:
+             num_cpus: { get_input: ci_number_cpus }
+             mem_size: { get_input: ci_memory_size }
+          os:
+            properties:
+              type: linux
+
     outputs:
       obm_url:
-        value: { concat: [ 'http://', get_attribute: [ obm_server, public_address, 0 ], ':9880/' ] }
+        value: { concat: [ 'http://', get_attribute: [ obm_server, public_address, 0 ], '/' ] }
+      obm_compute_ip:
+        value: { get_attribute: [ obm_compute_node, public_address, 0 ] }
+      supervisor_pass:
+        value: { get_attribute: [ obm_server, ansible_output, obm_obm_server_conf_obm_server, tasks, supervisor_pass, output ] }
+

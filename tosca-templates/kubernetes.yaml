@@ -104,6 +104,11 @@ topology_template:
       description: Email to be used in the Let's Encrypt issuer
       default: "jhondoe@server.com"
 
+    allowed_cidr:
+      type: string
+      description: Allowed remote CIDR to extenal access
+      default: "0.0.0.0/0"
+
   node_templates:
 
     lrms_front_end:
@@ -115,12 +120,15 @@ topology_template:
               http_port:
                 protocol: tcp
                 source: 80
+                remote_cidr: { get_input: allowed_cidr }
               https_port:
                 protocol: tcp
                 source: 443
+                remote_cidr: { get_input: allowed_cidr }
               kube_port:
                 protocol: tcp
                 source: 6443
+                remote_cidr: { get_input: allowed_cidr }
       properties:
         admin_username:  kubeuser
         install_nfs_client: true
