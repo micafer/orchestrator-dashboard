@@ -181,5 +181,16 @@
         "url": "https://cloud-api-pub.cr.cnaf.infn.it:5000",
         "id": "13252G0",
         "region": "sdds"
+    },
+    {
+        "name": "CESGA-CLOUD",
+        "url": "https://cloud.srv.cesga.es:5000/",
+        "id": "14059G0",
+        "vos": {
+            "eosc-synergy.eu": "8b3f809f2b0841e6b91b7f60d08da8c9",
+	    "vo.deltares.nl": "8a244d1b0d0f4f8e8c9519fae4cfc8ee",
+	    "vo.obsea.es": "277dd78e3b3b4c8caf93ad42fddaec38"
+        },
+        "identity_method": "oidc"
     }
 ]
