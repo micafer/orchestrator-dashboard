@@ -135,16 +135,14 @@ topology_template:
                 DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE: '{JUPYTER_IMAGE_SPEC}'
               defaultUrl: '/lab'  # Use jupyterlab by defualt.
               memory:
-                guarantee: 500M
-                limit: 1G
+                guarantee: 2G
+                limit: 4G
               cpu:
-                guarantee: 0.3
-                limit: 1
+                guarantee: 1
+                limit: 2
               storage:
                 type: dynamic
-                capacity: 1Gi
-                dynamic:
-                  storageClass: standard
+                capacity: 2Gi
               # default is 300s, sometimes Jetstream volumes are slow to attach
               startTimeout: 600
               # See https://github.com/zonca/jupyterhub-deploy-kubernetes-jetstream/issues/38
@@ -171,6 +169,18 @@ topology_template:
               prefix: '/services/dask-gateway'  # Users connect to the Gateway through the JupyterHub service.
               auth:
                 type: jupyterhub  # Use JupyterHub to authenticate with Dask Gateway
+              extraConfig:
+                dasklimits: |
+                  c.ClusterConfig.cluster_max_cores = 6
+                  c.ClusterConfig.cluster_max_memory = "24 G"
+                  c.ClusterConfig.cluster_max_workers = 3
+              backend:
+                worker:
+                  cores:
+                    limit: 2
+                  memory:
+                    limit: 8G
+                  threads: 2
             traefik:
               service:
                 type: ClusterIP  # Access Dask Gateway through JupyterHub. To access the Gateway from outside JupyterHub, this must be changed to a `LoadBalancer`.
