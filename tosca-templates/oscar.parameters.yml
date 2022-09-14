@@ -16,7 +16,10 @@ inputs:
 
     wn_mem:
       tab: HW Data
-    
+
+    wn_instance_type:
+      tab: HW Data
+
     storage_size:
       tab: HW Data
 

@@ -54,6 +54,10 @@ topology_template:
       required: yes
       constraints:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    wn_instance_type:
+      type: string
+      description: Flavor name of the WN node. Only required in case of special flavors (i.e. with GPUs)
+      default: ""
 
     storage_size:
       type: string
@@ -228,6 +232,7 @@ topology_template:
           properties:
             num_cpus: { get_input: wn_cpus }
             mem_size: { get_input: wn_mem }
+            instance_type: { get_input: wn_instance_type }
         os:
           properties:
             distribution: ubuntu
