@@ -11,23 +11,24 @@ metadata:
   childs:
     - oscar_elastic.yaml
     - oscar_function.yaml
+    - prometheus.yaml
 
-description: Template for launching an OSCAR Virtual Cluster
+description: Template for launching an OSCAR Virtual Cluster.
 
 topology_template:
   inputs:
     wn_num:
       type: integer
-      description: Number of WNs in the OSCAR cluster
+      description: Number of WNs in the oscar cluster
       default: 1
       required: yes
     fe_cpus:
       type: integer
       description: Number of CPUs for the front-end node
-      default: 2
+      default: 4
       required: yes
       constraints:
-      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+      - valid_values: [ 4, 8, 16, 32, 64 ]
     fe_mem:
       type: scalar-unit.size
       description: Amount of Memory for the front-end node
@@ -35,6 +36,10 @@ topology_template:
       required: yes
       constraints:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    fe_instance_type:
+      type: string
+      description: Flavor name of the front-end node. Only required in case of special flavors (i.e. with GPUs)
+      default: ""
     wn_cpus:
       type: integer
       description: Number of CPUs for the WNs
@@ -76,6 +81,14 @@ topology_template:
       type: string
       description: Email to be used in the Let's Encrypt issuer
       default: "jhondoe@server.com"
+    user_id:
+      type: string
+      description: ID of the user that creates the infrastructure
+      default: ""
+    selected_vo:
+      type: string
+      description: VO to support
+      default: ""
 
   node_templates:
 
@@ -120,6 +133,9 @@ topology_template:
         dns_host: { concat: [ get_property: [dns_reg, record_name], '.', get_property: [dns_reg, domain_name] ] }
         minio_dns_host: { concat: [ 'minio.', get_property: [dns_reg, record_name], '.', get_property: [dns_reg, domain_name] ] }
         minio_dns_host_console: { concat: [ 'console.minio.', get_property: [dns_reg, record_name], '.', get_property: [dns_reg, domain_name] ] }
+        oidc_enable: true
+        oidc_subject: { get_input: user_id }
+        oidc_groups: [{ get_input: selected_vo }]
       capabilities:
         endpoint:
           properties:
@@ -158,6 +174,7 @@ topology_template:
         cert_manager_challenge_dns01_domain: { get_property: [dns_reg, domain_name] }
         cert_manager_challenge_dns01_ak: AK
         cert_manager_challenge_dns01_sk: SK
+        cri_runtime: containerd
       requirements:
         - host: front
 
@@ -172,6 +189,7 @@ topology_template:
           properties:
             num_cpus: { get_input: fe_cpus }
             mem_size: { get_input: fe_mem }
+            instance_type: { get_input: fe_instance_type }
         os:
           properties:
             distribution: ubuntu
@@ -196,6 +214,7 @@ topology_template:
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
         version: 1.23.6
+        cri_runtime: containerd
       requirements:
         - host: wn
 
