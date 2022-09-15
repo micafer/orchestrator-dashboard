@@ -66,7 +66,7 @@
 
     <!-- userid type -->
     {% elif value.tag_type == "userid" %}
-    <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{session['userid']}}" aria-describedby="help{{key}}" disabled/>
+    <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{session['userid']}}" aria-describedby="help{{key}}" readonly/>
     <!-- end userid type -->
 
     <!-- vo_list type -->
