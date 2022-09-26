@@ -687,7 +687,7 @@ def create_app(oidc_blueprint=None):
                                selectedTemplate=selected_tosca,
                                creds=creds, input_values=inputs,
                                infra_name=infra_name, child_templates=child_templates,
-                               vos=utils.getVOs(session))
+                               vos=utils.getVOs(session), utils=utils)
 
     @app.route('/vos')
     def getvos():
