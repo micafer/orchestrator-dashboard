@@ -246,7 +246,7 @@ def create_app(oidc_blueprint=None):
         vmid = request.args['vmId']
         infid = request.args['infId']
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         try:
             response = im.get_vm_info(infid, vmid, auth_data)
         except Exception as ex:
@@ -367,7 +367,7 @@ def create_app(oidc_blueprint=None):
     def managevm(op=None, infid=None, vmid=None):
         access_token = oidc_blueprint.session.token['access_token']
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         try:
             if op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data, [vmid])
@@ -456,7 +456,7 @@ def create_app(oidc_blueprint=None):
         if not infid:
             return {"state": "error", "vm_states": {}}
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         try:
             state = im.get_inf_state(infid, auth_data)
             try:
@@ -486,9 +486,21 @@ def create_app(oidc_blueprint=None):
 
     def hide_sensitive_data(template):
         """Remove/Hide sensitive data (passwords, credentials)."""
+
+        # TODO: Replace using this regexp
+        # AKID: (?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9])
+        # SK:   (?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])
         data = yaml.full_load(template)
 
         for node in list(data['topology_template']['node_templates'].values()):
+            if node["type"] == "tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes":
+                try:
+                    if "cert_manager_challenge_dns01_ak" in node["properties"]:
+                        node["properties"]["cert_manager_challenge_dns01_ak"] = "AK"
+                    if "cert_manager_challenge_dns01_sk" in node["properties"]:
+                        node["properties"]["cert_manager_challenge_dns01_sk"] = "SK"
+                except KeyError:
+                    pass
 
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
                 if "im_auth" in node["properties"]:
@@ -1112,7 +1124,7 @@ def create_app(oidc_blueprint=None):
         else:
             form_data = request.form.to_dict()
 
-            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
             try:
                 response = im.get_inf_property(infid, 'radl', auth_data)
             except Exception as ex:
@@ -1154,7 +1166,9 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def manage_inf(infid=None, op=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+
+        # Try to get the Cred ID to restrict the auth info sent to the IM
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         reload = None
 
         try:
@@ -1162,7 +1176,8 @@ def create_app(oidc_blueprint=None):
                 form_data = request.form.to_dict()
                 if 'description' in form_data and form_data['description'] != "":
                     try:
-                        infra_data = infra.get_infra(infid)
+                        if not infra_data:
+                            infra_data = infra.get_infra(infid)
                         infra_data["name"] = form_data['description']
                         infra.write_infra(infid, infra_data)
                     except Exception as uex:
@@ -1181,12 +1196,6 @@ def create_app(oidc_blueprint=None):
                     force = True
                 if 'recreate' in form_data and form_data['recreate'] != "0":
                     recreate = True
-                # Specially added for OSCAR clusters
-                success, msg = utils.delete_dns_record(infid, im, auth_data)
-                if not success:
-                    app.logger.error('Error deleting DNS record: %s', (msg))
-                else:
-                    app.logger.info('%s DNS record successfully deleted.', (msg))
                 response = im.delete_inf(infid, force, auth_data)
                 if not response.ok:
                     raise Exception(response.text)

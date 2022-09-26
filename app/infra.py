@@ -67,3 +67,10 @@ class Infrastructures:
         db = self._get_inf_db()
         db.execute("delete from infrastructures where infid = %s", (infid, ))
         db.close()
+
+    def get_infra_cred_id(self, infid):
+        try:
+            infra_data = self.get_infra(infid)
+        except Exception:
+            infra_data = {}
+        return infra_data.get("site", {}).get("id")
