@@ -1176,8 +1176,7 @@ def create_app(oidc_blueprint=None):
                 form_data = request.form.to_dict()
                 if 'description' in form_data and form_data['description'] != "":
                     try:
-                        if not infra_data:
-                            infra_data = infra.get_infra(infid)
+                        infra_data = infra.get_infra(infid)
                         infra_data["name"] = form_data['description']
                         infra.write_infra(infid, infra_data)
                     except Exception as uex:

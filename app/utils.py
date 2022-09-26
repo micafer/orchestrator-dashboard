@@ -183,7 +183,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
             creds.extend(g.settings.extra_auth)
             extra_auth_ids = [elem["id"] for elem in g.settings.extra_auth]
     except Exception:
-        pass
+        print("Error getting extra credentials.", file=sys.stderr)
 
     for cred in creds:
         if cred['enabled'] and (cred_id is None or cred_id == cred['id'] or cred['id'] in extra_auth_ids):
