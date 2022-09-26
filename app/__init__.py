@@ -489,11 +489,6 @@ def create_app(oidc_blueprint=None):
         data = yaml.full_load(template)
 
         for node in list(data['topology_template']['node_templates'].values()):
-            if node["type"] == "tosca.nodes.ec3.DNSRegistry":
-                try:
-                    node["properties"]["dns_service_credentials"]["token"] = "AK:SK"
-                except KeyError:
-                    pass
 
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
                 if "im_auth" in node["properties"]:
