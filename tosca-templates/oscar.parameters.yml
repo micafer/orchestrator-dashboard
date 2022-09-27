@@ -42,6 +42,15 @@ inputs:
     selected_vo:
       tab: OSCAR parameters
       tag_type: vo_list
+
+    cluster_name:
+      tab: OSCAR parameters
+      tag_type: random
+
+    domain_name:
+      tab: OSCAR parameters
+      tag_type: hidden
+
 tabs:
   - HW Data
   - OSCAR parameters
