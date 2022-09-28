@@ -372,6 +372,8 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
+                        <div class="modal-body" id="owners_list">
+                        </div>
                         <form action="{{ url_for('manage_inf', infid=infId, op='change_user') }}" method="post">
                           <div class="container-fluid">
                             <div class="form-group">
@@ -412,6 +414,13 @@
                     $('#outputs_{{infId}}').on('show.bs.modal', function (event) {
                       var modal = $(this)
                       modal.find('.modal-body').html('Loading...').load("{{ url_for('infoutputs', infid=infId) }}");
+                    });
+                  });
+
+                  $(document).ready(function () {
+                    $('#change_auth_{{infId}}').on('show.bs.modal', function (event) {
+                      var modal = $(this)
+                      modal.find('#owners_list').html('Loading...').load("{{ url_for('getowners', infid=infId) }}");
                     });
                   });
                 </script>
