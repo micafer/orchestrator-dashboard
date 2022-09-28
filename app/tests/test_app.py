@@ -89,6 +89,10 @@ class IMDashboardTests(unittest.TestCase):
                                                  "instances": {"used": 1, "limit": 10},
                                                  "floating_ips": {"used": 1, "limit": 10},
                                                  "security_groups": {"used": 1, "limit": 10}}}
+        elif url == "/im/infrastructures/infid/owners":
+            resp.ok = True
+            resp.status_code = 200
+            resp.text = "user1\nuser2"
 
         return resp
 
@@ -592,3 +596,14 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("VMs 1,2 successfully deleted.", 'success'))
+
+    @patch("app.utils.getIMUserAuthData")
+    @patch('requests.get')
+    @patch("app.utils.avatar")
+    def test_owners(self, avatar, get, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get.side_effect = self.get_response
+        self.login(avatar)
+        res = self.client.get('/owners/infid')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)

@@ -1276,6 +1276,29 @@ def create_app(oidc_blueprint=None):
 
         return redirect(url_for('get_ssh_keys'))
 
+    @app.route('/owners/<infid>')
+    @authorized_with_valid_token
+    def getowners(infid=None):
+
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
+        res = ""
+        try:
+            response = im.get_inf_property(infid, 'owners', auth_data)
+            if not response.ok:
+                raise Exception(response.text)
+
+            owners = response.text.split()
+            res = "Current Owners:<br><ul>"
+            for owner in owners:
+                owner = owner.replace("__OPENID__", "")
+                res += "<li>%s</li>" % owner
+            res += "</ul>"
+        except Exception as ex:
+            res = "Error: %s." % ex
+
+        return Markup(res)
+
     @app.route('/logout')
     def logout():
         session.clear()
