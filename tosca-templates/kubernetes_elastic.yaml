@@ -20,6 +20,11 @@ topology_template:
       description: Maximum Number of WNs in the cluster
       default: 1
       required: yes
+    min_wn_num:
+      type: integer
+      description: Min Number of WNs in the cluster
+      default: 0
+      required: yes
 
   node_templates:
 
@@ -37,6 +42,8 @@ topology_template:
           - { section: 'monitoring', option: 'PERIOD_LIFECYCLE', value: '20' }
           - { section: 'monitoring', option: 'PERIOD_MONITORING_NODES', value: '20' }
           - { section: 'client', option: 'CLUES_REQUEST_WAIT_TIMEOUT', value: '3000' }
+          - { section: 'scheduling', option: 'SCHEDULER_CLASSES', value: 'clueslib.schedulers.CLUES_Scheduler_PowOn_Requests, clueslib.schedulers.CLUES_Scheduler_Reconsider_Jobs, clueslib.schedulers.CLUES_Scheduler_PowOff_IDLE,clueslib.schedulers.CLUES_Scheduler_PowOn_Free' }
+          - { section: 'scheduling', option: 'EXTRA_NODES_FREE', value: { get_input: admin_token } }
       capabilities:
         endpoint:
           properties:
