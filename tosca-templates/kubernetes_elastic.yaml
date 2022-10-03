@@ -43,7 +43,7 @@ topology_template:
           - { section: 'monitoring', option: 'PERIOD_MONITORING_NODES', value: '20' }
           - { section: 'client', option: 'CLUES_REQUEST_WAIT_TIMEOUT', value: '3000' }
           - { section: 'scheduling', option: 'SCHEDULER_CLASSES', value: 'clueslib.schedulers.CLUES_Scheduler_PowOn_Requests, clueslib.schedulers.CLUES_Scheduler_Reconsider_Jobs, clueslib.schedulers.CLUES_Scheduler_PowOff_IDLE,clueslib.schedulers.CLUES_Scheduler_PowOn_Free' }
-          - { section: 'scheduling', option: 'EXTRA_NODES_FREE', value: { get_input: admin_token } }
+          - { section: 'scheduling', option: 'EXTRA_NODES_FREE', value: { get_input: min_wn_num } }
       capabilities:
         endpoint:
           properties:
