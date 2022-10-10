@@ -80,7 +80,7 @@ topology_template:
         - host: lrms_front_end
         - dependency: nifi_reg_ns
 
-    nifi_ingress:
+    nifi_reg_ingress:
       type: tosca.nodes.indigo.KubernetesObject
       properties:
         spec: |
@@ -107,5 +107,5 @@ topology_template:
         - dependency: nifi_ref_ns
 
   outputs:
-    nifi_endpoint:
+    nifi_registry_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/nifi-registry/' ] }
