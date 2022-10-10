@@ -6,7 +6,7 @@ imports:
 metadata:
   name: Nifi
   display_name: Launch an nifi on top of a Kubernetes Virtual Cluster
-  icon: https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Apache-nifi-logo.svg/640px-Apache-nifi-logo.svg.png
+  icon: images/nifi.png
   parents:
    - kubernetes.yaml
 
