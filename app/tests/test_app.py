@@ -89,7 +89,7 @@ class IMDashboardTests(unittest.TestCase):
                                                  "instances": {"used": 1, "limit": 10},
                                                  "floating_ips": {"used": 1, "limit": 10},
                                                  "security_groups": {"used": 1, "limit": 10}}}
-        elif url == "/im/infrastructures/infid/owners":
+        elif url == "/im/infrastructures/infid/authorization":
             resp.ok = True
             resp.status_code = 200
             resp.text = "user1\nuser2"

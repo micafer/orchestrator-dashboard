@@ -84,6 +84,11 @@ topology_template:
             - get_input: nifi_admin_username
             - |-
                 '
+                            - name: NIFI_WEB_PROXY_HOST
+                              value: '
+            - get_attribute: [ front, public_address, 0 ]
+            - |-
+                '
       requirements:
         - host: lrms_front_end
         - dependency: nifins
