@@ -37,7 +37,7 @@ topology_template:
       capabilities:
         endpoint:
           properties:
-            port: 443
+            port: 8080
             protocol: tcp
       requirements:
         - host: simple_node 
