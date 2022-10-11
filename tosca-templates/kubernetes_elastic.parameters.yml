@@ -1,6 +1,7 @@
 inputs:
     max_wn_num:
       tab: Elastic Data
-
+    min_wn_num:
+      tab: Elastic Data
 tabs:
   - Elastic Data

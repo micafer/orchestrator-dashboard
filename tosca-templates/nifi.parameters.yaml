@@ -1,0 +1,9 @@
+inputs:
+    nifi_admin_username:
+      tab: Nifi
+
+    nifi_admin_password:
+      tab: Nifi
+
+tabs:
+  - Nifi

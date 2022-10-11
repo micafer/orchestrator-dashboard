@@ -1284,7 +1284,7 @@ def create_app(oidc_blueprint=None):
         auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
         res = ""
         try:
-            response = im.get_inf_property(infid, 'owners', auth_data)
+            response = im.get_inf_property(infid, 'authorization', auth_data)
             if not response.ok:
                 raise Exception(response.text)
 
