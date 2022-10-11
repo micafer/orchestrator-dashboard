@@ -34,6 +34,11 @@ topology_template:
 
     create_users:
       type: tosca.nodes.SoftwareComponent
+      capabilities:
+        endpoint:
+          properties:
+            port: 443
+            protocol: tcp
       requirements:
         - host: simple_node 
       interfaces:
