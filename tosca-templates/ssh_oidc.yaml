@@ -10,6 +10,7 @@ metadata:
   display_name: Enable SSH OIDC access to the VM
   icon: images/ssh-oidc.png
   tag: SYS
+  web: https://github.com/EOSC-synergy/ssh-oidc
   tag_color: purple
   parents:
     - single-node-disk.yml
