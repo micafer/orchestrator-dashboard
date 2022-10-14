@@ -8,7 +8,7 @@ description: Enable SSH OIDC access to the VM
 metadata:
   name: SSH OIDC
   display_name: Enable SSH OIDC access to the VM
-  icon: images/ssh-oidc.png
+  icon: images/motley-cue.png
   tag: SYS
   web: https://github.com/EOSC-synergy/ssh-oidc
   tag_color: purple
@@ -33,8 +33,8 @@ topology_template:
 
   node_templates:
 
-    create_users:
-      type: tosca.nodes.SoftwareComponent
+    ssh_oidc:
+      type: tosca.nodes.ec3.Application
       capabilities:
         endpoint:
           properties:
