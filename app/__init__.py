@@ -183,12 +183,7 @@ def create_app(oidc_blueprint=None):
             session['userid'] = "a_very_long_user_id_00000000000000000000000000000000000000000000@egi.es"
             session['username'] = "username"
             session['gravatar'] = ""
-            if 'next' in session:
-                next_url = session['next']
-                del session['next']
-                return redirect(next_url)
-            else:
-                return render_template('portfolio.html', templates=templates, parent=None)
+            return render_template('portfolio.html', templates=templates, parent=None)
         else:
             if not oidc_blueprint.session.authorized:
                 return redirect(url_for('login'))
@@ -240,12 +235,7 @@ def create_app(oidc_blueprint=None):
                     else:
                         session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
 
-                    if 'next' in session:
-                        next_url = session['next']
-                        del session['next']
-                        return redirect(next_url)
-                    else:
-                        return render_template('portfolio.html', templates=templates, parent=None)
+                    return render_template('portfolio.html', templates=templates, parent=None)
                 else:
                     flash("Error getting User info: \n" + account_info.text, 'error')
                     return render_template('home.html', oidc_name=settings.oidcName)
@@ -1313,8 +1303,6 @@ def create_app(oidc_blueprint=None):
     @app.route('/logout')
     def logout():
         session.clear()
-        if 'logout' not in request.full_path:
-            session['next'] = request.full_path
         try:
             oidc_blueprint.session.get("/logout")
         except Exception as ex:
