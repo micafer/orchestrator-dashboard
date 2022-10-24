@@ -39,6 +39,7 @@ class Settings:
         self.oidcGroups = config.get('OIDC_GROUP_MEMBERSHIP')
         self.db_url = config.get('DB_URL')
         self.analytics_tag = config.get('ANALYTICS_TAG')
+        self.motomo_id = config.get('MOTOMO_ID')
         self.static_sites = config.get('STATIC_SITES', [])
         self.static_sites_url = config.get('STATIC_SITES_URL', "")
         self.appdb_cache_timeout = config.get('APPDB_CACHE_TIMEOUT', 3600)
