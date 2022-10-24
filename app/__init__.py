@@ -109,6 +109,7 @@ def create_app(oidc_blueprint=None):
         if 'external_links' not in session:
             session['external_links'] = settings.external_links
         g.analytics_tag = settings.analytics_tag
+        g.motomo_info = settings.motomo_info
         g.settings = settings
 
     def authorized_with_valid_token(f):
