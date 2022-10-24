@@ -229,7 +229,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
+                        <form id="deleteInfra" action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteBtn" role="button">Delete</button>
                           <input type="checkbox" name="force" value="1" onclick="showForceMessage(this);"> Force
@@ -253,7 +253,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary reconfCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='reconfigure') }}" method="post">
+                        <form id="reconfInfra" action="{{ url_for('manage_inf', infid=infId, op='reconfigure') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success reconfigureBtn" role="button">Reconfigure</button>
                         </form>
@@ -274,7 +274,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary stopCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='stop') }}" method="post">
+                        <form id="stopInfra" action="{{ url_for('manage_inf', infid=infId, op='stop') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-warning StopBtn" role="button">Stop</button>
                         </form>
@@ -295,7 +295,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary startCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='start') }}" method="post">
+                        <form id="startInfra" action="{{ url_for('manage_inf', infid=infId, op='start') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success StartBtn" role="button">Start</button>
                         </form>
@@ -352,7 +352,7 @@
                       <div class="modal-body text-center" id="deletevms_{{infId}}_body">
                       </div>
                       <div class="modal-footer">
-                        <form action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
+                        <form id="deleteVmsInfra" action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
                           <input type="hidden" name="vm_list" id="vm_list_{{infId}}" />
                         <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -374,7 +374,7 @@
                       <div class="modal-body">
                         <div class="modal-body" id="owners_list">
                         </div>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='change_user') }}" method="post">
+                        <form id="changeUserInfra" action="{{ url_for('manage_inf', infid=infId, op='change_user') }}" method="post">
                           <div class="container-fluid">
                             <div class="form-group">
                             <div class="row">
