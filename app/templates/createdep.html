@@ -76,6 +76,9 @@ function onSubmit() {
 {% if g.analytics_tag %}
     gtag('event', 'submit', {'event_category' : '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}', 'event_label' : 'Submit'});
 {% endif %}
+{% if g.motomo_id %}
+    _paq.push(['trackEvent', 'Infrastructure', 'Deploy', '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}']);
+{% endif %}
     return true;
 }
 $(document).ready(function() {
