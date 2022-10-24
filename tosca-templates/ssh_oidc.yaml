@@ -35,6 +35,10 @@ topology_template:
 
     ssh_oidc:
       type: tosca.nodes.ec3.Application
+      artifacts:
+        docker_role:
+          file: grycap.motley_cue
+          type: tosca.artifacts.AnsibleGalaxy.role
       capabilities:
         endpoint:
           properties:
