@@ -54,6 +54,13 @@ topology_template:
           start:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/use_external_im.yml
 
+    lrms_front_end:
+      type: tosca.nodes.indigo.LRMS.FrontEnd.Slurm
+      properties:
+        max_number_of_nodes: { get_input: max_wn_num }
+      requirements:
+        - host: lrms_server
+
     wn_node:
       type: tosca.nodes.indigo.LRMS.WorkerNode.Slurm
       capabilities:

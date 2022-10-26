@@ -35,7 +35,7 @@ from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app.ssh_key import SSHKey
 from app import utils, appdb, db
-from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError
+from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
 from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
 from functools import wraps
@@ -126,7 +126,7 @@ def create_app(oidc_blueprint=None):
                     if oidc_blueprint.session.token['expires_in'] < 20:
                         app.logger.debug("Force refresh token")
                         oidc_blueprint.session.get(settings.oidcUserInfoPath)
-                except (InvalidTokenError, TokenExpiredError):
+                except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
                     flash("Token expired.", 'warning')
                     return logout()
 
@@ -194,7 +194,7 @@ def create_app(oidc_blueprint=None):
                 # Only contact userinfo endpoint first time in session
                 try:
                     account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + settings.oidcUserInfoPath)
-                except (InvalidTokenError, TokenExpiredError):
+                except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
                     flash("Token expired.", 'warning')
                     return logout()
 
