@@ -162,7 +162,7 @@ class IMDashboardTests(unittest.TestCase):
 
         return resp
 
-    def login(self, avatar): 
+    def login(self, avatar):
         self.oauth.session.authorized = True
         self.oauth.session.token = {'expires_in': 500, 'access_token': 'token'}
         account_info = MagicMock()
