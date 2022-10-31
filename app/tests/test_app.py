@@ -162,7 +162,7 @@ class IMDashboardTests(unittest.TestCase):
 
         return resp
 
-    def login(self, avatar):
+    def login(self, avatar): 
         self.oauth.session.authorized = True
         self.oauth.session.token = {'expires_in': 500, 'access_token': 'token'}
         account_info = MagicMock()
@@ -414,7 +414,9 @@ class IMDashboardTests(unittest.TestCase):
                   'num_cpus': '4',
                   'ports': '22,80,443',
                   'storage_size': '0 GB',
-                  'mount_path': '/mnt/disk'}
+                  'mount_path': '/mnt/disk',
+                  'infra_name': 'some_infra'
+                  }
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
