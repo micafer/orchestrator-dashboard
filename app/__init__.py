@@ -945,7 +945,8 @@ def create_app(oidc_blueprint=None):
         if priv_network_id and pub_network_id:
             template = add_network_id_to_template(template, priv_network_id, pub_network_id)
 
-        template = add_instance_name_to_compute(template, form_data['infra_name'])
+        if form_data['infra_name']:
+            template = add_instance_name_to_compute(template, form_data['infra_name'])
 
         template = add_image_to_template(template, image)
 
