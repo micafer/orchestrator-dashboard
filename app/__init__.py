@@ -789,7 +789,8 @@ def create_app(oidc_blueprint=None):
             if node["type"] == "tosca.nodes.indigo.Compute":
                 if "properties" not in node:
                     node["properties"] = {}
-                node["properties"]["instance_name"] = "%s_%s" % (inf_name, node_name)
+                    inf_name = ''.join(char for char in inf_name if ord(char) < 128)
+                node["properties"]["instance_name"] = "%s_%s" % (inf_name.replace(" ", "_"), node_name)
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
 
