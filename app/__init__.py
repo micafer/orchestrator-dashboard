@@ -789,6 +789,7 @@ def create_app(oidc_blueprint=None):
             if node["type"] == "tosca.nodes.indigo.Compute":
                 if "properties" not in node:
                     node["properties"] = {}
+                    # Remove non ascii chars to avoid issues
                     inf_name = ''.join(char for char in inf_name if ord(char) < 128)
                 node["properties"]["instance_name"] = "%s_%s" % (inf_name.replace(" ", "_"), node_name)
 
