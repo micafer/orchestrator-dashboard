@@ -303,6 +303,10 @@ def create_app(oidc_blueprint=None):
                     if "net_interface.%s.dns_name" % cont in vminfo:
                         nets += " (%s)" % vminfo["net_interface.%s.dns_name" % cont]
                         del vminfo["net_interface.%s.dns_name" % cont]
+                    
+                    if "net_interface.%s.additional_dns_names" % cont in vminfo and vminfo["net_interface.%s.additional_dns_names" % cont]:
+                        nets += " (%s)" % ", ".join(vminfo["net_interface.%s.additional_dns_names" % cont].replace("@", "."))
+                        del vminfo["net_interface.%s.additional_dns_names" % cont]
 
                 cont += 1
 
