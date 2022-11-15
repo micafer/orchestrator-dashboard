@@ -35,7 +35,7 @@ from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app.ssh_key import SSHKey
 from app import utils, appdb, db
-from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError
+from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
 from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
 from functools import wraps
@@ -109,6 +109,7 @@ def create_app(oidc_blueprint=None):
         if 'external_links' not in session:
             session['external_links'] = settings.external_links
         g.analytics_tag = settings.analytics_tag
+        g.motomo_info = settings.motomo_info
         g.settings = settings
 
     def authorized_with_valid_token(f):
@@ -125,7 +126,7 @@ def create_app(oidc_blueprint=None):
                     if oidc_blueprint.session.token['expires_in'] < 20:
                         app.logger.debug("Force refresh token")
                         oidc_blueprint.session.get(settings.oidcUserInfoPath)
-                except (InvalidTokenError, TokenExpiredError):
+                except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
                     flash("Token expired.", 'warning')
                     return logout()
 
@@ -193,7 +194,7 @@ def create_app(oidc_blueprint=None):
                 # Only contact userinfo endpoint first time in session
                 try:
                     account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + settings.oidcUserInfoPath)
-                except (InvalidTokenError, TokenExpiredError):
+                except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
                     flash("Token expired.", 'warning')
                     return logout()
 
@@ -246,7 +247,7 @@ def create_app(oidc_blueprint=None):
         vmid = request.args['vmId']
         infid = request.args['infId']
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         try:
             response = im.get_vm_info(infid, vmid, auth_data)
         except Exception as ex:
@@ -367,7 +368,7 @@ def create_app(oidc_blueprint=None):
     def managevm(op=None, infid=None, vmid=None):
         access_token = oidc_blueprint.session.token['access_token']
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         try:
             if op == "reconfigure":
                 response = im.reconfigure_inf(infid, auth_data, [vmid])
@@ -456,7 +457,7 @@ def create_app(oidc_blueprint=None):
         if not infid:
             return {"state": "error", "vm_states": {}}
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         try:
             state = im.get_inf_state(infid, auth_data)
             try:
@@ -486,12 +487,19 @@ def create_app(oidc_blueprint=None):
 
     def hide_sensitive_data(template):
         """Remove/Hide sensitive data (passwords, credentials)."""
+
+        # TODO: Replace using this regexp
+        # AKID: (?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9])
+        # SK:   (?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])
         data = yaml.full_load(template)
 
         for node in list(data['topology_template']['node_templates'].values()):
-            if node["type"] == "tosca.nodes.ec3.DNSRegistry":
+            if node["type"] == "tosca.nodes.indigo.LRMS.FrontEnd.Kubernetes":
                 try:
-                    node["properties"]["dns_service_credentials"]["token"] = "AK:SK"
+                    if "cert_manager_challenge_dns01_ak" in node["properties"]:
+                        node["properties"]["cert_manager_challenge_dns01_ak"] = "AK"
+                    if "cert_manager_challenge_dns01_sk" in node["properties"]:
+                        node["properties"]["cert_manager_challenge_dns01_sk"] = "SK"
                 except KeyError:
                     pass
 
@@ -686,7 +694,8 @@ def create_app(oidc_blueprint=None):
                                template=selected_template,
                                selectedTemplate=selected_tosca,
                                creds=creds, input_values=inputs,
-                               infra_name=infra_name, child_templates=child_templates)
+                               infra_name=infra_name, child_templates=child_templates,
+                               vos=utils.getVOs(session), utils=utils)
 
     @app.route('/vos')
     def getvos():
@@ -924,7 +933,7 @@ def create_app(oidc_blueprint=None):
                     if "public" in site["networks"][vo]:
                         pub_network_id = site["networks"][vo]["public"]
 
-            if form_data['extra_opts.selectedImage'] != "":
+            if form_data['extra_opts.selectedImage'] != "" and 'name' in site:
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
             elif form_data['extra_opts.selectedSiteImage'] != "":
                 image = form_data['extra_opts.selectedSiteImage']
@@ -1161,7 +1170,7 @@ def create_app(oidc_blueprint=None):
         else:
             form_data = request.form.to_dict()
 
-            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
             try:
                 response = im.get_inf_property(infid, 'radl', auth_data)
             except Exception as ex:
@@ -1203,7 +1212,9 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def manage_inf(infid=None, op=None):
         access_token = oidc_blueprint.session.token['access_token']
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id())
+
+        # Try to get the Cred ID to restrict the auth info sent to the IM
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         reload = None
 
         try:
@@ -1230,12 +1241,6 @@ def create_app(oidc_blueprint=None):
                     force = True
                 if 'recreate' in form_data and form_data['recreate'] != "0":
                     recreate = True
-                # Specially added for OSCAR clusters
-                success, msg = utils.delete_dns_record(infid, im, auth_data)
-                if not success:
-                    app.logger.error('Error deleting DNS record: %s', (msg))
-                else:
-                    app.logger.info('%s DNS record successfully deleted.', (msg))
                 response = im.delete_inf(infid, force, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
@@ -1316,6 +1321,29 @@ def create_app(oidc_blueprint=None):
         ssh_key.write_ssh_key(session['userid'], key, desc)
 
         return redirect(url_for('get_ssh_keys'))
+
+    @app.route('/owners/<infid>')
+    @authorized_with_valid_token
+    def getowners(infid=None):
+
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
+        res = ""
+        try:
+            response = im.get_inf_property(infid, 'authorization', auth_data)
+            if not response.ok:
+                raise Exception(response.text)
+
+            owners = response.text.split()
+            res = "Current Owners:<br><ul>"
+            for owner in owners:
+                owner = owner.replace("__OPENID__", "")
+                res += "<li>%s</li>" % owner
+            res += "</ul>"
+        except Exception as ex:
+            res = "Error: %s." % ex
+
+        return Markup(res)
 
     @app.route('/logout')
     def logout():

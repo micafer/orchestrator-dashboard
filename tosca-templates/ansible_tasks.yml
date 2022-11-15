@@ -1,0 +1,44 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: Launch user defined Ansible tasks.
+
+
+metadata:
+  name: Ansible
+  display_name: Ansible tasks
+  icon: images/ansible.png
+  tag: SW
+  tag_color: blue
+  parents:
+    - simple_node.yaml
+
+topology_template:
+  inputs:
+ 
+    ansible_tasks:
+      type: string
+      description: Ansible tasks (In case of using double quotes you have to escape it with \)
+      default: ""
+
+    ansible_url:
+      type: string
+      description: or specify an URL of a set of Ansible tasks
+      default: ""
+
+  node_templates:
+
+    ansible:
+      type: tosca.nodes.SoftwareComponent
+      interfaces:
+        Standard:
+          configure:
+            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/ansible_tasks.yml
+            inputs:
+                ansible_tasks: { get_input: ansible_tasks }
+                ansible_url: { get_input: ansible_url }
+                ansible_name: 'im_dash_tasks'
+      requirements:
+        - host: simple_node

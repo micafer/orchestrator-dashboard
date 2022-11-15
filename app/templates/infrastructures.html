@@ -229,7 +229,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
+                        <form id="deleteInfra" action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteBtn" role="button">Delete</button>
                           <input type="checkbox" name="force" value="1" onclick="showForceMessage(this);"> Force
@@ -253,7 +253,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary reconfCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='reconfigure') }}" method="post">
+                        <form id="reconfInfra" action="{{ url_for('manage_inf', infid=infId, op='reconfigure') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success reconfigureBtn" role="button">Reconfigure</button>
                         </form>
@@ -274,7 +274,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary stopCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='stop') }}" method="post">
+                        <form id="stopInfra" action="{{ url_for('manage_inf', infid=infId, op='stop') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-warning StopBtn" role="button">Stop</button>
                         </form>
@@ -295,7 +295,7 @@
                       </div>
                       <div class="modal-footer">
                         <a class="btn btn-primary startCancelBtn" role="button" data-dismiss="modal">Cancel</a>
-                        <form action="{{ url_for('manage_inf', infid=infId, op='start') }}" method="post">
+                        <form id="startInfra" action="{{ url_for('manage_inf', infid=infId, op='start') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success StartBtn" role="button">Start</button>
                         </form>
@@ -352,7 +352,7 @@
                       <div class="modal-body text-center" id="deletevms_{{infId}}_body">
                       </div>
                       <div class="modal-footer">
-                        <form action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
+                        <form id="deleteVmsInfra" action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
                           <input type="hidden" name="vm_list" id="vm_list_{{infId}}" />
                         <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -372,7 +372,9 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
-                        <form action="{{ url_for('manage_inf', infid=infId, op='change_user') }}" method="post">
+                        <div class="modal-body" id="owners_list">
+                        </div>
+                        <form id="changeUserInfra" action="{{ url_for('manage_inf', infid=infId, op='change_user') }}" method="post">
                           <div class="container-fluid">
                             <div class="form-group">
                             <div class="row">
@@ -412,6 +414,13 @@
                     $('#outputs_{{infId}}').on('show.bs.modal', function (event) {
                       var modal = $(this)
                       modal.find('.modal-body').html('Loading...').load("{{ url_for('infoutputs', infid=infId) }}");
+                    });
+                  });
+
+                  $(document).ready(function () {
+                    $('#change_auth_{{infId}}').on('show.bs.modal', function (event) {
+                      var modal = $(this)
+                      modal.find('#owners_list').html('Loading...').load("{{ url_for('getowners', infid=infId) }}");
                     });
                   });
                 </script>

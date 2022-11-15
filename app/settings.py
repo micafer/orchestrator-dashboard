@@ -24,7 +24,7 @@
 class Settings:
     def __init__(self, config):
         """Creator function."""
-        self.version = "2.4.1"
+        self.version = "2.5.1"
         self.toscaDir = config.get('TOSCA_TEMPLATES_DIR', '') + "/"
         self.toscaParamsDir = config.get('TOSCA_PARAMETERS_DIR', '') + "/"
         self.imUrl = config['IM_URL']
@@ -39,6 +39,7 @@ class Settings:
         self.oidcGroups = config.get('OIDC_GROUP_MEMBERSHIP')
         self.db_url = config.get('DB_URL')
         self.analytics_tag = config.get('ANALYTICS_TAG')
+        self.motomo_info = config.get('MOTOMO_INFO')
         self.static_sites = config.get('STATIC_SITES', [])
         self.static_sites_url = config.get('STATIC_SITES_URL', "")
         self.appdb_cache_timeout = config.get('APPDB_CACHE_TIMEOUT', 3600)
@@ -48,3 +49,4 @@ class Settings:
         self.vault_url = config.get('VAULT_URL', None)
         self.im_auth = config.get('IM_AUTH', None)
         self.vo_map = config.get('VO_MAP', {})
+        self.extra_auth = config.get('EXTRA_AUTH', [])

@@ -1,0 +1,13 @@
+inputs:
+   host:
+      tab: Binderhub Data
+
+   version:
+      tab: Binderhub Data
+
+   config:
+      tab: Binderhub Data
+      tag_type: textarea
+
+tabs:
+  - Binderhub Data

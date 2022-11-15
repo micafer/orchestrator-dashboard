@@ -1,0 +1,55 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: Enable SSH OIDC access to the VM
+
+metadata:
+  name: SSH OIDC
+  display_name: Enable SSH OIDC access to the VM
+  icon: images/motley-cue.png
+  tag: SYS
+  web: https://github.com/EOSC-synergy/ssh-oidc
+  tag_color: purple
+  parents:
+    - single-node-disk.yml
+
+topology_template:
+
+  inputs:        
+
+    ssh_oidc_my_vo:
+      type: boolean
+      description: ALL members of ALL VOs of the user will be authorised to log in.
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
+
+    ssh_oidc_other_vos:
+      type: string
+      description: list of VOs will be authorised to log in.
+      default: ''
+
+  node_templates:
+
+    ssh_oidc:
+      type: tosca.nodes.ec3.Application
+      artifacts:
+        docker_role:
+          file: grycap.motley_cue
+          type: tosca.artifacts.AnsibleGalaxy.role
+      capabilities:
+        endpoint:
+          properties:
+            port: 8080
+            protocol: tcp
+      requirements:
+        - host: simple_node 
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/ssh_oidc.yml
+            inputs:
+              ssh_oidc_my_vo: { get_input: ssh_oidc_my_vo }
+              ssh_oidc_other_vos: { get_input: ssh_oidc_other_vos }

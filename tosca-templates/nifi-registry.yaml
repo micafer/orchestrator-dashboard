@@ -1,0 +1,111 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Nifi Registry
+  display_name: Launch an nifi registry on top of a Kubernetes Virtual Cluster
+  icon: images/nifi-registry.png
+  parents:
+   - kubernetes.yaml
+
+description: TOSCA template for launching an Nifi Registry on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+
+  node_templates:
+
+    nifi_reg_ns:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: 'nifi-registry'
+      requirements:
+        - host: lrms_front_end
+
+    nifi_reg:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: nifi-registry
+            namespace: nifi-registry
+            labels:
+              app: nifi-registry
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: nifi-registry
+            template:
+              metadata:
+                labels:
+                  app: nifi-registry
+              spec:
+                containers:
+                  - name: nifi-registry
+                    image: apache/nifi-registry
+                    ports:
+                      - containerPort: 18080
+                restartPolicy: Always
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifi_reg_ns
+
+    nifi_reg_services:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            namespace: nifi-registry
+            labels:
+              app: nifi-registry
+            name: service-nifi-registry
+          spec:
+            ports:
+              - name: '18080'
+                port: 18080
+                targetPort: 18080
+            selector:
+              app: nifi-registry
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifi_reg_ns
+
+    nifi_reg_ingress:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: ingress-nifi-registry
+            namespace: nifi-registry
+            annotations:
+              kubernetes.io/ingress.class: 'nginx'
+          spec:
+            rules:
+            - http:
+                paths:
+                - path: /nifi-registry
+                  backend:
+                    service:
+                      name: service-nifi-registry
+                      port:
+                        number: 18080
+                  pathType: Prefix
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifi_ref_ns
+
+  outputs:
+    nifi_registry_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/nifi-registry/' ] }
