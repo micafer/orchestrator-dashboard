@@ -35,6 +35,10 @@
             "eval.c-scale.eu": {
                 "private": "group-project-network",
                 "public": "public-muni-147-251-21-GROUP"
+            },
+            "in-sar-cubes.c-scale.eu": {
+                "private": "group-project-network",
+                "public": "public-muni-147-251-21-GROUP"
             }
         }
     },
