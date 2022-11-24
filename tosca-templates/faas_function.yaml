@@ -33,7 +33,7 @@ topology_template:
     function_image:
       type: string
       description: Container Image with the function (It must be in ECR in case of Lambda)
-      default: "000000000000.dkr.ecr.us-east-1.amazonaws.com/imagename""
+      default: "000000000000.dkr.ecr.us-east-1.amazonaws.com/imagename"
       required: yes
     function_script:
       type: string
