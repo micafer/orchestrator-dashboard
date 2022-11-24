@@ -78,7 +78,7 @@
         interfaces:
           Standard:
             configure:
-              implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/obm_install.yml
+              implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/obm/obm_install.yml
               inputs:
                  obm_compute_node_ip: { get_attribute: [ obm_compute_node, private_address, 0 ] }
 
@@ -144,7 +144,7 @@
         interfaces:
           Standard:
             configure:
-              implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/obm_compute_install.yml
+              implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/obm/obm_compute_install.yml
 
       obm_compute_node:
         type: tosca.nodes.indigo.Compute
