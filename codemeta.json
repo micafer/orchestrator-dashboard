@@ -4,7 +4,7 @@
         "http://schema.org"
     ],
     "@type": "SoftwareSourceCode",
-    "identifier": "im-dashbaord",
+    "identifier": "im-dashboard",
     "name": "Infrastructure Manager Dashboard",
     "version": "2.5.1",
     "description": "Infrastructure Manager - Simple Graphical UI",
