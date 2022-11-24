@@ -20,7 +20,6 @@
 # under the License.
 """Util functions."""
 
-import ast
 import io
 import json
 import os
@@ -267,7 +266,7 @@ def to_pretty_json(value):
 
 
 def avatar(email, size):
-    digest = md5(email.lower().encode('utf-8')).hexdigest() # nosec
+    digest = md5(email.lower().encode('utf-8')).hexdigest()  # nosec
     return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
 
