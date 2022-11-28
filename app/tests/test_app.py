@@ -19,7 +19,7 @@ class IMDashboardTests(unittest.TestCase):
         resp = MagicMock()
         parts = urlparse(url)
         url = parts[2]
-        params = parts[4]
+        # params = parts[4]
 
         resp.status_code = 404
         resp.ok = False
@@ -414,7 +414,9 @@ class IMDashboardTests(unittest.TestCase):
                   'num_cpus': '4',
                   'ports': '22,80,443',
                   'storage_size': '0 GB',
-                  'mount_path': '/mnt/disk'}
+                  'mount_path': '/mnt/disk',
+                  'infra_name': 'some_infra'
+                  }
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
@@ -437,7 +439,8 @@ class IMDashboardTests(unittest.TestCase):
                   'num_cpus': '4',
                   'ports': '22,80,443',
                   'storage_size': '0 GB',
-                  'mount_path': '/mnt/disk'}
+                  'mount_path': '/mnt/disk',
+                  'infra_name': 'some_infra'}
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])

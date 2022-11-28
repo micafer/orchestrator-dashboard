@@ -18,9 +18,8 @@
 
 import unittest
 import os
-
-from app.db import DataBase
 from mock import patch, MagicMock
+from app.db import DataBase
 
 
 class TestDataBase(unittest.TestCase):

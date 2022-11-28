@@ -1,0 +1,34 @@
+inputs:
+
+    function_name:
+      tab: FaaS function
+
+    function_memory:
+      tab: FaaS function
+      pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+      tag_type: text
+
+    function_cpu:
+      tab: FaaS function
+
+    function_image:
+      tab: FaaS function
+
+    function_script:
+      tab: FaaS function
+      tag_type: textarea
+
+    function_input_provider:
+      tab: FaaS function
+
+    function_input:
+      tab: FaaS function
+
+    function_output_provider:
+      tab: FaaS function
+
+    function_output:
+      tab: FaaS function
+
+tabs:
+  - FaaS function

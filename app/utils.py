@@ -20,7 +20,6 @@
 # under the License.
 """Util functions."""
 
-import ast
 import io
 import json
 import os
@@ -273,7 +272,7 @@ def to_pretty_json(value):
 
 
 def avatar(email, size):
-    digest = md5(email.lower().encode('utf-8')).hexdigest()
+    digest = md5(email.lower().encode('utf-8')).hexdigest()  # nosec
     return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
 
@@ -364,24 +363,6 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
         toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
 
     return toscaInfoOrder
-
-
-def exchange_token_with_audience(oidc_url, client_id, client_secret, oidc_token, audience):
-
-    payload_string = ('{ "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange", "audience": "' +
-                      audience + '", "subject_token": "' + oidc_token + '", "scope": "openid profile" }')
-
-    # Convert string payload to dictionary
-    payload = ast.literal_eval(payload_string)
-
-    oidc_response = requests.post(oidc_url + "/token", data=payload, auth=(client_id, client_secret), verify=False)
-
-    if not oidc_response.ok:
-        raise Exception("Error exchanging token: {} - {}".format(oidc_response.status_code, oidc_response.text))
-
-    deserialized_oidc_response = json.loads(oidc_response.text)
-
-    return deserialized_oidc_response['access_token']
 
 
 def generate_random_name():

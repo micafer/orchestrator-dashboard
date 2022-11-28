@@ -304,6 +304,12 @@ def create_app(oidc_blueprint=None):
                         nets += " (%s)" % vminfo["net_interface.%s.dns_name" % cont]
                         del vminfo["net_interface.%s.dns_name" % cont]
 
+                    if ("net_interface.%s.additional_dns_names" % cont in vminfo and
+                            vminfo["net_interface.%s.additional_dns_names" % cont]):
+                        dns_names = vminfo["net_interface.%s.additional_dns_names" % cont]
+                        nets += " (%s)" % ", ".join(dns_names).replace("@", ".")
+                        del vminfo["net_interface.%s.additional_dns_names" % cont]
+
                 cont += 1
 
             cont = 0
@@ -805,12 +811,18 @@ def create_app(oidc_blueprint=None):
 
         return template
 
-    def add_record_name_to_template(template, replace_name):
-        # Add a random name in the DNS record name
+    def add_instance_name_to_compute(template, inf_name):
+        # Prepend the infrastructure name to tne instance name
 
-        for node in list(template['topology_template']['node_templates'].values()):
-            if node["type"] == "tosca.nodes.ec3.DNSRegistry":
-                node["properties"]["record_name"] = node["properties"]["record_name"].replace("*", replace_name)
+        for node_name, node in template['topology_template']['node_templates'].items():
+            if node["type"] == "tosca.nodes.indigo.Compute":
+                if "properties" not in node:
+                    node["properties"] = {}
+                    # Remove non ascii chars to avoid issues
+                    inf_name = ''.join(char for char in inf_name if ord(char) < 128)
+                node["properties"]["instance_name"] = "%s_%s" % (inf_name.replace(" ", "_"), node_name)
+
+        app.logger.debug(yaml.dump(template, default_flow_style=False))
 
         return template
 
@@ -986,14 +998,14 @@ def create_app(oidc_blueprint=None):
         if priv_network_id and pub_network_id:
             template = add_network_id_to_template(template, priv_network_id, pub_network_id)
 
+        if form_data['infra_name']:
+            template = add_instance_name_to_compute(template, form_data['infra_name'])
+
         template = add_image_to_template(template, image)
 
         template = add_auth_to_template(template, auth_data)
 
         template = add_ssh_keys_to_template(template)
-
-        # Specially added for OSCAR clusters
-        template = add_record_name_to_template(template, utils.generate_random_name())
 
         inputs = {k: v for (k, v) in form_data.items() if not k.startswith("extra_opts.")}
 
