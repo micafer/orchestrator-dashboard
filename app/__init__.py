@@ -429,6 +429,21 @@ def create_app(oidc_blueprint=None):
             infrastructures[inf_id] = {'name': '', 'state': {}}
             if 'name' in infra_data:
                 infrastructures[inf_id]['name'] = infra_data["name"]
+            else:
+                try:
+                    response = im.get_inf_property(inf_id, "tosca", auth_data)
+                    if not response.ok:
+                        raise Exception(response.text)
+                    infra_template = yaml.safe_load(response.text)
+                    if infra_template.get('metadata', {}).get('infra_name'):
+                        infra_data["name"] = infra_template.get('metadata', {}).get('infra_name')
+                        infrastructures[inf_id]['name'] = infra_data["name"]
+                        try:
+                            infra.write_infra(inf_id, infra_data)
+                        except Exception as se:
+                            app.logger.error("Error saving infrastructure name: %s" % se)
+                except Exception as ex:
+                    app.logger.error("Error getting infrastructure name: %s" % ex)
             if 'state' in infra_data:
                 infrastructures[inf_id]['state'] = infra_data["state"]
             if 'site' in infra_data:
@@ -954,6 +969,7 @@ def create_app(oidc_blueprint=None):
             template = add_network_id_to_template(template, priv_network_id, pub_network_id)
 
         if form_data['infra_name']:
+            template['metadata']['infra_name'] = form_data['infra_name']
             template = add_instance_name_to_compute(template, form_data['infra_name'])
 
         template = add_image_to_template(template, image)
