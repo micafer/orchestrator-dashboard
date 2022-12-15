@@ -431,12 +431,12 @@ def create_app(oidc_blueprint=None):
                 infrastructures[inf_id]['name'] = infra_data["name"]
             else:
                 try:
-                    response = im.get_inf_property(inf_id, "tosca", auth_data)
+                    response = im.get_inf_property(inf_id, "radl", auth_data)
                     if not response.ok:
                         raise Exception(response.text)
-                    infra_template = yaml.safe_load(response.text)
-                    if infra_template.get('metadata', {}).get('infra_name'):
-                        infra_data["name"] = infra_template.get('metadata', {}).get('infra_name')
+                    infra_radl = radl_parse(response.text)
+                    if infra_radl.description and infra_radl.description.getValue("name"):
+                        infra_data["name"] = infra_radl.description.getValue("name")
                         infrastructures[inf_id]['name'] = infra_data["name"]
                         try:
                             infra.write_infra(inf_id, infra_data)
