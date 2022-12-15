@@ -434,7 +434,7 @@ def create_app(oidc_blueprint=None):
                     response = im.get_inf_property(inf_id, "radl", auth_data)
                     if not response.ok:
                         raise Exception(response.text)
-                    infra_radl = radl_parse(response.text)
+                    infra_radl = radl_parse.parse_radl(response.text)
                     if infra_radl.description and infra_radl.description.getValue("name"):
                         infra_data["name"] = infra_radl.description.getValue("name")
                         infrastructures[inf_id]['name'] = infra_data["name"]
