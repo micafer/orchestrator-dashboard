@@ -204,7 +204,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
             else:
                 res += "; type = OpenStack;"
                 res += " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
-                res += " host = %s; password = '%s', vo = %s" % (cred['host'], access_token, cred['vo'])
+                res += " host = %s; password = '%s'; vo = %s" % (cred['host'], access_token, cred['vo'])
 
                 projectid = cred['project_id'] if 'project_id' in cred else None
                 # only load this data if a EGI Cloud site appears
@@ -215,7 +215,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
 
                 if cred['host'] in fedcloud_sites:
                     site_info = fedcloud_sites[cred['host']]
-                    if 'api_versio' in site_info:
+                    if 'api_version' in site_info:
                         res += "; api_version  = %s" % site_info['api_version']
                     if 'identity_method' in site_info:
                         res = res.replace("tenant = openid", "tenant = %s" % site_info['identity_method'])
