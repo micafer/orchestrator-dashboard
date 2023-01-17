@@ -203,7 +203,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
             else:
                 res += "; type = OpenStack;"
                 res += " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
-                res += " host = %s; password = '%s'" % (cred['host'], access_token)
+                res += " host = %s; password = '%s', vo = %s" % (cred['host'], access_token, cred['vo'])
 
                 projectid = cred['project_id'] if 'project_id' in cred else None
                 # only load this data if a EGI Cloud site appears
@@ -214,7 +214,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
 
                 if cred['host'] in fedcloud_sites:
                     site_info = fedcloud_sites[cred['host']]
-                    if 'api_version' in site_info:
+                    if 'api_versio' in site_info:
                         res += "; api_version  = %s" % site_info['api_version']
                     if 'identity_method' in site_info:
                         res = res.replace("tenant = openid", "tenant = %s" % site_info['identity_method'])
@@ -743,3 +743,41 @@ def getVOs(session):
     elif not g.settings.debug_oidc_token:
         vos = []
     return vos
+
+
+def get_site_info_from_radl(radl, creds):
+    res_site = {}
+
+    # Get provider info from RADL
+    for elem in radl:
+        if elem["class"] == "system":
+            site_type = elem.get("provider.type")
+            site_host = elem.get("provider.host")
+            site_vo = elem.get("provider.vo")
+            if site_vo:
+                site_type = "fedcloud"
+            break
+
+    # Now try to get the corresponding cred
+    # only for EGI sites
+    for cred in creds:
+        if cred["type"] == "fedcloud" and site_host in cred["host"] and site_vo == cred["vo"]:
+            return cred
+
+    # If there is no cred for it
+    if site_vo:
+        res_site["vo"] = site_vo
+
+        # in case of FedCLoud sites get site name
+        for site_name, site in getCachedSiteList().items():
+            if site_host in site['url']:
+                res_site["site_name"] = site_name
+                break
+
+    if site_host and "cloudandheat" in site_host:
+        site_type = "CH"
+
+    res_site["host"] = site_host
+    res_site["type"] = site_type
+
+    return res_site

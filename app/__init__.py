@@ -275,6 +275,8 @@ def create_app(oidc_blueprint=None):
             if "provider.type" in vminfo:
                 deployment = vminfo["provider.type"]
                 del vminfo["provider.type"]
+            if "provider.vo" in vminfo:
+                del vminfo["provider.vo"]
             if "provider.host" in vminfo:
                 if "provider.port" in vminfo:
                     deployment += ": %s:%s" % (vminfo["provider.host"], vminfo["provider.port"])
@@ -446,6 +448,25 @@ def create_app(oidc_blueprint=None):
                     app.logger.error("Error getting infrastructure name: %s" % ex)
             if 'state' in infra_data:
                 infrastructures[inf_id]['state'] = infra_data["state"]
+            if 'site' not in infra_data:
+                try:
+                    response = im.get_vm_info(inf_id, "0", auth_data)
+                    if not response.ok:
+                        raise Exception(response.text)
+                    radl_json = response.json()["radl"]
+                except Exception as ex:
+                    app.logger.exception("Error getting vm info: %s" % ex, "error")
+                    radl_json = []
+                try:
+                    creds = cred.get_creds(get_cred_id())
+                except Exception as ex:
+                    app.logger.exception("Error getting user credentials: %s" % ex, "error")
+                    creds = []
+                infra_data["site"] = utils.get_site_info_from_radl(radl_json, creds)
+                try:
+                    infra.write_infra(inf_id, infra_data)
+                except Exception as se:
+                    app.logger.error("Error saving infrastructure site: %s" % se)
             if 'site' in infra_data:
                 site_info = ""
                 if "site_name" in infra_data["site"]:
@@ -1135,7 +1156,9 @@ def create_app(oidc_blueprint=None):
                 images = None
                 try:
                     infra_data = infra.get_infra(infid)
-                    cred_id = infra_data["site"]["id"]
+                    cred_id = None
+                    if infra_data.get("site", {}).get("id"):
+                        cred_id = infra_data["site"]["id"]
                     auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
                     response = im.get_cloud_images(cred_id, auth_data)
                     if not response.ok:
