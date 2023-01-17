@@ -101,7 +101,19 @@ topology_template:
       type: string
       description: Domain Name
       default: "im.grycap.net"
-
+    kube_nvidia_support:
+      type: boolean
+      description: Flag to add NVIDIA support
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
+    kube_install_yunikorn:
+      type: boolean
+      description: Flag to install Apache YuniKorn
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
+  
   node_templates:
 
     oscar:
@@ -115,6 +127,7 @@ topology_template:
         oidc_enable: true
         oidc_subject: { get_input: user_id }
         oidc_groups: [{ get_input: selected_vo }]
+        yunikorn_enable: { get_input: kube_install_yunikorn }
       capabilities:
         endpoint:
           properties:
@@ -154,6 +167,8 @@ topology_template:
 #        cert_manager_challenge_dns01_ak: AK
 #        cert_manager_challenge_dns01_sk: SK
         cri_runtime: containerd
+        nvidia_support: { get_input: kube_nvidia_support }
+        install_yunikorn: { get_input: kube_install_yunikorn }
       requirements:
         - host: front
 
@@ -198,6 +213,7 @@ topology_template:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
         version: 1.23.6
         cri_runtime: containerd
+        nvidia_support: { get_input: kube_nvidia_support }
       requirements:
         - host: wn
 
