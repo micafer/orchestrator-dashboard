@@ -76,7 +76,7 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/radl":
             resp.ok = True
             resp.status_code = 200
-            resp.text = "system wn ()\nsystem front ()"
+            resp.text = "description desc (name = 'infname')\n system wn ()\nsystem front ()"
         elif url == "/im/clouds/credid/images":
             resp.ok = True
             resp.status_code = 200
@@ -192,16 +192,21 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         self.assertIn(b"https://appsgrycap.i3m.upv.es:31443/im", res.data)
 
+    @patch("app.db_cred.DBCredentials.get_creds")
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
     @patch("app.utils.avatar")
-    def test_infrastructures(self, avatar, get, user_data):
+    def test_infrastructures(self, avatar, get, user_data, get_creds):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get_creds.return_value = []
         get.side_effect = self.get_response
         self.login(avatar)
         res = self.client.get('/infrastructures')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'infid', res.data)
+        self.assertIn(b'infname', res.data)
+        self.assertIn(b'OpenNebula', res.data)
+        self.assertIn(b'server.com', res.data)
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.put')

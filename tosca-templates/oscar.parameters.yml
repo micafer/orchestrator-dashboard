@@ -51,6 +51,12 @@ inputs:
       tab: OSCAR parameters
       tag_type: hidden
 
+    kube_nvidia_support:
+      tab: OSCAR parameters
+
+    kube_install_yunikorn:
+      tab: OSCAR parameters
+
 tabs:
   - HW Data
   - OSCAR parameters
