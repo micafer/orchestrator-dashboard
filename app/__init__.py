@@ -41,7 +41,7 @@ from flask import Flask, json, render_template, request, redirect, url_for, flas
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
-from radl.radl import deploy
+from radl.radl import deploy, description
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect
 
@@ -463,7 +463,9 @@ def create_app(oidc_blueprint=None):
                 except Exception as ex:
                     app.logger.exception("Error getting user credentials: %s" % ex, "error")
                     creds = []
-                infra_data["site"] = utils.get_site_info_from_radl(radl_json, creds)
+                site_info = utils.get_site_info_from_radl(radl_json, creds)
+                if site_info:
+                    infra_data["site"] = site_info
                 try:
                     infra.write_infra(inf_id, infra_data)
                 except Exception as se:
@@ -1231,6 +1233,21 @@ def create_app(oidc_blueprint=None):
                     try:
                         infra_data = infra.get_infra(infid)
                         infra_data["name"] = form_data['description']
+
+                        # Set the name in the infrastructure RADL
+                        response = im.get_inf_property(infid, "radl", auth_data)
+                        if not response.ok:
+                            raise Exception(response.text)
+                        infra_radl = radl_parse.parse_radl(response.text)
+                        if not infra_radl.description:
+                            infra_radl.description = description("desc")
+                        if not infra_radl.description.getValue("name"):
+                            infra_radl.description.setValue("name", infra_data["name"])
+                        infra_radl.deploys = []
+                        response = im.addresource_inf(infid, str(infra_radl), auth_data, context=False)
+                        if not response.ok:
+                            raise Exception(response.text)
+
                         infra.write_infra(infid, infra_data)
                     except Exception as uex:
                         flash("Error updating infrastructure description: %s" % str(uex), "error")

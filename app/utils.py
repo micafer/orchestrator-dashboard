@@ -749,6 +749,10 @@ def getVOs(session):
 def get_site_info_from_radl(radl, creds):
     res_site = {}
 
+    site_type = None
+    site_host = None
+    site_vo = None
+
     # Get provider info from RADL
     for elem in radl:
         if elem["class"] == "system":
@@ -758,6 +762,9 @@ def get_site_info_from_radl(radl, creds):
             if site_vo:
                 site_type = "fedcloud"
             break
+
+    if not site_type:
+        return res_site
 
     # Now try to get the corresponding cred
     # only for EGI sites

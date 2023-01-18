@@ -112,9 +112,11 @@ class InfrastructureManager():
         url = "%s/infrastructures?async=1" % self.im_url
         return requests.post(url, headers=headers, data=payload, timeout=self.timeout)
 
-    def addresource_inf(self, infid, payload, auth_data):
+    def addresource_inf(self, infid, payload, auth_data, context=None):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
         url = "%s/infrastructures/%s" % (self.im_url, infid)
+        if context == False:
+            url += "?context=0"
         return requests.post(url, headers=headers, data=payload, timeout=self.timeout)
 
     def get_cloud_images(self, cloud_id, auth_data):
