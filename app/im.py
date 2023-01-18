@@ -115,7 +115,7 @@ class InfrastructureManager():
     def addresource_inf(self, infid, payload, auth_data, context=None):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
         url = "%s/infrastructures/%s" % (self.im_url, infid)
-        if context == False:
+        if context is False:
             url += "?context=0"
         return requests.post(url, headers=headers, data=payload, timeout=self.timeout)
 
