@@ -23,14 +23,29 @@ topology_template:
         repository_name: argo
         repository_url: "https://argoproj.github.io/argo-helm"
         name: argo-workflows
+        values_file: |
+          controller:
+            workflowNamespaces: [default, argo]
         values:
           server.ingress.enabled: "true"
           server.ingress.ingressClassName: "nginx"
+          workflow.serviceAccount.create: "true"
       requirements:
         - host: front
         - dependency: lrms_front_end
 
+    argo_client:
+      type: tosca.nodes.SoftwareComponent
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/argo-client.yml
+      requirements:
+        - host: front
+        - dependency: argo
 
   outputs:
     argo_dashboard:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/' ] }
+    argo_token:
+      value: { get_attribute: [ front, ansible_output, argo_client_front_conf_front, tasks, argo_token, output ] }
