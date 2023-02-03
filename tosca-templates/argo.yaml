@@ -17,14 +17,19 @@ topology_template:
   node_templates:
 
     argo:
-      type: tosca.nodes.ec3.Application
-      interfaces:
-        Standard:
-          configure:
-            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/argo.yml
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: argo
+        repository_name: argo
+        repository_url: "https://argoproj.github.io/argo-helm"
+        name: argo-workflows
+        values:
+          server.ingress.enabled: "true"
+          server.ingress.ingressClassName: "nginx"
       requirements:
         - host: front
         - dependency: lrms_front_end
+
 
   outputs:
     argo_dashboard:
