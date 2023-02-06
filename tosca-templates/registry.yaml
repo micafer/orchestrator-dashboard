@@ -31,7 +31,6 @@ topology_template:
             inputs:
               type_of_node: 'front'
 
-
     registry_wn:
       type: tosca.nodes.ec3.Application
       artifacts:
@@ -40,6 +39,7 @@ topology_template:
           type: tosca.artifacts.AnsibleGalaxy.role
       requirements:
         - host: wn
+        - dependency: registry_fe
       interfaces:
         Standard:
           configure:
