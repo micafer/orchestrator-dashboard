@@ -16,7 +16,7 @@ topology_template:
 
   node_templates:
 
-    registry:
+    registry_fe:
       type: tosca.nodes.ec3.Application
       artifacts:
         docker_role:
@@ -28,3 +28,21 @@ topology_template:
         Standard:
           configure:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/registry.yml
+            inputs:
+              type_of_node: 'front'
+
+
+    registry_wn:
+      type: tosca.nodes.ec3.Application
+      artifacts:
+        docker_role:
+          file: grycap.kuberegistry
+          type: tosca.artifacts.AnsibleGalaxy.role
+      requirements:
+        - host: wn
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/registry.yml
+            inputs:
+              type_of_node: 'wn'
