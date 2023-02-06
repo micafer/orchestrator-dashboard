@@ -1,0 +1,30 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: Install Docker Registry on top of a Kubernetes Cluster
+
+metadata:
+  name: Docker Registry
+  display_name: Docker Registry on top of Kubernetes
+  icon: images/registry.png
+  parents:
+    - kubernetes.yaml
+
+topology_template:
+
+  node_templates:
+
+    registry:
+      type: tosca.nodes.ec3.Application
+      artifacts:
+        docker_role:
+          file: grycap.kuberegistry
+          type: tosca.artifacts.AnsibleGalaxy.role
+      requirements:
+        - host: front
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/registry.yml
