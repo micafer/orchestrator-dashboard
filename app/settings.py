@@ -50,3 +50,4 @@ class Settings:
         self.im_auth = config.get('IM_AUTH', None)
         self.vo_map = config.get('VO_MAP', {})
         self.extra_auth = config.get('EXTRA_AUTH', [])
+        self.vos_user_role = config.get('VOS_USER_ROLE')

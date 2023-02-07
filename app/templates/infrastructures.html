@@ -158,13 +158,13 @@
                 {% for infId, infInfo in infrastructures.items() %}
                 <tr>
                     <th scope="row">
-                      <a id="desc_{{infId}}_a" href="#" onclick="$('#edit_dest_{{infId}}').modal('show');">
                       {% if infInfo["name"] != "" %}
                         {{infInfo["name"]}}
                       {% else %}
+                      <a id="desc_{{infId}}_a" href="#" onclick="$('#edit_dest_{{infId}}').modal('show');">
                         N/A
-                      {% endif %}
                       </a>
+                      {% endif %}
                     </th>
                     <th>
                       {{infId}}
@@ -324,7 +324,7 @@
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="edit_dest_label_{{infId}}">Edit Infrastructure Name</h5>
+                        <h5 class="modal-title" id="edit_dest_label_{{infId}}">Set Infrastructure Name</h5>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">

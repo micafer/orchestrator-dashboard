@@ -41,7 +41,7 @@ from flask import Flask, json, render_template, request, redirect, url_for, flas
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
-from radl.radl import deploy
+from radl.radl import deploy, description
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect
 
@@ -203,7 +203,8 @@ def create_app(oidc_blueprint=None):
 
                     session["vos"] = None
                     if 'eduperson_entitlement' in account_info_json:
-                        session["vos"] = utils.getUserVOs(account_info_json['eduperson_entitlement'])
+                        session["vos"] = utils.getUserVOs(account_info_json['eduperson_entitlement'],
+                                                          settings.vos_user_role)
 
                     if settings.oidcGroups:
                         user_groups = []
@@ -275,6 +276,8 @@ def create_app(oidc_blueprint=None):
             if "provider.type" in vminfo:
                 deployment = vminfo["provider.type"]
                 del vminfo["provider.type"]
+            if "provider.vo" in vminfo:
+                del vminfo["provider.vo"]
             if "provider.host" in vminfo:
                 if "provider.port" in vminfo:
                     deployment += ": %s:%s" % (vminfo["provider.host"], vminfo["provider.port"])
@@ -429,8 +432,44 @@ def create_app(oidc_blueprint=None):
             infrastructures[inf_id] = {'name': '', 'state': {}}
             if 'name' in infra_data:
                 infrastructures[inf_id]['name'] = infra_data["name"]
+            else:
+                try:
+                    response = im.get_inf_property(inf_id, "radl", auth_data)
+                    if not response.ok:
+                        raise Exception(response.text)
+                    infra_radl = radl_parse.parse_radl(response.text)
+                    if infra_radl.description and infra_radl.description.getValue("name"):
+                        infra_data["name"] = infra_radl.description.getValue("name")
+                        infrastructures[inf_id]['name'] = infra_data["name"]
+                        try:
+                            infra.write_infra(inf_id, infra_data)
+                        except Exception as se:
+                            app.logger.error("Error saving infrastructure name: %s" % se)
+                except Exception as ex:
+                    app.logger.error("Error getting infrastructure name: %s" % ex)
             if 'state' in infra_data:
                 infrastructures[inf_id]['state'] = infra_data["state"]
+            if 'site' not in infra_data:
+                try:
+                    response = im.get_vm_info(inf_id, "0", auth_data)
+                    if not response.ok:
+                        raise Exception(response.text)
+                    radl_json = response.json()["radl"]
+                except Exception as ex:
+                    app.logger.exception("Error getting vm info: %s" % ex, "error")
+                    radl_json = []
+                try:
+                    creds = cred.get_creds(get_cred_id())
+                except Exception as ex:
+                    app.logger.exception("Error getting user credentials: %s" % ex, "error")
+                    creds = []
+                site_info = utils.get_site_info_from_radl(radl_json, creds)
+                if site_info:
+                    infra_data["site"] = site_info
+                try:
+                    infra.write_infra(inf_id, infra_data)
+                except Exception as se:
+                    app.logger.error("Error saving infrastructure site: %s" % se)
             if 'site' in infra_data:
                 site_info = ""
                 if "site_name" in infra_data["site"]:
@@ -999,6 +1038,7 @@ def create_app(oidc_blueprint=None):
             template = add_network_id_to_template(template, priv_network_id, pub_network_id)
 
         if form_data['infra_name']:
+            template['metadata']['infra_name'] = form_data['infra_name']
             template = add_instance_name_to_compute(template, form_data['infra_name'])
 
         template = add_image_to_template(template, image)
@@ -1164,7 +1204,9 @@ def create_app(oidc_blueprint=None):
                 images = None
                 try:
                     infra_data = infra.get_infra(infid)
-                    cred_id = infra_data["site"]["id"]
+                    cred_id = None
+                    if infra_data.get("site", {}).get("id"):
+                        cred_id = infra_data["site"]["id"]
                     auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id)
                     response = im.get_cloud_images(cred_id, auth_data)
                     if not response.ok:
@@ -1236,6 +1278,21 @@ def create_app(oidc_blueprint=None):
                     try:
                         infra_data = infra.get_infra(infid)
                         infra_data["name"] = form_data['description']
+
+                        # Set the name in the infrastructure RADL
+                        response = im.get_inf_property(infid, "radl", auth_data)
+                        if not response.ok:
+                            raise Exception(response.text)
+                        infra_radl = radl_parse.parse_radl(response.text)
+                        if not infra_radl.description:
+                            infra_radl.description = description("desc")
+                        if not infra_radl.description.getValue("name"):
+                            infra_radl.description.setValue("name", infra_data["name"])
+                        infra_radl.deploys = []
+                        response = im.addresource_inf(infid, str(infra_radl), auth_data, context=False)
+                        if not response.ok:
+                            raise Exception(response.text)
+
                         infra.write_infra(infid, infra_data)
                     except Exception as uex:
                         flash("Error updating infrastructure description: %s" % str(uex), "error")

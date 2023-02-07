@@ -55,7 +55,8 @@ class TestUtils(unittest.TestCase):
                                     " username = user; password = pass\\n"
                                     "id = fed; type = OpenStack; username = egi.eu;"
                                     " tenant = oidc; auth_version = 3.x_oidc_access_token; host ="
-                                    " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id\\n"
+                                    " https://api.cloud.ifca.es:5000; password = 'token'; vo = vo_name;"
+                                    " domain = project_id\\n"
                                     "id = ch; type = OpenStack; auth_version = 3.x_password;"
                                     " host = https://identity-f1a.cloudandheat.com:5000; username = user;"
                                     " tenant = tenant; password = 'pass'"))

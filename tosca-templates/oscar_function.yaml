@@ -70,4 +70,3 @@ topology_template:
             path: { get_input: function_output }
       requirements:
         - host: oscar
-        - dependency: dns_reg

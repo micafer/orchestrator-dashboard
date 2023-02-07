@@ -17,15 +17,82 @@ topology_template:
   node_templates:
 
     argo:
-      type: tosca.nodes.ec3.Application
-      interfaces:
-        Standard:
-          configure:
-            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/argo.yml
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: argo
+        repository_name: argo
+        repository_url: "https://argoproj.github.io/argo-helm"
+        name: argo-workflows
+        values_file: |
+          controller:
+            workflowNamespaces: [default, argo]
+        values:
+          server.ingress.enabled: "true"
+          server.ingress.ingressClassName: "nginx"
+          workflow.serviceAccount.create: "true"
       requirements:
         - host: front
         - dependency: lrms_front_end
 
+    argo_rbac:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRole
+          metadata:
+            namespace: argo
+            name: argo-user-cluster-role
+          rules:
+          - apiGroups: ['argoproj.io']
+            resources: ['workflows', 'eventsources', 'sensors', 'clusterworkflowtemplates', 'cronworkflows', 'cronworkflows/finalizers', 'workflowtemplates', 'workfloweventbindings']
+            verbs: ['create', 'delete', 'list', 'update', 'get', 'patch', 'watch']
+          - apiGroups: ['']
+            resources: ['configmaps']
+            verbs: ['get', 'watch', 'list']
+          - apiGroups: ['']
+            resources: ['secrets']
+            verbs: ['get', 'create']
+          - apiGroups: ['']
+            resources: ['pods', 'pods/exec', 'pods/log']
+            verbs: ['get', 'watch', 'list', 'delete']
+          - apiGroups: ['']
+            resources: ['events']
+            verbs: ['create', 'watch', 'patch']
+          - apiGroups: ['']
+            resources: ['serviceaccounts']
+            verbs: ['get', 'watch', 'list']
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            namespace: argo
+            name: argo-user-cluster-binding
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: argo-user-cluster-role
+          subjects:
+          - kind: ServiceAccount
+            name: argo-workflow
+            namespace: argo
+      requirements:
+        - host: lrms_front_end
+        - dependency: argo
+
+    argo_client:
+      type: tosca.nodes.SoftwareComponent
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/argo-client.yml
+      requirements:
+        - host: front
+        - dependency: argo
+
   outputs:
     argo_dashboard:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/' ] }
+    argo_token:
+      value: { get_attribute: [ front, ansible_output, argo_client_front_conf_front, tasks, argo_token, output ] }
