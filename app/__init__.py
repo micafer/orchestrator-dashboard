@@ -475,18 +475,18 @@ def create_app(oidc_blueprint=None):
                 if "site_name" in infra_data["site"]:
                     site_info += "Site: " + infra_data["site"]["site_name"]
                 else:
-                    if "host" in infra_data["site"]:
+                    if "host" in infra_data["site"] and infra_data["site"]["host"]:
                         site_info += "Host: " + infra_data["site"]["host"]
-                    if "tenant" in infra_data["site"]:
+                    if "tenant" in infra_data["site"] and infra_data["site"]["tenant"]:
                         if site_info:
                             site_info += "<br>"
                         site_info += "Tenant: " + infra_data["site"]["tenant"]
 
-                if "subscription_id" in infra_data["site"]:
+                if "subscription_id" in infra_data["site"] and infra_data["site"]["subscription_id"]:
                     site_info += "Subs. ID: " + infra_data["site"]["subscription_id"]
-                if "vo" in infra_data["site"]:
+                if "vo" in infra_data["site"] and infra_data["site"]["vo"]:
                     site_info += "<br>VO: " + infra_data["site"]["vo"]
-                if "project" in infra_data["site"]:
+                if "project" in infra_data["site"] and infra_data["site"]["project"]:
                     site_info += "Project: " + infra_data["site"]["project"]
 
                 infrastructures[inf_id]['cloud_type'] = infra_data["site"]["type"]

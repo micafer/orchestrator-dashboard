@@ -785,7 +785,8 @@ def get_site_info_from_radl(radl, creds):
     if site_host and "cloudandheat" in site_host:
         site_type = "CH"
 
-    res_site["host"] = site_host
+    if site_host:
+        res_site["host"] = site_host
     res_site["type"] = site_type
 
     return res_site
