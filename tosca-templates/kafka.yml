@@ -5,7 +5,7 @@ imports:
 
 metadata:
   name: Apache Kafka
-  display_name: Launch Apache Kafkaon top of a Kubernetes Virtual Cluster
+  display_name: Launch Apache Kafka on top of a Kubernetes Virtual Cluster
   icon: images/kafka.png
   parents:
     - kubernetes.yaml
@@ -13,6 +13,16 @@ metadata:
 description: TOSCA template for launching Apache Kafka on top of a Kubernetes Virtual Cluster.
 
 topology_template:
+
+  inputs:
+    kafka_user:
+      type: string
+      description: Default Kafka SASL JAAS Username
+      default: "user"
+    kafka_pass:
+      type: string
+      description: Default Kafka SASL JAAS password
+      default: "pass"
 
   node_templates:
 
@@ -29,6 +39,9 @@ topology_template:
         Standard:
           configure:
             implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/kafka_k8s.yml
+            inputs:
+              kafka_jaas_user: { get_input: kafka_user }
+              kafka_jaas_password: { get_input: kafka_pass }
       requirements:
         - host: front
         - dependency: lrms_front_end

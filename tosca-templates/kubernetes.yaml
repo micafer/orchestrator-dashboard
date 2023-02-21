@@ -15,6 +15,7 @@ metadata:
     - kubernetes_elastic.yaml
     - daskhub.yaml
     - kubeflow.yaml
+    - kafka.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 
