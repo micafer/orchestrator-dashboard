@@ -25,6 +25,8 @@ topology_template:
       description: Password of the full admin user
       default: nifiadminpassword
       required: yes
+      constraints:
+       - min_length: 12
 
   node_templates:
 
@@ -38,6 +40,25 @@ topology_template:
             name: 'nifi'
       requirements:
         - host: lrms_front_end
+
+    nifipvc:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            namespace: nifi
+            name: nifipvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifins
 
     nifi:
       type: tosca.nodes.indigo.KubernetesObject
@@ -64,15 +85,35 @@ topology_template:
                         app: nifi
                     spec:
                       restartPolicy: Always
+                      volumes:
+                        - name: nifi
+                          persistentVolumeClaim:
+                            claimName: nifipvc
                       containers:
                         - name: nifi
                           image: apache/nifi
                           ports:
                             - containerPort: 8443
                           resources: {}
-                          securityContext:
-                            privileged: true
-
+                          volumeMounts:
+                            - name: nifi
+                              mountPath: /opt/nifi/nifi-current/database_repository
+                              subPath: database_repository
+                            - name: nifi
+                              mountPath: /opt/nifi/nifi-current/flowfile_repository
+                              subPath: flowfile_repository
+                            - name: nifi
+                              mountPath: /opt/nifi/nifi-current/content_repository
+                              subPath: content_repository
+                            - name: nifi
+                              mountPath: /opt/nifi/nifi-current/provenance_repository
+                              subPath: provenance_repository
+                            - name: nifi
+                              mountPath: /opt/nifi/nifi-current/logs
+                              subPath: logs
+                            - name: nifi
+                              mountPath: /opt/nifi/nifi-current/state
+                              subPath: state
                           env:
                             - name: SINGLE_USER_CREDENTIALS_PASSWORD
                               value: '
@@ -111,8 +152,6 @@ topology_template:
                 targetPort: 8443
             selector:
               app: nifi
-          status:
-            loadBalancer: {}
       requirements:
         - host: lrms_front_end
         - dependency: nifins
