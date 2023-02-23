@@ -84,6 +84,19 @@ topology_template:
                     image: apache/nifi-registry
                     ports:
                       - containerPort: 18080
+                    resources:
+                      requests:
+                        memory: 800Mi
+                        cpu: 500m
+                    startupProbe:
+                      failureThreshold: 60
+                      periodSeconds: 10
+                      tcpSocket:
+                        port: 18080
+                    livenessProbe:
+                      periodSeconds: 20
+                      tcpSocket:
+                        port: 18080
                     volumeMounts:
                       - name: nifi-registry
                         mountPath: /opt/nifi-registry/nifi-registry-current/database

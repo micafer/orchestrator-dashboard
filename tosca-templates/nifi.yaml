@@ -94,7 +94,19 @@ topology_template:
                           image: apache/nifi
                           ports:
                             - containerPort: 8443
-                          resources: {}
+                          resources:
+                            requests:
+                              memory: 1536Mi
+                              cpu: 1000m
+                          startupProbe:
+                            failureThreshold: 600
+                            periodSeconds: 10
+                            tcpSocket:
+                              port: 8443
+                          livenessProbe:
+                            periodSeconds: 20
+                            tcpSocket:
+                              port: 8443
                           volumeMounts:
                             - name: nifi
                               mountPath: /opt/nifi/nifi-current/database_repository
