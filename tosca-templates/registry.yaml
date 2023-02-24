@@ -3,12 +3,12 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
-description: Install Docker Registry on top of a Kubernetes Cluster
+description: Install a Private Docker Registry on top of a Kubernetes Cluster
 
 metadata:
-  name: Docker Registry
-  display_name: Docker Registry on top of Kubernetes
-  icon: images/registry.png
+  name: Private Docker Registry
+  display_name: Private Docker Registry on top of Kubernetes
+  icon: https://github.com/grycap/im-dashboard/raw/devel/app/static/images/registry.png
   parents:
     - kubernetes.yaml
 
@@ -46,3 +46,8 @@ topology_template:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/registry.yml
             inputs:
               type_of_node: 'wn'
+
+  outputs:
+    registry_internal_url:
+      value: "registry.docker-registry"
+
