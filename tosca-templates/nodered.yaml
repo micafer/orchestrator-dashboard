@@ -75,7 +75,7 @@ topology_template:
                       flowFile: 'flows.json',
                       flowFilePretty: true,
                       uiPort: process.env.PORT || 1880,
-                      httpAdminRoot: /nodered,
+                      httpAdminRoot: '/nodered',
                       diagnostics: {
                           enabled: true,
                           ui: true
