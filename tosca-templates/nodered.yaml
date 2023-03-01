@@ -114,11 +114,11 @@ topology_template:
                                   username: '
             - get_input: nodered_admin_username
             - |-
-                    ',
+                ',
                                   password: '
             - get_input: nodered_admin_password
             - |-
-                    ',
+                ',
                                   permissions: '*'
                               }
                           ]
