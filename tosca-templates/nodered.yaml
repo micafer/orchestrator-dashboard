@@ -23,7 +23,7 @@ topology_template:
     nodered_admin_password:
       type: string
       description: "Password of the full admin user (adminpass). See how to get it https://nodered.org/docs/user-guide/runtime/securing-node-red#generating-the-password-hash"
-      default: $2b$08$BZqMjl9G.0itJFac/WY3mea/Oq1HCiYO3DGcQ9Uc8pldFdfVN/fvi
+      default: "$2b$08$BZqMjl9G.0itJFac/WY3mea/Oq1HCiYO3DGcQ9Uc8pldFdfVN/fvi"
       required: yes
 
   node_templates:
@@ -86,7 +86,7 @@ topology_template:
                       },
                       logging: {
                         console: {
-                          level: "info",
+                          level: 'info',
                           metrics: false,
                           audit: false
                         }
@@ -96,11 +96,11 @@ topology_template:
                         projects: {
                           enabled: false,
                           workflow: {
-                            mode: "manual"
+                            mode: 'manual'
                           }
                         },
                         codeEditor: {
-                          lib: "monaco"
+                          lib: 'monaco'
                         }
                       },
                       functionExternalModules: true,
@@ -108,18 +108,18 @@ topology_template:
                       mqttReconnectTime: 15000,
                       serialReconnectTime: 15000,
                       adminAuth: {
-                          type: "credentials",
+                          type: 'credentials',
                           users: [
                               {
-                                  username: "
+                                  username: '
+            - get_input: nodered_admin_username
+            - |-
+                  ',
+                                  password: '
             - get_input: nodered_admin_password
             - |-
-                  ",
-                                  password: "
-            - get_input: nodered_admin_password
-            - |-
-                  ",
-                                  permissions: "*"
+                  ',
+                                  permissions: '*'
                               }
                           ]
                       }
