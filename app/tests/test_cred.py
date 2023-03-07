@@ -38,15 +38,15 @@ class TestDBCredentials(unittest.TestCase):
                                              "user", "password": "pass"}, True)
 
         res = creds.get_cred("credid", "user")
-        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1})
+        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1})
 
         creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username": "user1"})
         res = creds.get_cred("credid", "user")
-        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
+        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
 
         creds.delete_cred("credid", "user")
         res = creds.get_cred("credid", "user")
-        self.assertEquals(res, {})
+        self.assertEqual(res, {})
 
     def test_creds_enc(self):
         creds = DBCredentials("sqlite:///tmp/creds.db", 'ZMiCBQwtVu2HE6TS4METx84d4LhqmZ5NJtgiTjJzbeU=')
@@ -54,19 +54,19 @@ class TestDBCredentials(unittest.TestCase):
                           True)
 
         res = creds.get_cred("credid", "user")
-        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1})
+        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1})
 
         creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username": "user1"})
         res = creds.get_cred("credid", "user")
-        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
+        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
 
         creds.enable_cred("credid", "user", 0)
         res = creds.get_cred("credid", "user")
-        self.assertEquals(res["enabled"], 0)
+        self.assertEqual(res["enabled"], 0)
 
         creds.delete_cred("credid", "user")
         res = creds.get_cred("credid", "user")
-        self.assertEquals(res, {})
+        self.assertEqual(res, {})
 
 
 class TestVaultCredentials(unittest.TestCase):
@@ -86,32 +86,44 @@ class TestVaultCredentials(unittest.TestCase):
 
         hvac.return_value = client
 
+        token = "token", []
+        token_vault = "token", ["http://some2.com", "mount_point", "path", 2]
         creds = VaultCredentials("http://some.com")
-        creds.write_creds("credid", "token", {"id": "credid", "type": "type", "username":
-                                              "user", "password": "pass"}, True)
+        creds.write_creds("credid", token, {"id": "credid", "type": "type", "username":
+                                            "user", "password": "pass"}, True)
         self.assertEqual(client.secrets.kv.v1.create_or_update_secret.call_args_list[0][0][0], "entity_id")
         exp_res = {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1}
         self.assertEqual(json.loads(client.secrets.kv.v1.create_or_update_secret.call_args_list[0][0][1]['credid']),
                          exp_res)
 
         client.secrets.kv.v1.read_secret.return_value = {"data": {"credid": json.dumps(exp_res)}}
-        res = creds.get_cred("credid", "token")
-        self.assertEquals(res, exp_res)
+        res = creds.get_cred("credid", token)
+        self.assertEqual(res, exp_res)
+        self.assertEqual(post.call_args_list[1][0][0], 'http://some.com/v1/auth/jwt/login')
+        self.assertEqual(client.secrets.kv.v1.read_secret.call_args_list[0][1], {'path': 'entity_id',
+                                                                                 'mount_point': 'credentials/'})
+        client.secrets.kv.v2.read_secret.return_value = {"data": {"credid": json.dumps(exp_res)}}
+        res = creds.get_cred("credid", token_vault)
+        self.assertEqual(res, exp_res)
+        self.assertEqual(post.call_args_list[2][0][0], 'http://some2.com/v1/auth/jwt/login')
+        self.assertEqual(client.secrets.kv.v2.read_secret.call_args_list[0][1], {'path': 'path',
+                                                                                 'mount_point': 'mount_point'})
 
-        creds.write_creds("credid", "token", {"id": "credid", "type": "type", "username": "user1"})
-        res = creds.get_cred("credid", "user")
-        self.assertEquals(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
 
-        creds.enable_cred("credid", "token", 0)
+        creds.write_creds("credid", token, {"id": "credid", "type": "type", "username": "user1"})
+        res = creds.get_cred("credid", token)
+        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
+
+        creds.enable_cred("credid", token, 0)
         self.assertEqual(json.loads(client.secrets.kv.v1.create_or_update_secret.call_args_list[2][0][1]['credid']),
                          {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 0})
 
-        creds.delete_cred("credid", "token")
+        creds.delete_cred("credid", token)
         self.assertEqual(client.secrets.kv.v1.delete_secret.call_args_list[0][0], ("entity_id",))
 
         client.secrets.kv.v1.read_secret.return_value = {"data": {"credid": json.dumps(exp_res),
                                                                   "credid2": ""}}
-        creds.delete_cred("credid", "token")
+        creds.delete_cred("credid", token)
         self.assertEqual(client.secrets.kv.v1.create_or_update_secret.call_args_list[3][0][1], {"credid2": ""})
 
 

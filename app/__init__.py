@@ -35,6 +35,7 @@ from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app.ssh_key import SSHKey
 from app import utils, appdb, db
+from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
 from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
@@ -64,6 +65,7 @@ def create_app(oidc_blueprint=None):
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
     ssh_key = SSHKey(settings.db_url)
+    vault_info = VaultInfo(settings.db_url)
 
     # To Reload internally the site cache
     scheduler = APScheduler()
@@ -1421,7 +1423,7 @@ def create_app(oidc_blueprint=None):
 
     def get_cred_id():
         if settings.vault_url:
-            return oidc_blueprint.session.token['access_token']
+            return oidc_blueprint.session.token['access_token'], vault_info.get_vault_info(session['userid'])
         else:
             return session['userid']
 
