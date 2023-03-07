@@ -109,7 +109,6 @@ class TestVaultCredentials(unittest.TestCase):
         self.assertEqual(client.secrets.kv.v2.read_secret.call_args_list[0][1], {'path': 'path',
                                                                                  'mount_point': 'mount_point'})
 
-
         creds.write_creds("credid", token, {"id": "credid", "type": "type", "username": "user1"})
         res = creds.get_cred("credid", token)
         self.assertEqual(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})

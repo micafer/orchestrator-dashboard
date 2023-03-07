@@ -32,7 +32,7 @@ class VaultInfo():
         if db.connect():
             if not db.table_exists("vault_info"):
                 db.execute("CREATE TABLE vault_info(userid VARCHAR(255) PRIMARY KEY, url VARCHAR(255), "
-                            "mount_point VARCHAR(255), path VARCHAR(255), kv_ver INTEGER)")
+                           "mount_point VARCHAR(255), path VARCHAR(255), kv_ver INTEGER)")
         else:
             raise Exception("Error connecting DB: %s" % self.url)
         return db
