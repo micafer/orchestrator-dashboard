@@ -1371,6 +1371,35 @@ def create_app(oidc_blueprint=None):
 
         return Markup(res)
 
+    @app.route('/manage_vault_info', methods=['GET', 'POST'])
+    @authorized_with_valid_token
+    def manage_vault_info():
+        if request.method == 'GET':
+            vinfo = []
+            try:
+                vinfo = vault_info.get_vault_info(session['userid'])
+            except Exception as ex:
+                flash("Error reading Vault Info %s!" % ex, 'error')
+
+            return render_template('modal_vault.html', vinfo=vinfo)
+        else:
+            vinfo = request.form.to_dict()
+
+            if 'overwrite' not in vinfo:
+                try:
+                    vault_info.delete_vault_info(session['userid'])
+                    flash("Vault Info successfully deleted!", 'success')
+                except Exception as ex:
+                    flash("Error deleting Vault Info %s!" % ex, 'error')
+            else:
+                try:
+                    vault_info.write_vault_info(session['userid'], vinfo['url'], vinfo['mount_point'], vinfo['path'], int(vinfo['kv_ver']))
+                    flash("Vault Info successfully written!", 'success')
+                except Exception as ex:
+                    flash("Error writing Vault Info %s!" % ex, 'error')
+
+            return redirect(url_for('manage_creds'))
+
     @app.route('/logout')
     def logout():
         session.clear()

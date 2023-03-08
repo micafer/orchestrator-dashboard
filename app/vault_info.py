@@ -45,16 +45,16 @@ class VaultInfo():
         if len(res) > 0:
             return res[0]
         else:
-            return []
+            return {}
 
     def write_vault_info(self, userid, url, mount_point, path, kv_ver=1):
-        db = self._get_ssh_db()
+        db = self._get_db()
 
         db.execute("replace into vault_info (userid, url, mount_point, path, kv_ver) values (%s, %s, %s, %s, %s)",
                    (userid, url, mount_point, path, kv_ver))
         db.close()
 
     def delete_vault_info(self, userid):
-        db = self._get_ssh_db()
+        db = self._get_db()
         db.execute("delete from vault_info where userid = %s", (userid, ))
         db.close()
