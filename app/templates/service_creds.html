@@ -15,7 +15,9 @@
               <h4 class="font-weight-bold text-primary">Cloud Credentials</h4>
             </div>
             <div class="col-md-6 text-right">
+              {% if vault %}
               <a class="btn btn-success" data-toggle="modal" data-target="#vaultInfo" href="#" role="button"><span class="far fa-edit"></span> Vault Info</a>
+              {% endif %}
               <button type=button id="addBtn"class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"><span class='fas fa-plus mr-2'></span>New Credential
                   <span class="sr-only">Toggle Dropdown</span>
               </button>

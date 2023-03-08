@@ -1048,7 +1048,7 @@ def create_app(oidc_blueprint=None):
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
 
-        return render_template('service_creds.html', creds=creds)
+        return render_template('service_creds.html', creds=creds, vault=settings.vault_url)
 
     @app.route('/write_creds', methods=['GET', 'POST'])
     @authorized_with_valid_token
@@ -1393,7 +1393,8 @@ def create_app(oidc_blueprint=None):
                     flash("Error deleting Vault Info %s!" % ex, 'error')
             else:
                 try:
-                    vault_info.write_vault_info(session['userid'], vinfo['url'], vinfo['mount_point'], vinfo['path'], int(vinfo['kv_ver']))
+                    vault_info.write_vault_info(session['userid'], vinfo['url'],
+                                                vinfo['mount_point'], vinfo['path'], int(vinfo['kv_ver']))
                     flash("Vault Info successfully written!", 'success')
                 except Exception as ex:
                     flash("Error writing Vault Info %s!" % ex, 'error')
