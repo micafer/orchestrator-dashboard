@@ -82,8 +82,8 @@ class VaultCredentials(Credentials):
         else:
             raise Exception("Invalid KV version (1 or 2)")
 
-    def get_creds(self, token_vault, enabled=None):
-        client, mount_point, path = self._login(token_vault)
+    def get_creds(self, userid, enabled=None):
+        client, mount_point, path = self._login(userid)
         data = []
 
         try:
@@ -97,16 +97,16 @@ class VaultCredentials(Credentials):
 
         return data
 
-    def get_cred(self, serviceid, token_vault):
-        client, mount_point, path = self._login(token_vault)
+    def get_cred(self, serviceid, userid):
+        client, mount_point, path = self._login(userid)
         creds = client.read_secret(path=path, mount_point=mount_point)
         if serviceid in creds["data"]:
             return json.loads(creds["data"][serviceid])
         else:
             return None
 
-    def write_creds(self, serviceid, token_vault, data, insert=False):
-        client, mount_point, path = self._login(token_vault)
+    def write_creds(self, serviceid, userid, data, insert=False):
+        client, mount_point, path = self._login(userid)
         try:
             creds = client.read_secret(path=path, mount_point=mount_point)
         except Exception:
@@ -134,8 +134,8 @@ class VaultCredentials(Credentials):
 
         response.raise_for_status()
 
-    def delete_cred(self, serviceid, token_vault):
-        client, mount_point, path = self._login(token_vault)
+    def delete_cred(self, serviceid, userid):
+        client, mount_point, path = self._login(userid)
 
         creds = client.read_secret(path=path, mount_point=mount_point)
         if serviceid in creds["data"]:
@@ -154,8 +154,8 @@ class VaultCredentials(Credentials):
                                                                        mount_point=mount_point)
             response.raise_for_status()
 
-    def enable_cred(self, serviceid, token_vault, enable=1):
-        client, mount_point, path = self._login(token_vault)
+    def enable_cred(self, serviceid, userid, enable=1):
+        client, mount_point, path = self._login(userid)
 
         creds = client.read_secret(path=path, mount_point=mount_point)
         if serviceid in creds["data"]:
