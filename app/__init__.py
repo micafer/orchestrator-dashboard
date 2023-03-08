@@ -35,6 +35,7 @@ from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app.ssh_key import SSHKey
 from app import utils, appdb, db
+from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
 from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
@@ -64,6 +65,7 @@ def create_app(oidc_blueprint=None):
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
     ssh_key = SSHKey(settings.db_url)
+    vault_info = VaultInfo(settings.db_url)
 
     # To Reload internally the site cache
     scheduler = APScheduler()
@@ -1046,7 +1048,8 @@ def create_app(oidc_blueprint=None):
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
 
-        return render_template('service_creds.html', creds=creds)
+        return render_template('service_creds.html', creds=creds,
+                               vault=(settings.vault_url and settings.enable_external_vault))
 
     @app.route('/write_creds', methods=['GET', 'POST'])
     @authorized_with_valid_token
@@ -1369,6 +1372,36 @@ def create_app(oidc_blueprint=None):
 
         return Markup(res)
 
+    @app.route('/manage_vault_info', methods=['GET', 'POST'])
+    @authorized_with_valid_token
+    def manage_vault_info():
+        if request.method == 'GET':
+            vinfo = []
+            try:
+                vinfo = vault_info.get_vault_info(session['userid'])
+            except Exception as ex:
+                flash("Error reading Vault Info %s!" % ex, 'error')
+
+            return render_template('modal_vault.html', vinfo=vinfo)
+        else:
+            vinfo = request.form.to_dict()
+
+            if 'overwrite' not in vinfo:
+                try:
+                    vault_info.delete_vault_info(session['userid'])
+                    flash("Vault Info successfully deleted!", 'success')
+                except Exception as ex:
+                    flash("Error deleting Vault Info %s!" % ex, 'error')
+            else:
+                try:
+                    vault_info.write_vault_info(session['userid'], vinfo['url'],
+                                                vinfo['mount_point'], vinfo['path'], int(vinfo['kv_ver']))
+                    flash("Vault Info successfully written!", 'success')
+                except Exception as ex:
+                    flash("Error writing Vault Info %s!" % ex, 'error')
+
+            return redirect(url_for('manage_creds'))
+
     @app.route('/logout')
     def logout():
         session.clear()
@@ -1421,7 +1454,7 @@ def create_app(oidc_blueprint=None):
 
     def get_cred_id():
         if settings.vault_url:
-            return oidc_blueprint.session.token['access_token']
+            return oidc_blueprint.session.token['access_token'], vault_info.get_vault_info(session['userid'])
         else:
             return session['userid']
 

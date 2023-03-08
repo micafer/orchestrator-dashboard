@@ -15,6 +15,9 @@
               <h4 class="font-weight-bold text-primary">Cloud Credentials</h4>
             </div>
             <div class="col-md-6 text-right">
+              {% if vault %}
+              <a class="btn btn-success" data-toggle="modal" data-target="#vaultInfo" href="#" role="button"><span class="far fa-edit"></span> Vault Info</a>
+              {% endif %}
               <button type=button id="addBtn"class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"><span class='fas fa-plus mr-2'></span>New Credential
                   <span class="sr-only">Toggle Dropdown</span>
               </button>
@@ -136,6 +139,27 @@
             </div>
           </div>
         </div>
+
+	      <!-- Modal Retrieve/Update Vault Info-->
+        <div class="modal fade" id="vaultInfo">
+          <form id="vaultForm" action="{{ url_for('manage_vault_info') }}" method="post">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Vault Info</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+              <div class="modal-body">
+              </div>
+              <div class="modal-footer">
+                <a class="btn btn-primary canceltBtn" role="button" data-dismiss="modal">Cancel</a>
+                <button type="submit" class="btn btn-success updatetBtn">Update</button>
+              </div>
+            </div>
+          </div>
+          </form>
+        </div>
+
     </div>
     </div>
 </div>
@@ -183,6 +207,20 @@ $(document).ready(function () {
      var cred_id = button.data('id')
      var modal = $(this)
      modal.find(".deleteBtn")[0].setAttribute("href", "{{url_for('delete_creds')}}?cred_id="+cred_id);
+  });
+});
+
+$(document).ready(function () {
+  $('#vaultInfo').on('hidden.bs.modal', function () {
+    var modal = $(this)
+    modal.find('.modal-body').empty()
+  });
+});
+
+$(document).ready(function () {
+  $('#vaultInfo').on('show.bs.modal', function (event) {
+     var modal = $(this)
+     modal.find('.modal-body').html('Loading...').load("{{url_for('manage_vault_info')}}");
   });
 });
 
