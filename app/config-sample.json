@@ -26,6 +26,7 @@
     "CHECK_TOSCA_CHANGES_TIME": 120,
     "IM_TIMEOUT": 60,
     "VAULT_URL": "",
+    "ENABLE_EXTERNAL_VAULT": false,
     "VO_MAP": {},
     "EXTRA_AUTH": {}
 }

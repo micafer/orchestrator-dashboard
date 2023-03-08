@@ -51,3 +51,4 @@ class Settings:
         self.vo_map = config.get('VO_MAP', {})
         self.extra_auth = config.get('EXTRA_AUTH', [])
         self.vos_user_role = config.get('VOS_USER_ROLE')
+        self.enable_external_vault = config.get('ENABLE_EXTERNAL_VAULT', False)

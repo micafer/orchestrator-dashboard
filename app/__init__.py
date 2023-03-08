@@ -1048,7 +1048,8 @@ def create_app(oidc_blueprint=None):
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
 
-        return render_template('service_creds.html', creds=creds, vault=settings.vault_url)
+        return render_template('service_creds.html', creds=creds,
+                               vault=(settings.vault_url and settings.enable_external_vault))
 
     @app.route('/write_creds', methods=['GET', 'POST'])
     @authorized_with_valid_token
