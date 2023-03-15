@@ -1,8 +1,8 @@
 inputs:
-    nifi_admin_username:
+    nifi_ui_auth:
       tab: Nifi
-
-    nifi_admin_password:
+    
+    nifi_replicas:
       tab: Nifi
 
 tabs:

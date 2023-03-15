@@ -26,6 +26,9 @@ inputs:
     volume_id:
       tab: HW Data
 
+    wn_disk_size:
+      tab: HW Data
+
     admin_token:
       tab: Kubernetes Data
 

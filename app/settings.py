@@ -29,6 +29,7 @@ class Settings:
         self.toscaParamsDir = config.get('TOSCA_PARAMETERS_DIR', '') + "/"
         self.imUrl = config['IM_URL']
         self.oidcName = config['OIDC_NAME']
+        self.oidcImage = config.get('OIDC_IMAGE')
         self.oidcUrl = config['OIDC_BASE_URL']
         self.oidcTokenUrl = config.get('OIDC_TOKEN_URL', self.oidcUrl + "/token")
         self.oidcRefresUrl = config.get('OIDC_REFRESH_URL', self.oidcUrl + "/token")

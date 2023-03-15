@@ -30,6 +30,16 @@ topology_template:
 
     argo:
       type: tosca.nodes.ec3.Application
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              minio_api:
+                protocol: tcp
+                source: 30300
+              minio_console:
+                protocol: tcp
+                source: 30303
       artifacts:
         docker_role:
           file: grycap.kubeminio
@@ -41,12 +51,14 @@ topology_template:
             inputs:
                 minio_accesskey: { get_input: minio_accesskey }
                 minio_secretkey: { get_input: minio_secretkey }
-                enable_ingress: true
+                enable_tls: true
       requirements:
         - host: front
         - dependency: lrms_front_end
 
   outputs:
-    minio_endpoint:
+    minio_api_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':30300/' ] }
+    minio_console_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':30303/' ] }
 

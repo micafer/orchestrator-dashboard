@@ -1,0 +1,7 @@
+inputs:
+    cernvmfs_repositories:
+      tab: CernVM-FS
+
+tabs:
+  - CernVM-FS
+

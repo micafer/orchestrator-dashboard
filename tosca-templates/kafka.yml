@@ -1,0 +1,55 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Apache Kafka
+  display_name: Launch Apache Kafka on top of a Kubernetes Virtual Cluster
+  icon: images/kafka.png
+  parents:
+    - kubernetes.yaml
+
+description: TOSCA template for launching Apache Kafka on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+
+  inputs:
+    kafka_user:
+      type: string
+      description: Default Kafka SASL JAAS Username
+      default: "user"
+    kafka_pass:
+      type: string
+      description: Default Kafka SASL JAAS password
+      default: "pass"
+
+  node_templates:
+
+    kafka:
+      type: tosca.nodes.ec3.Application
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              external_port:
+                protocol: tcp
+                source: 9094
+      interfaces:
+        Standard:
+          configure:
+            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/kafka_k8s.yml
+            inputs:
+              kafka_jaas_user: { get_input: kafka_user }
+              kafka_jaas_password: { get_input: kafka_pass }
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
+
+  outputs:
+    kafka_endpoint:
+      value: { concat: [ get_attribute: [ front, public_address, 0 ], ':9094' ] }
+    kafka_jaas_conf:
+      value: { get_attribute: [ front, ansible_output, kafka_front_conf_front, tasks, kafka_jaas_conf, output ] }
+    client_properties:
+      value: { get_attribute: [ front, ansible_output, kafka_front_conf_front, tasks, client_properties, output ] }

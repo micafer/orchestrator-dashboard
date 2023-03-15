@@ -157,7 +157,7 @@ def create_app(oidc_blueprint=None):
         session.clear()
         if template_filter:
             session["filter"] = template_filter
-        return render_template('home.html', oidc_name=settings.oidcName)
+        return render_template('home.html', oidc_name=settings.oidcName, oidc_image=settings.oidcImage)
 
     @app.route('/')
     def home():

@@ -31,7 +31,13 @@ hr.style-seven:before { /* Not really supposed to work, but does */
      <div class="col-lg-8">
      <h1 class="display-4">Infrastructure Manager Dashboard.</p>
      <p>
+        {% if oidc_image %}
+        <a href="{{ url_for("oidc.login") }}">
+        <img src="{{ oidc_image }}" height="55px">
+        </a>
+        {% else %}
         <a class="btn btn-primary btn-lg" role="button" href="{{ url_for("oidc.login") }}">Login with {{oidc_name}} <i class="fas fa-sign-in-alt"></i></a>
+        {% endif %}
      </p>
      </div>
      <div class="col-lg-4">

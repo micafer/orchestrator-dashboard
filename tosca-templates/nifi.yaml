@@ -15,16 +15,15 @@ description: TOSCA template for launching an Nifi on top of a Kubernetes Virtual
 topology_template:
   inputs:
 
-    nifi_admin_username:
+    nifi_ui_auth:
       type: string
-      description: Name of the full admin user
-      default: admin
+      description: "Username + password in base64 to access the Nifi Web UI: 'htpasswd -nb user pass | base64' default 'user' + 'pass'"
+      default: dXNlcjokYXByMSRSTk5sQmdMZiR1elJDTkp3Uno2MGIwcENkdEJUckQuCgo=
       required: yes
-    nifi_admin_password:
-      type: string
-      description: Password of the full admin user
-      default: nifiadminpassword
-      required: yes
+    nifi_replicas:
+      type: integer
+      description: Number of Nifi replicas
+      default: 2
 
   node_templates:
 
@@ -38,6 +37,208 @@ topology_template:
             name: 'nifi'
       requirements:
         - host: lrms_front_end
+
+    zookeepercm:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: zookeeper-cm
+            namespace: nifi
+          data:
+            ALLOW_ANONYMOUS_LOGIN: 'yes'
+            ZOO_ADMINSERVER_ENABLED: 'false'
+            ZOO_AUTOPURGE_PURGEINTERVAL: '2'
+            ZOO_AUTOPURGE_SNAPRETAINCOUNT: '10'
+            ZOO_CFG_EXTRA: 'metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7070'
+            ZOO_INIT_LIMIT: '10'
+            ZOO_STANDALONE_ENABLED: 'true'
+            ZOO_SYNC_LIMIT: '6'
+            ZOO_TICK_TIME: '4000'
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifins
+
+    zookeeperss:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: apps/v1
+          kind: StatefulSet
+          metadata:
+            name: zookeeper
+            namespace: nifi
+            labels:
+              name: zookeeper
+              app: zookeeper
+          spec:
+            serviceName: zookeeper
+            selector:
+              matchLabels:
+                app: zookeeper
+            template:
+              metadata:
+                labels:
+                  app: zookeeper
+              spec:
+                restartPolicy: Always
+                containers:
+                - name: zookeeper
+                  image: docker.io/zookeeper:3.8
+                  imagePullPolicy: IfNotPresent
+                  ports:
+                  - containerPort: 2181
+                    name: zk
+                  - containerPort: 8080
+                    name: web
+                  - containerPort: 7070
+                    name: metrics
+                  env:
+                    - name: POD_IP
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: status.podIP
+                    - name: ZOO_SERVERS
+                      value: 'server.1=$(POD_IP):2888:3888;2181'
+                  envFrom:
+                    - configMapRef:
+                        name: zookeeper-cm
+                        optional: false
+                  livenessProbe:
+                    exec:
+                      command:
+                        - which
+                        - java
+                    initialDelaySeconds: 30
+                    periodSeconds: 30
+                    timeoutSeconds: 10
+                    failureThreshold: 3
+                    successThreshold: 1
+                  readinessProbe:
+                    tcpSocket:
+                        port: 2181
+                    initialDelaySeconds: 120
+                    periodSeconds: 30
+                    timeoutSeconds: 10
+                    failureThreshold: 3
+                    successThreshold: 1
+                  resources:
+                    requests:
+                      cpu: 200m
+                      memory: 500Mi
+                    limits:
+                      cpu: 200m
+                      memory: 500Mi
+                  volumeMounts:
+                    - mountPath: /data
+                      name: data
+                      subPath: zookeeper_data
+                    - mountPath: /datalog
+                      name: data
+                      subPath: zookeeper_datalog
+                    - mountPath: /conf
+                      name: data
+                      subPath: zookeeper_conf
+                volumes:
+                  - name: data
+                    persistentVolumeClaim:
+                      claimName: nifipvc
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifins
+
+    zookeepersvc:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: zookeeper
+            namespace: nifi
+            labels:
+              app: zookeeper
+          spec:
+            type: ClusterIP
+            selector:
+              app: zookeeper
+            ports:
+            - protocol: TCP
+              port: 2181
+              targetPort: 2181
+              name: zk
+            - protocol: TCP
+              port: 8080
+              targetPort: 8080
+              name: web
+            - protocol: TCP
+              port: 7070
+              targetPort: 7070
+              name: metrics
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifins
+
+    nifipvc:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec: |
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            namespace: nifi
+            name: nifipvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifins
+
+    nificm:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec:
+          concat:
+            - |-
+                apiVersion: v1
+                kind: ConfigMap
+                metadata:
+                  name: nifi-cm
+                  namespace: nifi
+                data:
+                  JAVA_OPTS: '-XX:UseAVX=0'
+                  NIFI_ANALYTICS_PREDICT_ENABLED: 'true'
+                  NIFI_CLUSTER_IS_NODE: 'true'
+                  NIFI_CLUSTER_LOAD_BALANCE_HOST: 'nifi'
+                  NIFI_CLUSTER_NODE_CONNECTION_TIMEOUT: '2 min'
+                  NIFI_CLUSTER_NODE_LOAD_BALANCE_PORT: '6342'
+                  NIFI_CLUSTER_NODE_PROTOCOL_MAX_THREADS: '15'
+                  NIFI_CLUSTER_NODE_PROTOCOL_PORT: '11443'
+                  NIFI_CLUSTER_NODE_READ_TIMEOUT: '2 min'
+                  NIFI_CLUSTER_PROTOCOL_CONNECTION_HANDSHAKE_TIMEOUT: '2 min'
+                  NIFI_CLUSTER_PROTOCOL_HEARTBEAT_INTERVAL: '1 min'
+                  NIFI_ELECTION_MAX_CANDIDATES: '2'
+                  NIFI_ELECTION_MAX_WAIT: '1 min'
+                  NIFI_JVM_HEAP_INIT: '1g'
+                  NIFI_JVM_HEAP_MAX: '2g'
+                  NIFI_SENSITIVE_PROPS_KEY: '1yhqju3ubhp5rjeb'
+                  NIFI_WEB_HTTP_PORT: '8080'
+                  NIFI_WEB_HTTPS_PORT: '8443'
+                  NIFI_ZK_CONNECT_STRING: 'zookeeper:2181'
+                  NIFI_ZOOKEEPER_CONNECT_STRING: 'zookeeper:2181'
+                  NIFI_WEB_PROXY_HOST: '
+            - get_attribute: [ front, public_address, 0 ]
+            - |-
+                '
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifins
 
     nifi:
       type: tosca.nodes.indigo.KubernetesObject
@@ -54,7 +255,11 @@ topology_template:
                   name: nifi
                   namespace: nifi
                 spec:
-                  replicas: 1
+                  replicas: 
+            - get_input: nifi_replicas
+            - "\n"
+            - |-
+                # replicas
                   selector:
                     matchLabels:
                       app: nifi
@@ -64,31 +269,73 @@ topology_template:
                         app: nifi
                     spec:
                       restartPolicy: Always
+                      volumes:
+                        - name: nifi
+                          persistentVolumeClaim:
+                            claimName: nifipvc
+                      initContainers:
+                        - name: wait-for-zookeeper
+                          image: docker.io/busybox:1.35
+                          command:
+                          - sh
+                          - -c
+                          - |
+                            echo 'Connecting to Zookeeper ${NIFI_ZK_CONNECT_STRING}'
+                            until nc -vzw 1 zookeeper 2181 ; do
+                              echo 'Waiting for zookeeper to start'
+                              sleep 3
+                            done
+                          envFrom:
+                          - configMapRef:
+                              name: nifi-cm
+                              optional: false
+                          resources:
+                            requests:
+                              cpu: 20m
+                              memory: 10Mi
+                            limits:
+                              cpu: 20m
+                              memory: 10Mi
                       containers:
                         - name: nifi
                           image: apache/nifi
                           ports:
-                            - containerPort: 8443
-                          resources: {}
-                          securityContext:
-                            privileged: true
-
+                          - containerPort: 8080
+                            name: nifi
+                          - containerPort: 11443
+                            name: cluster
+                          - containerPort: 6342
+                            name: cluster-lb
+                          resources:
+                            requests:
+                              memory: 1Gi
+                              cpu: 400m
+                          startupProbe:
+                            failureThreshold: 600
+                            periodSeconds: 10
+                            tcpSocket:
+                              port: 8080
+                          livenessProbe:
+                            periodSeconds: 20
+                            tcpSocket:
+                              port: 8080
+                          volumeMounts:
+                            - name: nifi
+                              mountPath: /opt/nifi/nifi-current/data
+                              subPath: data
                           env:
-                            - name: SINGLE_USER_CREDENTIALS_PASSWORD
-                              value: '
-            - get_input: nifi_admin_password
-            - |-
-                '
-                            - name: SINGLE_USER_CREDENTIALS_USERNAME
-                              value: '
-            - get_input: nifi_admin_username
-            - |-
-                '
-                            - name: NIFI_WEB_PROXY_HOST
-                              value: '
-            - get_attribute: [ front, public_address, 0 ]
-            - |-
-                '
+                            - name: NIFI_CLUSTER_NODE_ADDRESS
+                              valueFrom:
+                                fieldRef:
+                                  fieldPath: status.podIP
+                            - name: HOSTNAME
+                              valueFrom:
+                                fieldRef:
+                                  fieldPath: status.podIP
+                          envFrom:
+                          - configMapRef:
+                              name: nifi-cm
+                              optional: false
       requirements:
         - host: lrms_front_end
         - dependency: nifins
@@ -106,13 +353,32 @@ topology_template:
             name: service-nifi
           spec:
             ports:
-              - name: '8443'
-                port: 8443
-                targetPort: 8443
+              - name: '8080'
+                port: 8080
+                targetPort: 8080
             selector:
               app: nifi
-          status:
-            loadBalancer: {}
+      requirements:
+        - host: lrms_front_end
+        - dependency: nifins
+
+    nifi_ui_secret:
+      type: tosca.nodes.indigo.KubernetesObject
+      properties:
+        spec:
+          concat:
+            - |-
+                apiVersion: v1
+                data:
+                  auth: '
+            - get_input: nifi_ui_auth
+            - |-
+                '
+                kind: Secret
+                metadata:
+                  name: basic-auth
+                  namespace: nifi
+                type: Opaque
       requirements:
         - host: lrms_front_end
         - dependency: nifins
@@ -128,7 +394,9 @@ topology_template:
             namespace: nifi
             annotations:
               kubernetes.io/ingress.class: 'nginx'
-              nginx.ingress.kubernetes.io/backend-protocol: 'HTTPS'
+              nginx.ingress.kubernetes.io/auth-type: basic
+              nginx.ingress.kubernetes.io/auth-secret: basic-auth
+              nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
           spec:
             rules:
             - http:
@@ -138,7 +406,7 @@ topology_template:
                     service:
                       name: service-nifi
                       port:
-                        number: 8443
+                        number: 8080
                   pathType: Prefix
       requirements:
         - host: lrms_front_end

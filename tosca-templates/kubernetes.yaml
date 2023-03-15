@@ -14,6 +14,8 @@ metadata:
     - influxdb.yaml
     - kubernetes_elastic.yaml
     - daskhub.yaml
+    - kubeflow.yaml
+    - kafka.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 
@@ -70,6 +72,12 @@ topology_template:
       type: string
       description: "Or URL of the disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
       default: ""
+    wn_disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the WN instances for storing containers
+      default: 0 GB
+      constraints:
+      - valid_values: [ 0 GB, 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
 
     admin_token:
       type: string
@@ -78,9 +86,9 @@ topology_template:
     kube_version:
       type: string
       description: Version of Kubernetes to install
-      default: "1.23.6"
+      default: "1.23.16"
       constraints:
-      - valid_values: [ "1.23.6", "1.22.9", "1.21.12" ]
+      - valid_values: [ "1.23.16", "1.24.10", "1.25.6", "1.26.1", "1.22.17" ]
     cri_runtime:
       type: string
       description: CRI Runtime to use with Kubernetes
@@ -197,6 +205,18 @@ topology_template:
           properties:
             distribution: ubuntu
             type: linux
+      requirements:
+      - local_storage:
+          node: wn_block_storage
+          relationship:
+            type: AttachesTo
+            properties:
+              location: { concat: [ '/var/lib/', get_input: cri_runtime ] }
+
+    wn_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: wn_disk_size }
 
   outputs:
     dashboard_endpoint:
