@@ -175,3 +175,8 @@ body {
     border-bottom:1px solid #EF8200; 
 }
 
+.alert-info {
+    color: #005FAA;
+    background-color: #F1F8FF;
+    border-color: #669FCC;
+}
