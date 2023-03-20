@@ -129,7 +129,7 @@
     border-color: #669FCC;
 }
 
-.btn-info.focus,.btn-success:focus{
+.btn-info.focus,.btn-info:focus{
     color:#fff;
     background-color:#669FCC;
     border-color:#669FCC;
