@@ -59,22 +59,32 @@ hr.style-seven:before { /* Not really supposed to work, but does */
             <div class="col-lg-3"></div>
         </div>
 
-        <div class="row text-dark">
-            <div class="col-lg-1"></div>
-            <div class="col-lg-10">
-            <ul class="list-group list-group-horizontal mx-auto">
-                <li class="list-group-item"><a href="https://kubernetes.io/" target="_blank"><img src="{{ url_for('static', filename='images/kubernetes.png') }}" alt="Kubernetes"></a></li>
-                <li class="list-group-item"><a href="http://mesos.apache.org/" target="_blank"><img src="{{ url_for('static', filename='images/mesos.png') }}" alt="Mesos"></a></li>
-                <li class="list-group-item"><a href="https://slurm.schedmd.com/" target="_blank"><img src="{{ url_for('static', filename='images/slurm.png') }}" alt="SLURM"></a></li>
-            </ul>
-            <ul class="list-group list-group-horizontal mx-auto">
-                <li class="list-group-item"><a href="https://galaxyproject.org/" target="_blank"><img src="{{ url_for('static', filename='images/galaxy.png') }}" alt="Galaxy"></a></li>
-                <li class="list-group-item"><a href="http://ophidia.cmcc.it/" target="_blank"><img src="{{ url_for('static', filename='images/ophidia.png') }}" alt="Ophidia"></a></li>
-                <li class="list-group-item" style="width: 291px; text-align: center; font-size: x-large;"><br/>and more ...</li>
-            </ul>
+
+        <div class="card-group px-5 mx-5">
+            <div class="card p-2 text-center">
+                <a href="https://kubernetes.io/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/kubernetes.png') }}" alt="Kubernetes"></a>
             </div>
-            <div class="col-lg-1"></div>
-        </div>
+            <div class="card p-2 text-center">
+                <a href="http://mesos.apache.org/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/mesos.png') }}" alt="Mesos"></a>
+            </div>
+            <div class="card p-2 text-center">
+                <a href="https://slurm.schedmd.com/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/slurm.png') }}" alt="SLURM"></a>
+            </div>
+          </div>
+    
+          <div class="card-group px-5 mx-5">
+            <div class="card p-2 text-center">
+                <a href="https://galaxyproject.org/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/galaxy.png') }}" alt="Galaxy"></a>            </div>
+            <div class="card p-2 text-center">
+                <a href="http://ophidia.cmcc.it/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/ophidia.png') }}" alt="Ophidia"></a>            </div>
+            <div class="card p-2">
+                <p class="text-dark" style="text-align: center; font-size: x-large;">
+                <br/>and more ...
+                </p>
+            </div>
+          </div>
+
+          <br />
 
         <div class="row">
             <div class="col-lg-3"></div>

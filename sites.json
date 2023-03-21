@@ -50,7 +50,8 @@
             "eosc-synergy.eu": "ddf0c468c8af4e0bbb9808bfc0288381",
             "worsica.vo.incd.pt": "a53ca78c534046e5b13f4537ae698411",
             "covid19.eosc-synergy.eu": "05e52356addc44e18ef2bd14f2e2f67d",
-            "lagoproject.net": "14e8f964db4c4a8ea286b0886ab51e7c"
+            "lagoproject.net": "14e8f964db4c4a8ea286b0886ab51e7c",
+	    "vo.ai4eosc.eu": "c61c1bb323414a248cb142eb6183d4b2"
         }
     },
     {
@@ -130,7 +131,8 @@
         "vos": {
             "eosc-synergy.eu": "51f736d36ce34b9ebdf196cfcabd24ee",
             "covid19.eosc-synergy.eu": "a22bbffb007745b2934bf308b0a4d186",
-	    "mswss.ui.savba.sk": "a3684e7440aa42f287cf5e9e85ea4cae" 
+	    "mswss.ui.savba.sk": "a3684e7440aa42f287cf5e9e85ea4cae",
+	    "vo.ai4eosc.eu": "4d40037774784f22907d537070e85f42"
         }
     },
     {
@@ -200,6 +202,14 @@
 	    "vo.deltares.nl": "8a244d1b0d0f4f8e8c9519fae4cfc8ee",
 	    "vo.obsea.es": "277dd78e3b3b4c8caf93ad42fddaec38",
 	    "bioisi": "458f3225272243d7b1c0551d3af3f130"
+        }
+    },
+    {
+        "name": "IFCA-LCG2",
+        "url": "https://api.cloud.ifca.es:5000",
+        "id": "7513G0",
+        "vos": {
+            "vo.ai4eosc.eu": "f44e296a9ea441548456d25fb5b467c9"
         }
     }
 ]
