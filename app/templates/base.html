@@ -156,8 +156,6 @@
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ session['username'] }}<span class="caret"></span>
             </a>
             <div class="dropdown-menu dropdown-menu-right"">
-              <a class="dropdown-item text-right disabled">{{ session['userid'] }}</a>
-              <div class="dropdown-divider"></div>
               <a class="dropdown-item text-right" href="{{ url_for("manage_creds") }}">Cloud Credentials</a>
               <a class="dropdown-item text-right" href="{{ url_for("get_ssh_keys") }}">SSH Key</a>
               <a class="dropdown-item text-right" href="{{ url_for("logout") }}">Logout</a>
