@@ -88,9 +88,14 @@ def create_app(oidc_blueprint=None):
     logging.basicConfig(level=numeric_level)
 
     oidc_base_url = settings.oidcUrl
-    oidc_token_url = settings.oidcTokenUrl
-    oidc_refresh_url = settings.oidcRefresUrl
-    oidc_authorization_url = settings.oidcAuthorizeUrl
+    oidc_urls = utils.discover_oidc_urls(settings.oidcUrl)
+    if oidc_urls:
+        oidc_token_url = oidc_urls['token_endpoint']
+        oidc_authorization_url = oidc_urls['authorization_endpoint']
+        settings.oidcUserInfoPath = urlparse(oidc_urls['userinfo_endpoint']).path
+    else:
+        oidc_token_url = settings.oidcTokenUrl
+        oidc_authorization_url = settings.oidcAuthorizeUrl
 
     if not oidc_blueprint:
         oidc_blueprint = OAuth2ConsumerBlueprint(
@@ -100,7 +105,7 @@ def create_app(oidc_blueprint=None):
             scope=app.config['OIDC_SCOPES'],
             base_url=oidc_base_url,
             token_url=oidc_token_url,
-            auto_refresh_url=oidc_refresh_url,
+            auto_refresh_url=oidc_token_url,
             authorization_url=oidc_authorization_url,
             redirect_to='home'
         )
@@ -195,7 +200,7 @@ def create_app(oidc_blueprint=None):
             else:
                 # Only contact userinfo endpoint first time in session
                 try:
-                    account_info = oidc_blueprint.session.get(urlparse(settings.oidcUrl)[2] + settings.oidcUserInfoPath)
+                    account_info = oidc_blueprint.session.get(settings.oidcUserInfoPath)
                 except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
                     flash("Token expired.", 'warning')
                     return logout()
