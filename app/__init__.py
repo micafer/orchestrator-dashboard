@@ -145,10 +145,7 @@ def create_app(oidc_blueprint=None):
     @authorized_with_valid_token
     def show_settings():
         imUrl = "%s (v. %s)" % (settings.imUrl, im.get_version())
-        if settings.debug_oidc_token:
-            access_token = settings.debug_oidc_token
-        else:
-            access_token = oidc_blueprint.session.token['access_token']
+        access_token = oidc_blueprint.session.token['access_token']
         return render_template('settings.html', oidc_url=settings.oidcUrl, im_url=imUrl,
                                access_token=access_token, vault_url=settings.vault_url,
                                version=settings.version)
@@ -186,67 +183,63 @@ def create_app(oidc_blueprint=None):
                         templates[k] = v
 
         if settings.debug_oidc_token:
-            session["vos"] = None
-            session['userid'] = "a_very_long_user_id_00000000000000000000000000000000000000000000@egi.es"
-            session['username'] = "username"
-            session['gravatar'] = ""
-            return render_template('portfolio.html', templates=templates, parent=None)
+            oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
         else:
             if not oidc_blueprint.session.authorized:
                 return redirect(url_for('login'))
 
-            if 'userid' in session and session['userid']:
+        if 'userid' in session and session['userid']:
+            return render_template('portfolio.html', templates=templates, parent=None)
+        else:
+            # Only contact userinfo endpoint first time in session
+            try:
+                account_info = oidc_blueprint.session.get(settings.oidcUserInfoPath)
+            except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
+                flash("Token expired.", 'warning')
+                return logout()
+
+            if account_info.ok:
+                account_info_json = account_info.json()
+
+                session["vos"] = None
+                if 'eduperson_entitlement' in account_info_json:
+                    session["vos"] = utils.getUserVOs(account_info_json['eduperson_entitlement'],
+                                                        settings.vos_user_role)
+
+                if settings.oidcGroups:
+                    user_groups = []
+                    if 'groups' in account_info_json:
+                        user_groups = account_info_json['groups']
+                    elif 'eduperson_entitlement' in account_info_json:
+                        user_groups = account_info_json['eduperson_entitlement']
+                    if not set(settings.oidcGroups).issubset(user_groups):
+                        app.logger.debug("No match on group membership. User group membership: " +
+                                            json.dumps(user_groups))
+                        message = Markup('You need to be a member of the following groups: {0}. <br>'
+                                            ' Please, visit <a href="{1}">{1}</a> and apply for the requested '
+                                            'membership.'.format(json.dumps(settings.oidcGroups), settings.oidcUrl))
+                        raise Forbidden(description=message)
+
+                session['userid'] = account_info_json['sub']
+                if 'name' in account_info_json:
+                    session['username'] = account_info_json['name']
+                else:
+                    session['username'] = ""
+                    if 'given_name' in account_info_json:
+                        session['username'] = account_info_json['given_name']
+                    if 'family_name' in account_info_json:
+                        session['username'] += " " + account_info_json['family_name']
+                    if session['username'] == "":
+                        session['username'] = account_info_json['sub']
+                if 'email' in account_info_json:
+                    session['gravatar'] = utils.avatar(account_info_json['email'], 26)
+                else:
+                    session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
+
                 return render_template('portfolio.html', templates=templates, parent=None)
             else:
-                # Only contact userinfo endpoint first time in session
-                try:
-                    account_info = oidc_blueprint.session.get(settings.oidcUserInfoPath)
-                except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
-                    flash("Token expired.", 'warning')
-                    return logout()
-
-                if account_info.ok:
-                    account_info_json = account_info.json()
-
-                    session["vos"] = None
-                    if 'eduperson_entitlement' in account_info_json:
-                        session["vos"] = utils.getUserVOs(account_info_json['eduperson_entitlement'],
-                                                          settings.vos_user_role)
-
-                    if settings.oidcGroups:
-                        user_groups = []
-                        if 'groups' in account_info_json:
-                            user_groups = account_info_json['groups']
-                        elif 'eduperson_entitlement' in account_info_json:
-                            user_groups = account_info_json['eduperson_entitlement']
-                        if not set(settings.oidcGroups).issubset(user_groups):
-                            app.logger.debug("No match on group membership. User group membership: " +
-                                             json.dumps(user_groups))
-                            message = Markup('You need to be a member of the following groups: {0}. <br>'
-                                             ' Please, visit <a href="{1}">{1}</a> and apply for the requested '
-                                             'membership.'.format(json.dumps(settings.oidcGroups), settings.oidcUrl))
-                            raise Forbidden(description=message)
-
-                    session['userid'] = account_info_json['sub']
-                    if 'name' in account_info_json:
-                        session['username'] = account_info_json['name']
-                    else:
-                        session['username'] = ""
-                        if 'given_name' in account_info_json:
-                            session['username'] = account_info_json['given_name']
-                        if 'family_name' in account_info_json:
-                            session['username'] += " " + account_info_json['family_name']
-                        if session['username'] == "":
-                            session['username'] = account_info_json['sub']
-                    if 'email' in account_info_json:
-                        session['gravatar'] = utils.avatar(account_info_json['email'], 26)
-                    else:
-                        session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
-
-                    return render_template('portfolio.html', templates=templates, parent=None)
-                else:
-                    flash("Error getting User info: \n" + account_info.text, 'error')
-                    return render_template('home.html', oidc_name=settings.oidcName)
+                flash("Error getting User info: \n" + account_info.text, 'error')
+                return render_template('home.html', oidc_name=settings.oidcName)
 
     @app.route('/vminfo')
     @authorized_with_valid_token
