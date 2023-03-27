@@ -800,3 +800,18 @@ def get_site_info_from_radl(radl, creds):
     res_site["type"] = site_type
 
     return res_site
+
+
+def discover_oidc_urls(base_url):
+    """Get OIDC URLs"""
+    url = "%s/.well-known/openid-configuration" % base_url
+    res = {}
+    try:
+        response = requests.get(url)
+        if response.ok:
+            data = response.json()
+            for elem in ["authorization_endpoint", "token_endpoint", "introspection_endpoint", "userinfo_endpoint"]:
+                res[elem] = data[elem]
+    except Exception:
+        return res
+    return res

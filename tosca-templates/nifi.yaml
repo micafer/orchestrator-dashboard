@@ -24,6 +24,10 @@ topology_template:
       type: integer
       description: Number of Nifi replicas
       default: 2
+    nifi_docker_image:
+      type: string
+      description: Nifi Docker image (apache/nifi)
+      default: ghcr.io/grycap/dcnios
 
   node_templates:
 
@@ -225,11 +229,8 @@ topology_template:
                   NIFI_CLUSTER_PROTOCOL_HEARTBEAT_INTERVAL: '1 min'
                   NIFI_ELECTION_MAX_CANDIDATES: '2'
                   NIFI_ELECTION_MAX_WAIT: '1 min'
-                  NIFI_JVM_HEAP_INIT: '1g'
-                  NIFI_JVM_HEAP_MAX: '2g'
                   NIFI_SENSITIVE_PROPS_KEY: '1yhqju3ubhp5rjeb'
                   NIFI_WEB_HTTP_PORT: '8080'
-                  NIFI_WEB_HTTPS_PORT: '8443'
                   NIFI_ZK_CONNECT_STRING: 'zookeeper:2181'
                   NIFI_ZOOKEEPER_CONNECT_STRING: 'zookeeper:2181'
                   NIFI_WEB_PROXY_HOST: '
@@ -298,7 +299,11 @@ topology_template:
                               memory: 10Mi
                       containers:
                         - name: nifi
-                          image: apache/nifi
+                          image: 
+            - get_input: nifi_docker_image
+            - "\n"
+            - |-
+                # image
                           ports:
                           - containerPort: 8080
                             name: nifi
@@ -323,6 +328,9 @@ topology_template:
                             - name: nifi
                               mountPath: /opt/nifi/nifi-current/data
                               subPath: data
+                            - name: nifi
+                              mountPath: /state
+                              subPath: state
                           env:
                             - name: NIFI_CLUSTER_NODE_ADDRESS
                               valueFrom:
