@@ -801,6 +801,7 @@ def get_site_info_from_radl(radl, creds):
 
     return res_site
 
+
 def discover_oidc_urls(base_url):
     """Get OIDC URLs"""
     url = "%s/.well-known/openid-configuration" % base_url
