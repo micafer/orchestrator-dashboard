@@ -1,0 +1,14 @@
+inputs:
+    storage_size:
+      tab: ENES Data
+    jupyterhub_crypt_key:
+      tab: ENES Data
+    enes_oidc_issuer:
+      tab: ENES Data
+    enes_client_id:
+      tab: ENES Data
+    enes_client_secret:
+      tab: ENES Data
+tabs:
+  - ENES Data
+
