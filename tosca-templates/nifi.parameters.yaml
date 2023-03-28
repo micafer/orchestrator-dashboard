@@ -5,5 +5,8 @@ inputs:
     nifi_replicas:
       tab: Nifi
 
+    nifi_docker_image:
+      tab: Nifi
+
 tabs:
   - Nifi
