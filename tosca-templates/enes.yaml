@@ -126,10 +126,12 @@ topology_template:
       type: string
       description: Access Token for the Kubernetes admin user
       default: not_very_secret_token
+      required: yes
     kube_version:
       type: string
       description: Version of Kubernetes to install
       default: "1.25.8"
+      required: yes
     kube_nvidia_support:
       type: boolean
       description: Flag to add NVIDIA support
@@ -140,6 +142,12 @@ topology_template:
       type: string
       description: Email to be used in the Let's Encrypt issuer
       default: "jhondoe@server.com"
+      required: yes
+    kube_public_dns_name:
+      type: string
+      description: DNS name of the public interface of the FE node to generate the certificate
+      default: ""
+      required: yes
 
     allowed_cidr:
       type: string
@@ -223,6 +231,7 @@ topology_template:
         nvidia_support: { get_input: kube_nvidia_support }
         cert_manager: true
         cert_user_email: { get_input: kube_cert_user_email }
+        public_dns_name: { get_input: kube_public_dns_name}
         cri_runtime: containerd
       requirements:
         - host: front
