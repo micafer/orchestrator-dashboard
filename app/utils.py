@@ -185,6 +185,16 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
     except Exception:
         print("Error getting extra credentials.", file=sys.stderr)
 
+    # Check if the cred_id provided exists
+    cred_found = False
+    for cred in creds:
+        if cred['enabled'] and (cred_id is None or cred_id == cred['id'] or cred['id'] in extra_auth_ids):
+            cred_found = True
+            break
+    # if not, set to none to send all creds
+    if not cred_found:
+        cred_id = None
+
     for cred in creds:
         if cred['enabled'] and (cred_id is None or cred_id == cred['id'] or cred['id'] in extra_auth_ids):
             res += "\\nid = %s" % cred['id']
@@ -790,3 +800,18 @@ def get_site_info_from_radl(radl, creds):
     res_site["type"] = site_type
 
     return res_site
+
+
+def discover_oidc_urls(base_url):
+    """Get OIDC URLs"""
+    url = "%s/.well-known/openid-configuration" % base_url
+    res = {}
+    try:
+        response = requests.get(url)
+        if response.ok:
+            data = response.json()
+            for elem in ["authorization_endpoint", "token_endpoint", "introspection_endpoint", "userinfo_endpoint"]:
+                res[elem] = data[elem]
+    except Exception:
+        return res
+    return res
