@@ -228,7 +228,7 @@
                         Do you really want to DELETE the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form id="deleteInfra" action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteBtn" role="button">Delete</button>
@@ -252,7 +252,7 @@
                         Do you really want to reconfigure the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary reconfCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary reconfCancelBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form id="reconfInfra" action="{{ url_for('manage_inf', infid=infId, op='reconfigure') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success reconfigureBtn" role="button">Reconfigure</button>
@@ -273,7 +273,7 @@
                         Do you really want to stop the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary stopCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary stopCancelBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form id="stopInfra" action="{{ url_for('manage_inf', infid=infId, op='stop') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-warning StopBtn" role="button">Stop</button>
@@ -294,7 +294,7 @@
                         Do you really want to start the Infrastructure "{{infInfo["name"]}}"  with ID: {{infId}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary startCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary startCancelBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form id="startInfra" action="{{ url_for('manage_inf', infid=infId, op='start') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success StartBtn" role="button">Start</button>
@@ -332,7 +332,7 @@
                           Name: <input type="text" name="description" value="{{ infInfo['name'] }}"/>
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary updateCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary updateCancelBtn" role="button" data-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success UpdateBtn" role="button">Update</button>
                         </form>
@@ -354,7 +354,7 @@
                       <div class="modal-footer">
                         <form id="deleteVmsInfra" action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
                           <input type="hidden" name="vm_list" id="vm_list_{{infId}}" />
-                        <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteVMsBtn" role="button">Delete</button>
                         </form>
@@ -388,7 +388,7 @@
                             </div>
                           </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary cancelChangeUserBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelChangeUserBtn" role="button" data-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success ChangeUserBtn" role="button">Add</button>
                           <input type="checkbox" name="overwrite" value="1" onclick="showOverwriteMessage(this);"> Overwrite

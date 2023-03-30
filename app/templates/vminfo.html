@@ -215,7 +215,7 @@
                         Do you really want to Start the VM {{vmid}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-outline-primary cancelStartBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelStartBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form id="startVM" action="{{ url_for('managevm', op='start', infid=infid, vmid=vmid) }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success StartBtn" role="button">Start</button>
@@ -236,7 +236,7 @@
                         Do you really want to Reboot the VM {{vmid}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-outline-primary cancelRebootBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelRebootBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form id="rebootVM" action="{{ url_for('managevm', op='reboot', infid=infid, vmid=vmid) }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-primary RebootBtn" role="button">Reboot</button>
@@ -257,7 +257,7 @@
                         Do you really want to Stop the VM {{vmid}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-outline-primary cancelStopBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelStopBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form id="stopVM" action="{{ url_for('managevm', op='stop', infid=infid, vmid=vmid) }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-warning StopBtn" role="button">Stop</button>
@@ -278,7 +278,7 @@
                         Do you really want to Terminate the VM {{vmid}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-outline-primary cancelTerminateBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelTerminateBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form id="terminateVM" action="{{ url_for('managevm', op='terminate', infid=infid, vmid=vmid) }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger TerminateBtn" role="button">Terminate</button>
@@ -299,7 +299,7 @@
                         Do you really want to Reconfigure the VM {{vmid}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-outline-primary cancelReconfBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelReconfBtn" role="button" data-dismiss="modal">Cancel</a>
                         <form action="{{ url_for('managevm', op='reconfigure', infid=infid, vmid=vmid) }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success ReconfBtn" role="button">Reconfigure</button>
@@ -333,7 +333,7 @@
 
                       </div>
                       <div class="modal-footer">
-                          <a class="btn btn-outline-primary cancelResizeBtn" role="button" data-dismiss="modal">Cancel</a>
+                          <a class="btn btn-secondary cancelResizeBtn" role="button" data-dismiss="modal">Cancel</a>
                           <button type="submit" class="btn btn-primary ResizeBtn">Resize</button>
                       </form>
                       </div>
