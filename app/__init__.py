@@ -1188,6 +1188,7 @@ def create_app(oidc_blueprint=None):
 
             if response.ok:
                 radl = None
+                total_dep = 0
                 try:
                     radl = radl_parse.parse_radl(response.text)
                     radl.deploys = []
@@ -1199,11 +1200,12 @@ def create_app(oidc_blueprint=None):
                             vm_num = int(form_data["%s_num" % system.name])
                             if vm_num > 0:
                                 sys_dep.vm_number = vm_num
+                                total_dep += vm_num
                         radl.deploys.append(sys_dep)
                 except Exception as ex:
                     flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
 
-                if radl:
+                if radl and total_dep:
                     try:
                         response = im.addresource_inf(infid, str(radl), auth_data)
                         if not response.ok:
@@ -1212,6 +1214,9 @@ def create_app(oidc_blueprint=None):
                         flash("%d nodes added successfully" % num, 'success')
                     except Exception as ex:
                         flash("Error adding nodes: \n%s\n%s" % (ex, response.text), 'error')
+
+                if total_dep == 0:
+                    flash("No nodes added (0 nodes set)", 'warning')
 
                 return redirect(url_for('showinfrastructures'))
             else:
