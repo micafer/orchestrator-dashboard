@@ -57,7 +57,7 @@
 
 
 .btn-secondary,.btn-secondary:disabled,.btn-secondary.disabled {
-    color: #fff;
+    color: #fff!important;
     background-color: #999999;
     border-color: #999999;
 }
