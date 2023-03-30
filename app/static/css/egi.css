@@ -91,7 +91,15 @@
 }
 
 .bg-dark {
-    background-color:#1e315c!important;
+    background-color:#09142E!important;
+}
+
+.bg-light {
+    background-color:#F7F6F7!important;
+}
+
+.jumbotron {
+    background-color:#F7F6F7;
 }
 
 .btn-success,.btn-success:disabled,.btn-success.disabled {
