@@ -347,7 +347,7 @@ topology_template:
 
   outputs:
     dashboard_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
+      value: { concat: [ 'https://', get_input: kube_public_dns_name, '/dashboard/' ] }
     api_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
     kubeconfig:
