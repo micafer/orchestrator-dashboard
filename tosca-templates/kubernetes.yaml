@@ -40,6 +40,16 @@ topology_template:
       type: string
       description: Flavor name of the front-end node
       default: ""
+    disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the FE instance
+      default: 10 GB
+      constraints:
+      - valid_values: [ 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    volume_id:
+      type: string
+      description: "Or URL of the disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
+      default: ""
     fe_kube_nvidia_support:
       type: boolean
       description: Flag to add NVIDIA support in the FE (must be set if any WN has GPU)
@@ -85,16 +95,6 @@ topology_template:
     wn_instance_type:
       type: string
       description: Flavor name for the WNs
-      default: ""
-    disk_size:
-      type: scalar-unit.size
-      description: Size of the disk to be attached to the FE instance
-      default: 10 GB
-      constraints:
-      - valid_values: [ 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
-    volume_id:
-      type: string
-      description: "Or URL of the disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
       default: ""
     wn_disk_size:
       type: scalar-unit.size
