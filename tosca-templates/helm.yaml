@@ -54,6 +54,8 @@ topology_template:
         repository_url: { get_input: helm_repo_url }
         name: { get_input: helm_chart_name }
         values_file: { get_input: helm_values }
+        values: 
+          dummy: no
       requirements:
         - host: front
         - dependency: lrms_front_end
