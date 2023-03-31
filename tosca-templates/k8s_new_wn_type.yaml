@@ -1,0 +1,116 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: Add a new WN type to the Kubernetes cluster (Heterogeneous cluster). Not compatible with Elasticity (yet).
+
+metadata:
+  name: New WN Type
+  display_name: Add a new WN type with diferent features
+  icon: images/k8swn.png
+  parents:
+   - kubernetes.yaml
+   - enes.yaml
+
+topology_template:
+
+  inputs:
+
+    wng_num:
+      type: integer
+      description: Number of 2nd WNs type in the cluster
+      default: 0
+      required: yes
+    wng_cpus:
+      type: integer
+      description: Number of CPUs for the WNs
+      default: 2
+      required: yes
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+    wng_mem:
+      type: scalar-unit.size
+      description: Amount of Memory for the WNs
+      default: 4 GB
+      required: yes
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    wng_instance_type:
+      type: string
+      description: Flavor name for the GPU WNs
+      default: ""
+    wng_num_gpus:
+      type: integer
+      description: Number of GPUs to assing to this VM
+      default: 0
+      constraints:
+      - valid_values: [ 0, 1, 2, 3, 4 ]
+    wng_gpu_vendor:
+      type: string
+      description: GPU Vendor
+      default: ''
+      constraints:
+      - valid_values: [ '', 'NVIDIA', 'AMD' ]
+    wng_gpu_model:
+      type: string
+      description: GPU Model
+      default: ''
+
+    wng_disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the GPU WN instances for storing containers
+      default: 0 GB
+      constraints:
+      - valid_values: [ 0 GB, 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    
+    wng_kube_nvidia_support:
+      type: boolean
+      description: Flag to add NVIDIA support
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
+  
+  node_templates:
+
+    wng_node:
+      type: tosca.nodes.indigo.LRMS.WorkerNode.Kubernetes
+      properties:
+        front_end_ip: { get_attribute: [ front, private_address, 0 ] }
+        version: { get_input: kube_version }
+        nvidia_support: { get_input: wng_kube_nvidia_support }
+        cri_runtime: { get_input: cri_runtime }
+      requirements:
+        - host: wng
+            
+    wng:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        scalable:
+          properties:
+            count:  { get_input: wng_num }
+        host:
+          properties:
+            num_cpus: { get_input: wng_cpus }
+            mem_size: { get_input: wng_mem }
+            num_gpus: { get_input: wng_num_gpus }
+            gpu_vendor: { get_input: wng_gpu_vendor }
+            gpu_model: { get_input: wng_gpu_model }
+            instance_type: { get_input: wng_instance_type }
+        os:
+          properties:
+            distribution: ubuntu
+            type: linux
+      requirements:
+      - local_storage:
+          node: wng_block_storage
+          relationship:
+            type: AttachesTo
+            properties:
+              location: { concat: [ '/var/lib/', get_input: cri_runtime ] }
+
+    wng_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: wng_disk_size }
+
