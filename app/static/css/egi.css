@@ -162,6 +162,10 @@
     background-color:#005FAA!important;
 }
 
+.selected-addon {
+    background-color: rgb(66, 159, 204, 0.5)!important;
+  }
+
 .badge-primary {
     background-color:#EF8200!important;
 }
