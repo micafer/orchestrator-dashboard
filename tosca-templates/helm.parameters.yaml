@@ -1,0 +1,16 @@
+inputs:
+    helm_namespace:
+      tab: Helm Chart Data
+    helm_repo_name:
+      tab: Helm Chart Data
+    helm_repo_url:
+      tab: Helm Chart Data
+    helm_chart_name:
+      tab: Helm Chart Data
+    helm_values:
+      tab: Helm Chart Data
+      tag_type: textarea
+
+tabs:
+  - Helm Chart Data
+

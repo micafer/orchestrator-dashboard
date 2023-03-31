@@ -1,0 +1,61 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Helm Chart
+  display_name: Launch a Helm Chart on top of a Kubernetes Virtual Cluster
+  icon: images/helm.png
+  parents:
+   - kubernetes.yaml
+
+description: TOSCA template for launching a Helm Chart on top of a Kubernetes Virtual Cluster.
+
+topology_template:
+  inputs:
+
+    helm_namespace:
+      type: string
+      description: Namespace where the Helm Chart will be created
+      default: ''
+      required: yes
+
+    helm_repo_name:
+      type: string
+      description: Name to set to the Helm repository
+      default: ''
+      required: yes
+
+    helm_repo_url:
+      type: string
+      description: URL of the Helm repository
+      default: ''
+      required: yes
+
+    helm_chart_name:
+      type: string
+      description: Name of the Helm Chart to install
+      default: ''
+      required: yes
+
+    helm_values:
+      type: string
+      description: Contents of the value file to configure the Chart
+      default: ''
+
+  node_templates:
+
+    helm_chart:
+      type: tosca.nodes.indigo.Helm.Chart
+      properties:
+        namespace: { get_input: helm_namespace }
+        repository_name: { get_input: helm_repo_name }
+        repository_url: { get_input: helm_repo_url }
+        name: { get_input: helm_chart_name }
+        values_file: { get_input: helm_values }
+        values: 
+          dummy: no
+      requirements:
+        - host: front
+        - dependency: lrms_front_end
