@@ -40,8 +40,23 @@
 
   <div class="card-deck">
 
+<!-- Not very pretty code to hide templates VO based -->
+ {% set vars = {'template_count': 0, 'enabled_vos': True} %}
  {% for tosca_filename, tosca in templates.items() %}
-    {% if loop.index % 3 == 1 %}
+    {% if tosca['metadata']['vos'] is defined %}
+      {% if vars.update({'enabled_vos': False}) %} {% endif %}
+      {% for uvo in session["vos"] %}
+        {% for tvo in tosca['metadata']['vos']  %}
+          {% if uvo == tvo %}
+            {% if vars.update({'enabled_vos': True}) %} {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+      {% endif %}
+    {% if vars['enabled_vos'] %}
+
+    {% if vars.update({'template_count': vars['template_count'] + 1}) %} {% endif %}
+    {% if vars['template_count'] % 3 == 1 %}
     <div class="card-group">
     {% endif %}
 
@@ -82,14 +97,15 @@
                 {% endif %}
             </div>
         </div>
-    {% if loop.index % 3 == 0 %}
+    {% if vars['template_count'] % 3 == 0 %}
     </div>
+    {% endif %}
     {% endif %}
     {% endfor %}
-    {% if templates|count % 3 != 0 %}
+    {% if vars['template_count'] % 3 != 0 %}
     </div>
     {% endif %}
-
+    
 
   </div>
   {% if parent %}
