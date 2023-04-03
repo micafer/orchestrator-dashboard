@@ -11,6 +11,7 @@ metadata:
   name: ENES Data Space service
   display_name: ENES Data Space service on top of Kubernetes
   icon: images/eds.png
+  vos: ['vo.enes.org']
 
 topology_template:
 
