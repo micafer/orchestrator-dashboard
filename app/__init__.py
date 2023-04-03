@@ -704,7 +704,11 @@ def create_app(oidc_blueprint=None):
             selected_tosca = request.args['selected_tosca']
 
         if not selected_tosca or selected_tosca not in toscaInfo:
-            flash("InvalidTOSCA template name: %s" % selected_tosca, "error")
+            flash("Invalid TOSCA template name: %s" % selected_tosca, "error")
+            return redirect(url_for('home'))
+
+        if not utils.valid_template_vos(session['vos'], toscaInfo[selected_tosca]["metadata"]):
+            flash("Invalid TOSCA template name: %s" % selected_tosca, "error")
             return redirect(url_for('home'))
 
         child_templates = {}
@@ -712,7 +716,7 @@ def create_app(oidc_blueprint=None):
         if "childs" in toscaInfo[selected_tosca]["metadata"]:
             if childs is not None:
                 for child in childs:
-                    if child in toscaInfo:
+                    if child in toscaInfo and utils.valid_template_vos(session['vos'], toscaInfo[child]["metadata"]):
                         child_templates[child] = toscaInfo[child]
                         if "inputs" in toscaInfo[child]:
                             selected_template["inputs"].update(toscaInfo[child]["inputs"])
@@ -720,7 +724,7 @@ def create_app(oidc_blueprint=None):
                             selected_template["tabs"].extend(toscaInfo[child]["tabs"])
             else:
                 for child in toscaInfo[selected_tosca]["metadata"]["childs"]:
-                    if child in toscaInfo:
+                    if child in toscaInfo and utils.valid_template_vos(session['vos'], toscaInfo[child]["metadata"]):
                         child_templates[child] = toscaInfo[child]
                 return render_template('portfolio.html', templates=child_templates, parent=selected_tosca)
         else:

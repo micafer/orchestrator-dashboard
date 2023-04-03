@@ -43,6 +43,7 @@
 <!-- Not very pretty code to hide templates VO based -->
  {% set vars = {'template_count': 0, 'enabled_vos': True} %}
  {% for tosca_filename, tosca in templates.items() %}
+    {% if vars.update({'enabled_vos': True}) %} {% endif %}
     {% if tosca['metadata']['vos'] is defined %}
       {% if vars.update({'enabled_vos': False}) %} {% endif %}
       {% for uvo in session["vos"] %}
