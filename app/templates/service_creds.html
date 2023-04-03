@@ -16,24 +16,24 @@
             </div>
             <div class="col-md-6 text-right">
               {% if vault %}
-              <a class="btn btn-info" data-bs-toggle="modal" data-target="#vaultInfo" href="#" role="button"><span class="far fa-edit"></span> Vault Info</a>
+              <a class="btn btn-info" data-bs-toggle="modal" data-bs-target="#vaultInfo" href="#" role="button"><span class="far fa-edit"></span> Vault Info</a>
               {% endif %}
               <button type=button id="addBtn"class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"><span class='fas fa-plus mr-2'></span>New Credential
                   <span class="sr-only">Toggle Dropdown</span>
               </button>
               <div class="dropdown-menu">
-                <a class="dropdown-item" data-id="" data-type="EC2" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/EC2Row.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="GCE" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/GCERow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="Azure" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/AzureRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="fedcloud" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/fedcloudRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="OpenNebula" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OpenNebulaRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="OpenStack" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OpenStackRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="Orange" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OrangeRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="Linode" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/LinodeRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="Kubernetes" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/KubernetesRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="InfrastructureManager" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/InfrastructureManagerRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="OSCAR" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OSCARRow.png') }}"/></a>
-                <a class="dropdown-item" data-id="" data-type="CH" data-bs-toggle="modal" data-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/CHRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="EC2" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/EC2Row.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="GCE" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/GCERow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="Azure" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/AzureRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="fedcloud" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/fedcloudRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="OpenNebula" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OpenNebulaRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="OpenStack" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OpenStackRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="Orange" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OrangeRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="Linode" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/LinodeRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="Kubernetes" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/KubernetesRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="InfrastructureManager" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/InfrastructureManagerRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="OSCAR" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OSCARRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="CH" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/CHRow.png') }}"/></a>
               </div>
             </div>
           </div> <!-- / .row -->
@@ -88,8 +88,8 @@
                         {% endif %}
                       </td>
                       <td>
-                        <button {{ 'disabled' if cred['type']=='fedcloud' else '' }} type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-info" data-bs-toggle="modal" data-target="#newModal"><i class='far fa-edit m-1'></i></button>
-                        <button type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-secondary" data-bs-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                        <button {{ 'disabled' if cred['type']=='fedcloud' else '' }} type=button id="updateBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-info" data-bs-toggle="modal" data-bs-target="#newModal"><i class='far fa-edit m-1'></i></button>
+                        <button type=button id="deleteBtn" data-id="{{cred['id']}}" data-type="{{cred['host']}}" class="btn btn-small btn-secondary" data-bs-toggle="modal" data-bs-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
                         {% if cred['enabled'] == 1 %}
                         <a data-bs-toggle="tooltip" data-bs-placement="top" title="Disable" id="disableBtn" class="btn btn-success text-white" href="{{ url_for('enable_creds', cred_id=cred['id'], enable=0) }}"><i class='far fa-check-circle m-1'></i></a>
                         {% else %}
@@ -109,12 +109,12 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="get_secret">Credential</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
               </div>
               <div class="modal-body">
               </div>
               <div class="modal-footer">
-                <a class="btn btn-secondary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                <a class="btn btn-secondary cancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                 <button type="submit" class="btn btn-success updateBtn">Update</button>
               </div>
             </div>
@@ -127,13 +127,13 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">Confirm credentials deletion</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
               </div>
               <div class="modal-body">
                 Do you really want to delete your credentials?
               </div>
               <div class="modal-footer">
-                <a class="btn btn-secondary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                <a class="btn btn-secondary cancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                 <a class="btn btn-danger deleteBtn" role="button" href="">Delete</a>
               </div>
             </div>
@@ -147,12 +147,12 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">Vault Info</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
               </div>
               <div class="modal-body">
               </div>
               <div class="modal-footer">
-                <a class="btn btn-secondary canceltBtn" role="button" data-dismiss="modal">Cancel</a>
+                <a class="btn btn-secondary canceltBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                 <button type="submit" class="btn btn-success updatetBtn">Update</button>
               </div>
             </div>
