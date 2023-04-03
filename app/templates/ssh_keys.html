@@ -15,7 +15,7 @@
               <h4 class="font-weight-bold text-primary">SSH Keys</h4>
             </div>
             <div class="col-md-6 text-right">
-              <button type=button id="updateBtn" class="btn btn-small btn-primary" data-toggle="modal" data-target="#newModal"><i class='fas fa-plus m-1'></i>New SSH Key</button>
+              <button type=button id="updateBtn" class="btn btn-small btn-primary" data-bs-toggle="modal" data-target="#newModal"><i class='fas fa-plus m-1'></i>New SSH Key</button>
             </div>
           </div> <!-- / .row -->
         </div>
@@ -36,7 +36,7 @@
                       <td>{{ssh_key[1]}}</td>
                       <td>{{ssh_key[2] | truncate(32, True, " . . . ")}}{{ssh_key[2][-32:]}}</td>
                       <td>
-                        <button type=button id="deleteBtn" data-id="{{ssh_key[0]}}" data-type="{{ssh_key[1]}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                        <button type=button id="deleteBtn" data-id="{{ssh_key[0]}}" data-type="{{ssh_key[1]}}" class="btn btn-small btn-danger" data-bs-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
                       </td>
                     </tr>
                     {% endfor %}
