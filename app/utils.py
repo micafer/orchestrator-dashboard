@@ -815,3 +815,10 @@ def discover_oidc_urls(base_url):
     except Exception:
         return res
     return res
+
+
+def valid_template_vos(user_vos, template_metadata):
+    if 'vos' in template_metadata:
+        return [vo for vo in user_vos if vo in template_metadata['vos']]
+    else:
+        return ['all']
