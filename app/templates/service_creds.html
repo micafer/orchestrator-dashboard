@@ -166,9 +166,9 @@
 
 <script>
 
-$(function () {
-  $('[data-bs-toggle="tooltip"]').tooltip()
-})
+// Enable tooltips 
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
 $(document).ready(function () {
   $('#newModal').on('hidden.bs.modal', function () {
