@@ -28,14 +28,18 @@
       var delete_vms = '';
       $.each( data["vm_states"], function( vmId, vmState ) {
         var tooltip = getSpanFromState(vmState) + vmState + '</span>';
-        vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-toggle="tooltip" data-placement="top" data-html="true" title="' + tooltip + '">';
+        vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' + tooltip + '">';
         vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
         delete_vms += '<a class="btn btn-outline-secondary btn-sm" href="#" role="button" onclick="addVMtoDel(this,\'' + infid + '\',\'' + vmId + '\')">';
         delete_vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
       });
       $('#' + infid + '_vms').html(vms);
       $('#deletevms_' + infid + '_body').html(delete_vms);
-      $('[data-toggle="tooltip"]').tooltip();
+
+      // Enable tooltips 
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
       if (data["state"] == "stopped") {
         $('#stop_' + infid + '_a').hide()
         $('#start_' + infid + '_a').show()
