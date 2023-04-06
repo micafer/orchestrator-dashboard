@@ -59,7 +59,7 @@
     {% elif value.tag_type == "toggle" %}
       {% for constraint in value.constraints %}
       <div>
-        <input type="checkbox" data-toggle="toggle" id="{{key}}" name="{{key}}" data-size="sm" data-offstyle="dark" value={{constraint['value']}}>
+        <input type="checkbox" data-bs-toggle="toggle" id="{{key}}" name="{{key}}" data-size="sm" data-offstyle="dark" value={{constraint['value']}}>
       </div>
       {% endfor %}
     <!-- end toggle type -->
@@ -80,7 +80,7 @@
     <!--
     {% for vo in vos %}
     <div>
-      <input type="checkbox" data-toggle="toggle" id="{{key}}" name="{{key}}" data-size="sm" data-offstyle="dark" value={{vo}}><label for="{{key}}">{{vo}}</label>
+      <input type="checkbox" data-bs-toggle="toggle" id="{{key}}" name="{{key}}" data-size="sm" data-offstyle="dark" value={{vo}}><label for="{{key}}">{{vo}}</label>
     </div>
     {% endfor %}
     -->
