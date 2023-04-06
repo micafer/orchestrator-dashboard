@@ -74,7 +74,7 @@ topology_template:
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
         version: { get_input: kube_version }
-        nvidia_support: { get_input: kube_nvidia_support }
+        nvidia_support: { get_input: wn_kube_nvidia_support }
         cri_runtime: { get_input: cri_runtime }
       requirements:
         - host: wn
