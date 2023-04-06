@@ -188,9 +188,7 @@ def create_app(oidc_blueprint=None):
             if not oidc_blueprint.session.authorized:
                 return redirect(url_for('login'))
 
-        if 'userid' in session and session['userid']:
-            return render_template('portfolio.html', templates=templates, parent=None)
-        else:
+        if 'userid' not in session or not session['userid']:
             # Only contact userinfo endpoint first time in session
             try:
                 account_info = oidc_blueprint.session.get(settings.oidcUserInfoPath)
@@ -235,11 +233,11 @@ def create_app(oidc_blueprint=None):
                     session['gravatar'] = utils.avatar(account_info_json['email'], 26)
                 else:
                     session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
-
-                return render_template('portfolio.html', templates=templates, parent=None)
             else:
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
+
+        return render_template('portfolio.html', templates=templates, parent=None)
 
     @app.route('/vminfo')
     @authorized_with_valid_token
@@ -706,7 +704,11 @@ def create_app(oidc_blueprint=None):
             selected_tosca = request.args['selected_tosca']
 
         if not selected_tosca or selected_tosca not in toscaInfo:
-            flash("InvalidTOSCA template name: %s" % selected_tosca, "error")
+            flash("Invalid TOSCA template name: %s" % selected_tosca, "error")
+            return redirect(url_for('home'))
+
+        if not utils.valid_template_vos(session['vos'], toscaInfo[selected_tosca]["metadata"]):
+            flash("Invalid TOSCA template name: %s" % selected_tosca, "error")
             return redirect(url_for('home'))
 
         child_templates = {}
@@ -714,7 +716,7 @@ def create_app(oidc_blueprint=None):
         if "childs" in toscaInfo[selected_tosca]["metadata"]:
             if childs is not None:
                 for child in childs:
-                    if child in toscaInfo:
+                    if child in toscaInfo and utils.valid_template_vos(session['vos'], toscaInfo[child]["metadata"]):
                         child_templates[child] = toscaInfo[child]
                         if "inputs" in toscaInfo[child]:
                             selected_template["inputs"].update(toscaInfo[child]["inputs"])
@@ -722,7 +724,7 @@ def create_app(oidc_blueprint=None):
                             selected_template["tabs"].extend(toscaInfo[child]["tabs"])
             else:
                 for child in toscaInfo[selected_tosca]["metadata"]["childs"]:
-                    if child in toscaInfo:
+                    if child in toscaInfo and utils.valid_template_vos(session['vos'], toscaInfo[child]["metadata"]):
                         child_templates[child] = toscaInfo[child]
                 return render_template('portfolio.html', templates=child_templates, parent=selected_tosca)
         else:
@@ -1188,6 +1190,7 @@ def create_app(oidc_blueprint=None):
 
             if response.ok:
                 radl = None
+                total_dep = 0
                 try:
                     radl = radl_parse.parse_radl(response.text)
                     radl.deploys = []
@@ -1199,11 +1202,12 @@ def create_app(oidc_blueprint=None):
                             vm_num = int(form_data["%s_num" % system.name])
                             if vm_num > 0:
                                 sys_dep.vm_number = vm_num
+                                total_dep += vm_num
                         radl.deploys.append(sys_dep)
                 except Exception as ex:
                     flash("Error parsing RADL: \n%s\n%s" % (str(ex), response.text), 'error')
 
-                if radl:
+                if radl and total_dep:
                     try:
                         response = im.addresource_inf(infid, str(radl), auth_data)
                         if not response.ok:
@@ -1212,6 +1216,9 @@ def create_app(oidc_blueprint=None):
                         flash("%d nodes added successfully" % num, 'success')
                     except Exception as ex:
                         flash("Error adding nodes: \n%s\n%s" % (ex, response.text), 'error')
+
+                if total_dep == 0:
+                    flash("No nodes added (0 nodes set)", 'warning')
 
                 return redirect(url_for('showinfrastructures'))
             else:

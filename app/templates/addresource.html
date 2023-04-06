@@ -1,29 +1,5 @@
-{% extends "base.html" %}
-{% block title %}Add Resouces{% endblock %}
-{% block content %}
-
-<div class="container">
-
-    <br>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-          <div class="row">
-            <div class="col-md-9">
-              <!-- Title -->
-              <h4 class="font-weight-bold text-primary">Add nodes to Inf: {{infid}}</h4>
-            </div>
-            <div class="col-md-3 text-right">
-              <!-- Button -->
-              <button type=button class="btn btn-small btn-outline-secondary" onclick="history.back()"><span class="fas fa-arrow-left mr-2"></span> Back</button>
-            </div>
-          </div> <!-- / .row -->
-        </div>
-
-        <div class="card-body">
 
     <div class="table-responsive">
-        <form id="addNodes" action="{{ url_for('addresources', infid=infid) }}" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <table id="tableSystems" class="table table-bordered table-striped" width="100%" cellspacing="0">
             <thead>
@@ -73,12 +49,8 @@
                 </tr>
             </tbody>
         </table>
-        <button type="submit" class="btn btn-success submitBtn">Submit</button>
-        </form>
     </div>
-    </div>
-    </div>
-</div>
+
 <script>
 $(document).ready(function () {
     $("#addNodes").submit(function () {
@@ -90,5 +62,3 @@ $(document).ready(function () {
     });
 });
 </script>
-
-{% endblock %}

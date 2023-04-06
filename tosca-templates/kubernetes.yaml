@@ -16,16 +16,12 @@ metadata:
     - daskhub.yaml
     - kubeflow.yaml
     - kafka.yaml
+    - k8s_new_wn_type.yaml
 
 description: TOSCA template for launching a Kubernetes Virtual Cluster.
 
 topology_template:
   inputs:
-    wn_num:
-      type: integer
-      description: Number of WNs in the cluster
-      default: 1
-      required: yes
     fe_cpus:
       type: integer
       description: Number of CPUs for the front-end node
@@ -44,6 +40,28 @@ topology_template:
       type: string
       description: Flavor name of the front-end node
       default: ""
+    disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the FE instance
+      default: 10 GB
+      constraints:
+      - valid_values: [ 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    volume_id:
+      type: string
+      description: "Or URL of the disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
+      default: ""
+    fe_kube_nvidia_support:
+      type: boolean
+      description: Flag to add NVIDIA support in the FE (must be set if any WN has GPU)
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
+
+    wn_num:
+      type: integer
+      description: Number of WNs in the cluster
+      default: 1
+      required: yes
     wn_cpus:
       type: integer
       description: Number of CPUs for the WNs
@@ -58,19 +76,25 @@ topology_template:
       required: yes
       constraints:
       - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+    wn_num_gpus:
+      type: integer
+      description: Number of GPUs to assing to this VM
+      default: 0
+      constraints:
+      - valid_values: [ 0, 1, 2, 3, 4 ]
+    wn_gpu_vendor:
+      type: string
+      description: GPU Vendor
+      default: ''
+      constraints:
+      - valid_values: [ '', 'NVIDIA', 'AMD' ]
+    wn_gpu_model:
+      type: string
+      description: GPU Model
+      default: ''
     wn_instance_type:
       type: string
       description: Flavor name for the WNs
-      default: ""
-    disk_size:
-      type: scalar-unit.size
-      description: Size of the disk to be attached to the FE instance
-      default: 10 GB
-      constraints:
-      - valid_values: [ 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
-    volume_id:
-      type: string
-      description: "Or URL of the disk to be attached to the instance (format: ost://api.cloud.ifca.es/<vol_id>"
       default: ""
     wn_disk_size:
       type: scalar-unit.size
@@ -78,6 +102,12 @@ topology_template:
       default: 0 GB
       constraints:
       - valid_values: [ 0 GB, 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    wn_kube_nvidia_support:
+      type: boolean
+      description: Flag to add NVIDIA support in the WN
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
 
     admin_token:
       type: string
@@ -92,15 +122,9 @@ topology_template:
     cri_runtime:
       type: string
       description: CRI Runtime to use with Kubernetes
-      default: "docker"
+      default: "containerd"
       constraints:
-      - valid_values: [ docker, containerd ]
-    kube_nvidia_support:
-      type: boolean
-      description: Flag to add NVIDIA support
-      default: false
-      constraints:
-      - valid_values: [ false, true ]
+      - valid_values: [ containerd, docker ]
     kube_cert_manager:
       type: boolean
       description: Flag to install Cert-Manager
@@ -111,6 +135,11 @@ topology_template:
       type: string
       description: Email to be used in the Let's Encrypt issuer
       default: "jhondoe@server.com"
+    kube_public_dns_name:
+      type: string
+      description: DNS name of the public interface of the FE node to generate the certificate
+      default: ""
+      required: yes
 
     allowed_cidr:
       type: string
@@ -143,9 +172,10 @@ topology_template:
         admin_token: { get_input: admin_token }
         install_kubeapps: false
         version: { get_input: kube_version }
-        nvidia_support: { get_input: kube_nvidia_support }
+        nvidia_support: { get_input: fe_kube_nvidia_support }
         cert_manager: { get_input: kube_cert_manager }
         cert_user_email: { get_input: kube_cert_user_email }
+        public_dns_name: { get_input: kube_public_dns_name}
         cri_runtime: { get_input: cri_runtime }
       requirements:
         - host: front
@@ -185,7 +215,7 @@ topology_template:
       properties:
         front_end_ip: { get_attribute: [ front, private_address, 0 ] }
         version: { get_input: kube_version }
-        nvidia_support: { get_input: kube_nvidia_support }
+        nvidia_support: { get_input: wn_kube_nvidia_support }
         cri_runtime: { get_input: cri_runtime }
       requirements:
         - host: wn
@@ -200,6 +230,9 @@ topology_template:
           properties:
             num_cpus: { get_input: wn_cpus }
             mem_size: { get_input: wn_mem }
+            num_gpus: { get_input: wn_num_gpus }
+            gpu_vendor: { get_input: wn_gpu_vendor }
+            gpu_model: { get_input: wn_gpu_model }
             instance_type: { get_input: wn_instance_type }
         os:
           properties:
@@ -221,6 +254,8 @@ topology_template:
   outputs:
     dashboard_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/dashboard/' ] }
+    dashboard_dns_endpoint:
+      value: { concat: [ 'https://', get_input: kube_public_dns_name, '/dashboard/' ] }
     api_endpoint:
       value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':6443' ] }
     kubeconfig:

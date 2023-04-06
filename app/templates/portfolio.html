@@ -40,8 +40,24 @@
 
   <div class="card-deck">
 
+<!-- Not very pretty code to hide templates VO based -->
+ {% set vars = {'template_count': 0, 'enabled_vos': True} %}
  {% for tosca_filename, tosca in templates.items() %}
-    {% if loop.index % 3 == 1 %}
+    {% if vars.update({'enabled_vos': True}) %} {% endif %}
+    {% if tosca['metadata']['vos'] is defined %}
+      {% if vars.update({'enabled_vos': False}) %} {% endif %}
+      {% for uvo in session["vos"] %}
+        {% for tvo in tosca['metadata']['vos']  %}
+          {% if uvo == tvo %}
+            {% if vars.update({'enabled_vos': True}) %} {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+      {% endif %}
+    {% if vars['enabled_vos'] %}
+
+    {% if vars.update({'template_count': vars['template_count'] + 1}) %} {% endif %}
+    {% if vars['template_count'] % 3 == 1 %}
     <div class="card-group">
     {% endif %}
 
@@ -72,24 +88,25 @@
 		  <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
 		</h5>
                 <p id="toscaDescription" class="card-text tosca-descr"><small>{{tosca['description']}}</small></p>
-                <a selector="toscaDescription" class="text-left badge badge-pill badge-info read_more" tabindex="0" data-toggle="popover" title="Full description" data-trigger="focus" data-content="{{tosca['description']}}">Read More</a>
+                <a selector="toscaDescription" class="text-left badge badge-pill badge-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-trigger="focus" data-content="{{tosca['description']}}">Read More</a>
                 {% if parent %}
                 <a href="#" onclick="AddChild(this, '{{tosca_filename}}')" class="badge badge-pill badge-primary"><span class='fas fa-plus mr-2'></span>Add</a>
                 {% elif 'link' in tosca['metadata'] %}
-                <a href="{{ url_for('configure', selected_tosca=tosca['metadata']['link']['parent'], childs=tosca['metadata']['link']['childs']) }}" class="badge badge-pill badge-primary">Configure</a>
+                <a href="{{ url_for('configure', selected_tosca=tosca['metadata']['link']['parent'], childs=tosca['metadata']['link']['childs']|join(',')) }}" class="badge badge-pill badge-primary">Configure</a>
                 {% else %}
                 <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge badge-pill badge-primary">Configure</a>
                 {% endif %}
             </div>
         </div>
-    {% if loop.index % 3 == 0 %}
+    {% if vars['template_count'] % 3 == 0 %}
     </div>
+    {% endif %}
     {% endif %}
     {% endfor %}
-    {% if templates|count % 3 != 0 %}
+    {% if vars['template_count'] % 3 != 0 %}
     </div>
     {% endif %}
-
+    
 
   </div>
   {% if parent %}
@@ -103,7 +120,7 @@
 
 <script>
 $(document).ready(function(){
-  $('[data-toggle="popover"]').popover();
+  $('[data-bs-toggle="popover"]').popover();
 });
 </script>
 
@@ -160,22 +177,19 @@ $(".tosca-descr").dotdotdot({
 }
 
 .card-img-overlay {
-  //background-color: #3374FF;
   background-color: #0C42B3;
   color: white;
-  //font-family: 'Abel', sans-serif;
-  //font-family: 'Roboto Condensed', sans-serif;
   opacity: 0.90;
 }
 
 
 .popover {
-    border: 2px solid #5BC0DE;
+    border: 2px solid #669FCC;
 }
 
 
 .popover-header {
-    background-color: #5BC0DE;
+    background-color: #669FCC;
     color: #FFFFFF;
     margin: 2;
     //font-size: 22px;

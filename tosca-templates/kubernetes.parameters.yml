@@ -1,33 +1,49 @@
 inputs:
-    wn_num:
-      tab: HW Data
 
     fe_cpus:
-      tab: HW Data
+      tab: FE Features
 
     fe_mem:
-      tab: HW Data
+      tab: FE Features
 
     fe_instance_type:
-      tab: HW Data
-
-    wn_cpus:
-      tab: HW Data
-
-    wn_mem:
-      tab: HW Data
-
-    wn_instance_type:
-      tab: HW Data
+      tab: FE Features
 
     disk_size:
-      tab: HW Data
+      tab: FE Features
 
     volume_id:
-      tab: HW Data
+      tab: FE Features
+
+    fe_kube_nvidia_support:
+      tab: FE Features
+
+    wn_num:
+      tab: WNs Features
+  
+    wn_cpus:
+      tab: WNs Features
+
+    wn_mem:
+      tab: WNs Features
+
+    wn_num_gpus:
+      tab: WNs Features
+  
+    wn_gpu_vendor:
+      tab: WNs Features
+
+    wn_gpu_model:
+      tab: WNs Features
+
+    wn_instance_type:
+      tab: WNs Features
 
     wn_disk_size:
-      tab: HW Data
+      tab: WNs Features
+
+    wn_kube_nvidia_support:
+      tab: WNs Features
 
     admin_token:
       tab: Kubernetes Data
@@ -38,15 +54,16 @@ inputs:
     cri_runtime:
       tab: Kubernetes Data
 
-    kube_nvidia_support:
-      tab: Kubernetes Data
-
     kube_cert_manager:
       tab: Kubernetes Data
 
     kube_cert_user_email:
       tab: Kubernetes Data
 
+    kube_public_dns_name:
+      tab: Kubernetes Data
+
 tabs:
-  - HW Data
+  - FE Features
+  - WNs Features
   - Kubernetes Data

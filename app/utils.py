@@ -807,7 +807,7 @@ def discover_oidc_urls(base_url):
     url = "%s/.well-known/openid-configuration" % base_url
     res = {}
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         if response.ok:
             data = response.json()
             for elem in ["authorization_endpoint", "token_endpoint", "introspection_endpoint", "userinfo_endpoint"]:
@@ -815,3 +815,10 @@ def discover_oidc_urls(base_url):
     except Exception:
         return res
     return res
+
+
+def valid_template_vos(user_vos, template_metadata):
+    if 'vos' in template_metadata:
+        return [vo for vo in user_vos if vo in template_metadata['vos']]
+    else:
+        return ['all']

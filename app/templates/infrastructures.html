@@ -28,14 +28,18 @@
       var delete_vms = '';
       $.each( data["vm_states"], function( vmId, vmState ) {
         var tooltip = getSpanFromState(vmState) + vmState + '</span>';
-        vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-toggle="tooltip" data-placement="top" data-html="true" title="' + tooltip + '">';
+        vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' + tooltip + '">';
         vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
         delete_vms += '<a class="btn btn-outline-secondary btn-sm" href="#" role="button" onclick="addVMtoDel(this,\'' + infid + '\',\'' + vmId + '\')">';
         delete_vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
       });
       $('#' + infid + '_vms').html(vms);
       $('#deletevms_' + infid + '_body').html(delete_vms);
-      $('[data-toggle="tooltip"]').tooltip();
+
+      // Enable tooltips 
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
       if (data["state"] == "stopped") {
         $('#stop_' + infid + '_a').hide()
         $('#start_' + infid + '_a').show()
@@ -191,16 +195,16 @@
                     </td>
 
                     <td>
-                      <div class="btn-group">
+                      <div class="btn-group dropstart">
                         <!-- DELETE -->
                         <a id="main_button_{{infId}}" type="button" class="text-white btn btn-primary btn-sm" href="{{ url_for('inflog', infid=infId) }}">
                           <span class="fas fa-file-alt mr-2"></span>Log
                         </a>
-                        <button id="toggle_button_{{infId}}" type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+                        <button id="toggle_button_{{infId}}" type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu">
-                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="{{ url_for('addresources', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
+                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#addresources_{{infId}}').modal('show');"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
                           <a id="deletevms_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#deletevms_{{infId}}').modal('show');"><span class="fas fa-minus mr-2 grey-text"></span>Remove nodes</a>
                           <a id="template_{{infId}}_a" class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
                           <a id="log_{{infId}}_a" class="dropdown-item" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
@@ -220,15 +224,15 @@
                 <div class="modal fade" id="delete_confirm_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="delete_confirm_label_{{infId}}">Confirm Infrastructure deletion</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
                         Do you really want to DELETE the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                         <form id="deleteInfra" action="{{ url_for('manage_inf', infid=infId, op='delete') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteBtn" role="button">Delete</button>
@@ -244,15 +248,15 @@
                 <div class="modal fade" id="reconfigure_confirm_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="reconfigure_confirm_label_{{infId}}">Confirm Infrastructure reconfiguration</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
                         Do you really want to reconfigure the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary reconfCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary reconfCancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                         <form id="reconfInfra" action="{{ url_for('manage_inf', infid=infId, op='reconfigure') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success reconfigureBtn" role="button">Reconfigure</button>
@@ -265,15 +269,15 @@
                 <div class="modal fade" id="stop_confirm_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="stop_confirm_label_{{infId}}">Confirm Infrastructure stop</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
                         Do you really want to stop the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary stopCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary stopCancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                         <form id="stopInfra" action="{{ url_for('manage_inf', infid=infId, op='stop') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-warning StopBtn" role="button">Stop</button>
@@ -286,15 +290,15 @@
                 <div class="modal fade" id="start_confirm_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="start_confirm_label_{{infId}}">Confirm Infrastructure start</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
                         Do you really want to start the Infrastructure "{{infInfo["name"]}}"  with ID: {{infId}}?
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary startCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary startCancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                         <form id="startInfra" action="{{ url_for('manage_inf', infid=infId, op='start') }}" method="post">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success StartBtn" role="button">Start</button>
@@ -307,14 +311,14 @@
                 <div class="modal fade" id="outputs_{{infId}}">
                   <div class="modal-dialog modal-lg">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="outputs_label_{{infId}}">Outputs</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
-                      <div class="modal-body">
+                      <div class="modal-body text-center">
                       </div>
                       <div class="modal-footer">
-                        <a class="text-white btn btn-primary outputsCancelBtn" role="button" data-dismiss="modal">Close</a>
+                        <a class="text-white btn btn-primary outputsCancelBtn" role="button" data-bs-dismiss="modal">Close</a>
                       </div>
                     </div>
                   </div>
@@ -323,16 +327,16 @@
                 <div class="modal fade" id="edit_dest_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="edit_dest_label_{{infId}}">Set Infrastructure Name</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
                         <form action="{{ url_for('manage_inf', infid=infId, op='descr') }}" method="post">
                           Name: <input type="text" name="description" value="{{ infInfo['name'] }}"/>
                       </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary updateCancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary updateCancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success UpdateBtn" role="button">Update</button>
                         </form>
@@ -345,18 +349,39 @@
                 <div class="modal fade" id="deletevms_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="delete_vms_label_{{infId}}">Select VMs to delete</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body text-center" id="deletevms_{{infId}}_body">
                       </div>
                       <div class="modal-footer">
                         <form id="deleteVmsInfra" action="{{ url_for('manage_inf', infid=infId, op='removeresources') }}" method="post" onsubmit="validateVMIDs(this)">
                           <input type="hidden" name="vm_list" id="vm_list_{{infId}}" />
-                        <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteVMsBtn" role="button">Delete</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Modal Add VMs -->
+                <div class="modal fade" id="addresources_{{infId}}" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title" id="addresources__label_{{infId}}">Add Nodes</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body text-center" id="addresources_{{infId}}_body">
+                      </div>
+                      <div class="modal-footer">
+                        <form id="addNodes" action="{{ url_for('addresources', infid=infId) }}" method="post">
+                        <a class="btn btn-secondary cancelAddVMsBtn" role="button" data-bs-dismiss="modal">Cancel</a>
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-primary addVMsBtn" role="button">Add</button>
                         </form>
                       </div>
                     </div>
@@ -367,9 +392,9 @@
                 <div class="modal fade" id="change_auth_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                      <div class="modal-header">
+                      <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="change_auth_label_{{infId}}">Change/Add Owner</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
                         <div class="modal-body" id="owners_list">
@@ -388,7 +413,7 @@
                             </div>
                           </div>
                       <div class="modal-footer">
-                        <a class="btn btn-primary cancelChangeUserBtn" role="button" data-dismiss="modal">Cancel</a>
+                        <a class="btn btn-secondary cancelChangeUserBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success ChangeUserBtn" role="button">Add</button>
                           <input type="checkbox" name="overwrite" value="1" onclick="showOverwriteMessage(this);"> Overwrite
@@ -413,14 +438,21 @@
                   $(document).ready(function () {
                     $('#outputs_{{infId}}').on('show.bs.modal', function (event) {
                       var modal = $(this)
-                      modal.find('.modal-body').html('Loading...').load("{{ url_for('infoutputs', infid=infId) }}");
+                      modal.find('.modal-body').html('Loading <span class="spinner-border spinner-border-sm"></span>').load("{{ url_for('infoutputs', infid=infId) }}");
                     });
                   });
 
                   $(document).ready(function () {
                     $('#change_auth_{{infId}}').on('show.bs.modal', function (event) {
                       var modal = $(this)
-                      modal.find('#owners_list').html('Loading...').load("{{ url_for('getowners', infid=infId) }}");
+                      modal.find('#owners_list').html('Loading <span class="spinner-border spinner-border-sm"></span>').load("{{ url_for('getowners', infid=infId) }}");
+                    });
+                  });
+
+                  $(document).ready(function () {
+                    $('#addresources_{{infId}}').on('show.bs.modal', function (event) {
+                      var modal = $(this)
+                      modal.find('.modal-body').html('Loading <span class="spinner-border spinner-border-sm"></span>').load("{{ url_for('addresources', infid=infId) }}");
                     });
                   });
                 </script>
@@ -436,11 +468,8 @@
 
 <style>
 .modal-header {
-  background-color: #3374FF;
   margin: 2px;
-  color: white;
   padding:9px 15px;
-
 }
 
 .nav-tabs .nav-link:not(.active) {
@@ -526,6 +555,17 @@ $(document).ready(function () {
       $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...` );
   });
 });
+
+$(document).ready(function () {
+  $(".addVMsBtn").click(function () {
+      // add spinner to button
+      $(this).parent().find(".cancelAddVMsBtn").addClass("disabled", true);
+      $(this).addClass("disabled", true);
+      $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...` );
+  });
+});
+
+
 </script>
 
 <script>
