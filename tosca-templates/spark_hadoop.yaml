@@ -4,8 +4,8 @@ imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
 metadata:
-  name: Spack
-  display_name: Add Sparck to the Hadoop Virtual Cluster
+  name: Spark
+  display_name: Add Spark to the Hadoop Virtual Cluster
   icon: images/hadoop_spark.png
   parents:
    - hadoop_cluster.yaml
