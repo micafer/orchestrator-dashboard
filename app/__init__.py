@@ -737,6 +737,12 @@ def create_app(oidc_blueprint=None):
             creds = []
         utils.get_project_ids(creds)
 
+        # Enable to get input values from URL parameters
+        for input_name, input_value in selected_template["inputs"].items():
+            value = request.args.get(input_name, None)
+            if value:
+                inputs[input_name] = value
+
         return render_template('createdep.html',
                                template=selected_template,
                                selectedTemplate=selected_tosca,
