@@ -165,11 +165,6 @@ def create_app(oidc_blueprint=None):
 
     @app.route('/')
     def home():
-        # if there are any next url, redirect to it
-        if "next" in session and session["next"]:
-            next_url = session.pop("next")
-            return redirect(next_url)
-
         template_filter = None
         if 'filter' in request.args:
             template_filter = request.args['filter']
@@ -244,7 +239,12 @@ def create_app(oidc_blueprint=None):
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
 
-        return render_template('portfolio.html', templates=templates, parent=None)
+        # if there are any next url, redirect to it
+        if "next" in session and session["next"]:
+            next_url = session.pop("next")
+            return redirect(url_for('home') + next_url[1:])
+        else:
+            return render_template('portfolio.html', templates=templates, parent=None)
 
     @app.route('/vminfo')
     @authorized_with_valid_token
