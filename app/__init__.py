@@ -741,7 +741,12 @@ def create_app(oidc_blueprint=None):
         for input_name, input_value in selected_template["inputs"].items():
             value = request.args.get(input_name, None)
             if value:
-                inputs[input_name] = value
+                if input_value['type'] == 'integer':
+                    inputs[input_name] = int(value)
+                elif input_value['type'] == 'float':
+                    inputs[input_name] = float(value)
+                else:
+                    inputs[input_name] = value
 
         return render_template('createdep.html',
                                template=selected_template,
