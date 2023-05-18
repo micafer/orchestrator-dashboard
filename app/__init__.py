@@ -128,14 +128,14 @@ def create_app(oidc_blueprint=None):
             else:
                 try:
                     if not oidc_blueprint.session.authorized or 'username' not in session:
-                        return logout()
+                        return logout(next_url=request.full_path)
 
                     if oidc_blueprint.session.token['expires_in'] < 20:
                         app.logger.debug("Force refresh token")
                         oidc_blueprint.session.get(settings.oidcUserInfoPath)
                 except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
                     flash("Token expired.", 'warning')
-                    return logout()
+                    return logout(next_url=request.full_path)
 
             return f(*args, **kwargs)
 
@@ -159,10 +159,17 @@ def create_app(oidc_blueprint=None):
         session.clear()
         if template_filter:
             session["filter"] = template_filter
+        if 'next_url' in request.args:
+            session["next"] = request.args.get("next_url")
         return render_template('home.html', oidc_name=settings.oidcName, oidc_image=settings.oidcImage)
 
     @app.route('/')
     def home():
+        # if there are any next url, redirect to it
+        if "next" in session and session["next"]:
+            next_url = session.pop("next")
+            return redirect(next_url)
+
         template_filter = None
         if 'filter' in request.args:
             template_filter = request.args['filter']
@@ -1419,13 +1426,13 @@ def create_app(oidc_blueprint=None):
             return redirect(url_for('manage_creds'))
 
     @app.route('/logout')
-    def logout():
+    def logout(next_url=None):
         session.clear()
         try:
             oidc_blueprint.session.get("/logout")
         except Exception as ex:
             app.logger.warn("Error in OIDC logout: %s" % ex)
-        return redirect(url_for('login'))
+        return redirect(url_for('login', next_url=next_url))
 
     @app.errorhandler(403)
     def forbidden(error):
