@@ -13,30 +13,30 @@
   <!-- BS4-->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
   <!-- FontAwesome-->
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
-    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css"
+    integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
   <!-- Cookie Consent -->
   <script src="{{ url_for('static', filename='js/cookieconsent-4.0.1.min.js') }}"></script>
 {% if home is not defined %}
   <!-- General Bootstrap JS -->
-  <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery-3.6.4.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
   <!-- DataTables -->
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dataTables.bootstrap4.min.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/responsive.bootstrap4.min.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scroller.bootstrap4.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dataTables.bootstrap5.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/responsive.bootstrap5.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scroller.bootstrap5.min.css') }}" />
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.bootstrap4.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.bootstrap5.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.responsive.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/responsive.bootstrap4.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/responsive.bootstrap5.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.scroller.min.js') }}"></script>
   <!-- Select2 -->
   <link href="{{ url_for('static', filename='css/select2.min.css') }}" rel="stylesheet">
   <script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
   <!-- Toggle -->
-  <link href="{{ url_for('static', filename='css/bootstrap4-toggle.min.css') }}" rel="stylesheet">
-  <script src="{{ url_for('static', filename='js/bootstrap4-toggle.min.js') }}"></script>
+  <link href="{{ url_for('static', filename='css/bootstrap5-toggle.min.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='js/bootstrap5-toggle.jquery.min.js') }}"></script>
   <!-- Latest compiled and minified JavaScript -->
   <script src="{{ url_for('static', filename='js/bootstrap-show-password.min.js') }}"></script>
 {% endif %}
@@ -131,14 +131,14 @@
           <li class="nav-item active"><a class="nav-link"
               href="{{ url_for("showinfrastructures") }}">Infrastructures</a></li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Advanced</a>
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Advanced</a>
             <div class="dropdown-menu">
               <a class="dropdown-item" href="{{ url_for("show_settings") }}">Settings</a>
             </div>
           </li>
           {% if session["external_links"]|length > 0 %}
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">External Links</a>
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">External Links</a>
             <div class="dropdown-menu">
               {% for link in session["external_links"] %}
               <a class="dropdown-item" href="{{ link.url }}" target="blank">{{link.menu_item_name}}</a>
@@ -151,7 +151,7 @@
         {% if session['username'] %}
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
               <img class="rounded-circle" src="{{ session['gravatar'] }}" </src>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ session['username'] }}<span class="caret"></span>
             </a>
