@@ -1,0 +1,9 @@
+inputs:
+    airflow_admin_password:
+      tab: Airflow Data
+
+    airflow_webserver_secret_key:
+      tab: Airflow Data
+
+tabs:
+  - Airflow Data
