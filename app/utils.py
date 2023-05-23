@@ -157,14 +157,14 @@ def getCachedSiteList(force=False):
 def getIMUserAuthData(access_token, cred, userid):
     if g.settings.im_auth == "Bearer":
         return "Bearer %s" % access_token
-    res = "type = InfrastructureManager; token = %s" % access_token
+    res = "type = InfrastructureManager; token = '%s'" % access_token
     for cred in cred.get_creds(userid):
         if cred['enabled']:
             if cred['type'] == "InfrastructureManager":
                 res += "\\nid = %s" % cred['id']
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
-                        res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
+                        res += "; %s = '%s'" % (key, value.replace('\n', '\\\\n'))
     return res
 
 
@@ -210,7 +210,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
             elif cred['type'] != "fedcloud":
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
-                        res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
+                        res += "; %s = '%s'" % (key, value.replace('\n', '\\\\n'))
             else:
                 res += "; type = OpenStack;"
                 res += " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
