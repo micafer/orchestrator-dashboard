@@ -51,8 +51,8 @@ class TestUtils(unittest.TestCase):
             flask_context.g.settings = MagicMock()
             flask_context.g.settings.im_auth = ""
             res = utils.getUserAuthData("token", cred, "user")
-            self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = one; type = OpenNebula;"
-                                    " username = user; password = pass\\n"
+            self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = one; type = 'OpenNebula';"
+                                    " username = 'user'; password = 'pass'\\n"
                                     "id = fed; type = OpenStack; username = egi.eu;"
                                     " tenant = oidc; auth_version = 3.x_oidc_access_token; host ="
                                     " https://api.cloud.ifca.es:5000; password = 'token'; vo = vo_name;"
