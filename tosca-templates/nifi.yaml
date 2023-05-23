@@ -5,12 +5,12 @@ imports:
 
 metadata:
   name: Nifi
-  display_name: Launch an nifi on top of a Kubernetes Virtual Cluster
+  display_name: Launch Apache NiFi on top of a Kubernetes Virtual Cluster
   icon: images/nifi.png
   parents:
    - kubernetes.yaml
 
-description: TOSCA template for launching an Nifi on top of a Kubernetes Virtual Cluster.
+description: TOSCA template for deploying Apache NiFi on top of a Kubernetes Virtual Cluster.
 
 topology_template:
   inputs:
