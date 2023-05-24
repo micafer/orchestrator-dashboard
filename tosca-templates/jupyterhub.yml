@@ -8,14 +8,31 @@ description: Launch JupyterHub on top of a Kubernetes Virtual Cluster.
 
 metadata:
   name: JupyterHub
-  display_name: Add a set of users
+  display_name: Launch JupyterHub on top of a Kubernetes Virtual Cluster
   icon: images/jupyterhub.png
-  tag: SW
-  tag_color: blue
   parents:
     - kubernetes.yaml
 
 topology_template:
+
+  inputs:
+
+    auth_class:
+      type: string
+      description: Athenticator class
+      default: dummy
+      constraints:
+      - valid_values: [ "dummy", "nativeauthenticator.NativeAuthenticator" ]
+
+    dummy_password:
+      type: string
+      description: Password used to authenticate in case of using the dummy authenticator
+      default: not_very_secret_pass
+
+    admin_user:
+      type: string
+      description: Username of the Administrator user
+      default: admin
 
   node_templates:
 
@@ -26,8 +43,14 @@ topology_template:
           configure:
             implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/jupyter/jupyterhub_k8s.yml
             inputs:
-              jup_auth_class: dummy
+              authenticator_class: { get_input: [ auth_class ] }
+              dummy_pass: { get_input: [ dummy_password ] }
+              admin_user: { get_input: [ admin_user ] }
       requirements:
         - host: front
         - dependency: lrms_front_end
+
+  outputs:
+    jupyterhub_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], '/jupyterhub/' ] }
 
