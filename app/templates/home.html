@@ -25,12 +25,16 @@ hr.style-seven:before { /* Not really supposed to work, but does */
 </style>
 
 <div class = "jumbotron jumbotron-fluid">
-  <div class="container">
+  <div class="bg-light-grey">
     {% include 'flashed_messages.html' %}
-    <div class="row p-5 ">
-     <div class="col-lg-8">
-     <h1 class="display-4">Infrastructure Manager Dashboard.</p>
-     <p>
+    <div class="row m-5">
+     <div class="d-flex flex-wrap col-lg-8 align-items-center">
+     <p class="ml-5 pl-5 mt-4 display-4 text-primary">
+        Infrastructure Manager Dashboard.
+     <p class="ml-5 pl-5 h3 text-primary">
+        Use cloud orchestrator to deploy and configure complex virtual infrastructures
+     </p>
+     <p class="ml-5 pl-5 mb-4">
         {% if oidc_image %}
         <a href="{{ url_for("oidc.login") }}">
         <img src="{{ oidc_image }}" height="55px">
@@ -41,58 +45,59 @@ hr.style-seven:before { /* Not really supposed to work, but does */
      </p>
      </div>
      <div class="col-lg-4">
-	    <img src="static/images/im-egi-logo.png" width="350px">
+	    <img class="rounded-1 mt-n4 mb-n4" src="static/images/im-egi-logo.png" width="600em">
      </div>
   </div>
 </div>
 
-<section id="about" class="p-4 bg-dark">
-    <div class="container text-light">
+<section id="about" class="p-4">
+    <div class="container text-primary">
         <div class="row">
             <div class="col-lg-3"></div>
             <div class="col-lg-6">
-            <h2 class="section-heading text-center">
+            <h2 class="section-heading text-center mb-4 font-weight-bold">
                 Available Topologies
             </h2>
-            <hr class="style-seven"/>
             </div>
             <div class="col-lg-3"></div>
         </div>
 
 
+        <div class="card-deck">
         <div class="card-group px-5 mx-5">
-            <div class="card p-2 text-center">
+            <div class="card p-4 text-center bg-light-grey border-0 mb-2 rounded" style="border-radius: 1rem !important;">
                 <a href="https://kubernetes.io/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/kubernetes.png') }}" alt="Kubernetes"></a>
             </div>
-            <div class="card p-2 text-center">
+            <div class="card p-4 text-center bg-light-grey border-0 mb-2 rounded" style="border-radius: 1rem !important;">
                 <a href="http://mesos.apache.org/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/mesos.png') }}" alt="Mesos"></a>
             </div>
-            <div class="card p-2 text-center">
+            <div class="card p-4 text-center bg-light-grey border-0 mb-2 rounded" style="border-radius: 1rem !important;">
                 <a href="https://slurm.schedmd.com/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/slurm.png') }}" alt="SLURM"></a>
             </div>
           </div>
     
           <div class="card-group px-5 mx-5">
-            <div class="card p-2 text-center">
-                <a href="https://galaxyproject.org/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/galaxy.png') }}" alt="Galaxy"></a>            </div>
-            <div class="card p-2 text-center">
-                <a href="http://ophidia.cmcc.it/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/ophidia.png') }}" alt="Ophidia"></a>            </div>
-            <div class="card p-2">
-                <p class="text-dark" style="text-align: center; font-size: x-large;">
-                <br/>and more ...
-                </p>
+            <div class="card p-4 text-center bg-light-grey border-0 mb-2 rounded" style="border-radius: 1rem !important;">
+                <a href="https://galaxyproject.org/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/galaxy.png') }}" alt="Galaxy"></a>
+            </div>
+            <div class="card p-4 text-center bg-light-grey border-0 mb-2 rounded" style="border-radius: 1rem !important;">
+                <a href="http://ophidia.cmcc.it/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/ophidia.png') }}" alt="Ophidia"></a>
+            </div>
+            <div class="card p-4 text-center bg-light-grey border-0 mb-2 rounded" style="border-radius: 1rem !important;">
+                <a href="https://oscar.grycap.net/" target="_blank"><img class="img-fluid" src="{{ url_for('static', filename='images/oscar.png') }}" alt="Ophidia"></a>
             </div>
           </div>
+        </div>
 
           <br />
 
         <div class="row">
             <div class="col-lg-3"></div>
             <div class="col-lg-6">
-            <h5 class="text-center">
+            <h5 class="text-center text-secondary">
                 <br/>
                 If you need a new topology please contact us
-                (<a href="mailto:products@grycap.upv.es?subject=[IM Dashboard]" target="_self"><i class="fa fa-envelope"></i></a>)
+                (<a href="mailto:products@grycap.upv.es?subject=[IM Dashboard]" target="_self"><i class="text-secondary fa fa-envelope"></i></a>)
             </h5>
             </div>
             <div class="col-lg-3"></div>
@@ -103,25 +108,29 @@ hr.style-seven:before { /* Not really supposed to work, but does */
 
        <!-- About Section -->
 
-      <section id="about" class="p-4">
+      <section id="about" class="p-4 m-5">
         <div class="container">
+            <h2 class="section-heading text-center mb-4 font-weight-bold text-primary">About</h2>
             <div class="row">
-                <div class="col-lg-3"></div>
-                <div class="col-lg-6">
-                <h2 class="section-heading text-center">About</h2>
-                <hr class="style-seven"/>
-                <h5 class="text-justify">
+                <div class="col-lg-2"></div>
+                <div class="col-lg-4">
+                <h5 class="text-justify text-secondary">
                     The IM Dashboard is designed to enable non advanced users to launch complex virtual infrastructures on top of
                     a wide range of cloud providers (<a href="https://aws.amazon.com/" target="_blank">AWS</a>, <a href="https://cloud.google.com/" target="_blank">
                     Google Cloud</a>, <a href="https://azure.microsoft.com/" target="_blank">Microsoft Azure</a>, <a href="https://www.egi.eu/services/cloud-compute/" target="_blank">EGI Cloud Computing</a>,
                     <a href="https://opennebula.io/" target="_blank">OpenNebula</a>, <a href="https://www.openstack.org/" target="_blank">OpenStack</a>, and more ...).
                     Only with a few clicks the user can deploy the set of available topologies expressed through templates written
                     in <a href="http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html" target="_blank">
-                    TOSCA (Simple Profile in YAML version 1.0)</a>. Then the IM service orchestrates the whole process: deployment of
+                    TOSCA (Simple Profile in YAML version 1.0)</a>.
+                </h5>
+                </div>
+                <div class="col-lg-4">
+                    <h5 class="text-justify text-secondary">
+                    Then the IM service orchestrates the whole process: deployment of
                     cloud resources, configuration, software installation, monitoring and update of the virtual infrastructures.
                     If you want to know how to use it see <a href="https://youtu.be/vmtzGOZxiUg" target="_blank">this video</a>. More
                     information about IM at <a href="https://www.grycap.upv.es/im" target="_blank">IM Webpage</a>
-                </h5>
+                    </h5>
                 </div>
             </div>
 

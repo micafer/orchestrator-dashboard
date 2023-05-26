@@ -61,7 +61,8 @@
     <div class="card-group">
     {% endif %}
 
-        <div class="card mb-4" style="width: 20rem; max-height: 25rem;" id="{{tosca_filename}}">
+        <div class="card mb-4 bg-light-grey border-0 rounded" style="border-radius: 1rem !important;width: 20rem; max-height: 25rem;" id="{{tosca_filename}}">
+
             <div class="card-body">
                 <h5 class="card-title text-center">
 		  <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
