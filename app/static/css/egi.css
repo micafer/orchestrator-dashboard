@@ -165,6 +165,8 @@
 
 .card-img-overlay {
     background-color:#005FAA!important;
+    border: 0;
+    border-radius: 1rem !important;
 }
 
 .selected-addon {
