@@ -204,16 +204,16 @@
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu">
-                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#addresources_{{infId}}').modal('show');"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
-                          <a id="deletevms_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#deletevms_{{infId}}').modal('show');"><span class="fas fa-minus mr-2 grey-text"></span>Remove nodes</a>
-                          <a id="template_{{infId}}_a" class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
-                          <a id="log_{{infId}}_a" class="dropdown-item" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
-                          <a id="outputs_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#outputs_{{infId}}').modal('show');"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
-                          <a id="stop_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#stop_confirm_{{infId}}').modal('show');"><span class="fas fa-pause mr-2 grey-text"></span>Stop</a>
-                          <a id="start_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#start_confirm_{{infId}}').modal('show');"><span class="fas fa-play mr-2 grey-text"></span>Start</a>
-                          <a id="delete_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_confirm_{{infId}}').modal('show');"><span class="fas fa-trash-alt mr-2 grey-text"></span>Delete</a>
-                          <a id="reconfigure_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#reconfigure_confirm_{{infId}}').modal('show');"><span class="fas fa-recycle mr-2 grey-text"></span>Reconfigure</a>
-                          <a id="change_auth_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#change_auth_{{infId}}').modal('show');"><span class="fas fa-users mr-2 grey-text"></span>Change Owner</a>
+                          <a id="addresources_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="#" onclick="$('#addresources_{{infId}}').modal('show');"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
+                          <a id="deletevms_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="#" onclick="$('#deletevms_{{infId}}').modal('show');"><span class="fas fa-minus mr-2 grey-text"></span>Remove nodes</a>
+                          <a id="template_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
+                          <a id="log_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
+                          <a id="outputs_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="#" onclick="$('#outputs_{{infId}}').modal('show');"><span class="fas fa-file-export mr-2 grey-text"></span>Outputs</a>
+                          <a id="stop_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="#" onclick="$('#stop_confirm_{{infId}}').modal('show');"><span class="fas fa-pause mr-2 grey-text"></span>Stop</a>
+                          <a id="start_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="#" onclick="$('#start_confirm_{{infId}}').modal('show');"><span class="fas fa-play mr-2 grey-text"></span>Start</a>
+                          <a id="delete_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="#" onclick="$('#delete_confirm_{{infId}}').modal('show');"><span class="fas fa-trash-alt mr-2 grey-text"></span>Delete</a>
+                          <a id="reconfigure_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="#" onclick="$('#reconfigure_confirm_{{infId}}').modal('show');"><span class="fas fa-recycle mr-2 grey-text"></span>Reconfigure</a>
+                          <a id="change_auth_{{infId}}_a" style="font-size: small;" class="dropdown-item py-0" href="#" onclick="$('#change_auth_{{infId}}').modal('show');"><span class="fas fa-users mr-2 grey-text"></span>Change Owner</a>
                       </div>
                     </td>
                 </tr>
