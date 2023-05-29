@@ -213,10 +213,7 @@ body {
 
 .dropdown-item {
     color:#005FAA!important; 
-    font-size: 18px;
-    line-height: 30px;
-    letter-spacing: .5px;
-    font-weight: 700;
+
 }
 
 .alert-info {
