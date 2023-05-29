@@ -61,8 +61,8 @@
     <div class="card-group">
     {% endif %}
 
-        <div class="card mb-3 bg-light-grey border-0 rounded" style="border-radius: 1rem !important;width: 20rem; max-height: 25rem;" id="{{tosca_filename}}">
-
+        <div class="card mb-3 bg-light-grey rounded card-rounded border-0" id="{{tosca_filename}}">
+        
             <div class="card-body">
                 <h5 class="card-title text-center">
 		  <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
@@ -153,6 +153,21 @@ $(".tosca-descr").dotdotdot({
 
 
 <style>
+
+.card-img-overlay {
+    border: 0;
+    border-radius: 1rem !important;
+}
+
+.card-rounded {
+  border-radius: 1rem!important;
+  width: 20rem;
+  max-height: 25rem;
+}
+
+.bg-light-grey {
+    background-color:#f2f2f2!important;
+}
 
 .selected-addon {
   background-color: rgb(9, 139, 179, 0.5);

@@ -102,10 +102,6 @@
     background-color:#669FCC!important;
 }
 
-.bg-light-grey {
-    background-color:#f2f2f2!important;
-}
-
 .jumbotron {
     background-color:#FFFFFF;
     padding: 0 0;
@@ -165,8 +161,6 @@
 
 .card-img-overlay {
     background-color:#005FAA!important;
-    border: 0;
-    border-radius: 1rem !important;
 }
 
 .selected-addon {
