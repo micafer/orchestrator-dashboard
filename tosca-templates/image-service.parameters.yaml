@@ -1,0 +1,25 @@
+inputs:
+
+  workflow_registry_git:
+    tab: Image Creation Data
+  software_catalog_git:
+    tab: Image Creation Data
+  registry_url:
+    tab: Image Creation Data
+  registry_prefix:
+    tab: Image Creation Data
+  registry_user:
+    tab: Image Creation Data
+  registry_token:
+    tab: Image Creation Data
+  captcha_site_key:
+    tab: Image Creation Data
+  captcha_web_site_key:
+    tab: Image Creation Data
+  dns_name:
+    tab: Image Creation Data
+  enable_https:
+    tab: Image Creation Data
+
+tabs:
+  - Image Creation Data
