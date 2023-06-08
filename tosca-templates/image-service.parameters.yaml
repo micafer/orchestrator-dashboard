@@ -4,6 +4,12 @@ inputs:
     tab: Image Creation Data
   software_catalog_git:
     tab: Image Creation Data
+  user_name:
+    tab: Image Creation Data
+  user_pass:
+    tab: Image Creation Data
+  user_mail:
+    tab: Image Creation Data
   registry_url:
     tab: Image Creation Data
   registry_prefix:

@@ -6,7 +6,7 @@ imports:
 metadata:
   name: eflows4hpc image creation service
   display_name: Launch the flows4hpc image creation service on a VM
-  icon: ''
+  icon: images/eflows4HPCcics.png
   parents:
     - simple-node-disk.yaml
 
@@ -25,6 +25,18 @@ topology_template:
       description: Git repository of the software catalog
       default: "https://github.com/eflows4hpc/software-catalog.git"
       required: yes
+    user_name:
+      type: string
+      description: Create username to access the image creation service
+      default: "admin"
+    user_pass:
+      type: string
+      description: Create password to access the image creation service
+      default: "admin"
+    user_mail:
+      type: string
+      description: Create mail to access the image creation service
+      default: "admin@admin.com"
     registry_url:
       type: string
       description: URL of the container registry
@@ -100,6 +112,9 @@ topology_template:
               REGISTRY_URL: { get_input: registry_url}
               REGISTRY_PREFIX: { get_input: registry_prefix }
               DNS_NAME: { get_input: dns_name }
+              USER_NAME: { get_input: user_name }
+              USER_PASS: { get_input: user_pass }
+              USER_MAIL: { get_input: user_mail }
       requirements:
         - host: simple_node
 
