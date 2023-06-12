@@ -5,7 +5,8 @@
     $('#mount_point').prop('disabled', true);
     $('#path').prop('disabled', true);
     $('#kv_ver').prop('disabled', true);
-    $('#checkbox').prop('checked', false);
+    $('#overwrite').prop('checked', false);
+    $('#egi_vault').prop('disabled', true);
   }
 
   function toggleDisable() {
@@ -13,30 +14,43 @@
     $('#mount_point').prop('disabled', (i, v) => !v);
     $('#path').prop('disabled', (i, v) => !v);
     $('#kv_ver').prop('disabled', (i, v) => !v);
+    $('#egi_vault').prop('disabled', (i, v) => !v);
   }
 
   $(document).ready(function () {
     $("#overwrite").click(function () {
       toggleDisable();
     });
-});
+  });
+
+  $(document).ready(function () {
+    $("#egi_vault").click(function () {
+      $('#url').val("https://vault.services.fedcloud.eu:8200")
+      $('#mount_point').val("/secrets")
+      $('#path').val("users/{{ session['userid'] }}/secrets")
+      $('#kv_ver').val("1")
+    });
+  });
 
 </script>
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
       <div class="row form-group">
         <div class="col">
-          <input type="checkbox" name="overwrite" id="overwrite" value="1"> Use your own Vault instance (disable the default one.).
+          <input type="checkbox" name="overwrite" id="overwrite" value="1"> Use extenal Vault instance (disable internal one.).<br/>
+          <span class="small">
+            Set <a href="https://vault.services.fedcloud.eu:8200/" target="_blank">EGI Secret management service</a> values. <button type="button" class="btn btn-info btn-sm" id="egi_vault" role="button" href="#"><span class="fas fa-gears"></span></button>
+          </span>
         </div>
       </div>
 
       <div class="row form-group">
         <div class="col col-6">
-          <label for="url"><strong>URL </strong><span class="small">(e.g. https://vault.services.fedcloud.eu:8200)</span></label>
+          <label for="url"><strong>URL </strong></label>
           <input placeholder="URL" name="url" class="form-control" type="text" id="url" value="{{ vinfo[0] if vinfo else '' }}" required/>
         </div>
         <div class="col col-4">
-          <label for="mount_point"><strong>Mount point </strong><span class="small">(e.g. /secrets)</span></label>
+          <label for="mount_point"><strong>Mount point </strong></label>
           <input placeholder="Mount point" name="mount_point" class="form-control" type="text" id="mount_point" value="{{ vinfo[1] if vinfo else '' }}" required/>
         </div>
         <div class="col col-2">
@@ -50,7 +64,7 @@
 
       <div class="row form-group">
         <div class="col">
-          <label for="path"><strong>Path </strong><span class="small">(e.g. users/{{ session['userid'] }}/secrets)</span></label>
+          <label for="path"><strong>Path </strong></label>
           <input placeholder="Path" name="path" class="form-control" type="text" id="path" value="{{ vinfo[2] if vinfo else '' }}" required/>
         </div>
       </div>
