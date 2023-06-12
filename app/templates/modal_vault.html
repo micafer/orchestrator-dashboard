@@ -50,7 +50,7 @@
 
       <div class="row form-group">
         <div class="col">
-          <label for="path"><strong>Path </strong><span class="small">(e.g. {{ session['userid'] }}/secrets)</span></label>
+          <label for="path"><strong>Path </strong><span class="small">(e.g. users/{{ session['userid'] }}/secrets)</span></label>
           <input placeholder="Path" name="path" class="form-control" type="text" id="path" value="{{ vinfo[2] if vinfo else '' }}" required/>
         </div>
       </div>
