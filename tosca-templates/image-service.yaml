@@ -1,0 +1,123 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: eflows4hpc image creation service
+  display_name: Launch the flows4hpc image creation service on a VM
+  icon: images/eflows4HPCcics.png
+  parents:
+    - simple-node-disk.yaml
+
+description: TOSCA template for launching the eflows4hpc image creation service on a VM
+
+topology_template:
+
+  inputs:
+    workflow_registry_git:
+      type: string
+      description: Git repository of the workflow registry
+      default: "https://github.com/eflows4hpc/workflow-registry.git"
+      required: yes
+    software_catalog_git:
+      type: string
+      description: Git repository of the software catalog
+      default: "https://github.com/eflows4hpc/software-catalog.git"
+      required: yes
+    user_name:
+      type: string
+      description: Create username to access the image creation service
+      default: "admin"
+    user_pass:
+      type: string
+      description: Create password to access the image creation service
+      default: "admin"
+    user_mail:
+      type: string
+      description: Create mail to access the image creation service
+      default: "admin@admin.com"
+    registry_url:
+      type: string
+      description: URL of the container registry
+      default: "ghcr.io"
+      required: yes
+    registry_prefix:
+      type: string
+      description: Prefix of the container registry
+      default: "ghcr.io/eflows4hpc"
+      required: yes
+    registry_user:
+      type: string
+      description: User to access the container registry
+      default: ""
+      required: yes
+    registry_token:
+      type: string
+      description: Token to access the container registry
+      default: ""
+      required: yes
+    captcha_site_key:
+      type: string
+      description: Captcha site key
+      default: ''
+      required: yes
+    captcha_web_site_key:
+      type: string
+      description: Captcha web site key
+      default: ''
+      required: yes
+    dns_name:
+      type: string
+      description: DNS name of the VM public IP
+      default: ''
+    enable_https:
+      type: boolean
+      description: Flag to enable https (you need to provide a DNS name)
+      default: false
+      constraints:
+      - valid_values: [ false, true ]
+
+
+  node_templates:
+
+    image_service:
+      type: tosca.nodes.ec3.Application
+      artifacts:
+        community_crypto:
+          file: community.crypto
+          type: tosca.artifacts.AnsibleGalaxy.collection
+        docker_role:
+          file: grycap.docker
+          type: tosca.artifacts.AnsibleGalaxy.role
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              https:
+                protocol: tcp
+                source: 443
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/eflows4hpc/image_creation.yaml
+            inputs:
+              HTTPS: { get_input: enable_https }
+              WORKFLOW_REGISTRY_GIT: { get_input: workflow_registry_git }
+              SOFTWARE_CATALOG_GIT: { get_input: software_catalog_git }
+              CAPTCHA_SITE_KEY: { get_input: captcha_site_key }
+              CAPTCHA_WEB_SITE_KEY: { get_input: captcha_web_site_key }
+              REGISTRY_USER: { get_input: registry_user }
+              REGISTRY_TOKEN: { get_input: registry_token }
+              REGISTRY_URL: { get_input: registry_url}
+              REGISTRY_PREFIX: { get_input: registry_prefix }
+              DNS_NAME: { get_input: dns_name }
+              USER_NAME: { get_input: user_name }
+              USER_PASS: { get_input: user_pass }
+              USER_MAIL: { get_input: user_mail }
+      requirements:
+        - host: simple_node
+
+  outputs:
+    image_creation_endpoint:
+      value: { concat: [ 'https://', get_input: [ dns_name ], '/image_creation/' ] }
