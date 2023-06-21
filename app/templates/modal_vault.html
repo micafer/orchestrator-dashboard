@@ -25,7 +25,7 @@
 
   $(document).ready(function () {
     $("#egi_vault").click(function () {
-      $('#url').val("https://vault.services.fedcloud.eu:8200")
+      $('#url').val("https://secrets.egi.eu")
       $('#mount_point').val("/secrets")
       $('#path').val("users/{{ session['userid'] }}/secrets")
       $('#kv_ver').val("1")
