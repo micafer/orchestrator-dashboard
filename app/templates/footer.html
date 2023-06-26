@@ -1,11 +1,11 @@
 <footer class="footer bg-dark">
   <div class="container-fluid">
-    <div class="row my-2">
-	    <div class="col-md-4 my-0 mt-2">© 2020-2023 <a href="https://www.grycap.upv.es/" target="_blank">GRyCAP</a><br>
-	    </div>
-	<div class="col-md-6 my-0">
-	  <p>
-		 <a href="https://www.indigo-datacloud.eu/" target="_blank"><img src="{{ url_for('static', filename='images/indigo_logo.png') }}"/></a>
+    <div class="row my-2 ml-2">
+	    <div class="col-xs-3 mt-2">© 2020-2023 <a href="https://www.grycap.upv.es/" target="_blank">GRyCAP</a>
+	</div>
+	<div class="col-md-7 d-none d-sm-block">
+	  <p class="text-right">
+		 <a href="https://www.indigo-datacloud.eu/" target="_blank"><img height="5px" src="{{ url_for('static', filename='images/indigo_logo.png') }}"/></a>
 		 <a href="https://deep-hybrid-datacloud.eu/" target="_blank"><img src="{{ url_for('static', filename='images/logo_deep.png') }}"/></a>
 		 <a href="https://www.eosc-hub.eu/" target="_blank"><img src="{{ url_for('static', filename='images/eosc-hub_logo.png') }}"/></a>
 		 <a href="https://www.eosc-synergy.eu/" target="_blank"><img src="{{ url_for('static', filename='images/eosc-synergy_logo.png') }}"/></a>
@@ -13,24 +13,24 @@
 		 <a href="https://www.egi.eu/projects/egi-ace/" target="_blank"><img src="{{ url_for('static', filename='images/logo-egi-ace.png') }}"/></a>
 		</p>   
 	</div>
-	<div class="col-md-2 mt-2" style="display:flex;justify-content:space-around;">
+	<div class="col-xs-2 mt-2 ml-auto mr-3 text-right" style="min-width:160px;">
 		<a href="https://github.com/grycap/" target="_blank" alt="Github" title="Github">
-                  <i class="fab fa-github" style="color:white;"></i>
+                  <i class="fab fa-github ml-2" style="color:white;"></i>
 	        </a>
 		<a href="https://hub.docker.com/orgs/grycap" target="_blank" alt="DockerHub" title="DockerHub">
-                  <i class="fab fa-docker" style="color:white;"></i>
+                  <i class="fab fa-docker ml-2" style="color:white;"></i>
 		</a>
 		<a href="https://www.researchgate.net/lab/GRyCAP-Ignacio-Blanquer" target="_blank" alt="ResearchGate" title="ResearchGate">
-                  <i class="fab fa-researchgate" style="color:white;"></i>
+                  <i class="fab fa-researchgate ml-2" style="color:white;"></i>
 		</a>
 		<a href="https://imdocs.readthedocs.io" target="_blank" alt="Documentation" title="Documentation">
-                  <i class="fa fa-book" style="color:white;"></i>
+                  <i class="fa fa-book ml-2" style="color:white;"></i>
 		</a>
 		<a href="{{ url_for('static', filename='terms.html') }}" target="_blank" alt="Terms of Service" title="Terms of Service">
-			<i class="fa fa-file-contract" style="color:white;"></i>
+			<i class="fa fa-file-contract ml-2" style="color:white;"></i>
   		</a>
 		  <a href="{{ url_for('static', filename='privacy.html') }}" target="_blank" alt="Privacy Policy" title="Privacy Policy">
-			<i class="fa fa-user-secret" style="color:white;"></i>
+			<i class="fa fa-user-secret ml-2" style="color:white;"></i>
   		</a>
 	</div>    
     </div>
