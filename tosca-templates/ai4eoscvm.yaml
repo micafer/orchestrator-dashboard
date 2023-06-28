@@ -5,12 +5,12 @@ imports:
 
 metadata:
   name: AI4EOSC DEEPaaS
-  display_name: Launch AI4EOSC DEEPaaS model on a VM
+  display_name: Deploy a DEEPaaS AI model
   icon: images/ai4eosc.png
   parents:
     - simple-node-disk.yaml
 
-description: TOSCA template for launching AI4EOSC DEEPaaS model on a VM
+description: TOSCA template for deploying a DEEPaaS AI model
 
 topology_template:
 
