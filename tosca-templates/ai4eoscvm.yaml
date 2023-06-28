@@ -49,6 +49,6 @@ topology_template:
         - host: simple_node
 
   outputs:
-    nodered_endpoint:
-            value: { concat: [ 'https://', get_attribute: [ simple_node, public_address, 5000 ], '/' ] }
+    ai4eos_model_endpoint:
+      value: { concat: [ 'https://', get_attribute: [ simple_node, public_address, 5000 ], '/' ] }
 
