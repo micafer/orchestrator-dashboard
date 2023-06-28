@@ -1,0 +1,7 @@
+inputs:
+    ai4eosc_model_image:
+      tab: AI4EOSC
+
+tabs:
+  - AI4EOSC
+
