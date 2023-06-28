@@ -1,0 +1,10 @@
+inputs:
+    nodered_admin_username:
+      tab: Node-RED
+
+    nodered_admin_password:
+      tab: Node-RED
+
+tabs:
+  - Node-RED
+
