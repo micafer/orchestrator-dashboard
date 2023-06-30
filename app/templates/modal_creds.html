@@ -99,6 +99,7 @@
               <option name="auth_version" value="">Set Auth Version</option>
               <option name="auth_version" value="3.x_password" {{ "selected" if creds and creds['auth_version'] == "3.x_password" else '' }}>3.x_password</option>
               <option name="auth_version" value="3.x_oidc_access_token" {{ "selected" if creds and creds['auth_version'] == "3.x_oidc_access_token" else '' }}>3.x_oidc_access_token</option>
+              <option name="auth_version" value="3.x_appcred" {{ "selected" if creds and creds['auth_version'] == "3.x_appcred" else '' }}>3.x_appcred</option>
               <option name="auth_version" value="2.0_voms" {{ "selected" if creds and creds['auth_version'] == "2.0_voms" else '' }}>2.0_voms</option>
               <option name="auth_version" value="2.0_password" {{ "selected" if creds and creds['auth_version'] == "2.0_password" else '' }}>2.0_password</option>
           </select>
