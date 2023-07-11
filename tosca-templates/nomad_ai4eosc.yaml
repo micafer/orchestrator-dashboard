@@ -1,0 +1,154 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+ 
+metadata:
+  display_name: Deploy an AI4EOSC Nomad Virtual Cluster
+  icon: images/nomad.png
+
+
+description: TOSCA template for deploying an AI4EOSC Nomad Virtual Cluster.
+
+topology_template:
+  inputs:
+
+    fe_num:
+      type: integer
+      description: Number of Nomad Servers in the cluster.
+      default: 1
+      required: yes
+      constraints:
+      - valid_values: [ 1, 3, 5 ]
+    fe_cpus:
+      type: integer
+      description: Number of CPUs for the front-end node
+      default: 2
+      required: yes
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+    fe_mem:
+      type: scalar-unit.size
+      description: Amount of Memory for the front-end node
+      default: 4 GB
+      required: yes
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+
+    wn_num:
+      type: integer
+      description: Number of Nomad Clients in the cluster
+      default: 1
+      required: yes
+    wn_cpus:
+      type: integer
+      description: Number of CPUs for the WNs
+      default: 2
+      required: yes
+      constraints:
+      - valid_values: [ 2, 4, 8, 16, 32, 64 ]
+    wn_mem:
+      type: scalar-unit.size
+      description: Amount of Memory for the WNs
+      default: 4 GB
+      required: yes
+      constraints:
+      - valid_values: [ 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
+
+
+  node_templates:
+
+    lrms_front_end:
+      type: tosca.nodes.indigo.LRMS.FrontEnd.Nomad
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              port_4646:
+                protocol: tcp
+                source: 4646
+              port_8501:
+                protocol: tcp
+                source: 8501
+      artifacts:
+        nomad_role:
+          file: grycap.nomad,ai4eosc
+          type: tosca.artifacts.AnsibleGalaxy.role
+        consul_role:
+          file: grycap.consul,ai4eosc
+          type: tosca.artifacts.AnsibleGalaxy.role
+      requirements:
+        - host: front
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/lrms/nomad_ai4eosc_fe_install.yml
+            inputs:
+              nomad_server_list: { get_attribute: [ SELF, private_address ] }
+
+    front:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            dns_name: server#N#
+            network_name: PUBLIC
+        host:
+          properties:
+            num_cpus: { get_input: fe_cpus }
+            mem_size: { get_input: fe_mem }
+        os:
+          properties:
+            type: linux
+
+
+    wn_node:
+      type: tosca.nodes.indigo.LRMS.WorkerNode.Nomad
+      requirements:
+        - host: wn
+      artifacts:
+        docker_role:
+          file: grycap.docker
+          type: tosca.artifacts.AnsibleGalaxy.role
+        nomad_role:
+          file: grycap.nomad,ai4eosc
+          type: tosca.artifacts.AnsibleGalaxy.role
+        consul_role:
+          file: grycap.consul,ai4eosc
+          type: tosca.artifacts.AnsibleGalaxy.role
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/lrms/nomad_ai4eosc_wn_install.yml
+            inputs:
+              nomad_server_list: { get_attribute: [ front, private_address ] }
+
+    wn:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        scalable:
+          properties:
+            count: { get_input: wn_num }
+        host:
+          properties:
+            num_cpus: { get_input: wn_cpus }
+            mem_size: { get_input: wn_mem }
+        os:
+          properties:
+            type: linux
+
+  outputs:
+    nomad_ui:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':4646' ] }
+    consul_ui:
+      value: { concat: [ 'https://', get_attribute: [ front, public_address, 0 ], ':8501' ] }
+    nomad_token:
+      value: { get_attribute: [ front, ansible_output, lrms_front_end_front_conf_front, tasks, 'grycap.nomad : nomad_secret_id', output ] }
+    consul_token:
+      value: { get_attribute: [ front, ansible_output, lrms_front_end_front_conf_front, tasks, 'grycap.consul : consul_secret_id', output ] }
+    cluster_ip:
+      value: { get_attribute: [ front, public_address, 0 ] }
+    cluster_creds:
+      value: { get_attribute: [ front, endpoint, credential, 0 ] }
+
+
