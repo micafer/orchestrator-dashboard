@@ -82,13 +82,15 @@ function copyToClipBoard(text) {
   var textarea = document.createElement('textarea');
   textarea.id = 'temp_element';
   textarea.style.height = 0;
-  document.body.appendChild(textarea);
-  textarea.value = text
-  var selector = document.querySelector('#temp_element')
-  selector.select()
-  document.execCommand('copy')
+  var table = document.getElementById("outputs-table");
+  table.appendChild(textarea);
+  textarea.value = text;
+  var selector = document.querySelector('#temp_element');
+  selector.focus();
+  selector.select();
+  document.execCommand('copy');
   // Remove the textarea
-  document.body.removeChild(textarea)
+  table.removeChild(textarea)
 }
 
 document.getElementById("copyBtn").addEventListener("click", function(){
