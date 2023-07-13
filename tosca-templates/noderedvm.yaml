@@ -1,0 +1,61 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: Node-RED
+  display_name: Launch Node-RED on a VM
+  icon: https://github.com/grycap/im-dashboard/raw/devel/app/static/images/nodered.png
+  parents:
+    - simple-node-disk.yaml
+
+description: TOSCA template for launching Node-RED on a VM
+
+topology_template:
+
+  inputs:
+    nodered_admin_username:
+      type: string
+      description: Name of the full admin user
+      default: admin
+      required: yes
+    nodered_admin_password:
+      type: string
+      description: "Password of the full admin user (adminpass). See how to get it https://nodered.org/docs/user-guide/runtime/securing-node-red#generating-the-password-hash"
+      default: "$2b$08$BZqMjl9G.0itJFac/WY3mea/Oq1HCiYO3DGcQ9Uc8pldFdfVN/fvi"
+      required: yes
+
+  node_templates:
+
+    nodered:
+      type: tosca.nodes.ec3.Application
+      artifacts:
+        community_crypto:
+          file: community.crypto
+          type: tosca.artifacts.AnsibleGalaxy.collection
+        docker_role:
+          file: grycap.docker
+          type: tosca.artifacts.AnsibleGalaxy.role
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              https:
+                protocol: tcp
+                source: 443
+      interfaces:
+        Standard:
+          configure:
+            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/nodered_compose.yml
+            inputs:
+              nodered_client_user: { get_input: nodered_admin_username }
+              nodered_client_pass: { get_input: nodered_admin_password }
+              nodered_image: "nodered/node-red"
+      requirements:
+        - host: simple_node
+
+  outputs:
+    nodered_endpoint:
+            value: { concat: [ 'https://', get_attribute: [ simple_node, public_address, 0 ], '/' ] }
+

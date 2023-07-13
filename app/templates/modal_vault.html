@@ -25,7 +25,7 @@
 
   $(document).ready(function () {
     $("#egi_vault").click(function () {
-      $('#url').val("https://vault.services.fedcloud.eu:8200")
+      $('#url').val("https://secrets.egi.eu")
       $('#mount_point').val("/secrets")
       $('#path').val("users/{{ session['userid'] }}/secrets")
       $('#kv_ver').val("1")
@@ -39,7 +39,7 @@
         <div class="col">
           <input type="checkbox" name="overwrite" id="overwrite" value="1"> Use extenal Vault instance (disable internal one.).<br/>
           <span class="small">
-            Set <a href="https://vault.services.fedcloud.eu:8200/" target="_blank">Fedcloud Secret management service</a> values. <button type="button" class="btn btn-info btn-sm" id="egi_vault" role="button" href="#"><span class="fas fa-gears"></span></button>
+            Set <a href="https://secrets.egi.eu/" target="_blank">Fedcloud Secret management service</a> values. <button type="button" class="btn btn-info btn-sm" id="egi_vault" role="button" href="#"><span class="fas fa-gears"></span></button>
           </span>
         </div>
       </div>

@@ -1,0 +1,45 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: MLFlow
+  display_name: Deploy MLFlow on a VM
+  icon: images/mlflow.png
+  parents:
+    - simple-node-disk.yaml
+
+description: TOSCA template for deploying MLFlow on a VM
+
+topology_template:
+
+  node_templates:
+
+    mlflow:
+      type: tosca.nodes.ec3.Application
+      artifacts:
+        community_crypto:
+          file: community.crypto
+          type: tosca.artifacts.AnsibleGalaxy.collection
+        docker_role:
+          file: grycap.docker
+          type: tosca.artifacts.AnsibleGalaxy.role
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              https:
+                protocol: tcp
+                source: 443
+      interfaces:
+        Standard:
+          configure:
+            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/mlflow_compose.yml
+      requirements:
+        - host: simple_node
+
+  outputs:
+    nodered_endpoint:
+            value: { concat: [ 'https://', get_attribute: [ simple_node, public_address, 0 ], '/' ] }
+

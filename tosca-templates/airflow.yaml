@@ -24,6 +24,18 @@ topology_template:
       type: string
       description: Airflow Webserver secret key (python3 -c 'import secrets; print(secrets.token_hex(16))')
       default: 'dcafd3b88f9931cb68b41ec596bb4a24'
+    airflow_dags_repo:
+      type: string
+      description: Airflow DAGs git repository url
+      default: ''
+    airflow_dags_repo_subpath:
+      type: string
+      description: Airflow DAGs git repository subpath
+      default: '' 
+    airflow_dags_branch:
+      type: string
+      description: irflow DAGs git repository branch
+      default: 'master'
 
   node_templates:
 
@@ -37,6 +49,10 @@ topology_template:
         values:
           webserver.defaultUser.password: { get_input: airflow_admin_password }
           webserverSecretKey: { get_input: airflow_webserver_secret_key }
+          dags.gitSync.enabled: "true"
+          dags.gitSync.repo: { get_input: airflow_dags_repo }
+          dags.gitSync.subPath: { get_input: airflow_dags_repo_subpath }
+          dags.gitSync.branch: { get_input: airflow_dags_branch }
       requirements:
         - host: front
         - dependency: lrms_front_end

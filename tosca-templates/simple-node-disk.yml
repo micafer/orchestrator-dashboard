@@ -8,7 +8,7 @@ description: >
   Galaxy, Docker, Add Users and Add SSH Keys addons available.
 
 metadata:
-  display_name: Start a virtual machine with extra HD
+  display_name: Deploy a VM
   icon: images/vm-icon-disk.png
   tag: VM
   order: 1
