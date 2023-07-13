@@ -84,7 +84,7 @@ topology_template:
           configure:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/lrms/nomad_ai4eosc_fe_install.yml
             inputs:
-              nomad_server_list: { get_attribute: [ SELF, private_address ] }
+              nomad_server_list: { get_attribute: [ front, private_address ] }
 
     front:
       type: tosca.nodes.indigo.Compute
