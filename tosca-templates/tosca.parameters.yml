@@ -1,0 +1,7 @@
+inputs:
+    tosca:
+      tab: TOSCA
+      tag_type: textarea
+
+tabs:
+  - TOSCA
