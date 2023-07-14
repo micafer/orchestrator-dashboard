@@ -45,6 +45,7 @@ from radl import radl_parse
 from radl.radl import deploy, description
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect
+from toscaparser.tosca_template import ToscaTemplate
 
 
 def create_app(oidc_blueprint=None):
@@ -999,7 +1000,12 @@ def create_app(oidc_blueprint=None):
 
         # Special case for a TOSCA template provided by the user
         if request.args.get('template') == 'tosca.yml':
-            template = yaml.safe_load(form_data.get('tosca'))
+            try:
+                template = yaml.safe_load(form_data.get('tosca'))
+                ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
+            except Exception as ex:
+                flash("Invalid TOSCA specified: '%s'." % ex, "error")
+                return redirect(url_for('showinfrastructures'))
         else:
             with io.open(settings.toscaDir + request.args.get('template')) as stream:
                 template = yaml.full_load(stream)
