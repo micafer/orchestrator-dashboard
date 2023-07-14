@@ -997,8 +997,12 @@ def create_app(oidc_blueprint=None):
 
         auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id, True)
 
-        with io.open(settings.toscaDir + request.args.get('template')) as stream:
-            template = yaml.full_load(stream)
+        # Special case for a TOSCA template provided by the user
+        if request.args.get('template') == 'tosca.yml':
+            template = yaml.safe_load(form_data.get('tosca'))
+        else:
+            with io.open(settings.toscaDir + request.args.get('template')) as stream:
+                template = yaml.full_load(stream)
 
         for child in childs:
             with io.open(settings.toscaDir + child) as stream:
