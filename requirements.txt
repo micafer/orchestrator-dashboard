@@ -12,3 +12,4 @@ Flask-APScheduler==1.12.4
 Flask-WTF==1.0.1
 hvac==1.0.2
 tosca-parser==2.9.0
+mysqlclient==2.1.1
