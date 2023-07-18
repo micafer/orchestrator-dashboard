@@ -13,7 +13,8 @@
             "vo.eoscfuture-sp.panosc.eu": "c91eeff7bf7845bc901b319512f2ebdb",
             "vo.pangeo.eu": "05e0ff6e03774082aadacc75bfc1d783",
             "training.egi.eu": "eae2aa7f26334104906106bca4b82ae3",
-            "eval.c-scale.eu": "d6283bc95d5c4296abb799596867818c"
+            "eval.c-scale.eu": "d6283bc95d5c4296abb799596867818c",
+	    "vo.enes.org": "786566209a7444f89a561172fa28e117"
         },
         "networks": {
             "cryoem.instruct-eric.eu": {
