@@ -7,6 +7,7 @@ COPY ./tosca-templates /opt/tosca-templates
 
 ENV PYTHONPATH=/app
 
+RUN apk add --no-cache mariadb-dev
 RUN pip3 install --no-cache-dir gunicorn==20.1.0 && pip3 install --no-cache-dir -r /app/requirements.txt
 
 EXPOSE 5001
