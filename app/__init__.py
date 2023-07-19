@@ -108,7 +108,8 @@ def create_app(oidc_blueprint=None):
             token_url=oidc_token_url,
             auto_refresh_url=oidc_token_url,
             authorization_url=oidc_authorization_url,
-            redirect_to='home'
+            redirect_to='home',
+            redirect_url=settings.oidcRedirectUrl
         )
     app.register_blueprint(oidc_blueprint, url_prefix="/login")
 
@@ -829,15 +830,7 @@ def create_app(oidc_blueprint=None):
 
         for node in list(template['topology_template']['node_templates'].values()):
             if node["type"] == "tosca.nodes.indigo.Compute":
-                if "capabilities" not in node:
-                    node["capabilities"] = {}
-                if "os" not in node["capabilities"]:
-                    node["capabilities"]["os"] = {}
-                if "properties" not in node["capabilities"]["os"]:
-                    node["capabilities"]["os"]["properties"] = {}
-                # Only set the image if the image is not already set
-                if not node["capabilities"]["os"]["properties"].get("image"):
-                    node["capabilities"]["os"]["properties"]["image"] = image
+                node["capabilities"]["os"]["properties"]["image"] = image
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
 
