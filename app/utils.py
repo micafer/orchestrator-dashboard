@@ -46,7 +46,11 @@ SITE_LIST = {}
 LAST_UPDATE = 0
 
 
-def _getStaticSitesInfo():
+def _getStaticSitesInfo(force=False):
+    # Remove cache if force is True
+    if force and g.settings.static_sites_url:
+        g.settings.static_sites = None
+
     if g.settings.static_sites:
         return g.settings.static_sites
     elif g.settings.static_sites_url:
@@ -85,9 +89,9 @@ def getCachedProjectIDs(site_id):
     return res
 
 
-def getStaticSites(vo=None):
+def getStaticSites(vo=None, force=False):
     res = {}
-    for site in _getStaticSitesInfo():
+    for site in _getStaticSitesInfo(force=force):
         if vo is None or ("vos" in site and site["vos"] and vo in site["vos"]):
             res[site["name"]] = site
             site["state"] = ""
@@ -149,7 +153,7 @@ def getCachedSiteList(force=False):
         except Exception as ex:
             flash("Error retrieving site list from AppDB: %s" % ex, 'warning')
 
-        SITE_LIST.update(getStaticSites())
+        SITE_LIST.update(getStaticSites(force=force))
 
     return SITE_LIST
 
