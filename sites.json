@@ -42,8 +42,8 @@
                 "public": "public-muni-147-251-21-GROUP"
             },
             "vo.enes.org": {
-                "private": "78-128-250-pers-proj-net",
-                "public": "public-muni-147-251-21-GROUP"
+                "private": "auto_allocated_network",
+                "public": "public-cesnet-78-128-251-GROUP"
             }
         }
     },
