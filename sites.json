@@ -40,6 +40,10 @@
             "in-sar-cubes.c-scale.eu": {
                 "private": "group-project-network",
                 "public": "public-muni-147-251-21-GROUP"
+            },
+            "vo.enes.org": {
+                "private": "group-project-network",
+                "public": "public-muni-147-251-21-GROUP"
             }
         }
     },
