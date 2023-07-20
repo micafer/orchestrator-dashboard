@@ -34,7 +34,7 @@ class Settings:
         self.oidcTokenUrl = config.get('OIDC_TOKEN_URL', self.oidcUrl + "/token")
         self.oidcAuthorizeUrl = config.get('OIDC_AUTHORIZE_URL', self.oidcUrl + "/authorize")
         self.oidcUserInfoPath = config.get('OIDC_USER_INFO_PATH', "/userinfo")
-        self.oidcRedirectUrl = config.get('OIDC_REDIRECT_URL')
+        self.tempSlamUrl = config.get('SLAM_URL') if config.get('SLAM_URL') else ""
         self.external_links = config.get('EXTERNAL_LINKS') if config.get('EXTERNAL_LINKS') else []
         self.oidcGroups = config.get('OIDC_GROUP_MEMBERSHIP')
         self.db_url = config.get('DB_URL')
