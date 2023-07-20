@@ -27,7 +27,7 @@ import logging
 import copy
 from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_dance.consumer import OAuth2ConsumerBlueprint
+from app.oidc import OAuth2WithURIConsumerBlueprint
 from app.settings import Settings
 from app.db_cred import DBCredentials
 from app.vault_cred import VaultCredentials
@@ -99,7 +99,7 @@ def create_app(oidc_blueprint=None):
         oidc_authorization_url = settings.oidcAuthorizeUrl
 
     if not oidc_blueprint:
-        oidc_blueprint = OAuth2ConsumerBlueprint(
+        oidc_blueprint = OAuth2WithURIConsumerBlueprint(
             "oidc", __name__,
             client_id=app.config['OIDC_CLIENT_ID'],
             client_secret=app.config['OIDC_CLIENT_SECRET'],
@@ -108,7 +108,8 @@ def create_app(oidc_blueprint=None):
             token_url=oidc_token_url,
             auto_refresh_url=oidc_token_url,
             authorization_url=oidc_authorization_url,
-            redirect_to='home'
+            redirect_to='home',
+            redirect_uri=settings.oidcRedirectUri
         )
     app.register_blueprint(oidc_blueprint, url_prefix="/login")
 
