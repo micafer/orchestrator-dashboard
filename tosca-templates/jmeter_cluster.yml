@@ -116,6 +116,7 @@ topology_template:
             implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/jmeter/jmeter_wn.yml
             inputs:
               jmeter_version: { get_input: jmeter_version }
+              jmeter_front_end_ip: { get_attribute: [ front, private_address, 0 ] }
 
     wn:
       type: tosca.nodes.indigo.Compute
