@@ -59,6 +59,42 @@ topology_template:
 
   node_templates:
 
+    pub_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: public
+
+    priv_network:
+      type: tosca.nodes.network.Network
+      properties:
+        network_type: private
+
+    server_pub_port:
+      type: tosca.nodes.indigo.network.Port
+      properties:
+        order: 1
+        dns_name: jmeterserverpublic
+      requirements:
+        - binding: front
+        - link: pub_network
+
+    server_port:
+      type: tosca.nodes.indigo.network.Port
+      properties:
+        order: 0
+        dns_name: jmeterserver
+      requirements:
+        - binding: front
+        - link: priv_network
+
+    wn_port:
+      type: tosca.nodes.indigo.network.Port
+      properties:
+        order: 0
+        dns_name: vnode-#N#
+      requirements:
+        - binding: wn
+        - link: priv_network
 
     jmeter_fe:
       type: tosca.nodes.SoftwareComponent
@@ -98,6 +134,7 @@ topology_template:
         os:
           properties:
             type: linux
+            architecture: x86_64
 
     jmeter_wn:
       type: tosca.nodes.SoftwareComponent
@@ -131,7 +168,7 @@ topology_template:
             mem_size: { get_input: wn_mem }
         os:
           properties:
-            distribution: ubuntu
+            architecture: x86_64
             type: linux
 
 
