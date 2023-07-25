@@ -46,7 +46,6 @@ class OAuth2WithURIConsumerBlueprint(OAuth2ConsumerBlueprint):
         client_id=None,
         client_secret=None,
         scope=None,
-        state=None,
         auto_refresh_url=None,
         base_url=None,
         authorization_url=None,
