@@ -36,10 +36,10 @@ class SSHKey():
             if not db.table_exists("ssh_keys"):
                 if db.db_type == DataBase.MYSQL:
                     db.execute("CREATE TABLE ssh_keys(rowid INTEGER NOT NULL AUTO_INCREMENT UNIQUE, "
-                               "description VARCHAR(255), userid VARCHAR(255), ssh_key VARCHAR(255))")
+                               "description VARCHAR(255), userid VARCHAR(255), ssh_key TEXT)")
                 elif db.db_type == DataBase.SQLITE:
                     db.execute("CREATE TABLE ssh_keys(userid VARCHAR(255), description VARCHAR(255), "
-                               "ssh_key VARCHAR(255))")
+                               "ssh_key TEXT)")
         else:
             raise Exception("Error connecting DB: %s" % self.url)
         return db
