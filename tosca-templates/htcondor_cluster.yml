@@ -1,0 +1,155 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: >
+  TOSCA for launching an HTCondor Virtual Cluster.
+
+
+metadata:
+  display_name: HTCondor virtual cluster
+  icon: images/htcondor.png
+
+topology_template:
+  inputs:
+    wn_num:
+      type: integer
+      description: Number of WNs in the cluster
+      default: 1
+      required: yes
+    fe_cpus:
+      type: integer
+      description: Number of CPUs for the front-end node
+      default: 1
+      required: yes
+    fe_mem:
+      type: scalar-unit.size
+      description: Amount of Memory for the front-end node
+      default: 1 GB
+      required: yes
+    wn_cpus:
+      type: integer
+      description: Number of CPUs for the WNs
+      default: 1
+      required: yes
+    wn_mem:
+      type: scalar-unit.size
+      description: Amount of Memory for the WNs
+      default: 1 GB
+      required: yes
+
+    fe_disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the FE instance (Set 0 if disk is not needed)
+      default: 0 GB
+      constraints:
+      - valid_values: [ 0 GB, 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    fe_volume_id:
+      type: string
+      description: "Or URL of the disk to be attached to the FE instance (format: ost://api.cloud.ifca.es/<vol_id>"
+      default: ""
+    fe_mount_path:
+      type: string
+      description: "Path to mount the FE attached disk"
+      default: "/home/data"
+
+    wn_disk_size:
+      type: scalar-unit.size
+      description: Size of the disk to be attached to the WN instances (Set 0 if disk is not needed)
+      default: 0 GB
+      constraints:
+      - valid_values: [ 0 GB, 10 GB, 20 GB, 50 GB, 100 GB, 200 GB, 500 GB, 1 TB, 2 TB ]
+    wn_mount_path:
+      type: string
+      description: "Path to mount the WN attached disk"
+      default: "/mnt/data"
+
+    htcondor_password:
+      type: string
+      description: Store HTCondor credentials
+      default: changeme
+      required: yes
+
+  node_templates:
+
+
+    lrms_front_end:
+      type: tosca.nodes.indigo.LRMS.FrontEnd.HTCondor
+      properties:
+        wn_ips: { get_attribute: [ lrms_wn, private_address ] }
+      requirements:
+        - host: lrms_server
+
+    lrms_server:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        endpoint:
+          properties:
+            dns_name: htcondorserver
+            network_name: PUBLIC
+              htcondor_port:
+                protocol: tcp
+                source: 9618
+        host:
+          properties:
+            num_cpus: { get_input: fe_cpus }
+            mem_size: { get_input: fe_mem }
+        os:
+          properties:
+            type: linux
+            architecture: x86_64
+      requirements:
+      - local_storage:
+          node: fe_block_storage
+          relationship:
+            type: AttachesTo
+            properties:
+              location: { get_input: fe_mount_path }
+
+    fe_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: fe_disk_size }
+        volume_id: { get_input: fe_volume_id }
+
+    wn_node:
+      type: tosca.nodes.indigo.LRMS.WorkerNode.HTCondor
+      properties:
+        front_end_ip: { get_attribute: [ lrms_server, private_address, 0 ] }
+        public_front_end_ip: { get_attribute: [ lrms_server, public_address, 0 ] }
+      requirements:
+        - host: lrms_wn
+
+    lrms_wn:
+      type: tosca.nodes.indigo.Compute
+      capabilities:
+        scalable:
+          properties:
+            count: { get_input: wn_num }
+        host:
+          properties:
+            num_cpus: { get_input: wn_cpus }
+            mem_size: { get_input: wn_mem }
+        os:
+          properties:
+            type: linux
+            architecture: x86_64
+      requirements:
+      - local_storage:
+          node: wn_block_storage
+          relationship:
+            type: AttachesTo
+            properties:
+              location: { get_input: wn_mount_path }
+
+    wn_block_storage:
+      type: tosca.nodes.BlockStorage
+      properties:
+        size: { get_input: wn_disk_size }
+
+  outputs:
+    cluster_ip:
+      value: { get_attribute: [ lrms_server, public_address, 0 ] }
+    cluster_creds:
+      value: { get_attribute: [ lrms_server, endpoint, credential, 0 ] }
