@@ -78,6 +78,7 @@ topology_template:
       type: tosca.nodes.indigo.LRMS.FrontEnd.HTCondor
       properties:
         wn_ips: { get_attribute: [ lrms_wn, private_address ] }
+        htcondor_password: { get_input: htcondor_password }C
       requirements:
         - host: lrms_server
 
@@ -118,6 +119,7 @@ topology_template:
       properties:
         front_end_ip: { get_attribute: [ lrms_server, private_address, 0 ] }
         public_front_end_ip: { get_attribute: [ lrms_server, public_address, 0 ] }
+        htcondor_password: { get_input: htcondor_password }
       requirements:
         - host: lrms_wn
 
