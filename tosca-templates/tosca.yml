@@ -16,3 +16,8 @@ topology_template:
       type: string
       description: TOSCA template
       default: ''
+
+    tosca_url:
+      type: string
+      description: or TOSCA template URL
+      default: ''

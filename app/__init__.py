@@ -25,6 +25,7 @@ import io
 import os
 import logging
 import copy
+import requests
 from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
@@ -1009,8 +1010,14 @@ def create_app(oidc_blueprint=None):
         # Special case for a TOSCA template provided by the user
         if request.args.get('template') == 'tosca.yml':
             try:
-                template = yaml.safe_load(form_data.get('tosca'))
-                ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
+                if form_data.get('tosca'):
+                    template = yaml.safe_load(form_data.get('tosca'))
+                    ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
+                else:
+                    response = requests.get(form_data.get('tosca_url'), timeout=10)
+                    response.raise_for_status()
+                    template = yaml.safe_load(response.text)
+                    ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
             except Exception as ex:
                 flash("Invalid TOSCA specified: '%s'." % ex, "error")
                 return redirect(url_for('showinfrastructures'))
