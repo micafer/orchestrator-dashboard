@@ -2,6 +2,8 @@ inputs:
     tosca:
       tab: TOSCA
       tag_type: textarea
+    tosca_url:
+      tab: TOSCA
 
 tabs:
   - TOSCA
