@@ -89,6 +89,7 @@ topology_template:
           properties:
             dns_name: htcondorserver
             network_name: PUBLIC
+            ports:
               htcondor_port:
                 protocol: tcp
                 source: 9618
