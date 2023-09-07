@@ -41,7 +41,7 @@ topology_template:
       - valid_values: [ 1, 2, 4, 8, 16, 32, 64 ]
     wn_mem:
       type: scalar-unit.size
-      description: Amount of Memory for the WNs
+      description: Amount of Memory for the Worker Nodes
       default: 1 GB
       required: yes
 
