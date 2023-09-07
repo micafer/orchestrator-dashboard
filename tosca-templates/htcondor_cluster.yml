@@ -32,7 +32,7 @@ topology_template:
       required: yes
     wn_cpus:
       type: integer
-      description: Number of CPUs for the WNs
+      description: Number of CPUs for the Worker Nodes
       default: 1
       required: yes
       constraints:
