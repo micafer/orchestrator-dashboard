@@ -180,15 +180,6 @@
         }
     },
     {
-        "name": "INFN-CLOUD-BARI",
-        "url": "https://cloud.recas.ba.infn.it:5000",
-        "id": "8016G0",
-        "vos": {
-            "vo.seadatanet.org": "50c9ea335b7d429296eb1623a97ff311"
-        },
-        "identity_method": "oidc"
-    },
-    {
         "name": "INFN-CLOUD-CNAF",
         "url": "https://cloud-api-pub.cr.cnaf.infn.it:5000",
         "id": "13252G0",
