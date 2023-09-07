@@ -44,6 +44,8 @@ topology_template:
       description: Amount of Memory for the Worker Nodes
       default: 1 GB
       required: yes
+      constraints:
+      - valid_values: [ 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, 64 GB, 128 GB, 256 GB, 512 GB ]
 
     fe_disk_size:
       type: scalar-unit.size
