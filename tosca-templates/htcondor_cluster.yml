@@ -15,7 +15,7 @@ topology_template:
   inputs:
     wn_num:
       type: integer
-      description: Number of WNs in the cluster
+      description: Number of Worker Nodes in the cluster
       default: 1
       required: yes
     fe_cpus:
