@@ -1,0 +1,38 @@
+inputs:
+    wn_num:
+      tab: WNs Features
+
+    fe_cpus:
+      tab: FE Node Features
+
+    fe_mem:
+      tab: FE Node Features
+
+    wn_cpus:
+      tab: WNs Features
+
+    wn_mem:
+      tab: WNs Features
+
+    fe_disk_size:
+      tab: FE Node Features
+
+    fe_volume_id:
+      tab: FE Node Features
+    
+    fe_mount_path:
+      tab: FE Node Features
+
+    wn_disk_size:
+      tab: WNs Features
+
+    wn_mount_path:
+      tab: WNs Features
+
+    htcondor_password:
+      tab: HTCondor configuration
+
+tabs:
+  - FE Node Features
+  - WNs Features
+  - HTCondor configuration
