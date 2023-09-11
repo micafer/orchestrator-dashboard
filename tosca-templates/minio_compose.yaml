@@ -87,6 +87,7 @@ topology_template:
         - host: simple_node
 
   outputs:
-    minio_endpoint:
+    minio_console:
       value: { concat: [ 'https://', get_input: [ minio_dns_console ], '/' ] }
-
+    minio_api:
+      value: { concat: [ 'https://', get_input: [ minio_dns_api ], '/' ] }
