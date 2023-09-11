@@ -41,7 +41,15 @@ topology_template:
       default: RELEASE.2023-07-21T21-12-44Z
       description: Check out https://github.com/minio/minio/tags
       type: string
-
+    nsupdate_secret_console:
+      default: changeme
+      description: Secret generated when registering minio.test.fedcloud.changeme via https://nsupdate.fedcloud.eu/
+      type: string
+    nsupdate_secret_api:
+      default: changeme
+      description: Secret generated when registering minio-api.test.fedcloud.changeme via https://nsupdate.fedcloud.eu/
+      type: string
+  
   node_templates:
 
     minio:
@@ -83,6 +91,38 @@ topology_template:
                 get_input: minio_letsencrypt_email
               release:
                 get_input: minio_release
+      requirements:
+        - host: simple_node
+
+    nsupdate_minio_api:
+      type: tosca.nodes.ec3.Application
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/dydns_egi_update.yml
+            inputs:
+              dydns_hostname:
+                get_input: minio_dns_api
+              dydns_secret:
+                get_input: nsupdate_secret_api
+              new_ip:
+                get_attribute: [ simple_node, public_address, 0 ]
+      requirements:
+        - host: simple_node
+
+    nsupdate_minio_console:
+      type: tosca.nodes.ec3.Application
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/dydns_egi_update.yml
+            inputs:
+              dydns_hostname:
+                get_input: minio_dns_console
+              dydns_secret:
+                get_input: nsupdate_secret_console
+              new_ip:
+                get_attribute: [ simple_node, public_address, 0 ]
       requirements:
         - host: simple_node
 
