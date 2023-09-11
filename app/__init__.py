@@ -890,7 +890,7 @@ def create_app(oidc_blueprint=None):
                         value["default"] = False
                 # Special case for ports, convert a comma separated list of ints
                 # to a PortSpec map
-                elif value["type"] == "map" and name == "ports":
+                elif value["type"] == "map" and value["entry_schema"]["type"] in ["PortSpec", "tosca.datatypes.network.PortSpec"]:
                     ports = inputs[name].split(",")
                     ports_value = {}
                     for port in ports:
