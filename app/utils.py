@@ -830,7 +830,7 @@ def valid_template_vos(user_vos, template_metadata):
 
 def get_list_values(name, inputs, value_type="string"):
 
-    cont=1
+    cont = 1
     # Special case for ports
     if value_type == "PortSpec":
         ports_value = {}
