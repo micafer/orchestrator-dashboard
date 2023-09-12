@@ -748,7 +748,7 @@ def create_app(oidc_blueprint=None):
                     inputs[input_name] = int(value)
                 elif input_value['type'] == 'float':
                     inputs[input_name] = float(value)
-                elif input_value['type'] == 'map' and input_value['entry_schema']['type'] == 'PortSpec':
+                elif input_value['type'] == 'map' and input_value['entry_schema']['type'] in utils.PORT_SPECT_TYPES:
                     inputs[input_name] = json.loads(value)
                 else:
                     inputs[input_name] = value
@@ -892,8 +892,7 @@ def create_app(oidc_blueprint=None):
                         value["default"] = []
                 # Special case for ports, convert a list of strings like 80,443,8080-8085,9000-10000/udp
                 # to a PortSpec map
-                elif (value["type"] == "map" and
-                      value["entry_schema"]["type"] in ["PortSpec", "tosca.datatypes.network.PortSpec"]):
+                elif value["type"] == "map" and value["entry_schema"]["type"] in utils.PORT_SPECT_TYPES:
                     try:
                         value["default"] = utils.get_list_values(name, inputs, "PortSpec")
                     except Exception as ex:
