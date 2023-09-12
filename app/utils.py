@@ -867,3 +867,18 @@ def get_list_values(name, inputs, value_type="string"):
             values.append(value)
             cont += 1
         return values
+
+
+def formatPortSpec(ports):
+    res = {}
+    for port_name, port_value in ports.items():
+        if 'remote_cidr' in port_value and port_value['remote_cidr']:
+            res[port_name] = str(port_value['remote_cidr']) + "-"
+        else:
+            res[port_name] = ""
+        if 'source_range' in port_value:
+            res[port_name] = "%s:%s" % (port_value['source_range'][0],
+                                        port_value['source_range'][1])
+        elif 'source' in port_value:
+            res[port_name] = "%s" % port_value['source']
+    return res
