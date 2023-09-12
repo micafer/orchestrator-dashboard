@@ -16,35 +16,118 @@ topology_template:
   inputs:
  
     minio_accesskey:
-      type: string
+      default: changeme
       description: Access key credential for object storage and web access
-      default: minio
-    minio_secretkey:
       type: string
-      description: Secret key credential for object storage and web access
-      default: minio123
+    minio_secretkey:
       constraints:
-        - min_length: 8
-
+      - min_length: 8
+      default: changeme123
+      description: Secret key credential for object storage and web access
+      type: string
+    minio_dns_console:
+      default: minio.test.fedcloud.changeme
+      description: DNS hostname to access MinIO console
+      type: string
+    minio_dns_api:
+      default: minio-api.test.fedcloud.changeme
+      description: DNS hostname to access MinIO API endpoint
+      type: string
+    minio_letsencrypt_email:
+      default: changeme@email.com
+      description: Email to be used for Let's Encrypt certificates
+      type: string
+    minio_release:
+      default: RELEASE.2023-07-21T21-12-44Z
+      description: Check out https://github.com/minio/minio/tags
+      type: string
+    nsupdate_secret_console:
+      default: changeme
+      description: Secret generated when registering minio.test.fedcloud.changeme via https://nsupdate.fedcloud.eu/
+      type: string
+    nsupdate_secret_api:
+      default: changeme
+      description: Secret generated when registering minio-api.test.fedcloud.changeme via https://nsupdate.fedcloud.eu/
+      type: string
+  
   node_templates:
 
-    argo:
+    minio:
       type: tosca.nodes.ec3.Application
       artifacts:
         docker_role:
           file: grycap.docker
           type: tosca.artifacts.AnsibleGalaxy.role
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              port_http:
+                protocol: tcp
+                source: 80
+              port_https:
+                protocol: tcp
+                source: 443
+              port_api:
+                protocol: tcp
+                source: 9000
+              port_console:
+                protocol: tcp
+                source: 9001
       interfaces:
         Standard:
           configure:
-            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/minio_compose.yaml
+            implementation: https://raw.githubusercontent.com/sebastian-luna-valero/tosca/main/artifacts/minio.yml
             inputs:
-                admin_user: { get_input: minio_accesskey }
-                admin_pass: { get_input: minio_secretkey }
+              admin_pass:
+                get_input: minio_secretkey
+              admin_user:
+                get_input: minio_accesskey
+              dns_console:
+                get_input: minio_dns_console
+              dns_api:
+                get_input: minio_dns_api
+              letsencrypt_email:
+                get_input: minio_letsencrypt_email
+              release:
+                get_input: minio_release
+      requirements:
+        - host: simple_node
+
+    nsupdate_minio_api:
+      type: tosca.nodes.ec3.Application
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/dydns_egi_update.yml
+            inputs:
+              dydns_hostname:
+                get_input: minio_dns_api
+              dydns_secret:
+                get_input: nsupdate_secret_api
+              new_ip:
+                get_attribute: [ simple_node, public_address, 0 ]
+      requirements:
+        - host: simple_node
+
+    nsupdate_minio_console:
+      type: tosca.nodes.ec3.Application
+      interfaces:
+        Standard:
+          configure:
+            implementation: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/dydns_egi_update.yml
+            inputs:
+              dydns_hostname:
+                get_input: minio_dns_console
+              dydns_secret:
+                get_input: nsupdate_secret_console
+              new_ip:
+                get_attribute: [ simple_node, public_address, 0 ]
       requirements:
         - host: simple_node
 
   outputs:
-    minio_endpoint:
-      value: { concat: [ 'https://', get_attribute: [ front, simple_node, 0 ], ':9001/' ] }
-
+    minio_console:
+      value: { concat: [ 'https://', get_input: [ minio_dns_console ], '/' ] }
+    minio_api:
+      value: { concat: [ 'https://', get_input: [ minio_dns_api ], '/' ] }

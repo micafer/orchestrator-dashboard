@@ -105,7 +105,21 @@
           </select>
 	  {% else %}
 
-      {% if value.type == "integer" %}
+      <!-- list type -->
+      {% if value.type == "list" %}
+        <fieldset class="border p-2">
+        {% include 'list.html' %}
+        </fieldset>
+      <!-- end list type -->
+
+      <!-- Special case of map of PortSpec -->
+      {% elif value.type == "map" and value.entry_schema.type in ["PortSpec", "tosca.datatypes.network.PortSpec"] %}
+        <fieldset class="border p-2">
+        {% include 'list.html' %}
+        </fieldset>
+      <!-- end PortSpec type -->
+
+      {% elif value.type == "integer" %}
       <!-- number type -->
       <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
       {% elif value.type == "scalar-unit.size" %}
