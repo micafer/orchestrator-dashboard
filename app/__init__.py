@@ -686,7 +686,10 @@ def create_app(oidc_blueprint=None):
                 for input_name, input_value in list(data['topology_template']['inputs'].items()):
                     inputs[input_name] = None
                     if input_value.get("default", None):
-                        inputs[input_name] = input_value["default"]
+                        if input_value["type"] == "map" and input_name == "ports":
+                            inputs[input_name] = utils.formatPortSpec(input_value["default"])
+                        else:
+                            inputs[input_name] = input_value["default"]
                 if 'filename' in data['metadata'] and data['metadata']['filename']:
                     selected_tosca = data['metadata']['filename']
                 if 'childs' in data['metadata']:
@@ -745,6 +748,8 @@ def create_app(oidc_blueprint=None):
                     inputs[input_name] = int(value)
                 elif input_value['type'] == 'float':
                     inputs[input_name] = float(value)
+                elif input_value['type'] == 'map' and input_value['entry_schema']['type'] == 'PortSpec':
+                    inputs[input_name] = json.loads(value)
                 else:
                     inputs[input_name] = value
 
