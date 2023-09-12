@@ -44,6 +44,7 @@ urllib3.disable_warnings(InsecureRequestWarning)
 
 SITE_LIST = {}
 LAST_UPDATE = 0
+PORT_SPECT_TYPES = ["PortSpec", "tosca.datatypes.network.PortSpec", "tosca.datatypes.indigo.network.PortSpec"]
 
 
 def _getStaticSitesInfo(force=False):
@@ -832,7 +833,7 @@ def get_list_values(name, inputs, value_type="string"):
 
     cont = 1
     # Special case for ports
-    if value_type == "PortSpec":
+    if value_type in PORT_SPECT_TYPES:
         ports_value = {}
         while "%s_list_value_%d" % (name, cont) in inputs:
             value = inputs["%s_list_value_%d" % (name, cont)]
