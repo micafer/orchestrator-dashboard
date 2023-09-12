@@ -826,3 +826,44 @@ def valid_template_vos(user_vos, template_metadata):
         return [vo for vo in user_vos if vo in template_metadata['vos']]
     else:
         return ['all']
+
+
+def get_list_values(name, inputs, value_type="string"):
+
+    cont=1
+    # Special case for ports
+    if value_type == "PortSpec":
+        ports_value = {}
+        while "%s_list_value_%d" % (name, cont) in inputs:
+            value = inputs["%s_list_value_%d" % (name, cont)]
+            # Should we also open UDP?
+            remote_cidr = None
+            if "-" in value:
+                parts = value.split("-")
+                port_num = parts[1]
+                remote_cidr = parts[0]
+            else:
+                port_num = value
+
+            ports_value["port_%s" % port_num.replace(":", "_")] = {"protocol": "tcp"}
+            if ":" in port_num:
+                ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = port_num.split(":")
+            else:
+                ports_value["port_%s" % port_num.replace(":", "_")]["source"] = int(port_num)
+            if remote_cidr:
+                ports_value["port_%s" % port_num.replace(":", "_")]["remote_cidr"] = remote_cidr
+            cont += 1
+        return ports_value
+    else:
+        values = []
+        while "%s_list_value_%d" % (name, cont) in inputs:
+            value = inputs["%s_list_value_%d" % (name, cont)]
+            if value_type == "integer":
+                value = int(value)
+            elif value_type == "float":
+                value = float(value)
+            elif value_type == "boolean":
+                value = value.lower() in ["true", "yes", "1"]
+            values.append(value)
+            cont += 1
+        return values

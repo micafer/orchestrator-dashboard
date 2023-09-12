@@ -686,16 +686,7 @@ def create_app(oidc_blueprint=None):
                 for input_name, input_value in list(data['topology_template']['inputs'].items()):
                     inputs[input_name] = None
                     if input_value.get("default", None):
-                        if input_value["type"] == "map" and input_name == "ports":
-                            inputs[input_name] = ""
-                            for port_value in input_value["default"].values():
-                                if inputs[input_name]:
-                                    inputs[input_name] += ","
-                                if 'remote_cidr' in port_value and port_value['remote_cidr']:
-                                    inputs[input_name] += str(port_value['remote_cidr']) + "-"
-                                inputs[input_name] += str(port_value['source'])
-                        else:
-                            inputs[input_name] = input_value["default"]
+                        inputs[input_name] = input_value["default"]
                 if 'filename' in data['metadata'] and data['metadata']['filename']:
                     selected_tosca = data['metadata']['filename']
                 if 'childs' in data['metadata']:
@@ -880,24 +871,18 @@ def create_app(oidc_blueprint=None):
                         value["default"] = True
                     else:
                         value["default"] = False
-                # Special case for ports, convert a comma separated list of ints
+                elif value["type"] == "list" and value["entry_schema"]["type"] not in ["map", "list"]:
+                    try:
+                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"])
+                    except:
+                        value["default"] = []
+                # Special case for ports, convert a list of strings like 80,443,8080-8085,9000-10000/udp
                 # to a PortSpec map
-                elif value["type"] == "map" and name == "ports":
-                    ports = inputs[name].split(",")
-                    ports_value = {}
-                    for port in ports:
-                        # Should we also open UDP?
-                        remote_cidr = None
-                        if "-" in port:
-                            parts = port.split("-")
-                            port_num = int(parts[1])
-                            remote_cidr = parts[0]
-                        else:
-                            port_num = int(port)
-                        ports_value["port_%s" % port] = {"protocol": "tcp", "source": port_num}
-                        if remote_cidr:
-                            ports_value["port_%s" % port]["remote_cidr"] = remote_cidr
-                    value["default"] = ports_value
+                elif value["type"] == "map" and value["entry_schema"]["type"] in ["PortSpec", "tosca.datatypes.network.PortSpec"]:
+                    try:
+                        value["default"] = utils.get_list_values(name, inputs, "PortSpec")
+                    except:
+                        value["default"] = {}
                 else:
                     value["default"] = inputs[name]
 
