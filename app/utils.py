@@ -835,20 +835,14 @@ def get_list_values(name, inputs, value_type="string"):
     # Special case for ports
     if value_type in PORT_SPECT_TYPES:
         ports_value = {}
-        while "%s_list_value_%d" % (name, cont) in inputs:
-            value = inputs["%s_list_value_%d" % (name, cont)]
+        while "%s_list_value_%d_range" % (name, cont) in inputs:
+            port_num = inputs["%s_list_value_%d_range" % (name, cont)]
+            remote_cidr = inputs["%s_list_value_%d_cidr" % (name, cont)]
             # Should we also open UDP?
-            remote_cidr = None
-            if "-" in value:
-                parts = value.split("-")
-                port_num = parts[1]
-                remote_cidr = parts[0]
-            else:
-                port_num = value
-
             ports_value["port_%s" % port_num.replace(":", "_")] = {"protocol": "tcp"}
             if ":" in port_num:
-                ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = port_num.split(":")
+                port_range = port_num.split(":")
+                ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = [int(port_range[0]), int(port_range[1])]
             else:
                 ports_value["port_%s" % port_num.replace(":", "_")]["source"] = int(port_num)
             if remote_cidr:
@@ -878,8 +872,8 @@ def formatPortSpec(ports):
         else:
             res[port_name] = ""
         if 'source_range' in port_value:
-            res[port_name] = "%s:%s" % (port_value['source_range'][0],
+            res[port_name] += "%s:%s" % (port_value['source_range'][0],
                                         port_value['source_range'][1])
         elif 'source' in port_value:
-            res[port_name] = "%s" % port_value['source']
+            res[port_name] += "%s" % port_value['source']
     return res
