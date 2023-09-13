@@ -1,0 +1,49 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+metadata:
+  name: SGDE
+  display_name: Launch SGDE server
+  #icon: images/sgde.png
+  parents:
+    - simple_node.yaml
+
+description: Launch SGDE server.
+
+topology_template:
+  inputs:
+ 
+    sgde_jwt_secret:
+      default: Tr8J+bw+XIf0LWIXpPQ+0Rt3h2UITT2XHM2/Vc/j1lfBeuDqqrJFcCm/f9pvTgbd
+      description: SGDE JWT secret
+      type: string
+  
+  node_templates:
+
+    minio:
+      type: tosca.nodes.ec3.Application
+      artifacts:
+        docker_role:
+          file: grycap.docker
+          type: tosca.artifacts.AnsibleGalaxy.role
+      capabilities:
+        endpoint:
+          properties:
+            ports:
+              port_http:
+                protocol: tcp
+                source: 8000
+      interfaces:
+        Standard:
+          configure:
+            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/sgde_compose.yml
+            inputs:
+              sgde_jwt_secret: { get_input: sgde_jwt_secret }
+      requirements:
+        - host: simple_node
+
+  outputs:
+    sgde_url:
+      value: { concat: [ 'http://', get_attribute: [ simple_node, public_address, 0 ], ':8000/' ] }
