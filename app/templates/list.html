@@ -34,9 +34,7 @@ function addItem_{{key}}(object=null, value='') {
     var pattern = ".*";
     {% endif %}
     let input_template = `
-          <div class="form-group">
-            <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}" class="form-control" required pattern="${pattern}" value="${value}">
-          </div>`;
+            <input type="text" class="col-11 form-control" name="${tagname}_list_value_${num__{{key}}}" class="form-control" required pattern="${pattern}" value="${value}">`;
   {% endif %}
 
   let template = `
