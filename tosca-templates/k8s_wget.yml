@@ -1,0 +1,51 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: Donwload some data available in an URL to a local path
+
+metadata:
+  name: Download in PVC
+  display_name: Download Data in PVC
+  icon: images/download.png
+  parents:
+    - kubernetes.yml
+
+topology_template:
+
+  inputs:        
+
+    data_url:
+      type: string
+      description: URL of the data to Download (HTTP, HTTPS, or FTP URL in the form (http|https|ftp)://[user[:pass]]@host.domain[:port]/path)
+      default: ''
+      required: true
+
+    pvc_namespace:
+      type: string
+      description: Namespace of the PVC
+      default: 'default'
+      required: true
+
+    pvc_name:
+      type: string
+      description: Namespace of the PVC
+      default: ''
+      required: true
+
+  node_templates:
+
+    get_data:
+      type: tosca.nodes.SoftwareComponent
+      interfaces:
+        Standard:
+          configure:
+            implementation:  https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/artifacts/download_data.yml
+            inputs:
+              data_url: { get_input: data_url }
+              k8s_pvc_namespace: { get_input: pvc_namespace }
+              k8s_pvc_name: { get_input: pvc_name }
+      requirements:
+        - host: simple_node
+
