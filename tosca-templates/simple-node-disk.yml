@@ -74,7 +74,7 @@ topology_template:
         type: PortSpec
       description: |
         List of ports to be Opened in the Cloud site (eg. 22,80,443,2000:2100).
-        You can also include the remote CIDR (eg. 8.8.0.0/24-22,9.9.9.0/24-80,443).
+        You can also include the remote CIDR (eg. 8.8.0.0/24).
       default:
         ssh_port:
           source: 22

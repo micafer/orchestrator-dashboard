@@ -842,7 +842,8 @@ def get_list_values(name, inputs, value_type="string"):
             ports_value["port_%s" % port_num.replace(":", "_")] = {"protocol": "tcp"}
             if ":" in port_num:
                 port_range = port_num.split(":")
-                ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = [int(port_range[0]), int(port_range[1])]
+                ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = [int(port_range[0]),
+                                                                                       int(port_range[1])]
             else:
                 ports_value["port_%s" % port_num.replace(":", "_")]["source"] = int(port_num)
             if remote_cidr:
@@ -873,7 +874,7 @@ def formatPortSpec(ports):
             res[port_name] = ""
         if 'source_range' in port_value:
             res[port_name] += "%s:%s" % (port_value['source_range'][0],
-                                        port_value['source_range'][1])
+                                         port_value['source_range'][1])
         elif 'source' in port_value:
             res[port_name] += "%s" % port_value['source']
     return res
