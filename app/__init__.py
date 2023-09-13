@@ -1003,7 +1003,8 @@ def create_app(oidc_blueprint=None):
                     template = yaml.safe_load(response.text)
                     ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
             except Exception as ex:
-                flash("Invalid TOSCA specified: '%s'." % ex, "error")
+                msg = "%s" % ex
+                flash("Invalid TOSCA specified: '%s'." % msg[:512], "error")
                 return redirect(url_for('showinfrastructures'))
         else:
             with io.open(settings.toscaDir + request.args.get('template')) as stream:
