@@ -10,6 +10,8 @@ description: >
 metadata:
   display_name: HTCondor virtual cluster
   icon: images/htcondor.png
+  childs:
+   - pulsar.yml
 
 topology_template:
   inputs:
