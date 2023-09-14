@@ -7,7 +7,7 @@ description: Donwload some data available in an URL to a local path
 
 metadata:
   name: Download
-  display_name: Download Data
+  display_name: Download File in VM local path
   icon: images/download.png
   parents:
     - single-node-disk.yml

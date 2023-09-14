@@ -3,11 +3,11 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
   - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
 
-description: Donwload some data available in an URL to a local path
+description: Donwload some data available in an URL to a Kubernetes PVC
 
 metadata:
   name: Download in PVC
-  display_name: Download Data in PVC
+  display_name: Download file in a Kubernetes PVC
   icon: images/download.png
   parents:
     - kubernetes.yml
@@ -47,5 +47,5 @@ topology_template:
               k8s_pvc_namespace: { get_input: pvc_namespace }
               k8s_pvc_name: { get_input: pvc_name }
       requirements:
-        - host: simple_node
+        - host: lrms_front_end
 
