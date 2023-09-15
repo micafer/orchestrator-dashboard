@@ -76,7 +76,7 @@ def create_app(oidc_blueprint=None):
     scheduler.start()
 
     toscaTemplates = utils.loadToscaTemplates(settings.toscaDir)
-    toscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir, toscaTemplates)
+    toscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir, toscaTemplates, settings.hide_tosca_tags)
 
     app.jinja_env.filters['tojson_pretty'] = utils.to_pretty_json
     app.logger.debug("TOSCA INFO: " + json.dumps(toscaInfo))
@@ -1478,7 +1478,7 @@ def create_app(oidc_blueprint=None):
                 for elem in newToscaTemplates:
                     if elem not in toscaTemplates:
                         toscaTemplates.append(elem)
-                newToscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir, newToscaTemplates)
+                newToscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir, newToscaTemplates, settings.hide_tosca_tags)
                 toscaInfo.update(newToscaInfo)
 
     def delete_infra(infid):
