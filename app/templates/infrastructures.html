@@ -204,7 +204,7 @@
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
                         <div class="dropdown-menu">
-                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#addresources_{{infId}}').modal('show');"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
+                          <a id="addresources_{{infId}}_a" class="dropdown-item" href="{{ url_for('addresources', infid=infId) }}"><span class="fas fa-plus mr-2 grey-text"></span>Add nodes</a>
                           <a id="deletevms_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#deletevms_{{infId}}').modal('show');"><span class="fas fa-minus mr-2 grey-text"></span>Remove nodes</a>
                           <a id="template_{{infId}}_a" class="dropdown-item" href="{{ url_for('template', infid=infId) }}"><span class="fas fa-search mr-2 grey-text"></span>Show template</a>
                           <a id="log_{{infId}}_a" class="dropdown-item" style="display: none;" href="{{ url_for('inflog', infid=infId) }}"><span class="fas fa-file-alt mr-2 grey-text"></span>Log</a>
@@ -367,27 +367,6 @@
                   </div>
                 </div>
 
-                <!-- Modal Add VMs -->
-                <div class="modal fade" id="addresources_{{infId}}" role="dialog">
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title" id="addresources__label_{{infId}}">Add Nodes</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
-                      </div>
-                      <div class="modal-body text-center" id="addresources_{{infId}}_body">
-                      </div>
-                      <div class="modal-footer">
-                        <form id="addNodes" action="{{ url_for('addresources', infid=infId) }}" method="post">
-                        <a class="btn btn-secondary cancelAddVMsBtn" role="button" data-bs-dismiss="modal">Cancel</a>
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                          <button type="submit" class="btn btn-primary addVMsBtn" role="button">Add</button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Modal Change user inf. -->
                 <div class="modal fade" id="change_auth_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
@@ -446,13 +425,6 @@
                     $('#change_auth_{{infId}}').on('show.bs.modal', function (event) {
                       var modal = $(this)
                       modal.find('#owners_list').html('Loading <span class="spinner-border spinner-border-sm"></span>').load("{{ url_for('getowners', infid=infId) }}");
-                    });
-                  });
-
-                  $(document).ready(function () {
-                    $('#addresources_{{infId}}').on('show.bs.modal', function (event) {
-                      var modal = $(this)
-                      modal.find('.modal-body').html('Loading <span class="spinner-border spinner-border-sm"></span>').load("{{ url_for('addresources', infid=infId) }}");
                     });
                   });
                 </script>
