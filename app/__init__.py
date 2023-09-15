@@ -684,12 +684,7 @@ def create_app(oidc_blueprint=None):
                 template = response.text
                 data = yaml.full_load(template)
                 for input_name, input_value in list(data['topology_template']['inputs'].items()):
-                    inputs[input_name] = None
-                    if input_value.get("default", None):
-                        if input_value["type"] == "map" and input_name == "ports":
-                            inputs[input_name] = utils.formatPortSpec(input_value["default"])
-                        else:
-                            inputs[input_name] = input_value["default"]
+                    inputs[input_name] = input_value.get("default", None)
                 if 'filename' in data['metadata'] and data['metadata']['filename']:
                     selected_tosca = data['metadata']['filename']
                 if 'childs' in data['metadata']:
