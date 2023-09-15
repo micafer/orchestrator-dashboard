@@ -370,6 +370,7 @@
                 <!-- Modal Add VMs -->
                 <div class="modal fade" id="addresources_{{infId}}" role="dialog">
                   <div class="modal-dialog" role="document">
+                    <form id="addNodes" action="{{ url_for('addresources', infid=infId) }}" method="post"></form>
                     <div class="modal-content">
                       <div class="modal-header bg-info text-white">
                         <h5 class="modal-title" id="addresources__label_{{infId}}">Add Nodes</h5>
@@ -378,13 +379,12 @@
                       <div class="modal-body text-center" id="addresources_{{infId}}_body">
                       </div>
                       <div class="modal-footer">
-                        <form id="addNodes" action="{{ url_for('addresources', infid=infId) }}" method="post">
                         <a class="btn btn-secondary cancelAddVMsBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-primary addVMsBtn" role="button">Add</button>
-                        </form>
                       </div>
                     </div>
+                    </form>
                   </div>
                 </div>
 
