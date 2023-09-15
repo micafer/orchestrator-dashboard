@@ -52,3 +52,4 @@ class Settings:
         self.extra_auth = config.get('EXTRA_AUTH', [])
         self.vos_user_role = config.get('VOS_USER_ROLE')
         self.enable_external_vault = config.get('ENABLE_EXTERNAL_VAULT', False)
+        self.hide_tosca_tags = config.get('HIDE_TOSCA_TAGS', [])

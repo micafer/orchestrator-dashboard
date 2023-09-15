@@ -317,11 +317,15 @@ def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
     return toscaTemplates
 
 
-def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
+def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates, tags_to_hide):
     toscaInfoOrder = toscaInfo = {}
     for tosca in toscaTemplates:
         with io.open(toscaDir + tosca) as stream:
             template = yaml.full_load(stream)
+
+            # skip tosca templates with hidden tags
+            if tags_to_hide and template.get('metadata', {}).get('tag') in tags_to_hide:
+                continue
 
             toscaInfo[tosca] = {"valid": True,
                                 "description": "TOSCA Template",
