@@ -49,6 +49,7 @@ PORT_SPECT_TYPES = ["PortSpec", "tosca.datatypes.network.PortSpec", "tosca.datat
 VO_LIST = []
 VO_LAST_UPDATE = 0
 
+
 def _getStaticSitesInfo(force=False):
     # Remove cache if force is True
     if force and g.settings.static_sites_url:
