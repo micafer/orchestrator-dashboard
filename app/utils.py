@@ -46,6 +46,8 @@ SITE_LIST = {}
 LAST_UPDATE = 0
 PORT_SPECT_TYPES = ["PortSpec", "tosca.datatypes.network.PortSpec", "tosca.datatypes.indigo.network.PortSpec"]
 
+VO_LIST = []
+VO_LAST_UPDATE = 0
 
 def _getStaticSitesInfo(force=False):
     # Remove cache if force is True
@@ -753,9 +755,25 @@ def get_project_ids(creds):
     return creds
 
 
+def getCachedVOList():
+    global VO_LIST
+    global VO_LAST_UPDATE
+
+    now = int(time.time())
+    if not VO_LIST or now - VO_LAST_UPDATE > g.settings.appdb_cache_timeout:
+        try:
+            VO_LIST = appdb.get_vo_list()
+            # in case of error do not update time
+            VO_LAST_UPDATE = now
+        except Exception as ex:
+            flash("Error retrieving VO list from AppDB: %s" % ex, 'warning')
+
+    return VO_LIST
+
+
 def getVOs(session):
     vos = getStaticVOs()
-    vos.extend(appdb.get_vo_list())
+    vos.extend(getCachedVOList())
     vos = list(set(vos))
     vos.sort()
     if "vos" in session and session["vos"]:
