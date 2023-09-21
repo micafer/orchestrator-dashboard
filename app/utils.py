@@ -756,12 +756,12 @@ def get_project_ids(creds):
     return creds
 
 
-def getCachedVOList():
+def getCachedVOList(force=False):
     global VO_LIST
     global VO_LAST_UPDATE
 
     now = int(time.time())
-    if not VO_LIST or now - VO_LAST_UPDATE > g.settings.appdb_cache_timeout:
+    if force or not VO_LIST or now - VO_LAST_UPDATE > g.settings.appdb_cache_timeout:
         try:
             VO_LIST = appdb.get_vo_list()
             # in case of error do not update time
@@ -845,9 +845,11 @@ def discover_oidc_urls(base_url):
     return res
 
 
-def valid_template_vos(user_vos, template_metadata):
+def valid_template_vos(session, template_metadata):
     if 'vos' in template_metadata:
-        return [vo for vo in user_vos if vo in template_metadata['vos']]
+        if 'vos' not in session or not session['vos']:
+            return []
+        return [vo for vo in session['vos'] if vo in template_metadata['vos']]
     else:
         return ['all']
 
