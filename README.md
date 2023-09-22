@@ -5,7 +5,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/c985310233c34f0aa6699cc9b167fba0)](https://www.codacy.com/gh/grycap/im-dashboard/dashboard?utm_source=github.com&utm_medium=referral&utm_content=grycap/im-dashboard&utm_campaign=Badge_Coverage)
 [![License](https://img.shields.io/badge/license-GPL%20v3.0-brightgreen.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://imdocs.readthedocs.io/en/latest/dashboard.html)
-[![SQAaaS badge](https://img.shields.io/badge/sqaaas%20software-gold-yellow)](https://eu.badgr.com/public/assertions/PHWNeiKSRjegitcblLQKbg)
+[![SQAaaS badge](https://img.shields.io/badge/sqaaas%20software-gold-yellow)](https://eu.badgr.com/public/assertions/oFwlnWtbR-u4kQa_BPnmUg)
 
 
 Infrastructure Manager - Simple Graphical UI (based on [INDIGO PaaS Orchestrator Dashboard](https://github.com/indigo-dc/orchestrator-dashboard))
@@ -24,7 +24,7 @@ The docker image uses [Gunicorn](https://gunicorn.org/) as WSGI HTTP server to s
 
 ## Achievements
 
-[![SQAaaS badge](https://github.com/EOSC-synergy/SQAaaS/raw/master/badges/badges_150x116/badge_software_gold.png)](https://eu.badgr.com/public/assertions/PHWNeiKSRjegitcblLQKbg "SQAaaS gold badge achieved")
+[![SQAaaS badge](https://github.com/EOSC-synergy/SQAaaS/raw/master/badges/badges_150x116/badge_software_gold.png)](https://eu.badgr.com/public/assertions/oFwlnWtbR-u4kQa_BPnmUg "SQAaaS gold badge achieved")
 
 This software has received a gold badge according to the
 [Software Quality Baseline criteria](https://github.com/indigo-dc/sqa-baseline)
