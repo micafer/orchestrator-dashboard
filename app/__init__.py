@@ -459,7 +459,6 @@ def create_app(oidc_blueprint=None):
                 infrastructures[inf_id]['state'] = infra_data["state"]
             if 'site' not in infra_data:
                 try:
-                    inf_id += "0"
                     response = im.get_vm_info(inf_id, "0", auth_data)
                     if not response.ok:
                         raise Exception(response.text)
