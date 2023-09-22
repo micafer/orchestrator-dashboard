@@ -459,17 +459,18 @@ def create_app(oidc_blueprint=None):
                 infrastructures[inf_id]['state'] = infra_data["state"]
             if 'site' not in infra_data:
                 try:
+                    inf_id += "0"
                     response = im.get_vm_info(inf_id, "0", auth_data)
                     if not response.ok:
                         raise Exception(response.text)
                     radl_json = response.json()["radl"]
                 except Exception as ex:
-                    app.logger.exception("Error getting vm info: %s" % ex, "error")
+                    app.logger.exception("Error getting vm info: %s" % ex)
                     radl_json = []
                 try:
                     creds = cred.get_creds(get_cred_id())
                 except Exception as ex:
-                    app.logger.exception("Error getting user credentials: %s" % ex, "error")
+                    app.logger.exception("Error getting user credentials: %s" % ex)
                     creds = []
                 site_info = utils.get_site_info_from_radl(radl_json, creds)
                 if site_info:
