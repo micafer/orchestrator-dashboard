@@ -1,0 +1,39 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+imports:
+  - ec3_custom_types: https://raw.githubusercontent.com/grycap/ec3/tosca/tosca/custom_types.yaml
+
+description: >
+  TOSCA for configuring a Pulsar endpoint
+
+metadata:
+  name: Pulsar
+  display_name: Configure a Pulsar endpoint
+  icon: images/pulsar.png
+  parents:
+  - htcondor_cluster.yml
+
+topology_template:
+  inputs:
+
+    message_queue_user:
+      type: string
+      description: User for the message queue
+      default: changeme
+    message_queue_password:
+      type: string
+      description: Password for the message queue
+      default: changeme
+
+  node_templates:
+
+    pulsar_node:
+      type: tosca.nodes.indigo.Pulsar
+      properties:
+        mq_user: { get_input: message_queue_user }
+        mq_password: { get_input: message_queue_password }
+      requirements:
+        - lrms: lrms_front_end
+        - host: lrms_server
+
+  outputs:
