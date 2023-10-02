@@ -1,7 +1,0 @@
-inputs:
-    ssh_key:
-      tab: SSH Key
-      tag_type: textarea
-
-tabs:
-  - SSH Key

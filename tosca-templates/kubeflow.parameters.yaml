@@ -1,8 +1,0 @@
-inputs:
-    kubeflow_user:
-      tab: Kubeflow Data
-
-    kubeflow_pass:
-      tab: Kubeflow Data
-tabs:
-  - Kubeflow Data

@@ -1,6 +1,0 @@
-inputs:
-    sgde_jwt_secret:
-      tab: SGDE data
-
-tabs:
-  - SGDE data
