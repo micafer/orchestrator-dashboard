@@ -1,7 +1,0 @@
-inputs:
-    nifi_reg_ui_auth:
-      tab: Nifi Registry
-
-tabs:
-  - Nifi Registry
-
