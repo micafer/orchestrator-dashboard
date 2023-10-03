@@ -45,7 +45,7 @@ from urllib.parse import urlparse
 from radl import radl_parse
 from radl.radl import deploy, description
 from flask_apscheduler import APScheduler
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from toscaparser.tosca_template import ToscaTemplate
 
 
@@ -1453,6 +1453,11 @@ def create_app(oidc_blueprint=None):
     def internal_server_error(error):
         app.logger.error('Server Error: %s', (error))
         return render_template('error_pages/500.html', support_email=app.config.get('SUPPORT_EMAIL')), 500
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        flash(e.description, 'error')
+        return redirect(url_for('home'))
 
     # Reload internally the site cache
     @scheduler.task('interval', id='reload_sites', seconds=5)
