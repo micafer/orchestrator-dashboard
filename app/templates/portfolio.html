@@ -93,7 +93,7 @@
                 {% if parent %}
                 <a href="#!" onclick="AddChild(this, '{{tosca_filename}}')" class="badge badge-pill badge-primary"><span class='fas fa-plus mr-2'></span>Add</a>
                 {% elif 'link' in tosca['metadata'] %}
-                <a href="{{ url_for('configure', selected_tosca=tosca['metadata']['link']['parent'], childs=tosca['metadata']['link']['childs']) }}" class="badge badge-pill badge-primary">Configure</a>
+                <a href="{{ url_for('configure', selected_tosca=tosca['metadata']['link']['parent'], childs=tosca['metadata']['link']['childs']|join(',')) }}" class="badge badge-pill badge-primary">Configure</a>
                 {% else %}
                 <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge badge-pill badge-primary">Configure</a>
                 {% endif %}
