@@ -6,11 +6,13 @@ WORKDIR /app/
 RUN mkdir -p /opt/tosca-templates/
 RUN mkdir -p /opt/tosca-parameters/
 
-RUN git clone https://github.com/grycap/tosca/ && \
+RUN apk add --no-cache git && \
+    git clone https://github.com/grycap/tosca/ && \
     cd tosca && \
     cp templates/* /opt/tosca-templates/ && \
     cp parameters/* /opt/tosca-parameters/ && \
-    rm -rf tosca
+    rm -rf tosca && \
+    apk del git
 
 ENV PYTHONPATH=/app
 
