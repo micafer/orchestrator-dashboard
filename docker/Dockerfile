@@ -3,7 +3,16 @@ FROM python:3.10-alpine3.15
 COPY . /app
 WORKDIR /app/
 
-COPY ./tosca-templates /opt/tosca-templates
+RUN mkdir -p /opt/tosca-templates/
+RUN mkdir -p /opt/tosca-parameters/
+
+RUN apk add --no-cache git && \
+    git clone https://github.com/grycap/tosca/ && \
+    cd tosca && \
+    cp templates/* /opt/tosca-templates/ && \
+    cp parameters/* /opt/tosca-parameters/ && \
+    rm -rf tosca && \
+    apk del git
 
 ENV PYTHONPATH=/app
 
