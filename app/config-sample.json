@@ -3,7 +3,6 @@
     "OIDC_CLIENT_ID": "my_client_id",
     "OIDC_CLIENT_SECRET": "my_client_secret",
     "OIDC_BASE_URL": "https://aai.egi.eu/auth/realms/egi",
-    "OIDC_USER_INFO_PATH": "/oidc/userinfo",
     "OIDC_GROUP_MEMBERSHIP": [  ],
     "OIDC_SCOPES": "openid email profile offline_access eduperson_entitlement",
     "VOS_USER_ROLE": "vm_operator",
