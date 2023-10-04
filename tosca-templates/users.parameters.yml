@@ -1,7 +1,0 @@
-inputs:
-    user_num:
-      tab: Users Data
-
-tabs:
-  - Users Data
-

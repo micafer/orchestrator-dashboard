@@ -115,6 +115,8 @@ topology_template:
 ....
 ```
 
+You can find the set of available TOSCA templates in the following [repo](https://github.com/grycap/tosca).
+
 ### Enabling HTTPS
 
 You would need to provide

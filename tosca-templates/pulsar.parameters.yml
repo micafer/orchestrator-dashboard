@@ -1,9 +1,0 @@
-inputs:
-    message_queue_user:
-      tab: Pulsar configuration
-
-    message_queue_password:
-      tab: Pulsar configuration
-
-tabs:
-  - Pulsar configuration
