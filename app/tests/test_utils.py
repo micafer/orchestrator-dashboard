@@ -35,7 +35,7 @@ class TestUtils(unittest.TestCase):
     @patch("app.utils.getCachedSiteList")
     def test_getUserAuthData(self, getCachedSiteList, getCachedProjectIDs):
         cred = MagicMock()
-        with flask.Flask(__name__).test_request_context() as flask_context:
+        with flask.Flask(__name__).app_context() as flask_context:
             cred.get_creds.return_value = [{'enabled': 1, 'type': 'OpenNebula', 'id': 'one',
                                             'username': 'user', 'password': 'pass'},
                                            {'enabled': 1, 'type': 'fedcloud', 'id': 'fed',
