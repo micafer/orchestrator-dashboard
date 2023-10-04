@@ -259,7 +259,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
-                          ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.", 'success'))
+                          ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
+                           'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
