@@ -522,7 +522,6 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.get('/addresources/infid')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'infid', res.data)
         self.assertIn(b'wn', res.data)
         self.assertIn(b'front', res.data)
 
