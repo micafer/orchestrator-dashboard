@@ -639,3 +639,34 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/owners/infid')
         self.assertEqual(200, res.status_code)
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
+
+    def test_oai(self):
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
+        self.assertEqual(200, res.status_code)
+        ini_res = (b'<OAI-PMH xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                   b'xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ '
+                   b'http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd" '
+                   b'xmlns="http://www.openarchives.org/OAI/2.0/">')
+        end_res = (b'<ListRecords>\n    <record>\n      <header>\n        '
+                   b'<identifier>https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml</identifier>'
+                   b'\n        <datestamp>datestamp</datestamp>\n      </header>\n      <metadata>\n        '
+                   b'<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" '
+                   b'xmlns:dc="http://purl.org/dc/elements/1.1/" '
+                   b'xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ '
+                   b'http://www.openarchives.org/OAI/2.0/oai_dc.xsd">\n  <dc:version>1.0.0</dc:version>\n  '
+                   b'<dc:title>Deploy a VM</dc:title>\n  <dc:subject>VM</dc:subject>\n  <dc:relation/>\n</oai_dc:dc>\n'
+                   b'      </metadata>\n    </record>\n  </ListRecords>\n</OAI-PMH>\n')
+        self.assertIn(ini_res, res.data)
+
+        tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
+        res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
+        print(res.data)
+        exp_res = (b'<metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n  '
+                   b'<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" '
+                   b'xmlns:dc="http://purl.org/dc/elements/1.1/" '
+                   b'xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ '
+                   b'http://www.openarchives.org/OAI/2.0/oai_dc.xsd">\n  <dc:version>1.0.0</dc:version>\n  '
+                   b'<dc:title>Deploy a VM</dc:title>\n  <dc:subject>VM</dc:subject>\n  '
+                   b'<dc:relation/>\n</oai_dc:dc>\n</metadata>\n')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(exp_res, res.data)
