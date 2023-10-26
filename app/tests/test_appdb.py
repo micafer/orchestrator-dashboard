@@ -108,7 +108,7 @@ class TestAppDB(unittest.TestCase):
         res = appdb.get_sites("vo.access.egi.eu")
         self.assertEquals(res, {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
                                           'state': '', 'id': '1', 'name': 'CESGA'}})
-        #self.assertIn(appdb_call.call_args_list[0][0][0], ["/rest/1.0/va_providers/1"])
+        # self.assertIn(appdb_call.call_args_list[0][0][0], ["/rest/1.0/va_providers/1"])
 
     @patch('app.appdb.appdb_call')
     def test_get_project_ids(self, appdb_call):
