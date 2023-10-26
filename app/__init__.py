@@ -26,6 +26,7 @@ import os
 import logging
 import copy
 import requests
+from lxml import etree
 from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
@@ -39,7 +40,7 @@ from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
+from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
@@ -47,6 +48,8 @@ from radl.radl import deploy, description
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from toscaparser.tosca_template import ToscaTemplate
+from app.oaipmh.errors import Errors
+from app.oaipmh.oai import OAI
 
 
 def create_app(oidc_blueprint=None):
@@ -1451,6 +1454,60 @@ def create_app(oidc_blueprint=None):
                     flash("Error writing Vault Info %s!" % ex, 'error')
 
             return redirect(url_for('manage_creds'))
+
+    @app.route('/oai', methods=['GET', 'POST'])
+    def oai_pmh():
+        response_xml = None
+        oai = OAI()
+        root = OAI.baseXMLTree()
+
+        if request.method == 'GET':
+            verb = request.args.get('verb')
+            metadata_prefix = request.args.get('metadataPrefix')
+            identifier = request.args.get('identifier')
+            from_date = request.args.get('from')
+            until_date = request.args.get('until')
+            set_spec = request.args.get('set')
+            resumption_token = request.args.get('resumptionToken')
+        else:
+            verb = request.form.get('verb')
+            metadata_prefix = request.form.get('metadataPrefix')
+            identifier = request.form.get('identifier')
+            from_date = request.form.get('from')
+            until_date = request.form.get('until')
+            set_spec = request.form.get('set')
+            resumption_token = request.form.get('resumptionToken')
+
+        metadata_dict = {}
+        for name, tosca in toscaInfo.items():
+            metadata = tosca["metadata"]
+            metadata_dict[name] = metadata
+
+        # Create a dictionary mapping verbs to functions
+        verb_handlers = {
+            'GetRecord': lambda metadata_dict = metadata_dict: oai.getRecord(root, metadata_dict, verb, identifier, metadata_prefix),
+            'Identify': lambda: oai.identify(root, verb),
+            'ListIdentifiers': lambda metadata_dict = metadata_dict: oai.listIdentifiers(root, metadata_dict, verb, metadata_prefix, from_date, until_date, set_spec, resumption_token),
+            'ListRecords': lambda metadata_dict = metadata_dict: oai.listRecords(root, metadata_dict, verb, metadata_prefix, from_date, until_date, set_spec, resumption_token),
+            'ListMetadataFormats': lambda metadata_dict = metadata_dict: oai.listMetadataFormats(root, metadata_dict, verb, identifier),
+            'ListSets': lambda: oai.listSets(root, verb, resumption_token),
+        }
+
+        # Get the handler function for the specified verb
+        handler = verb_handlers.get(verb)
+
+        if handler is None:
+            request_element = etree.SubElement(root, 'request')
+            request_element.text = f"{oai.repository_base_url}"
+            error_element = Errors.badVerb()
+            root.append(error_element)
+        else:
+            response_xml = handler()
+
+        # Serialize the XML tree to a string
+        response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
+
+        return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
 
     @app.route('/logout')
     def logout(next_url=None):
