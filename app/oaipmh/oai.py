@@ -157,7 +157,7 @@ class OAI():
             error_element = Errors.noRecordsMatch()
             root.append(error_element)
         else:
-            for record_identifier, record_datestamp in metadata_dict.items():
+            for record_identifier in list(metadata_dict.keys()):
                 record_element = etree.Element('record')
 
                 header_element = etree.Element('header')
