@@ -657,6 +657,7 @@ class IMDashboardTests(unittest.TestCase):
                    b'<dc:title>Deploy a VM</dc:title>\n  <dc:subject>VM</dc:subject>\n  <dc:relation/>\n</oai_dc:dc>\n'
                    b'      </metadata>\n    </record>\n  </ListRecords>\n</OAI-PMH>\n')
         self.assertIn(ini_res, res.data)
+        self.assertIn(end_res, res.data)
 
         tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
         res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
