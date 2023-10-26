@@ -1489,12 +1489,34 @@ def create_app(oidc_blueprint=None):
 
         # Create a dictionary mapping verbs to functions
         verb_handlers = {
-            'GetRecord': lambda metadata_dict = metadata_dict: oai.getRecord(root, metadata_dict, verb, identifier, metadata_prefix),
-            'Identify': lambda: oai.identify(root, verb),
-            'ListIdentifiers': lambda metadata_dict = metadata_dict: oai.listIdentifiers(root, metadata_dict, verb, metadata_prefix, from_date, until_date, set_spec, resumption_token),
-            'ListRecords': lambda metadata_dict = metadata_dict: oai.listRecords(root, metadata_dict, verb, metadata_prefix, from_date, until_date, set_spec, resumption_token),
-            'ListMetadataFormats': lambda metadata_dict = metadata_dict: oai.listMetadataFormats(root, metadata_dict, verb, identifier),
-            'ListSets': lambda: oai.listSets(root, verb, resumption_token),
+            "GetRecord": lambda metadata_dict = metadata_dict: oai.getRecord(
+                root, metadata_dict, verb, identifier, metadata_prefix
+            ),
+            "Identify": lambda: oai.identify(root, verb),
+            "ListIdentifiers": lambda metadata_dict = metadata_dict: oai.listIdentifiers(
+                root,
+                metadata_dict,
+                verb,
+                metadata_prefix,
+                from_date,
+                until_date,
+                set_spec,
+                resumption_token,
+            ),
+            "ListRecords": lambda metadata_dict = metadata_dict: oai.listRecords(
+                root,
+                metadata_dict,
+                verb,
+                metadata_prefix,
+                from_date,
+                until_date,
+                set_spec,
+                resumption_token,
+            ),
+            "ListMetadataFormats": lambda metadata_dict = metadata_dict: oai.listMetadataFormats(
+                root, metadata_dict, verb, identifier
+            ),
+            "ListSets": lambda: oai.listSets(root, verb, resumption_token),
         }
 
         # Get the handler function for the specified verb
@@ -1507,9 +1529,6 @@ def create_app(oidc_blueprint=None):
             root.append(error_element)
         else:
             response_xml = handler()
-
-        # Serialize the XML tree to a string
-        response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
 
         return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
 

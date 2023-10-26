@@ -16,7 +16,7 @@ class OAI():
         self.repository_protocol_version = "2.0"
 
         self.valid_metadata_formats = ['oai_dc', 'oai_openaire']
-    
+
         self.formats = [
             {
                 'metadataPrefix': 'oai_dc',
@@ -30,7 +30,6 @@ class OAI():
             },
         ]
 
-
     @staticmethod
     def baseXMLTree():
         root = etree.Element('OAI-PMH')
@@ -40,7 +39,7 @@ class OAI():
 
         # Set the xsi:schemaLocation attribute
         root.set('{http://www.w3.org/2001/XMLSchema-instance}schemaLocation',
-                'http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd')
+                 'http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd')
 
         root.set('xmlns', 'http://www.openarchives.org/OAI/2.0/')
 
@@ -51,7 +50,6 @@ class OAI():
 
         return root
 
-    
     def getRecord(self, root, metadata_dict, verb, identifier, metadata_prefix):
         self.addRequestElement(root, verb=verb, identifier=identifier, metadata_prefix=metadata_prefix)
 
@@ -61,18 +59,18 @@ class OAI():
             return etree.tostring(root, pretty_print=True, encoding='unicode')
 
         if not self.validMetadataPrefix(metadata_prefix):
-                error_element = Errors.cannotDisseminateFormat()
-                root.append(error_element)
-                return etree.tostring(root, pretty_print=True, encoding='unicode')
-        
+            error_element = Errors.cannotDisseminateFormat()
+            root.append(error_element)
+            return etree.tostring(root, pretty_print=True, encoding='unicode')
+
         identifier = identifier
         name_identifier = identifier.split('templates/')[1]
-        
+
         if name_identifier not in metadata_dict:
             error_element = Errors.idDoesNotExist()
             root.append(error_element)
             return etree.tostring(root, pretty_print=True, encoding='unicode')
-                
+
         record_data = self.recordByIdentifier(metadata_dict, identifier)
 
         get_record_element = etree.SubElement(root, 'GetRecord')
@@ -89,7 +87,7 @@ class OAI():
 
         if metadata_prefix == 'oai_dc':
             metadata_xml = self.mapDC(record_data)
-        
+
         if metadata_prefix == 'oai_openaire':
             metadata_xml = self.mapOAIRE(record_data)
 
@@ -101,9 +99,11 @@ class OAI():
         self.addIdentifyElements(identify_element)
 
         return etree.tostring(root, pretty_print=True, encoding='unicode')
-        
-    def listIdentifiers(self, root, metadata_dict, verb, metadata_prefix, from_date=None, until_date=None, set_spec=None, resumption_token=None):
-        self.addRequestElement(root, verb, metadata_prefix=metadata_prefix, from_date=from_date, until_date=until_date, set_spec=None, resumption_token=resumption_token)
+
+    def listIdentifiers(self, root, metadata_dict, verb, metadata_prefix, from_date=None,
+                        until_date=None, set_spec=None, resumption_token=None):
+        self.addRequestElement(root, verb, metadata_prefix=metadata_prefix, from_date=from_date,
+                               until_date=until_date, set_spec=None, resumption_token=resumption_token)
 
         from_date_dt = None
         until_date_dt = None
@@ -112,7 +112,7 @@ class OAI():
             error_element = Errors.badResumptionToken()
             root.append(error_element)
             return etree.tostring(root, pretty_print=True, encoding='unicode')
-            
+
         if set_spec is not None:
             error_element = Errors.noSetHierarchy()
             root.append(error_element)
@@ -142,12 +142,13 @@ class OAI():
 
         # for record_identifier, record_data in metadata_dict.items():
         #     record_date_str = record_data["metadata"]["date"]
-        
+
         #     # Convert the date string to a datetime object
         #     record_date = datetime.strptime(record_date_str, "%Y-%m-%d")
-            
-        #     if (from_date_dt is None or record_date >= from_date_dt) and (until_date_dt is None or record_date <= until_date_dt):
-        #         filtered_identifiers.append((record_identifier, record_date_str))
+
+            # if (from_date_dt is None or record_date >= from_date_dt) and \
+            #     (until_date_dt is None or record_date <= until_date_dt):
+            #     filtered_identifiers.append((record_identifier, record_date_str))
 
         # Create the ListIdentifiers element
         list_identifiers_element = etree.Element('ListIdentifiers')
@@ -199,8 +200,10 @@ class OAI():
 
         return etree.tostring(root, pretty_print=True, encoding='unicode')
 
-    def listRecords(self, root, metadata_dict, verb, metadata_prefix, from_date=None, until_date=None, set_spec=None, resumption_token=None):
-        self.addRequestElement(root, verb, metadata_prefix=metadata_prefix, from_date=from_date, until_date=until_date, set_spec=set_spec, resumption_token=resumption_token)
+    def listRecords(self, root, metadata_dict, verb, metadata_prefix, from_date=None,
+                    until_date=None, set_spec=None, resumption_token=None):
+        self.addRequestElement(root, verb, metadata_prefix=metadata_prefix, from_date=from_date,
+                               until_date=until_date, set_spec=set_spec, resumption_token=resumption_token)
 
         from_date_dt = None
         until_date_dt = None
@@ -243,9 +246,10 @@ class OAI():
 
         #     # Convert the date string to a datetime object
         #     record_date = datetime.strptime(record_date_str, "%Y-%m-%d")
-                
-        #     if (from_date_dt is None or record_date >= from_date_dt) and (until_date_dt is None or record_date <= until_date_dt):
-        #         filtered_identifiers.append((record_identifier, record_date_str, record_metadata))
+
+            # if (from_date_dt is None or record_date >= from_date_dt) and \
+            #     (until_date_dt is None or record_date <= until_date_dt):
+            #     filtered_identifiers.append((record_identifier, record_date_str, record_metadata))
 
         list_records_element = etree.Element('ListRecords')
 
@@ -266,7 +270,7 @@ class OAI():
 
                 if metadata_prefix == 'oai_dc':
                     metadata_xml = self.mapDC(record_metadata)
-                    
+
                 if metadata_prefix == 'oai_openaire':
                     metadata_xml = self.mapOAIRE(record_metadata)
 
@@ -277,7 +281,7 @@ class OAI():
                 header_element.append(datestamp_element)
                 record_element.append(header_element)
                 record_element.append(metadata_element)
-                    
+
                 list_records_element.append(record_element)
 
         root.append(list_records_element)
@@ -286,12 +290,11 @@ class OAI():
 
     def listSets(self, root, verb, set_spec=False, resumption_token=None):
         self.addRequestElement(root, verb)
-        
+
         error_element = Errors.noSetHierarchy()
         root.append(error_element)
 
         return etree.tostring(root, pretty_print=True, encoding='unicode')
-
 
     def addMetadataFormatElement(self, parent_element, format_info):
         metadata_prefix_element = etree.SubElement(parent_element, 'metadataPrefix')
@@ -325,39 +328,40 @@ class OAI():
         admin_email_element = etree.SubElement(identify_element, 'adminEmail')
         admin_email_element.text = self.repository_admin_email
 
-    def addRequestElement(self, root, verb=None, metadata_prefix=None, identifier=None, from_date=None, until_date=None, set_spec=None, resumption_token=None):
-            if verb:
-                # Create the request element and add the verb attribute
-                request_element = etree.Element('request', verb=verb)
+    def addRequestElement(self, root, verb=None, metadata_prefix=None, identifier=None,
+                          from_date=None, until_date=None, set_spec=None, resumption_token=None):
+        if verb:
+            # Create the request element and add the verb attribute
+            request_element = etree.Element('request', verb=verb)
 
-                # Add additional attributes to the request element when necessary
-                if metadata_prefix:
-                    request_element.set('metadataPrefix', metadata_prefix)
+            # Add additional attributes to the request element when necessary
+            if metadata_prefix:
+                request_element.set('metadataPrefix', metadata_prefix)
 
-                if identifier:
-                    request_element.set('identifier', identifier)
+            if identifier:
+                request_element.set('identifier', identifier)
 
-                if from_date:
-                    request_element.set('from', from_date)
+            if from_date:
+                request_element.set('from', from_date)
 
-                if until_date:
-                    request_element.set('until', until_date)
+            if until_date:
+                request_element.set('until', until_date)
 
-                if set_spec:
-                    request_element.set('setSpec', set_spec)
+            if set_spec:
+                request_element.set('setSpec', set_spec)
 
-                if resumption_token:
-                    request_element.set('resumptionToken', resumption_token)
+            if resumption_token:
+                request_element.set('resumptionToken', resumption_token)
 
-                # Set the text content of the request element
-                request_element.text = f"{self.repository_base_url}"
+            # Set the text content of the request element
+            request_element.text = f"{self.repository_base_url}"
 
-                # Append the request element to the root
-                root.append(request_element)
+            # Append the request element to the root
+            root.append(request_element)
 
     def validMetadataPrefix(self, metadata_prefix):
         if metadata_prefix in self.valid_metadata_formats:
-                return True
+            return True
 
     def recordByIdentifier(self, metadata_dict, identifier):
         for record_name, record_metadata in metadata_dict.items():
@@ -384,7 +388,8 @@ class OAI():
         })
 
         # Add xsi:schemaLocation attribute
-        root.set('{http://www.w3.org/2001/XMLSchema-instance}schemaLocation', 'http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd')
+        root.set('{http://www.w3.org/2001/XMLSchema-instance}schemaLocation',
+                 'http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd')
 
         # Define the DataCite namespace and associate it with the root element
         nsmap = {
@@ -414,15 +419,19 @@ class OAI():
                 date_element.text = value
                 root.append(date_element)
             if key == 'resource_type':
-                resource_type_element = etree.Element('{http://namespace.openaire.eu/schema/oaire/}resourceType', resourceTypeGeneral="software", uri="http://purl.org/coar/resource_type/c_5ce6")
+                resource_type_element = etree.Element('{http://namespace.openaire.eu/schema/oaire/}resourceType',
+                                                      resourceTypeGeneral="software",
+                                                      uri="http://purl.org/coar/resource_type/c_5ce6")
                 resource_type_element.text = value
                 root.append(resource_type_element)
             if key == 'identifier':
-                identifier_element = etree.Element('{http://datacite.org/schema/kernel-4}identifier', identifierType="URN")
+                identifier_element = etree.Element('{http://datacite.org/schema/kernel-4}identifier',
+                                                   identifierType="URN")
                 identifier_element.text = value
                 root.append(identifier_element)
             if key == 'rights':
-                rights_element = etree.Element('{http://datacite.org/schema/kernel-4}rights', rightsURI="http://purl.org/coar/access_right/c_abf2")
+                rights_element = etree.Element('{http://datacite.org/schema/kernel-4}rights',
+                                               rightsURI="http://purl.org/coar/access_right/c_abf2")
                 rights_element.text = value
                 root.append(rights_element)
             if key == 'publisher':
@@ -438,17 +447,18 @@ class OAI():
                 subject_element.text = value
                 root.append(subject_element)
             if key == 'related_identifier':
-                related_identifier_element = etree.Element('{http://datacite.org/schema/kernel-4}relatedIdentifier', relatedIdentifierType="DOI", relationType="isContinuedBy")
+                related_identifier_element = etree.Element('{http://datacite.org/schema/kernel-4}relatedIdentifier',
+                                                           relatedIdentifierType="DOI", relationType="isContinuedBy")
                 related_identifier_element.text = value
                 root.append(related_identifier_element)
             if key == 'format':
                 format_element = etree.Element('{http://purl.org/dc/elements/1.1/}format')
                 format_element.text = value
                 root.append(format_element)
-        
+
         # Serialize the XML to a string
         xml_string = etree.tostring(root, pretty_print=True, encoding='unicode')
-        
+
         return xml_string
 
     def mapDC(self, metadata_dict):
@@ -459,7 +469,8 @@ class OAI():
         })
 
         # Add xsi:schemaLocation attribute
-        root.set('{http://www.w3.org/2001/XMLSchema-instance}schemaLocation', 'http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd')
+        root.set('{http://www.w3.org/2001/XMLSchema-instance}schemaLocation',
+                 'http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd')
 
         # Define the DataCite namespace and associate it with the root element
         nsmap = {
@@ -519,9 +530,8 @@ class OAI():
                 related_identifier_element = etree.Element('{http://purl.org/dc/elements/1.1/}description')
                 related_identifier_element.text = value
                 root.append(related_identifier_element)
-            
-        
+
         # Serialize the XML to a string
         xml_string = etree.tostring(root, pretty_print=True, encoding='unicode')
-        
+
         return xml_string
