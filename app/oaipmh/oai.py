@@ -202,9 +202,6 @@ class OAI():
         self.addRequestElement(root, verb, metadata_prefix=metadata_prefix, from_date=from_date,
                                until_date=until_date, set_spec=set_spec, resumption_token=resumption_token)
 
-        from_date_dt = None
-        until_date_dt = None
-
         if resumption_token is not None:
             error_element = Errors.badResumptionToken()
             root.append(error_element)
