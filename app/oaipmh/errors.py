@@ -2,6 +2,7 @@ from lxml import etree
 
 class Errors():
 
+    @staticmethod
     def badVerb():
         # Create the root element with the specified verb
         error = etree.Element('error')
@@ -9,7 +10,8 @@ class Errors():
         error.text = 'Value of the verb argument is not a legal OAI-PMH verb, the verb argument is missing, or the verb argument is repeated.'
 
         return error
-        
+
+    @staticmethod
     def badArgument():
         # Create the root element with the specified verb
         error = etree.Element('error')
@@ -18,6 +20,7 @@ class Errors():
 
         return error
 
+    @staticmethod
     def cannotDisseminateFormat():
         # Create the root element with the specified verb
         error = etree.Element('error')
@@ -26,6 +29,7 @@ class Errors():
 
         return error
 
+    @staticmethod
     def idDoesNotExist():
         # Create the root element with the specified verb
         error = etree.Element('error')
@@ -34,6 +38,7 @@ class Errors():
 
         return error
 
+    @staticmethod
     def badResumptionToken():
         # Create the root element with the specified verb
         error = etree.Element('error')
@@ -42,6 +47,7 @@ class Errors():
 
         return error
 
+    @staticmethod
     def noRecordsMatch():
         # Create the root element with the specified verb
         error = etree.Element('error')
@@ -50,6 +56,7 @@ class Errors():
 
         return error
 
+    @staticmethod
     def noMetadataFormats():
         # Create the root element with the specified verb
         error = etree.Element('error')
@@ -58,6 +65,7 @@ class Errors():
 
         return error
 
+    @staticmethod
     def noSetHierarchy():
         # Create the root element with the specified verb
         error = etree.Element('error')
