@@ -1,12 +1,10 @@
 from lxml import etree
 from datetime import datetime
-from app import utils
-from app.settings import Settings
 from app.oaipmh.errors import Errors
 
 
 class OAI():
-    
+
     def __init__(self):
         self.repository_name = "Repositorio de recetas TOSCA del IM"
         self.repository_base_url = "http://158.42.104.43:5000/oai"
@@ -33,6 +31,7 @@ class OAI():
         ]
 
 
+    @staticmethod
     def baseXMLTree():
         root = etree.Element('OAI-PMH')
 
