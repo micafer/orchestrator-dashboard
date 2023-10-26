@@ -721,7 +721,11 @@ def create_app(oidc_blueprint=None):
                     if child in toscaInfo and utils.valid_template_vos(session['vos'], toscaInfo[child]["metadata"]):
                         child_templates[child] = toscaInfo[child]
                         if "inputs" in toscaInfo[child]:
-                            selected_template["inputs"].update(toscaInfo[child]["inputs"])
+                            for k, v in toscaInfo[child]["inputs"].items():
+                                if k not in selected_template["inputs"]:
+                                    selected_template["inputs"][k] = v
+                                else:
+                                    selected_template["inputs"][k].update(v)
                         if "tabs" in toscaInfo[child]:
                             selected_template["tabs"].extend(toscaInfo[child]["tabs"])
             else:
@@ -970,7 +974,7 @@ def create_app(oidc_blueprint=None):
         image = None
         priv_network_id = None
         pub_network_id = None
-        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE']:
+        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE', 'CH']:
             if cred_data['type'] == 'fedcloud':
                 site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
                 if "networks" in site and vo in site["networks"]:
