@@ -718,7 +718,7 @@ def create_app(oidc_blueprint=None):
                     if child in toscaInfo and utils.valid_template_vos(session['vos'], toscaInfo[child]["metadata"]):
                         child_templates[child] = toscaInfo[child]
                         if "inputs" in toscaInfo[child]:
-                            for k,v in toscaInfo[child]["inputs"].items():
+                            for k, v in toscaInfo[child]["inputs"].items():
                                 if k not in selected_template["inputs"]:
                                     selected_template["inputs"][k] = v
                                 else:
