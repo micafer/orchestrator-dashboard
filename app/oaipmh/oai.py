@@ -93,6 +93,8 @@ class OAI():
 
         metadata_element.append(etree.fromstring(metadata_xml))
 
+        return etree.tostring(metadata_element, pretty_print=True, encoding='unicode')
+
     def identify(self, root, verb):
         self.addRequestElement(root, verb)
         identify_element = etree.SubElement(root, 'Identify')
