@@ -35,14 +35,30 @@ class TestDBCredentials(unittest.TestCase):
     def test_creds(self):
         creds = DBCredentials("sqlite:///tmp/creds.db")
         creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username":
-                                             "user", "password": "pass"}, True)
+                                             "user", "password": "pass", "host": "host"}, True)
 
         res = creds.get_cred("credid", "user")
-        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user", "password": "pass", "enabled": 1})
+        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user", "password": "pass", "host": "host", "enabled": 1})
 
-        creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username": "user1"})
+        creds.write_creds("credid", "user", {"id": "credid", "type": "type", "username": "user1", "host": "host"})
         res = creds.get_cred("credid", "user")
-        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "enabled": 1})
+        self.assertEqual(res, {"id": "credid", "type": "type", "username": "user1", "password": "pass", "host": "host", "enabled": 1})
+
+        new_cred = {"id": "credid", "type": "type", "username": "user1", "password": "pass", "host": "host"}
+        res = creds.validate_cred("user", new_cred)
+        self.assertEqual(res, (1, 'Duplicated ID.'))
+
+        new_cred = {"id": "credid1", "type": "type", "username": "user1", "password": "pass", "host": "host"}
+        res = creds.validate_cred("user", new_cred)
+        self.assertEqual(res, (1, 'Credentials already available.'))
+
+        new_cred = {"id": "credid2", "type": "type", "username": "user2", "password": "pass", "host": "host"}
+        res = creds.validate_cred("user", new_cred)
+        self.assertEqual(res[0], 2)
+
+        new_cred = {"id": "credid2", "type": "type", "username": "user2", "password": "pass", "host": "host2"}
+        res = creds.validate_cred("user", new_cred)
+        self.assertEqual(res[0], 0)
 
         creds.delete_cred("credid", "user")
         res = creds.get_cred("credid", "user")
