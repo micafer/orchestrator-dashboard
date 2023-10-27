@@ -629,6 +629,18 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("VMs 1,2 successfully deleted.", 'success'))
 
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.get')
+    @patch("app.utils.avatar")
+    @patch("app.infra")
+    def test_infrastructure_state(self, infra, avatar, get, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get.side_effect = self.get_response
+        self.login(avatar)
+        res = self.client.get('/infrastructures/state?infid=infid')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(b'{"state":"configured","vm_states":{"0":"configured"}}\n', res.data)
+
     @patch("app.utils.getIMUserAuthData")
     @patch('requests.get')
     @patch("app.utils.avatar")
