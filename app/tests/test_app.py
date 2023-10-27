@@ -641,6 +641,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
 
     def test_oai(self):
+        # Test ListRecords
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
         self.assertEqual(200, res.status_code)
         ini_res = (b'<OAI-PMH xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
@@ -659,6 +660,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(ini_res, res.data)
         self.assertIn(end_res, res.data)
 
+        # Test GetRecord
         tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
         res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
         print(res.data)
@@ -671,3 +673,8 @@ class IMDashboardTests(unittest.TestCase):
                    b'<dc:relation/>\n</oai_dc:dc>\n</metadata>\n')
         self.assertEqual(200, res.status_code)
         self.assertEqual(exp_res, res.data)
+
+        # Test Identify
+        res = self.client.get('/oai?verb=Identify')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b'<repositoryName>Repositorio de recetas TOSCA del IM</repositoryName>', res.data)
