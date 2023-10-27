@@ -677,4 +677,4 @@ class IMDashboardTests(unittest.TestCase):
         # Test Identify
         res = self.client.get('/oai?verb=Identify')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'<repositoryName>Repositorio de recetas TOSCA del IM</repositoryName>', res.data)
+        self.assertIn(b'<repositoryName>IM Dashboard</repositoryName>', res.data)

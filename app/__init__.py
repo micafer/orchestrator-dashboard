@@ -1461,8 +1461,12 @@ def create_app(oidc_blueprint=None):
 
     @app.route('/oai', methods=['GET', 'POST'])
     def oai_pmh():
+        if not settings.oaipmh_repo_name:
+            return make_response("OAI-PMH not enabled.", 404, {'Content-Type': 'text/plain'})
+
         response_xml = None
-        oai = OAI()
+        oai = OAI(settings.oaipmh_repo_name, request.base_url, settings.oaipmh_repo_description,
+                  settings.oaipmh_repo_base_identifier_url)
         root = OAI.baseXMLTree()
 
         if request.method == 'GET':
