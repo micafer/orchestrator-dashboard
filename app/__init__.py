@@ -35,11 +35,12 @@ from app.vault_cred import VaultCredentials
 from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app.ssh_key import SSHKey
+from app.ott import OneTimeTokenData
 from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
+from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
@@ -68,6 +69,7 @@ def create_app(oidc_blueprint=None):
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
     ssh_key = SSHKey(settings.db_url)
     vault_info = VaultInfo(settings.db_url)
+    ott = OneTimeTokenData(settings.db_url)
 
     # To Reload internally the site cache
     scheduler = APScheduler()
@@ -821,6 +823,19 @@ def create_app(oidc_blueprint=None):
         except Exception as ex:
             return "Error loading site quotas: %s!" % str(ex), 400
 
+    @app.route('/get_auth')
+    def get_auth():
+        try:
+            auth = request.headers.get('Authorization')
+            if auth and auth.startswith('Bearer '):
+                token = auth.split(' ')[1]
+                data = ott.get_data(token)
+                return make_response(data, 200, {"Content-Type": "text/plain"})
+            else:
+                return make_response("Unauthorized", 401)
+        except Exception as ex:
+            return make_response("Invalid request: %s" % ex, 400)
+
     def add_image_to_template(template, image):
         # Add the image to all compute nodes
 
@@ -847,7 +862,8 @@ def create_app(oidc_blueprint=None):
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
                 if "properties" not in node:
                     node["properties"] = {}
-                node["properties"]["im_auth"] = auth_data
+                node["properties"]["im_auth"] = {"token": ott.write_data(auth_data),
+                                                 "url": url_for('get_auth', _external=True)}
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
 
