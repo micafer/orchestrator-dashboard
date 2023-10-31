@@ -26,7 +26,7 @@ from uuid import uuid4
 class OneTimeTokenData():
 
     def __init__(self, ott_db, ttl=86400):
-        self._ott_db = DataBase(ott_db)
+        self._ott_db = ott_db
         self.ttl = ttl
 
     def _get_ott_db(self):
@@ -43,23 +43,23 @@ class OneTimeTokenData():
         try:
             now = int(time.time())
             db = self._get_ott_db()
-            res = db.select("select token, data, exp from ott token = %s and exp < %s", (token, now))
+            res = db.select("select token, data, exp from ott where token = %s and exp > %s", (token, now))
             if len(res) > 0:
                 data = res[0][1]
-            db.execute("delete from token where token = %s", (token,))
+            db.execute("delete from ott where token = %s", (token,))
             # Clean expired tokens
-            db.execute("delete from ott where exp > %s", (now,))
+            db.execute("delete from ott where exp < %s", (now,))
             db.close()
         except Exception as e:
             pass
         return data
 
     def write_data(self, data):
-        token = uuid4()
+        token = str(uuid4())
         now = int(time.time())
         db = self._get_ott_db()
         db.execute("insert into ott (token, data, exp) values (%s, %s, %s)", (token, data, now + self.ttl))
         # Clean expired tokens
-        db.execute("delete from ott where exp > %s", (now,))
+        db.execute("delete from ott where exp < %s", (now,))
         db.close()
         return token
