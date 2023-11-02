@@ -26,7 +26,7 @@ class OneTimeTokenData():
 
     VAULT_LOCKER_MOUNT_POINT = "/cubbyhole/"
 
-    def __init__(self, vault_url, role="", ttl=86400, num_uses=2):
+    def __init__(self, vault_url, role="", ttl="3h", num_uses=2):
         self.vault_url = vault_url
         self.role = role
         self.ttl = ttl
@@ -41,7 +41,7 @@ class OneTimeTokenData():
         client.auth.jwt.jwt_login(role=self.role, jwt=access_token)
         client.auth.token.renew_self(increment=self.ttl)
         locker_token = client.auth.token.create(
-            policies=["default"], ttl=self.ttl, num_uses=self.num_uses, renewable=False
+            policies=["default"], ttl=self.ttl, num_uses=self.num_uses, renewable=True, explicit_max_ttl=self.ttl,
         )
         return locker_token["auth"]["client_token"]
 
@@ -54,13 +54,12 @@ class OneTimeTokenData():
         client = hvac.Client(url=self.vault_url, token=locker_token)
         if command == "read_secret":
             resp = client.read(self.VAULT_LOCKER_MOUNT_POINT + path)
-            return resp.get("data").get("data")
+            return resp.get("data").get("data").replace("\\n", "\n")
         elif command == "put":
             resp = client.write(self.VAULT_LOCKER_MOUNT_POINT + path, data=data)
             return None
         else:
             raise Exception(f"Invalid command {command}")
-        
 
     def write_data(self, access_token, data):
         token = self._create(access_token)
