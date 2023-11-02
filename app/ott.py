@@ -19,14 +19,12 @@
 # specific language governing permissions and limitations
 # under the License.
 """Class to manage data using One Time Tokens (OTT)."""
-import time
 import hvac
-import requests
 from uuid import uuid4
 
 class OneTimeTokenData():
 
-    VAULT_LOCKER_MOUNT_POINT = "/v1/cubbyhole/"
+    VAULT_LOCKER_MOUNT_POINT = "/cubbyhole/"
 
     def __init__(self, vault_url, role="", ttl=86400, num_uses=2):
         self.vault_url = vault_url
@@ -55,10 +53,10 @@ class OneTimeTokenData():
         """
         client = hvac.Client(url=self.vault_url, token=locker_token)
         if command == "read_secret":
-            resp = client.read("/cubbyhole/"+ path)
+            resp = client.read(self.VAULT_LOCKER_MOUNT_POINT + path)
             return resp.get("data").get("data")
         elif command == "put":
-            resp = client.write("/cubbyhole/"+ path, data=data)
+            resp = client.write(self.VAULT_LOCKER_MOUNT_POINT + path, data=data)
             return None
         else:
             raise Exception(f"Invalid command {command}")
