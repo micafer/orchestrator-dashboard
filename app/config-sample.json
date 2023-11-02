@@ -24,6 +24,5 @@
     "ENABLE_EXTERNAL_VAULT": false,
     "VO_MAP": {},
     "EXTRA_AUTH": {},
-    "HIDE_TOSCA_TAGS": [],
-    "LOCK_VAULT_URL": ""
+    "HIDE_TOSCA_TAGS": []
 }

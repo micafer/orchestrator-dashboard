@@ -69,7 +69,7 @@ def create_app(oidc_blueprint=None):
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
     ssh_key = SSHKey(settings.db_url)
     vault_info = VaultInfo(settings.db_url)
-    ott = OneTimeTokenData(settings.db_url)
+    ott = OneTimeTokenData(settings.vault_url)
 
     # To Reload internally the site cache
     scheduler = APScheduler()
@@ -823,13 +823,13 @@ def create_app(oidc_blueprint=None):
         except Exception as ex:
             return "Error loading site quotas: %s!" % str(ex), 400
 
-    @app.route('/get_auth')
-    def get_auth():
+    @app.route('/get_auth/<path>')
+    def get_auth(path=None):
         try:
             auth = request.headers.get('Authorization')
             if auth and auth.startswith('Bearer '):
                 token = auth.split(' ')[1]
-                data = ott.get_data(token)
+                data = ott.get_data(path, token)
                 return make_response(data, 200, {"Content-Type": "text/plain"})
             else:
                 return make_response("Unauthorized", 401)
@@ -855,15 +855,16 @@ def create_app(oidc_blueprint=None):
 
         return template
 
-    def add_auth_to_template(template, auth_data):
+    def add_auth_to_template(template, access_token, auth_data):
         # Add the auth_data ElasticCluster node
 
         for node in list(template['topology_template']['node_templates'].values()):
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
                 if "properties" not in node:
                     node["properties"] = {}
-                node["properties"]["im_auth"] = {"token": ott.write_data(auth_data),
-                                                 "url": url_for('get_auth', _external=True)}
+                token, path = ott.write_data(access_token, auth_data)
+                node["properties"]["im_auth"] = {"token": token,
+                                                 "url": url_for('get_auth', path=path, _external=True)}
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
 

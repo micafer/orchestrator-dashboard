@@ -20,46 +20,55 @@
 # under the License.
 """Class to manage data using One Time Tokens (OTT)."""
 import time
-from app.db import DataBase
+import hvac
+import requests
 from uuid import uuid4
 
 class OneTimeTokenData():
 
-    def __init__(self, ott_db, ttl=86400):
-        self._ott_db = ott_db
+    VAULT_LOCKER_MOUNT_POINT = "/v1/cubbyhole/"
+
+    def __init__(self, vault_url, role="", ttl=86400, num_uses=2):
+        self.vault_url = vault_url
+        self.role = role
         self.ttl = ttl
+        self.num_uses = num_uses
 
-    def _get_ott_db(self):
-        db = DataBase(self._ott_db)
-        if db.connect():
-            if not db.table_exists("ott"):
-                db.execute("CREATE TABLE ott(token VARCHAR(255), data VARCHAR(255), exp INTEGER, PRIMARY KEY (token))")
+    def _create(self, access_token):
+        """
+        Create a locker and return the locker token
+        from fedcloudclient. Thanks ti @tdviet
+        """
+        client = hvac.Client(url=self.vault_url)
+        client.auth.jwt.jwt_login(role=self.role, jwt=access_token)
+        client.auth.token.renew_self(increment=self.ttl)
+        locker_token = client.auth.token.create(
+            policies=["default"], ttl=self.ttl, num_uses=self.num_uses, renewable=False
+        )
+        return locker_token["auth"]["client_token"]
+
+
+    def locker_client(self, locker_token, command, path, data=None):
+        """
+        Manage locker data.
+        from fedcloudclient. Thanks to @tdviet
+        """
+        client = hvac.Client(url=self.vault_url, token=locker_token)
+        if command == "read_secret":
+            resp = client.read("/cubbyhole/"+ path)
+            return resp.get("data").get("data")
+        elif command == "put":
+            resp = client.write("/cubbyhole/"+ path, data=data)
+            return None
         else:
-            raise Exception("Error connecting DB: %s" % self.url)
-        return db
+            raise Exception(f"Invalid command {command}")
+        
 
-    def get_data(self, token):
-        data = None
-        try:
-            now = int(time.time())
-            db = self._get_ott_db()
-            res = db.select("select token, data, exp from ott where token = %s and exp > %s", (token, now))
-            if len(res) > 0:
-                data = res[0][1]
-            db.execute("delete from ott where token = %s", (token,))
-            # Clean expired tokens
-            db.execute("delete from ott where exp < %s", (now,))
-            db.close()
-        except Exception as e:
-            pass
-        return data
+    def write_data(self, access_token, data):
+        token = self._create(access_token)
+        path = str(uuid4())
+        self.locker_client(token, "put", path, data)
+        return token, path
 
-    def write_data(self, data):
-        token = str(uuid4())
-        now = int(time.time())
-        db = self._get_ott_db()
-        db.execute("insert into ott (token, data, exp) values (%s, %s, %s)", (token, data, now + self.ttl))
-        # Clean expired tokens
-        db.execute("delete from ott where exp < %s", (now,))
-        db.close()
-        return token
+    def get_data(self, path, token):
+        return self.locker_client(token, "read_secret", path)
