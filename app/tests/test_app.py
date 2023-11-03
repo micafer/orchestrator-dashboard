@@ -719,6 +719,7 @@ class IMDashboardTests(unittest.TestCase):
 
         self.assertEqual(root.find(".//oaipmh:metadataPrefix", namespace).text, "oai_dc")
 
+        # Test OAI path
         res = self.client.get('/oai')
         self.assertEqual(200, res.status_code)
 
