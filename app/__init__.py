@@ -1055,7 +1055,7 @@ def create_app(oidc_blueprint=None):
 
         template = add_image_to_template(template, image)
 
-        template = add_auth_to_template(template, auth_data)
+        template = add_auth_to_template(template, access_token, auth_data)
 
         template = add_ssh_keys_to_template(template)
 
