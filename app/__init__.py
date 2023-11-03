@@ -1531,6 +1531,7 @@ def create_app(oidc_blueprint=None):
             request_element.text = f"{oai.repository_base_url}"
             error_element = Errors.badVerb()
             root.append(error_element)
+            response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
         else:
             response_xml = handler()
 
