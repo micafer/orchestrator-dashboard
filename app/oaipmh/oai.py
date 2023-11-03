@@ -428,15 +428,15 @@ class OAI():
                 title_element = etree.Element('{http://datacite.org/schema/kernel-4}title')
                 title_element.text = value
                 root.append(title_element)
-            if key == 'creator':
+            if key == 'author':
                 creator_element = etree.Element('{http://datacite.org/schema/kernel-4}creator')
                 creator_name_element = etree.Element('{http://datacite.org/schema/kernel-4}creatorName')
                 creator_name_element.text = value
                 creator_element.append(creator_name_element)
                 root.append(creator_element)
-            if key == 'date':
+            if key == 'creation_date':
                 date_element = etree.Element('{http://datacite.org/schema/kernel-4}date', dateType="Issued")
-                date_element.text = value
+                date_element.text = value.strftime("%Y-%m-%d")
                 root.append(date_element)
             if key == 'resource_type':
                 resource_type_element = etree.Element('{http://namespace.openaire.eu/schema/oaire/}resourceType',
@@ -505,13 +505,13 @@ class OAI():
                 title_element = etree.Element('{http://purl.org/dc/elements/1.1/}title')
                 title_element.text = value
                 root.append(title_element)
-            if key == 'creator':
+            if key == 'author':
                 creator_element = etree.Element('{http://purl.org/dc/elements/1.1/}creator')
                 creator_element.text = value
                 root.append(creator_element)
-            if key == 'date':
+            if key == 'creation_date':
                 date_element = etree.Element('{http://purl.org/dc/elements/1.1/}date')
-                date_element.text = value
+                date_element.text = value.strftime("%Y-%m-%d")
                 root.append(date_element)
             if key == 'resource_type':
                 resource_type_element = etree.Element('{http://purl.org/dc/elements/1.1/}type')

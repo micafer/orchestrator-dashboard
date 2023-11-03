@@ -676,8 +676,8 @@ class IMDashboardTests(unittest.TestCase):
         namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
 
         self.assertEqual(root.find(".//dc:title", namespace).text, "Deploy a VM")
-        # self.assertIsNotNone(root.find(".//dc:creator", namespace))
-        # self.assertIsNotNone(root.find(".//dc:date", namespace))
+        self.assertIsNotNone(root.find(".//dc:creator", namespace))
+        self.assertIsNotNone(root.find(".//dc:date", namespace))
         # self.assertIsNotNone(root.find(".//dc:type", namespace))
         # self.assertIsNotNone(root.find(".//dc:identifier", namespace))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace))
@@ -701,8 +701,8 @@ class IMDashboardTests(unittest.TestCase):
         namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
 
         self.assertEqual(root.find(".//dc:title", namespace).text, "Deploy a VM")
-        # self.assertIsNotNone(root.find(".//dc:creator", namespace))
-        # self.assertIsNotNone(root.find(".//dc:date", namespace))
+        self.assertIsNotNone(root.find(".//dc:creator", namespace))
+        self.assertIsNotNone(root.find(".//dc:date", namespace))
         # self.assertIsNotNone(root.find(".//dc:type", namespace))
         # self.assertIsNotNone(root.find(".//dc:identifier", namespace))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace))
