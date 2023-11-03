@@ -650,13 +650,13 @@ class IMDashboardTests(unittest.TestCase):
 
         namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
 
-        self.assertIsNotNone(root.find(".//oaipmh:repositoryName", namespace))
-        self.assertIsNotNone(root.find(".//oaipmh:baseURL", namespace))
-        self.assertIsNotNone(root.find(".//oaipmh:protocolVersion", namespace))
+        self.assertEqual(root.find(".//oaipmh:repositoryName", namespace).text, "IM Dashboard")
+        self.assertEqual(root.find(".//oaipmh:baseURL", namespace).text, "http://localhost/oai")
+        self.assertEqual(root.find(".//oaipmh:protocolVersion", namespace).text, "2.0")
         self.assertIsNotNone(root.find(".//oaipmh:earliestDatestamp", namespace))
-        self.assertIsNotNone(root.find(".//oaipmh:deletedRecord", namespace))
-        self.assertIsNotNone(root.find(".//oaipmh:granularity", namespace))
-        self.assertIsNotNone(root.find(".//oaipmh:adminEmail", namespace))
+        self.assertEqual(root.find(".//oaipmh:deletedRecord", namespace).text, "no")
+        self.assertEqual(root.find(".//oaipmh:granularity", namespace).text, "YYYY-MM-DD")
+        self.assertEqual(root.find(".//oaipmh:adminEmail", namespace).text, "admin@localhost")
 
         # Test GetRecord
         tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
@@ -667,7 +667,7 @@ class IMDashboardTests(unittest.TestCase):
 
         namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
 
-        self.assertIsNotNone(root.find(".//dc:title", namespace))
+        self.assertEqual(root.find(".//dc:title", namespace).text, "Deploy a VM")
         # self.assertIsNotNone(root.find(".//dc:creator", namespace))
         # self.assertIsNotNone(root.find(".//dc:date", namespace))
         # self.assertIsNotNone(root.find(".//dc:type", namespace))
@@ -682,7 +682,7 @@ class IMDashboardTests(unittest.TestCase):
 
         namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
 
-        self.assertIsNotNone(root.find(".//oaipmh:identifier", namespace))
+        self.assertEqual(root.find(".//oaipmh:identifier", namespace).text, "simple-node-disk.yml")
 
         # Test ListRecords
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
@@ -692,7 +692,7 @@ class IMDashboardTests(unittest.TestCase):
 
         namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
 
-        self.assertIsNotNone(root.find(".//dc:title", namespace))
+        self.assertEqual(root.find(".//dc:title", namespace).text, "Deploy a VM")
         # self.assertIsNotNone(root.find(".//dc:creator", namespace))
         # self.assertIsNotNone(root.find(".//dc:date", namespace))
         # self.assertIsNotNone(root.find(".//dc:type", namespace))
@@ -707,7 +707,7 @@ class IMDashboardTests(unittest.TestCase):
 
         namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
 
-        self.assertIsNotNone(root.find(".//oaipmh:metadataPrefix", namespace))
+        self.assertEqual(root.find(".//oaipmh:metadataPrefix", namespace).text, "oai_dc")
 
         res = self.client.get('/oai')
         self.assertEqual(200, res.status_code)
