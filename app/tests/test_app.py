@@ -1,6 +1,5 @@
 import unittest
 import json
-import re
 import xml.etree.ElementTree as etree
 from app import create_app
 from urllib.parse import urlparse
