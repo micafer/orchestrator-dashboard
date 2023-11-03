@@ -823,8 +823,8 @@ def create_app(oidc_blueprint=None):
         except Exception as ex:
             return "Error loading site quotas: %s!" % str(ex), 400
 
-    @app.route('/get_auth/<path>')
-    def get_auth(path=None):
+    @app.route('/secret/<path>')
+    def secret(path=None):
         try:
             auth = request.headers.get('Authorization')
             if auth and auth.startswith('Bearer '):
@@ -863,8 +863,8 @@ def create_app(oidc_blueprint=None):
                 if "properties" not in node:
                     node["properties"] = {}
                 token, path = ott.write_data(access_token, auth_data)
-                node["properties"]["im_auth"] = {"token": token,
-                                                 "url": url_for('get_auth', path=path, _external=True)}
+                node["properties"]["clues_auth_token"] = {"token": token,
+                                                          "url": url_for('secret', path=path, _external=True)}
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
 
