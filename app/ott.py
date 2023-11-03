@@ -22,6 +22,7 @@
 import hvac
 from uuid import uuid4
 
+
 class OneTimeTokenData():
 
     VAULT_LOCKER_MOUNT_POINT = "/cubbyhole/"
@@ -44,7 +45,6 @@ class OneTimeTokenData():
             policies=["default"], ttl=self.ttl, num_uses=self.num_uses, renewable=True, explicit_max_ttl=self.ttl,
         )
         return locker_token["auth"]["client_token"]
-
 
     def locker_client(self, locker_token, command, path, data=None):
         """
