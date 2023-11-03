@@ -642,6 +642,14 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
 
     def test_oai(self):
+        # Test OAI path
+        res = self.client.get('/oai')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badVerb')
+
         # Test Identify
         res = self.client.get('/oai?verb=Identify')
         self.assertEqual(200, res.status_code)
@@ -684,7 +692,7 @@ class IMDashboardTests(unittest.TestCase):
 
         self.assertEqual(root.find(".//oaipmh:identifier", namespace).text, "simple-node-disk.yml")
 
-        # Test ListRecords
+        # Test ListRecords oai_dc
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
         self.assertEqual(200, res.status_code)
 
@@ -719,10 +727,10 @@ class IMDashboardTests(unittest.TestCase):
 
         self.assertEqual(root.find(".//oaipmh:metadataPrefix", namespace).text, "oai_dc")
 
-        # Test OAI path
-        res = self.client.get('/oai')
+        # Test ListSets
+        res = self.client.get('/oai?verb=ListSets')
         self.assertEqual(200, res.status_code)
 
         root = etree.fromstring(res.data)
 
-        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badVerb')
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noSetHierarchy')

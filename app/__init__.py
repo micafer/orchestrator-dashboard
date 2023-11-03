@@ -1469,6 +1469,45 @@ def create_app(oidc_blueprint=None):
                   settings.oaipmh_repo_base_identifier_url)
         root = OAI.baseXMLTree()
 
+        attrib_dict = {
+            'verb': 0,
+            'identifier': 0,
+            'metadataPrefix': 0,
+            'from': 0,
+            'until': 0,
+            'set': 0,
+            'resumptionToken': 0,
+        }
+
+        url = request.url
+        parsed_url = urlparse(url)
+        query_parameters = parsed_url.query.split('&')
+
+        for param in query_parameters:
+            key = param.split('=')[0]
+            if key in attrib_dict:
+                attrib_dict[key] += 1
+                if attrib_dict[key] > 1:
+                    request_element = etree.SubElement(root, 'request')
+                    request_element.text = f"{oai.repository_base_url}"
+                    error_element = Errors.badArgument()
+                    root.append(error_element)
+                    response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
+                    
+                    return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
+        
+        # Check for unknown attributes
+        unknown_attributes = [param.split('=')[0] for param in query_parameters if param.split('=')[0] not in attrib_dict]
+
+        if unknown_attributes:
+            request_element = etree.SubElement(root, 'request')
+            request_element.text = f"{oai.repository_base_url}"
+            error_element = Errors.badArgument()
+            root.append(error_element)
+            response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
+
+            return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
+
         if request.method == 'GET':
             verb = request.args.get('verb')
             metadata_prefix = request.args.get('metadataPrefix')
