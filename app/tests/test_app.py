@@ -708,3 +708,10 @@ class IMDashboardTests(unittest.TestCase):
         namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
 
         self.assertIsNotNone(root.find(".//oaipmh:metadataPrefix", namespace))
+
+        res = self.client.get('/oai')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badVerb')
