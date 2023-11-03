@@ -699,6 +699,17 @@ class IMDashboardTests(unittest.TestCase):
         # self.assertIsNotNone(root.find(".//dc:identifier", namespace))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace))
 
+        # Test ListRecords oai_openaire
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_openaire')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+        print(res.data)
+
+        namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
+
+        self.assertEqual(root.find(".//dc:version", namespace).text, "1.0.0")
+
         # Test ListMetadataFormats
         res = self.client.get('/oai?verb=ListMetadataFormats')
         self.assertEqual(200, res.status_code)
