@@ -651,3 +651,14 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/owners/infid')
         self.assertEqual(200, res.status_code)
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
+
+    @patch("hvac.Client")
+    def test_secret(self, hvac):
+        hvac_mock = MagicMock()
+        hvac.return_value = hvac_mock
+        hvac_mock.read.return_value = {"data": {"data": "some_data\\nmore_data"}}
+        self.client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer your_token'
+        res = self.client.get('/secret/secret_id')
+        del self.client.environ_base['HTTP_AUTHORIZATION']
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(b'some_data\nmore_data', res.data)
