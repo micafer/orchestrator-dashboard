@@ -704,7 +704,6 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
 
         root = etree.fromstring(res.data)
-        print(res.data)
 
         namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
 
