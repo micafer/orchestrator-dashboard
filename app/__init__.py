@@ -560,9 +560,9 @@ def create_app(oidc_blueprint=None):
 
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
                 if "im_auth" in node["properties"]:
-                    node["properties"]["im_auth"] = "protected"
+                    node["properties"]["im_auth"] = "redacted"
                 if "clues_auth_token" in node["properties"]:
-                    node["properties"]["clues_auth_token"] = "protected"
+                    node["properties"]["clues_auth_token"] = "redacted"
                 try:
                     node["interfaces"]["Standard"]["configure"]["inputs"]["CLIENT_ID"] = "client_id"
                     node["interfaces"]["Standard"]["configure"]["inputs"]["CLIENT_SECRET"] = "client_secret"
