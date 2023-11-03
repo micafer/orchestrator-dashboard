@@ -25,9 +25,10 @@ from app.oaipmh.errors import Errors
 
 class OAI():
 
-    def __init__(self, repo_name, repo_base_url, repo_description, 
+    def __init__(self, repo_name, repo_base_url, repo_description,
                  repo_identifier_base_url="https://github.com/grycap/tosca/blob/main/templates/",
-                 earliest_datestamp="2023-03-01", datestamp_granularity="YYYY-MM-DD", repo_admin_email="admin@localhost", ):
+                 earliest_datestamp="2023-03-01", datestamp_granularity="YYYY-MM-DD",
+                 repo_admin_email="admin@localhost", ):
         self.repository_name = repo_name
         self.repository_base_url = repo_base_url
         self.repository_description = repo_description
