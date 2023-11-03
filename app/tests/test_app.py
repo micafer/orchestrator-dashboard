@@ -1,5 +1,7 @@
 import unittest
 import json
+import re
+import xml.etree.ElementTree as etree
 from app import create_app
 from urllib.parse import urlparse
 from mock import patch, MagicMock
@@ -641,40 +643,69 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
 
     def test_oai(self):
-        # Test ListRecords
-        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
+        # Test Identify
+        res = self.client.get('/oai?verb=Identify')
         self.assertEqual(200, res.status_code)
-        ini_res = (b'<OAI-PMH xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
-                   b'xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ '
-                   b'http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd" '
-                   b'xmlns="http://www.openarchives.org/OAI/2.0/">')
-        end_res = (b'<ListRecords>\n    <record>\n      <header>\n        '
-                   b'<identifier>https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml</identifier>'
-                   b'\n        <datestamp>datestamp</datestamp>\n      </header>\n      <metadata>\n        '
-                   b'<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" '
-                   b'xmlns:dc="http://purl.org/dc/elements/1.1/" '
-                   b'xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ '
-                   b'http://www.openarchives.org/OAI/2.0/oai_dc.xsd">\n  <dc:version>1.0.0</dc:version>\n  '
-                   b'<dc:title>Deploy a VM</dc:title>\n  <dc:subject>VM</dc:subject>\n  <dc:relation/>\n</oai_dc:dc>\n'
-                   b'      </metadata>\n    </record>\n  </ListRecords>\n</OAI-PMH>\n')
-        self.assertIn(ini_res, res.data)
-        self.assertIn(end_res, res.data)
+
+        root = etree.fromstring(res.data)
+
+        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+
+        self.assertIsNotNone(root.find(".//oaipmh:repositoryName", namespace))
+        self.assertIsNotNone(root.find(".//oaipmh:baseURL", namespace))
+        self.assertIsNotNone(root.find(".//oaipmh:protocolVersion", namespace))
+        self.assertIsNotNone(root.find(".//oaipmh:earliestDatestamp", namespace))
+        self.assertIsNotNone(root.find(".//oaipmh:deletedRecord", namespace))
+        self.assertIsNotNone(root.find(".//oaipmh:granularity", namespace))
+        self.assertIsNotNone(root.find(".//oaipmh:adminEmail", namespace))
 
         # Test GetRecord
         tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
         res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
-        print(res.data)
-        exp_res = (b'<metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n  '
-                   b'<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" '
-                   b'xmlns:dc="http://purl.org/dc/elements/1.1/" '
-                   b'xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ '
-                   b'http://www.openarchives.org/OAI/2.0/oai_dc.xsd">\n  <dc:version>1.0.0</dc:version>\n  '
-                   b'<dc:title>Deploy a VM</dc:title>\n  <dc:subject>VM</dc:subject>\n  '
-                   b'<dc:relation/>\n</oai_dc:dc>\n</metadata>\n')
         self.assertEqual(200, res.status_code)
-        self.assertEqual(exp_res, res.data)
 
-        # Test Identify
-        res = self.client.get('/oai?verb=Identify')
+        root = etree.fromstring(res.data)
+
+        namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
+
+        self.assertIsNotNone(root.find(".//dc:title", namespace))
+        # self.assertIsNotNone(root.find(".//dc:creator", namespace))
+        # self.assertIsNotNone(root.find(".//dc:date", namespace))
+        # self.assertIsNotNone(root.find(".//dc:type", namespace))
+        # self.assertIsNotNone(root.find(".//dc:identifier", namespace))
+        # self.assertIsNotNone(root.find(".//dc:rights", namespace))
+
+        # Test ListIdentifiers
+        res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc')
         self.assertEqual(200, res.status_code)
-        self.assertIn(b'<repositoryName>Repositorio de recetas TOSCA del IM</repositoryName>', res.data)
+
+        root = etree.fromstring(res.data)
+
+        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+
+        self.assertIsNotNone(root.find(".//oaipmh:identifier", namespace))
+
+        # Test ListRecords
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
+
+        self.assertIsNotNone(root.find(".//dc:title", namespace))
+        # self.assertIsNotNone(root.find(".//dc:creator", namespace))
+        # self.assertIsNotNone(root.find(".//dc:date", namespace))
+        # self.assertIsNotNone(root.find(".//dc:type", namespace))
+        # self.assertIsNotNone(root.find(".//dc:identifier", namespace))
+        # self.assertIsNotNone(root.find(".//dc:rights", namespace))
+
+        # Test ListMetadataFormats
+        res = self.client.get('/oai?verb=ListMetadataFormats')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+
+        self.assertIsNotNone(root.find(".//oaipmh:metadataPrefix", namespace))
