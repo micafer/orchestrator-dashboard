@@ -650,7 +650,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badVerb')
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badArgument')
 
         # Test Identify
         res = self.client.get('/oai?verb=Identify')
