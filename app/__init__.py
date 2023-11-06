@@ -1498,7 +1498,7 @@ def create_app(oidc_blueprint=None):
 
         # Check for unknown attributes
         unknown_attributes = [param.split('=')[0] for param in query_parameters
-                              if param.split('=')[0] not in attrib_dict]
+                              if param.split('=')[0] not in attributes_dict]
 
         if unknown_attributes:
             request_element = etree.SubElement(root, 'request')

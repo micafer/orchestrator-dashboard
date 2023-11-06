@@ -642,6 +642,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
 
     def test_oai(self):
+        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+
         # Test OAI path
         res = self.client.get('/oai')
         self.assertEqual(200, res.status_code)
@@ -655,8 +657,6 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
 
         root = etree.fromstring(res.data)
-
-        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
 
         self.assertEqual(root.find(".//oaipmh:repositoryName", namespace).text, "IM Dashboard")
         self.assertEqual(root.find(".//oaipmh:baseURL", namespace).text, "http://localhost/oai")
