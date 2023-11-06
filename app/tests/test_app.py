@@ -673,14 +673,16 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
+        namespace_dc = {'dc': 'http://purl.org/dc/elements/1.1/'}
+        namespace_oaipmh = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+        namespace_datacite = {'datacite': 'http://datacite.org/schema/kernel-4'}
 
-        self.assertEqual(root.find(".//dc:title", namespace).text, "Deploy a VM")
-        self.assertIsNotNone(root.find(".//dc:creator", namespace))
-        self.assertIsNotNone(root.find(".//dc:date", namespace))
-        # self.assertIsNotNone(root.find(".//dc:type", namespace))
-        # self.assertIsNotNone(root.find(".//dc:identifier", namespace))
-        # self.assertIsNotNone(root.find(".//dc:rights", namespace))
+        self.assertEqual(root.find(".//dc:title", namespace_dc).text, "Deploy a VM")
+        self.assertEqual(root.find(".//dc:creator", namespace_dc).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//dc:date", namespace_dc).text, "2020-09-08")
+        # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:identifier", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
 
         # Test ListIdentifiers
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc')
@@ -688,9 +690,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
-
-        self.assertEqual(root.find(".//oaipmh:identifier", namespace).text, "simple-node-disk.yml")
+        self.assertEqual(root.find(".//oaipmh:identifier", namespace_oaipmh).text, "simple-node-disk.yml")
 
         # Test ListRecords oai_dc
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
@@ -698,14 +698,12 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
-
-        self.assertEqual(root.find(".//dc:title", namespace).text, "Deploy a VM")
-        self.assertIsNotNone(root.find(".//dc:creator", namespace))
-        self.assertIsNotNone(root.find(".//dc:date", namespace))
-        # self.assertIsNotNone(root.find(".//dc:type", namespace))
-        # self.assertIsNotNone(root.find(".//dc:identifier", namespace))
-        # self.assertIsNotNone(root.find(".//dc:rights", namespace))
+        self.assertEqual(root.find(".//dc:title", namespace_dc).text, "Deploy a VM")
+        self.assertEqual(root.find(".//dc:creator", namespace_dc).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//dc:date", namespace_dc).text, "2020-09-08")
+        # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:identifier", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
 
         # Test ListRecords oai_openaire
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_openaire')
@@ -713,9 +711,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        namespace = {'dc': 'http://purl.org/dc/elements/1.1/'}
-
-        self.assertEqual(root.find(".//dc:version", namespace).text, "1.0.0")
+        self.assertEqual(root.find(".//datacite:creatorName", namespace_datacite).text, "Miguel Caballer")
 
         # Test ListMetadataFormats
         res = self.client.get('/oai?verb=ListMetadataFormats')
@@ -723,9 +719,11 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+        prefixes = root.findall(".//oaipmh:metadataPrefix", namespace_oaipmh)
+        prefixes_text = [prefix.text for prefix in prefixes]
 
-        self.assertEqual(root.find(".//oaipmh:metadataPrefix", namespace).text, "oai_dc")
+        self.assertIn('oai_dc', prefixes_text)
+        self.assertIn('oai_openaire', prefixes_text)
 
         # Test ListSets
         res = self.client.get('/oai?verb=ListSets')
