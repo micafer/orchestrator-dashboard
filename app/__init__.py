@@ -1469,7 +1469,7 @@ def create_app(oidc_blueprint=None):
                   settings.oaipmh_repo_base_identifier_url)
         root = OAI.baseXMLTree()
 
-        attrib_dict = {
+        attributes_dict = {
             'verb': 0,
             'identifier': 0,
             'metadataPrefix': 0,
@@ -1485,9 +1485,9 @@ def create_app(oidc_blueprint=None):
 
         for param in query_parameters:
             key = param.split('=')[0]
-            if key in attrib_dict:
-                attrib_dict[key] += 1
-                if attrib_dict[key] > 1:
+            if key in attributes_dict:
+                attributes_dict[key] += 1
+                if attributes_dict[key] > 1:
                     request_element = etree.SubElement(root, 'request')
                     request_element.text = f"{oai.repository_base_url}"
                     error_element = Errors.badArgument()
