@@ -1493,11 +1493,12 @@ def create_app(oidc_blueprint=None):
                     error_element = Errors.badArgument()
                     root.append(error_element)
                     response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
-                    
+
                     return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
-        
+
         # Check for unknown attributes
-        unknown_attributes = [param.split('=')[0] for param in query_parameters if param.split('=')[0] not in attrib_dict]
+        unknown_attributes = [param.split('=')[0] for param in query_parameters
+                              if param.split('=')[0] not in attrib_dict]
 
         if unknown_attributes:
             request_element = etree.SubElement(root, 'request')
