@@ -35,11 +35,12 @@ from app.vault_cred import VaultCredentials
 from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app.ssh_key import SSHKey
+from app.ott import OneTimeTokenData
 from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g
+from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
@@ -68,6 +69,7 @@ def create_app(oidc_blueprint=None):
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
     ssh_key = SSHKey(settings.db_url)
     vault_info = VaultInfo(settings.db_url)
+    ott = OneTimeTokenData(settings.vault_url)
 
     # To Reload internally the site cache
     scheduler = APScheduler()
@@ -558,7 +560,9 @@ def create_app(oidc_blueprint=None):
 
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
                 if "im_auth" in node["properties"]:
-                    node["properties"]["im_auth"] = "protected"
+                    node["properties"]["im_auth"] = "redacted"
+                if "auth_token" in node["properties"]:
+                    node["properties"]["auth_token"] = "redacted"
                 try:
                     node["interfaces"]["Standard"]["configure"]["inputs"]["CLIENT_ID"] = "client_id"
                     node["interfaces"]["Standard"]["configure"]["inputs"]["CLIENT_SECRET"] = "client_secret"
@@ -821,6 +825,19 @@ def create_app(oidc_blueprint=None):
         except Exception as ex:
             return "Error loading site quotas: %s!" % str(ex), 400
 
+    @app.route('/secret/<path>')
+    def secret(path=None):
+        try:
+            auth = request.headers.get('Authorization')
+            if auth and auth.startswith('Bearer '):
+                token = auth.split(' ')[1]
+                data = ott.get_data(path, token)
+                return make_response(data, 200, {"Content-Type": "text/plain"})
+            else:
+                return make_response("Unauthorized", 401)
+        except Exception as ex:
+            return make_response("Invalid request: %s" % ex, 400)
+
     def add_image_to_template(template, image):
         # Add the image to all compute nodes
 
@@ -840,14 +857,18 @@ def create_app(oidc_blueprint=None):
 
         return template
 
-    def add_auth_to_template(template, auth_data):
+    def add_auth_to_template(template, access_token, cred_id):
         # Add the auth_data ElasticCluster node
+
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id, True, False)
 
         for node in list(template['topology_template']['node_templates'].values()):
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
                 if "properties" not in node:
                     node["properties"] = {}
-                node["properties"]["im_auth"] = auth_data
+                token, path = ott.write_data(access_token, auth_data)
+                node["properties"]["auth_token"] = {"token": token,
+                                                    "url": url_for('secret', path=path, _external=True)}
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
 
@@ -1036,7 +1057,7 @@ def create_app(oidc_blueprint=None):
 
         template = add_image_to_template(template, image)
 
-        template = add_auth_to_template(template, auth_data)
+        template = add_auth_to_template(template, access_token, cred_id)
 
         template = add_ssh_keys_to_template(template)
 
