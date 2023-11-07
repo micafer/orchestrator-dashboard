@@ -865,8 +865,8 @@ def create_app(oidc_blueprint=None):
                 if "properties" not in node:
                     node["properties"] = {}
                 token, path = ott.write_data(access_token, auth_data)
-                node["properties"]["auth_token"] = json.dumps({"token": token,
-                                                               "url": url_for('secret', path=path, _external=True)})
+                node["properties"]["auth_token"] = {"token": token,
+                                                    "url": url_for('secret', path=path, _external=True)}
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
 
