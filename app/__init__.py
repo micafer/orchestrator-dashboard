@@ -561,8 +561,8 @@ def create_app(oidc_blueprint=None):
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
                 if "im_auth" in node["properties"]:
                     node["properties"]["im_auth"] = "redacted"
-                if "clues_auth_token" in node["properties"]:
-                    node["properties"]["clues_auth_token"] = "redacted"
+                if "auth_token" in node["properties"]:
+                    node["properties"]["auth_token"] = "redacted"
                 try:
                     node["interfaces"]["Standard"]["configure"]["inputs"]["CLIENT_ID"] = "client_id"
                     node["interfaces"]["Standard"]["configure"]["inputs"]["CLIENT_SECRET"] = "client_secret"
@@ -865,8 +865,8 @@ def create_app(oidc_blueprint=None):
                 if "properties" not in node:
                     node["properties"] = {}
                 token, path = ott.write_data(access_token, auth_data)
-                node["properties"]["clues_auth_token"] = {"token": token,
-                                                          "url": url_for('secret', path=path, _external=True)}
+                node["properties"]["auth_token"] = json.dumps({"token": token,
+                                                               "url": url_for('secret', path=path, _external=True)})
 
         app.logger.debug(yaml.dump(template, default_flow_style=False))
 
