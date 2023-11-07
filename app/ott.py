@@ -27,7 +27,7 @@ class OneTimeTokenData():
 
     VAULT_LOCKER_MOUNT_POINT = "/cubbyhole/"
 
-    def __init__(self, vault_url, role="", ttl="3h", num_uses=2):
+    def __init__(self, vault_url, role="", ttl="3h", num_uses=5):
         self.vault_url = vault_url
         self.role = role
         self.ttl = ttl

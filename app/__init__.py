@@ -857,8 +857,10 @@ def create_app(oidc_blueprint=None):
 
         return template
 
-    def add_auth_to_template(template, access_token, auth_data):
+    def add_auth_to_template(template, access_token, cred_id):
         # Add the auth_data ElasticCluster node
+
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id, True, False)
 
         for node in list(template['topology_template']['node_templates'].values()):
             if node["type"] == "tosca.nodes.ec3.ElasticCluster":
@@ -1055,7 +1057,7 @@ def create_app(oidc_blueprint=None):
 
         template = add_image_to_template(template, image)
 
-        template = add_auth_to_template(template, access_token, auth_data)
+        template = add_auth_to_template(template, access_token, cred_id)
 
         template = add_ssh_keys_to_template(template)
 
