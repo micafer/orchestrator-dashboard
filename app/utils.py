@@ -176,7 +176,7 @@ def getIMUserAuthData(access_token, cred, userid):
     return res
 
 
-def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
+def getUserAuthData(access_token, cred, userid, cred_id=None, full=False, add_extra_auth=True):
     if g.settings.im_auth == "Bearer" and not full:
         return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = %s" % access_token
@@ -187,7 +187,7 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
     # Add the extra auth configured in the Dashboard
     extra_auth_ids = []
     try:
-        if g.settings.extra_auth:
+        if g.settings.extra_auth and add_extra_auth:
             creds.extend(g.settings.extra_auth)
             extra_auth_ids = [elem["id"] for elem in g.settings.extra_auth]
     except Exception:
