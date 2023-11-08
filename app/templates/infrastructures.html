@@ -214,6 +214,7 @@
                           <a id="delete_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#delete_confirm_{{infId}}').modal('show');"><span class="fas fa-trash-alt mr-2 grey-text"></span>Delete</a>
                           <a id="reconfigure_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#reconfigure_confirm_{{infId}}').modal('show');"><span class="fas fa-recycle mr-2 grey-text"></span>Reconfigure</a>
                           <a id="change_auth_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#change_auth_{{infId}}').modal('show');"><span class="fas fa-users mr-2 grey-text"></span>Change Owner</a>
+                          <a id="migrate_{{infId}}_a" class="dropdown-item" href="#" onclick="$('#migrate_{{infId}}').modal('show');"><span class="fas fa-file-export mr-2 grey-text"></span>Migrate</a>
                       </div>
                     </td>
                 </tr>
@@ -361,6 +362,28 @@
                         <a class="btn btn-secondary cancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger deleteVMsBtn" role="button">Delete</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Modal Migrate Infrastructure. -->
+                <div class="modal fade" id="migrate_{{infId}}" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title" id="migrate_label_{{infId}}">New IM URL</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                        <form action="{{ url_for('manage_inf', infid=infId, op='migrate') }}" method="post">
+                          URL: <input type="text" name="new_im_url" value="" style="min-width: 100%"/>
+                      </div>
+                      <div class="modal-footer">
+                        <a class="btn btn-secondary migrateCancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn btn-success migrareBtn" role="button">Migrate</button>
                         </form>
                       </div>
                     </div>

@@ -93,6 +93,10 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.text = "user1\nuser2"
+        elif url == "/im/infrastructures/infid/data":
+            resp.ok = True
+            resp.status_code = 200
+            resp.text = '{"some": "value"}'
 
         return resp
 
@@ -114,6 +118,10 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/stop":
             resp.ok = True
             resp.status_code = 200
+        elif url == "/im/infrastructures":
+            resp.ok = True
+            resp.status_code = 200
+            resp.text = "http://server.com/im/infrastructures/infid"
 
         return resp
 
@@ -236,6 +244,23 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
                           ("Infrastructure owner successfully changed.", 'success'))
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.put')
+    @patch('requests.get')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_manageinf_migrate(self, flash, avatar, get, put, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        put.side_effect = self.put_response
+        get.side_effect = self.get_response
+        self.login(avatar)
+        res = self.client.post('/manage_inf/infid/migrate', data={"new_im_url": "http://newim.com/im"})
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEquals(flash.call_args_list[0][0],
+                          ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
+                           'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')

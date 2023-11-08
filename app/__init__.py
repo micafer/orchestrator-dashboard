@@ -1372,6 +1372,19 @@ def create_app(oidc_blueprint=None):
                 if not response.ok:
                     raise Exception(response.text)
                 flash("VMs %s successfully deleted." % vm_list, "success")
+            elif op == "migrate":
+                form_data = request.form.to_dict()
+                new_im_url = form_data.get('new_im_url')
+                new_im = InfrastructureManager(new_im_url, settings.imTimeout)
+                infra_data = im.export_inf(infid, auth_data)
+                new_infra_id = new_im.import_inf(infra_data, auth_data)
+                if new_infra_id:
+                    im.export_inf(infid, auth_data, delete=True)
+                    flash("Infrastructure successfully migrated to %s." % new_infra_id, "success")
+                else:
+                    flash("Error migrating the infrastructure %s." % infid, "error")
+            else:
+                flash("Invalid operation: %s" % op, 'error')
         except Exception as ex:
             flash("Error in '%s' operation: %s." % (op, ex), 'error')
 
