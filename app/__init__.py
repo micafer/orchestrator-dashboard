@@ -143,7 +143,7 @@ def create_app(oidc_blueprint=None):
         def decorated_function(*args, **kwargs):
             check_auth_res = check_auth()
             if check_auth_res:
-                return check_auth_res # redirect to login
+                return check_auth_res  # redirect to login
             return f(*args, **kwargs)
 
         return decorated_function
@@ -679,7 +679,7 @@ def create_app(oidc_blueprint=None):
         if inf_id:
             check_auth_res = check_auth()
             if check_auth_res:
-                return check_auth_res # redirect to login
+                return check_auth_res  # redirect to login
             access_token = oidc_blueprint.session.token['access_token']
             auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
             try:
@@ -755,11 +755,11 @@ def create_app(oidc_blueprint=None):
                     inputs[input_name] = value
 
         return render_template('createdep.html',
-                            template=selected_template,
-                            selectedTemplate=selected_tosca,
-                            creds=creds, input_values=inputs,
-                            infra_name=infra_name, child_templates=child_templates,
-                            vos=utils.getVOs(session), utils=utils)
+                               template=selected_template,
+                               selectedTemplate=selected_tosca,
+                               creds=creds, input_values=inputs,
+                               infra_name=infra_name, child_templates=child_templates,
+                               vos=utils.getVOs(session), utils=utils)
 
     @app.route('/vos')
     def getvos():
