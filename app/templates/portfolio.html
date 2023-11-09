@@ -89,7 +89,7 @@
 		  <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
 		</h5>
                 <p id="toscaDescription" class="card-text tosca-descr"><small>{{tosca['description']}}</small></p>
-                <a selector="toscaDescription" class="text-left badge badge-pill badge-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-trigger="focus" data-content="{{tosca['description']}}">Read More</a>
+                <a selector="toscaDescription" class="text-left badge badge-pill badge-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-bs-trigger="focus" data-bs-content="{{tosca['description']}}">Read More</a>
                 {% if parent %}
                 <a href="#!" onclick="AddChild(this, '{{tosca_filename}}')" class="badge badge-pill badge-primary"><span class='fas fa-plus mr-2'></span>Add</a>
                 {% elif 'link' in tosca['metadata'] %}
