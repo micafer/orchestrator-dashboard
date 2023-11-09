@@ -93,6 +93,10 @@ class IMDashboardTests(unittest.TestCase):
             resp.ok = True
             resp.status_code = 200
             resp.text = "user1\nuser2"
+        elif url == "/im/infrastructures/infid/data":
+            resp.ok = True
+            resp.status_code = 200
+            resp.text = '{"some": "value"}'
 
         return resp
 
@@ -114,6 +118,10 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/stop":
             resp.ok = True
             resp.status_code = 200
+        elif url == "/im/infrastructures":
+            resp.ok = True
+            resp.status_code = 200
+            resp.text = "http://server.com/im/infrastructures/infid"
 
         return resp
 
@@ -236,6 +244,23 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0],
                           ("Infrastructure owner successfully changed.", 'success'))
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.put')
+    @patch('requests.get')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_manageinf_migrate(self, flash, avatar, get, put, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        put.side_effect = self.put_response
+        get.side_effect = self.get_response
+        self.login(avatar)
+        res = self.client.post('/manage_inf/infid/migrate', data={"new_im_url": "http://newim.com/im"})
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEquals(flash.call_args_list[0][0],
+                          ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
+                           'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -604,6 +629,18 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("VMs 1,2 successfully deleted.", 'success'))
 
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.get')
+    @patch("app.utils.avatar")
+    @patch("app.infra")
+    def test_infrastructure_state(self, infra, avatar, get, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get.side_effect = self.get_response
+        self.login(avatar)
+        res = self.client.get('/infrastructures/state?infid=infid')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(b'{"state":"configured","vm_states":{"0":"configured"}}\n', res.data)
+
     @patch("app.utils.getIMUserAuthData")
     @patch('requests.get')
     @patch("app.utils.avatar")
@@ -614,3 +651,14 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/owners/infid')
         self.assertEqual(200, res.status_code)
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
+
+    @patch("hvac.Client")
+    def test_secret(self, hvac):
+        hvac_mock = MagicMock()
+        hvac.return_value = hvac_mock
+        hvac_mock.read.return_value = {"data": {"data": "some_data\\nmore_data"}}
+        self.client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer your_token'
+        res = self.client.get('/secret/secret_id')
+        del self.client.environ_base['HTTP_AUTHORIZATION']
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(b'some_data\nmore_data', res.data)

@@ -166,3 +166,19 @@ class InfrastructureManager():
         response = requests.delete(url, headers=headers, timeout=self.timeout)
 
         return response
+
+    def export_inf(self, infid, auth_data, delete=False):
+        headers = {"Authorization": auth_data}
+        url = "%s/infrastructures/%s/data" % (self.im_url, infid)
+        if delete:
+            url += "?delete=1"
+        response = requests.get(url, headers=headers, timeout=self.timeout)
+        response.raise_for_status()
+        return response.text
+
+    def import_inf(self, data, auth_data):
+        headers = {"Authorization": auth_data}
+        url = "%s/infrastructures" % self.im_url
+        response = requests.put(url, headers=headers, timeout=self.timeout, data=data)
+        response.raise_for_status()
+        return response.text
