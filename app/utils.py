@@ -379,6 +379,18 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates, tags_to_hide):
 
         toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
 
+    # Add addons to description
+    for tosca in toscaTemplates:
+        if "childs" in toscaInfo[tosca]["metadata"] and toscaInfo[tosca]["metadata"]["childs"]:
+            if 'description' not in toscaInfo[tosca]:
+                toscaInfo[tosca]["description"] = ""
+            child_names = []
+            for child in toscaInfo[tosca]["metadata"]["childs"]:
+                child_name = toscaInfo.get(child, {}).get("metadata", {}).get("name")
+                if child_name:
+                    child_names.append(child_name)
+            toscaInfo[tosca]["description"] += " Addons: %s" % ", ".join(child_names)
+
     return toscaInfoOrder
 
 
