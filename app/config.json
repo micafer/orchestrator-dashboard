@@ -1,0 +1,42 @@
+{
+    "OIDC_NAME": "OIDC",
+    "OIDC_CLIENT_ID": "my_client_id",
+    "OIDC_CLIENT_SECRET": "my_client_secret",
+    "OIDC_BASE_URL": "https://aai.egi.eu/auth/realms/egi",
+    "OIDC_GROUP_MEMBERSHIP": [  ],
+    "OIDC_SCOPES": "openid email profile offline_access eduperson_entitlement",
+    "VOS_USER_ROLE": "vm_operator",
+    "IM_URL": "https://appsgrycap.i3m.upv.es:31443/im",
+    "TOSCA_TEMPLATES_DIR": "../tosca/templates/",
+    "TOSCA_PARAMETERS_DIR": "../tosca/parameters/",
+    "SUPPORT_EMAIL": "support@example.com",
+    "EXTERNAL_LINKS": [ { "url": "https://imdocs.readthedocs.io/", "menu_item_name": "IM Docs" } ],
+    "LOG_LEVEL": "info",
+    "DB_URL": "sqlite:///creds.db",
+    "ANALYTICS_TAG": "",
+    "MOTOMO_INFO": {"url": "", "siteid": ""},
+    "STATIC_SITES": [{"name": "static_site_name", "url": "static_site_url", "id": "static_id", "vos": {"vo": "stprojectid"}, "api_version": "1.1"}],
+    "STATIC_SITES_URL": "",
+    "APPDB_CACHE_TIMEOUT": 3600,
+    "CHECK_TOSCA_CHANGES_TIME": 120,
+    "IM_TIMEOUT": 60,
+    "VAULT_URL": "",
+    "ENABLE_EXTERNAL_VAULT": false,
+    "VO_MAP": {},
+    "EXTRA_AUTH": {},
+    "HIDE_TOSCA_TAGS": [],
+    "OAIPMH_REPO_NAME": "IM Dashboard",
+    "OAIPMH_REPO_DESCRIPTION": "IM Dashboard OAI-PMH repository",
+    "OAIPMH_REPO_BASE_IDENTIFIER_URL": "https://github.com/grycap/tosca/blob/main/templates/",
+    "DEBUG_OIDC_TOKEN": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJQVVlPaXJBM1ktZF9kR3BkajRpSkRIdzR6SGE4SVktYmhaZGFFajByamJVIn0.eyJleHAiOjE3MDAyMjMyNjMsImlhdCI6MTcwMDIxOTY2MywiYXV0aF90aW1lIjoxNzAwMjA4MTM3LCJqdGkiOiI0YWMwNWNkOC1lNTY0LTRkNzktODMzNC00ZDdjZTNhMTZkNDYiLCJpc3MiOiJodHRwczovL2FhaS5lZ2kuZXUvYXV0aC9yZWFsbXMvZWdpIiwic3ViIjoiNjVkZGNmNDg0MTM0YjIxZmNhZjE4ZjlhNWRhMWUzOWIwM2I4YzVjYzEyNWIwNWJkZGU3YWZjN2JkM2I4NGU1OEBlZ2kuZXUiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJpbS1kYXNoYm9hcmQiLCJzZXNzaW9uX3N0YXRlIjoiZTc3YmU3OTctYzU5NS00MDdhLWI3ZDgtZTM3ZDY5Y2JkNWFhIiwic2NvcGUiOiJvcGVuaWQgb2ZmbGluZV9hY2Nlc3MgZWR1cGVyc29uX2VudGl0bGVtZW50IHByb2ZpbGUgZW1haWwiLCJzaWQiOiJlNzdiZTc5Ny1jNTk1LTQwN2EtYjdkOC1lMzdkNjljYmQ1YWEiLCJhdXRoZW50aWNhdGluZ19hdXRob3JpdHkiOiJodHRwczovL3d3dy5yZWRpcmlzLmVzL3Npci91cHZpZHAifQ.gE_0cqfRsDqNbCUpS3DBW_3GMSbNi1g19RlgR3qSJo73RK41uG8bhYAmF13c2vlqxC05S7nkj1F_j7_qGk-_pgBVbfLb4X7MQJFiZEyAFeKM0awGJRGH10hu6vsxggiASnbyScs_T38K8PX6uQov7nJ0WW9TkjOl5syHFf9vEUN91g-fKiXKbKvtCfV2bd9YlIJqchrJrtXGqceuN80u3J0MHVesoVuWArbnuxXVFBG-HPLMI47fMTzSOvxABtDJ79XGuLKpqvJtvI4pYokIVow9T6OtFeggGoEH5anBt0E3l78bQwcPtsR0Xn20SA5Gi5xow8LOdhel32e_m3Z9FQ",
+    "COSTS": {
+        "WN": 1,
+        "CPU": 3,
+        "RAM": 2,
+        "Nvidia support": 5,
+        "Cloud Provider": {
+          "OpenNebula": 10,
+          "Ramses": 15
+        }
+      }
+}
