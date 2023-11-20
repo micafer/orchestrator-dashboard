@@ -53,11 +53,11 @@
             {% else %}
                 {% include 'default_form.html' %}
             {% endif %}
-            <input type="hidden" name="action" value="">
+            <div id="cost" style="display: flex; float: right;">Foreseen cost of deployment: <span id="payload">{payload:}</span></div>
+            <button type="submit" class="btn btn-primary submitBtn" disabled><span class="fas fa-share mr-2"></span>Submit</button>
             <button id="cancelBtn" type=button class="btn btn-small btn-secondary" onclick="location.href='{{ url_for('home') }}'">
                 <span class="fas fa-ban mr-2"></span>Cancel</button>
-            <button type="submit" class="btn btn-primary previewBtn" onclick="setActionValue('preview');" disabled><span class="fas fa-file-pen mr-2"></span>Preview</button>
-            <button id="submitBtn" type="submit" class="btn btn-primary submitBtn" onclick="setActionValue('submit');" disabled><span class="fas fa-share mr-2"></span>Submit</button>
+                <button type="button" class="btn btn-primary costBtn"></span>Calculate cost</button>
             </form>
         </div>
     </div>

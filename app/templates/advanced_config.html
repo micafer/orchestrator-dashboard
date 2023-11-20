@@ -147,6 +147,19 @@
         });
    }
 
+   function loadPayload() {
+        $.ajax({
+            method: "GET",
+            url: "{{ url_for('submit') }}images/" + $("#selectedCred").val(),
+            success : function(text)
+            {
+                $('#selectedImage').empty();
+                $('#selectedImage').append("<option value=''> - Select one image - </option>");
+                $('#selectedImage').append(text);
+            }
+        });
+   }
+
    function loadSiteImages() {
         $('#selectedSiteImage').empty();
         $('#selectedSiteImage').append("<option value=''>Loading Images ...</option>");
@@ -295,7 +308,7 @@
                </div>
                <div>Foreseen cost of deployment: {{payload}} €</div>
            </div>
-
+           <div id="cost">Foreseen cost of deployment: {{payload}} €</div>
        </div>
       </div>
 
