@@ -174,7 +174,7 @@ class InfrastructureManager():
             url += "?delete=1"
         response = requests.get(url, headers=headers, timeout=self.timeout)
         response.raise_for_status()
-        return response.text
+        return response.json()['data']
 
     def import_inf(self, data, auth_data):
         headers = {"Authorization": auth_data}
