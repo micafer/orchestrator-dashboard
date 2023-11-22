@@ -390,8 +390,11 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates, tags_to_hide):
                 if child in toscaInfo:
                     child_name = toscaInfo[child].get("metadata", {}).get("name")
                 else:
-                    with io.open(toscaDir + child) as stream:
-                        child_template = yaml.full_load(stream)
+                    try:
+                        with io.open(toscaDir + child) as stream:
+                            child_template = yaml.full_load(stream)
+                    except Exception:
+                        child_template = {}
                     child_name = child_template.get("metadata", {}).get("name")
                 if child_name:
                     child_names.append(child_name)
