@@ -53,11 +53,11 @@
             {% else %}
                 {% include 'default_form.html' %}
             {% endif %}
-            <div id="cost" style="display: flex; float: right;">Foreseen cost of deployment: <span id="payload">{payload:}</span></div>
+            <input type="hidden" id="payloadInput" name="action" value="" />
             <button type="submit" class="btn btn-primary submitBtn" disabled><span class="fas fa-share mr-2"></span>Submit</button>
             <button id="cancelBtn" type=button class="btn btn-small btn-secondary" onclick="location.href='{{ url_for('home') }}'">
                 <span class="fas fa-ban mr-2"></span>Cancel</button>
-                <button type="button" class="btn btn-primary costBtn"></span>Calculate cost</button>
+            <button id="calculateBtn" type="button" class="btn btn-primary costBtn" onclick="setActionValue('cost'); calculateCost();" disabled>Calculate cost</button>
             </form>
         </div>
     </div>
@@ -80,8 +80,8 @@ function setActionValue(action) {
     document.getElementById("depSubmit").addEventListener("submit", function (event) {
         var clickedButton = event.submitter;
 
-        if (clickedButton.classList.contains('previewBtn')) {
-            setActionValue('preview');
+        if (clickedButton.classList.contains('costBtn')) {
+            setActionValue('cost');
         } else if (clickedButton.classList.contains('submitBtn')) {
             setActionValue('submit');
         }

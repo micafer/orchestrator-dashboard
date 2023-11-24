@@ -40,7 +40,7 @@ from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response
+from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response,jsonify
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
@@ -1057,7 +1057,7 @@ def create_app(oidc_blueprint=None):
 
             template = add_image_to_template(template, image)
 
-            template = add_auth_to_template(template, auth_data)
+            template = add_auth_to_template(template, access_token, cred_id)
 
             template = add_ssh_keys_to_template(template)
 
@@ -1068,6 +1068,9 @@ def create_app(oidc_blueprint=None):
             template = set_inputs_to_template(template, inputs)
 
             payload = yaml.dump(template, default_flow_style=False, sort_keys=False)
+
+        if request.form.get('action') == 'cost':
+            return payload
 
         if request.form.get('action') == 'preview':
             return redirect(url_for('preview', data=payload))
@@ -1100,7 +1103,7 @@ def create_app(oidc_blueprint=None):
             flash("Error creating infrastrucrure: \n%s." % ex, 'error')
 
         return redirect(url_for('showinfrastructures'))
-
+    
     @app.route('/preview')
     @authorized_with_valid_token
     def preview():
