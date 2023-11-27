@@ -95,8 +95,8 @@
 		</h5>
                 <p id="fullToscaDescription" class="d-none">{{tosca['description']}}</p>
                 <p id="toscaDescription" class="card-text tosca-descr"><small>{{tosca['description']}}</small></p>
-                <a href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
-                  <span class="fab fa-github" style="color:white;"></span>
+                <a class="badge badge-pill badge-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
+                  View on <span class="fab fa-github" style="color:white;"></span>
                 </a>
                 <a selector="toscaDescription" class="text-left badge badge-pill badge-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-bs-trigger="focus" data-bs-content="{{tosca['description']}}">Read More</a>
                 {% if parent %}
