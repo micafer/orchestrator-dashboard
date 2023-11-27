@@ -91,9 +91,9 @@
             <div class="card-img-overlay">
             {% endif %}
                 <div class="text-center">
-                <h5>
+                <h6>
                   <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
-                </h5>
+                </h6>
                 <p id="fullToscaDescription" class="d-none">{{tosca['description']}}</p>
                 <p id="toscaDescription" class="card-text tosca-descr"><small>{{tosca['description']}}</small></p>
                 <a class="badge badge-pill badge-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
@@ -143,10 +143,8 @@ $(document).ready(function(){
 
 //init dotdotdot
 $(".tosca-descr").dotdotdot({
-    ellipsis    : ' [...] ',
+    ellipsis    : ' [...]',
     wrap        : 'word',
-    after       : "a.read_more",
-    watch       : true,
     height      : 70,
     callback    : function( isTruncated, orgContent ) {
 
