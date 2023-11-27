@@ -65,8 +65,8 @@
         
             <div class="card-body">
               <h5 class="card-title text-center pl-2 pr-2">
-		            <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
-		          </h5>
+                <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
+              </h5>
             </div>
             <div class="wrapper">
                 <img class="card-img-bottom img-fluid" src="{% if tosca['metadata']['icon'].startswith('http') %}{{tosca['metadata']['icon']}}{% else %}{{ url_for('static', filename=tosca['metadata']['icon']) }}{% endif %}" alt="Card image cap">
@@ -92,8 +92,8 @@
             {% endif %}
                 <div class="text-center">
                 <h5>
-		              <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
-		            </h5>
+                  <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
+                </h5>
                 <p id="fullToscaDescription" class="d-none">{{tosca['description']}}</p>
                 <p id="toscaDescription" class="card-text tosca-descr"><small>{{tosca['description']}}</small></p>
                 <a class="badge badge-pill badge-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
