@@ -63,12 +63,7 @@
 
         <div class="card mb-3 bg-light-grey rounded card-rounded border-0" id="{{tosca_filename}}">
         
-          {% if tosca['metadata']['version'] is defined %}
-            <div class="card-body pt-1 pl-3">
-              <span class="badge badge-pill badge-secondary" style="font-size: 0.6em;">v{{tosca['metadata']['version']}}</span>
-          {% else %}
-              <div class="card-body">
-          {% endif %}
+            <div class="card-body">
               <h5 class="card-title text-center pl-2 pr-2">
 		            <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
 		          </h5>
@@ -89,10 +84,16 @@
                   <div class="corner-ribbon bottom-right sticky {{tag_color}} shadow">{{tosca['metadata']['tag']}}</div>
                 {% endif %}
             </div>
-            <div class="card-img-overlay text-center">
+            {% if tosca['metadata']['version'] is defined %}
+            <div class="card-img-overlay pt-1 pl-3">
+                <span class="badge badge-pill badge-secondary mb-2" style="font-size: 0.6em;">v{{tosca['metadata']['version']}}</span>
+            {% else %}
+            <div class="card-img-overlay">
+            {% endif %}
+                <div class="text-center">
                 <h5>
-		  <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
-		</h5>
+		              <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
+		            </h5>
                 <p id="fullToscaDescription" class="d-none">{{tosca['description']}}</p>
                 <p id="toscaDescription" class="card-text tosca-descr"><small>{{tosca['description']}}</small></p>
                 <a class="badge badge-pill badge-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
@@ -106,6 +107,7 @@
                 {% else %}
                 <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge badge-pill badge-primary">Configure</a>
                 {% endif %}
+                </div>
             </div>
         </div>
     {% if vars['template_count'] % 3 == 0 %}
