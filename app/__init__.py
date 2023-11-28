@@ -1070,7 +1070,38 @@ def create_app(oidc_blueprint=None):
             payload = yaml.dump(template, default_flow_style=False, sort_keys=False)
 
         if request.form.get('action') == 'cost':
-            return payload
+            template = yaml.safe_load(payload)
+            ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
+
+            num_wn = 0
+            total_cost = 0
+            for node_name, node in template['topology_template']['node_templates'].items():
+                if node["type"] in ["tosca.nodes.indigo.Compute", "tosca.nodes.Compute"]:
+                    if 'capabilities' in node and 'scalable' in node['capabilities']:
+                        input_wn = node['capabilities']['scalable']['properties']['count']['get_input']
+                        num_wn = template['topology_template']['inputs'][input_wn]['default']
+                        print('inside numner of wn', num_wn)
+                    else:
+                        num_wn += 1
+
+                    print('numner of wn', num_wn)
+                    total_cost += num_wn * settings.costs.get("WN")
+                    print('total w wn', total_cost)
+
+                    input_cpus = node['capabilities']['host']['properties']['num_cpus']['get_input']
+                    print('input_cpus', input_cpus)
+                    num_cpus = template['topology_template']['inputs'][input_cpus]['default']
+                    print('num_cpus', num_cpus)
+                    input_mem = node['capabilities']['host']['properties']['mem_size']['get_input']
+                    print('input_mem', input_mem)
+                    mem_size = template['topology_template']['inputs'][input_mem]['default']
+                    print('mem_size', mem_size)
+                    total_cost += num_cpus * settings.costs.get("CPU")
+                    print('total w cpus', total_cost)
+                    total_cost += int(mem_size.split()[0]) * settings.costs.get("MEM")
+                    print('total w mem', total_cost)
+
+            return str(total_cost)
 
         if request.form.get('action') == 'preview':
             return redirect(url_for('preview', data=payload))

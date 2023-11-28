@@ -8,7 +8,8 @@
   
   <script src="{{ url_for('static', filename='chart/Chart.min.js') }}"></script>
   <script src="{{ url_for('static', filename='chart/utils.js') }}"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.14.0/js-yaml.min.js"></script>
+  
   <script>
 
    var config = {};
@@ -217,34 +218,12 @@
                 method: "POST",
                 url: "{{ url_for('createdep', template=selectedTemplate) }}",
                 data: formData,
-                success: function(payload) {
-                    var computeCount = countComputeOccurrences(payload);
-                    console.log("Number of '.Compute' occurrences: " + computeCount);
-
-                    $('#payloadValue').empty();
-                    $('#payloadValue').append(computeCount);
+                success: function(total_cost) {
+                    $('#costValue').empty();
+                    $('#costValue').append(total_cost);
                 }
             });
         });
-    }
-
-    function countComputeOccurrences(payload) {
-        var count = 0;
-
-        // Convert the payload to a string to use regular expression for counting
-        var payloadString = JSON.stringify(payload);
-        console.log(payloadString)
-
-        // Use a regular expression to count occurrences of ".Compute"
-        var regex = /\.Compute/g;
-        var matches = payloadString.match(regex);
-
-        // If matches is not null, get the count
-        if (matches) {
-            count = matches.length;
-        }
-
-        return count;
     }
 
    function activateSubmit() {
@@ -331,7 +310,7 @@
                        <canvas id="chart-area-security_groups" width="100px" height="100px"></canvas>
                    </div>
                </div>
-               <div>Foreseen cost of deployment: <span id="payloadValue"></span> €</div>
+               <div>Foreseen cost of deployment: <span id="costValue"></span> €</div>
            </div>
         </div>
       </div>
