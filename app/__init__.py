@@ -1088,7 +1088,7 @@ def create_app(oidc_blueprint=None):
                     input_cpus = node['capabilities']['host']['properties']['num_cpus']['get_input']
                     num_cpus = template['topology_template']['inputs'][input_cpus]['default']
                     total_cost += num_cpus * settings.costs.get("CPU")
-                    
+
                     input_mem = node['capabilities']['host']['properties']['mem_size']['get_input']
                     mem_size = template['topology_template']['inputs'][input_mem]['default']
                     total_cost += int(mem_size.split()[0]) * settings.costs.get("MEM")
@@ -1126,7 +1126,7 @@ def create_app(oidc_blueprint=None):
             flash("Error creating infrastrucrure: \n%s." % ex, 'error')
 
         return redirect(url_for('showinfrastructures'))
-    
+
     @app.route('/preview')
     @authorized_with_valid_token
     def preview():
