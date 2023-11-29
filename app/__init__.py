@@ -1076,6 +1076,8 @@ def create_app(oidc_blueprint=None):
             num_wn = 0
             total_cost = 0
             for node_name, node in template['topology_template']['node_templates'].items():
+                print('node_name', node_name)
+                print('node', node)
                 if node["type"] in ["tosca.nodes.indigo.Compute", "tosca.nodes.Compute"]:
                     if 'capabilities' in node and 'scalable' in node['capabilities']:
                         input_wn = node['capabilities']['scalable']['properties']['count']['get_input']

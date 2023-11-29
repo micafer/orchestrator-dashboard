@@ -53,11 +53,11 @@
             {% else %}
                 {% include 'default_form.html' %}
             {% endif %}
-            <input type="hidden" id="payloadInput" name="action" value="" />
+            <input type="hidden" id="inputAction" name="action" value="" />
             <button type="submit" class="btn btn-primary submitBtn" disabled><span class="fas fa-share mr-2"></span>Submit</button>
             <button id="cancelBtn" type=button class="btn btn-small btn-secondary" onclick="location.href='{{ url_for('home') }}'">
                 <span class="fas fa-ban mr-2"></span>Cancel</button>
-            <button id="calculateBtn" type="button" class="btn btn-primary costBtn" onclick="setActionValue('cost'); calculateCost();" disabled>Calculate cost</button>
+            <button id="calculateBtn" type="button" class="btn btn-primary costBtn" disabled>Calculate cost</button>
             </form>
         </div>
     </div>
@@ -73,21 +73,30 @@
 -->
 
 <script>
-function setActionValue(action) {
-        document.getElementsByName('action')[0].value = action;
-    }
+document.getElementById("calculateBtn").addEventListener("click", function () {
+    setActionValue('cost');
+    calculateCost();
+});
 
-    document.getElementById("depSubmit").addEventListener("submit", function (event) {
-        var clickedButton = event.submitter;
+function setActionValue(action) {
+    document.getElementById('inputAction').value = action;
+}
+
+document.getElementById("depSubmit").addEventListener("click", function (event) {
+    var clickedButton = event.target;
+
+    if (clickedButton.tagName === 'BUTTON') {
+        var action = '';
 
         if (clickedButton.classList.contains('costBtn')) {
-            setActionValue('cost');
+            action = 'cost';
         } else if (clickedButton.classList.contains('submitBtn')) {
-            setActionValue('submit');
+            action = 'submit';
         }
 
-        return true;
-    });
+        setActionValue(action);
+    }
+});
 
 function onSubmit() {
     if (document.activeElement.classList.contains('submitBtn')) {
@@ -101,6 +110,7 @@ function onSubmit() {
     
     return true;
 }
+
 $(document).ready(function() {
     $('.js-example-basic-single').select2({
       width: '100%' // https://github.com/select2/select2/issues/4220

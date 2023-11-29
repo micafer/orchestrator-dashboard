@@ -211,20 +211,18 @@
    }
 
    function calculateCost() {
-        $('#calculateBtn').on('click', function() {
-            var formData = $('#depSubmit').serialize();
+    var formData = $('#depSubmit').serialize();
 
-            $.ajax({
-                method: "POST",
-                url: "{{ url_for('createdep', template=selectedTemplate) }}",
-                data: formData,
-                success: function(total_cost) {
-                    $('#costValue').empty();
-                    $('#costValue').append(total_cost);
-                }
-            });
-        });
-    }
+    $.ajax({
+        method: "POST",
+        url: "{{ url_for('createdep', template=selectedTemplate) }}",
+        data: formData,
+        success: function(total_cost) {
+            $('#costValue').empty();
+            $('#costValue').append(total_cost);
+        }
+    });
+}
 
    function activateSubmit() {
        $(".submitBtn").attr("disabled", false);
