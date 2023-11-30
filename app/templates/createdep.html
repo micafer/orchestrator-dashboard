@@ -33,10 +33,19 @@
 
         <div class="card-body">
             <div class="alert alert-info">
-                <strong>Description:</strong> {{template['description']}}
+                <strong>Description:</strong>
+                {{template['description']}}
                 {% if 'metadata' in template and 'web' in template['metadata'] and template['metadata']['web'] %}
                 (<a taget="_blank" href="{{template['metadata']['web']}}">{{template['metadata']['web']}}</a>)
                 {% endif %}
+                <!-- Add childs descriptions -->
+                {% if child_templates %}
+                {% for name, child_template in child_templates.items() %}
+                   {%- if child_template['description'] is defined and child_template['description'] -%}
+                   <br> {{ child_template['description'] }}
+                   {% endif -%}
+               {% endfor %}
+               {% endif %}
             </div>
 
             <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post" onsubmit="return onSubmit();">
