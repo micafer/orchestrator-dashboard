@@ -62,9 +62,11 @@
             {% else %}
                 {% include 'default_form.html' %}
             {% endif %}
-            <button type="submit" class="btn btn-primary submitBtn" disabled><span class="fas fa-share mr-2"></span>Submit</button>
+            <input type="hidden" name="action" value="">
             <button id="cancelBtn" type=button class="btn btn-small btn-secondary" onclick="location.href='{{ url_for('home') }}'">
                 <span class="fas fa-ban mr-2"></span>Cancel</button>
+            <button type="submit" class="btn btn-primary previewBtn" onclick="setActionValue('preview');" disabled><span class="fas fa-file-pen mr-2"></span>Preview</button>
+            <button id="submitBtn" type="submit" class="btn btn-primary submitBtn" onclick="setActionValue('submit');" disabled><span class="fas fa-share mr-2"></span>Submit</button>
             </form>
         </div>
     </div>
@@ -80,14 +82,32 @@
 -->
 
 <script>
+function setActionValue(action) {
+        document.getElementsByName('action')[0].value = action;
+    }
+
+    document.getElementById("depSubmit").addEventListener("submit", function (event) {
+        var clickedButton = event.submitter;
+
+        if (clickedButton.classList.contains('previewBtn')) {
+            setActionValue('preview');
+        } else if (clickedButton.classList.contains('submitBtn')) {
+            setActionValue('submit');
+        }
+
+        return true;
+    });
 
 function onSubmit() {
-{% if g.analytics_tag %}
-    gtag('event', 'submit', {'event_category' : '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}', 'event_label' : 'Submit'});
-{% endif %}
-{% if g.motomo_info and "url" in g.motomo_info and g.motomo_info["url"] %}
-    _paq.push(['trackEvent', 'Infrastructure', 'Deploy', '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}']);
-{% endif %}
+    if (document.activeElement.classList.contains('submitBtn')) {
+        {% if g.analytics_tag %}
+            gtag('event', 'submit', {'event_category' : '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}', 'event_label' : 'Submit'});
+        {% endif %}
+        {% if g.motomo_info and "url" in g.motomo_info and g.motomo_info["url"] %}
+            _paq.push(['trackEvent', 'Infrastructure', 'Deploy', '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}']);
+        {% endif %}
+    }
+    
     return true;
 }
 $(document).ready(function() {
@@ -100,13 +120,17 @@ $(document).ready(function() {
 <script>
 $(document).ready(function () {
     $("#depSubmit").submit(function () {
-        //disable button on click
-        $(".submitBtn").attr("disabled", true);
-        // add spinner to button
-        $(".submitBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...` );
-        //disable cancel too
-        $("#cancelBtn").attr("disabled", true);
-        $("#cancelBtn").attr("onclick", "#");
+        if ($(document.activeElement).attr("id") === "submitBtn") {
+            //disable button on click
+            $(".submitBtn").attr("disabled", true);
+            $(".previewBtn").attr("disabled", true);
+            // add spinner to button
+            $(".submitBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...` );
+            //disable cancel too
+            $("#cancelBtn").attr("disabled", true);
+            $("#cancelBtn").attr("onclick", "#");
+        }
+
         return true;
     });
 });
