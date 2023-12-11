@@ -40,7 +40,7 @@ from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response
+from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response,jsonify
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
@@ -978,99 +978,146 @@ def create_app(oidc_blueprint=None):
     def createdep():
 
         form_data = request.form.to_dict()
-
-        app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
-
-        childs = []
-        if 'extra_opts.childs' in form_data:
-            childs = form_data['extra_opts.childs'].split(",")
-        cred_id = form_data['extra_opts.selectedCred']
-        cred_data = cred.get_cred(cred_id, get_cred_id())
         access_token = oidc_blueprint.session.token['access_token']
+        if request.form.get('action'):
+            app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
-        site = {}
-        image = None
-        priv_network_id = None
-        pub_network_id = None
-        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE', 'CH']:
-            if cred_data['type'] == 'fedcloud':
-                site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
-                if "networks" in site and vo in site["networks"]:
-                    if "private" in site["networks"][vo]:
-                        priv_network_id = site["networks"][vo]["private"]
-                    if "public" in site["networks"][vo]:
-                        pub_network_id = site["networks"][vo]["public"]
+            childs = []
+            if 'extra_opts.childs' in form_data:
+                childs = form_data['extra_opts.childs'].split(",")
+            cred_id = form_data['extra_opts.selectedCred']
+            cred_data = cred.get_cred(cred_id, get_cred_id())
 
-            if form_data['extra_opts.selectedImage'] != "" and 'name' in site:
-                image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
-            elif form_data['extra_opts.selectedSiteImage'] != "":
-                image = form_data['extra_opts.selectedSiteImage']
-        else:
-            image_id = form_data['extra_opts.imageID']
-            protocol_map = {
-                'EC2': 'aws',
-                'Kubernetes': 'docker',
-                'Azure': 'azr'
-            }
-            image = "%s://%s" % (protocol_map.get(cred_data['type']), image_id)
+            site = {}
+            image = None
+            priv_network_id = None
+            pub_network_id = None
+            if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE', 'CH']:
+                if cred_data['type'] == 'fedcloud':
+                    site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
+                    if "networks" in site and vo in site["networks"]:
+                        if "private" in site["networks"][vo]:
+                            priv_network_id = site["networks"][vo]["private"]
+                        if "public" in site["networks"][vo]:
+                            pub_network_id = site["networks"][vo]["public"]
 
-        if not image:
-            flash("No correct image specified.", "error")
-            return redirect(url_for('showinfrastructures'))
+                if form_data['extra_opts.selectedImage'] != "" and 'name' in site:
+                    image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
+                elif form_data['extra_opts.selectedSiteImage'] != "":
+                    image = form_data['extra_opts.selectedSiteImage']
+            else:
+                image_id = form_data['extra_opts.imageID']
+                protocol_map = {
+                    'EC2': 'aws',
+                    'Kubernetes': 'docker',
+                    'Azure': 'azr'
+                }
+                image = "%s://%s" % (protocol_map.get(cred_data['type']), image_id)
 
-        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id, True)
-
-        # Special case for a TOSCA template provided by the user
-        if request.args.get('template') == 'tosca.yml':
-            try:
-                if form_data.get('tosca'):
-                    template = yaml.safe_load(form_data.get('tosca'))
-                    ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
-                else:
-                    response = requests.get(form_data.get('tosca_url'), timeout=10)
-                    response.raise_for_status()
-                    template = yaml.safe_load(response.text)
-                    ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
-            except Exception as ex:
-                msg = "%s" % ex
-                flash("Invalid TOSCA specified: '%s'." % msg[:512], "error")
+            if not image:
+                flash("No correct image specified.", "error")
                 return redirect(url_for('showinfrastructures'))
-        else:
-            with io.open(settings.toscaDir + request.args.get('template')) as stream:
-                template = yaml.full_load(stream)
 
-        for child in childs:
-            with io.open(settings.toscaDir + child) as stream:
-                template = _merge_templates(template, yaml.full_load(stream))
+            auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), cred_id, True)
 
-        if 'metadata' not in template:
-            template['metadata'] = {}
-        template['metadata']['filename'] = request.args.get('template')
-        template['metadata']['childs'] = childs
+            # Special case for a TOSCA template provided by the user
+            if request.args.get('template') == 'tosca.yml':
+                try:
+                    if form_data.get('tosca'):
+                        template = yaml.safe_load(form_data.get('tosca'))
+                        ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
+                    else:
+                        response = requests.get(form_data.get('tosca_url'), timeout=10)
+                        response.raise_for_status()
+                        template = yaml.safe_load(response.text)
+                        ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
+                except Exception as ex:
+                    msg = "%s" % ex
+                    flash("Invalid TOSCA specified: '%s'." % msg[:512], "error")
+                    if request.form.to_dict().get('tosca_url', '') == '':
+                        resources = {
+                        'error': 'Invalid TOSCA recipe.',
+                        }
+                    return json.dumps(resources)
+            else:
+                with io.open(settings.toscaDir + request.args.get('template')) as stream:
+                    template = yaml.full_load(stream)
 
-        if priv_network_id and pub_network_id:
-            template = add_network_id_to_template(template, priv_network_id, pub_network_id)
+            for child in childs:
+                with io.open(settings.toscaDir + child) as stream:
+                    template = _merge_templates(template, yaml.full_load(stream))
 
-        if form_data['infra_name']:
-            template['metadata']['infra_name'] = form_data['infra_name']
-            template = add_instance_name_to_compute(template, form_data['infra_name'])
+            if 'metadata' not in template:
+                template['metadata'] = {}
+            template['metadata']['filename'] = request.args.get('template')
+            template['metadata']['childs'] = childs
 
-        template = add_image_to_template(template, image)
+            if priv_network_id and pub_network_id:
+                template = add_network_id_to_template(template, priv_network_id, pub_network_id)
 
-        template = add_auth_to_template(template, access_token, cred_id)
+            if form_data['infra_name']:
+                template['metadata']['infra_name'] = form_data['infra_name']
+                template = add_instance_name_to_compute(template, form_data['infra_name'])
 
-        template = add_ssh_keys_to_template(template)
+            template = add_image_to_template(template, image)
 
-        inputs = {k: v for (k, v) in form_data.items() if not k.startswith("extra_opts.")}
+            template = add_auth_to_template(template, access_token, cred_id)
 
-        app.logger.debug("Parameters: " + json.dumps(inputs))
+            template = add_ssh_keys_to_template(template)
 
-        template = set_inputs_to_template(template, inputs)
+            inputs = {k: v for (k, v) in form_data.items() if not k.startswith("extra_opts.")}
 
-        payload = yaml.dump(template, default_flow_style=False, sort_keys=False)
+            app.logger.debug("Parameters: " + json.dumps(inputs))
+
+            template = set_inputs_to_template(template, inputs)
+
+            payload = yaml.dump(template, default_flow_style=False, sort_keys=False)
+
+        if request.form.get('action') == 'resources':
+            template = yaml.safe_load(payload)
+            ToscaTemplate(yaml_dict_tpl=copy.deepcopy(template))
+
+            wns_used = 0
+            cpus_used = 0
+            mem_used = 0
+
+            for node_name, node in template['topology_template']['node_templates'].items():
+                if node["type"] in ["tosca.nodes.indigo.Compute", "tosca.nodes.Compute"]:
+                    if 'capabilities' in node and 'scalable' in node['capabilities']:
+                        count_property = node['capabilities']['scalable']['properties']['count']
+
+                        if isinstance(count_property, dict):
+                            input_wn = count_property['get_input']
+                            wns_used = template['topology_template']['inputs'][input_wn]['default']
+                        else:
+                            wns_used = count_property
+                    else:
+                        wns_used += 1
+
+                    input_cpus = node['capabilities']['host']['properties']['num_cpus']['get_input']
+                    cpus_used = template['topology_template']['inputs'][input_cpus]['default']
+
+                    input_mem = node['capabilities']['host']['properties']['mem_size']['get_input']
+                    mem_used = template['topology_template']['inputs'][input_mem]['default']
+
+            resources = {
+                'wns_used': str(wns_used),
+                'cpus_used': str(cpus_used),
+                'mem_used': str(mem_used)
+            }
+
+            return json.dumps(resources)
+
+        if request.form.get('action') == 'preview':
+            return redirect(url_for('preview', data=payload))
 
         try:
-            response = im.create_inf(payload, auth_data)
+            if request.form.get('action'):
+                response = im.create_inf(payload, auth_data)
+            else:
+                auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), None, True)
+                response = im.create_inf(request.form.get('payload'), auth_data)
+
             if not response.ok:
                 raise Exception(response.text)
 
@@ -1092,6 +1139,12 @@ def create_app(oidc_blueprint=None):
             flash("Error creating infrastrucrure: \n%s." % ex, 'error')
 
         return redirect(url_for('showinfrastructures'))
+    
+    @app.route('/preview')
+    @authorized_with_valid_token
+    def preview():
+        payload = request.args.get('data')
+        return render_template('preview.html', payload=payload, prev_action='preview')
 
     @app.route('/manage_creds')
     @authorized_with_valid_token
@@ -1380,7 +1433,6 @@ def create_app(oidc_blueprint=None):
                 new_infra_id = new_im.import_inf(infra_data, auth_data)
                 if new_infra_id:
                     im.export_inf(infid, auth_data, delete=True)
-                    infra.delete_infra(infid)
                     flash("Infrastructure successfully migrated to %s." % new_infra_id, "success")
                 else:
                     flash("Error migrating the infrastructure %s." % infid, "error")

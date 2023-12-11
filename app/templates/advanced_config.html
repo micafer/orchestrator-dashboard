@@ -8,7 +8,8 @@
   
   <script src="{{ url_for('static', filename='chart/Chart.min.js') }}"></script>
   <script src="{{ url_for('static', filename='chart/utils.js') }}"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.14.0/js-yaml.min.js"></script>
+  
   <script>
 
    var config = {};
@@ -209,8 +210,42 @@
         });
    }
 
+   function showResourcesUsed() {
+    var formData = $('#depSubmit').serialize();
+
+    $.ajax({
+        method: "POST",
+        url: "{{ url_for('createdep', template=selectedTemplate) }}",
+        data: formData,
+        success: function(resources) {
+            var parsedResources  = JSON.parse(resources);
+
+            if (parsedResources.error) {
+                var resourcesHTML = parsedResources.error;
+                $('#resourcesValue').empty();
+                $('#resourcesValue').text(resourcesHTML);
+            } else {
+                $('#resourcesValue').empty();
+
+                var resourcesHTML = '<div>Resources used:</div>' +
+                    '<ul>' +
+                    '<li>VMs: <span id="vmsValue"></span></li>' +
+                    '<li>CPUs: <span id="cpusValue"></span></li>' +
+                    '<li>Memory used: <span id="memoryValue"></span></li>' +
+                    '</ul>';
+
+                $('#resourcesValue').append(resourcesHTML);
+                $('#vmsValue').text(parsedResources.wns_used);
+                $('#cpusValue').text(parsedResources.cpus_used);
+                $('#memoryValue').text(parsedResources.mem_used);
+            }
+        }
+    });
+}
+
    function activateSubmit() {
        $(".submitBtn").attr("disabled", false);
+       $(".resourcesBtn").attr("disabled", false);
    }
    </script>
 
@@ -292,9 +327,9 @@
                        <canvas id="chart-area-security_groups" width="100px" height="100px"></canvas>
                    </div>
                </div>
+               <div><span id="resourcesValue"></span></div>
            </div>
-
-       </div>
+        </div>
       </div>
 
 
