@@ -661,11 +661,24 @@ class IMDashboardTests(unittest.TestCase):
                   'ports': '22,80,443',
                   'storage_size': '0 GB',
                   'mount_path': '/mnt/disk',
-                  'infra_name': 'some_infra',
+                  'infra_name': 'some_infra'
                   }
         res = self.client.post('/configure?selected_tosca=simple-node-disk.yml&childs=', data=params)
         self.assertEqual(200, res.status_code)
 
+        parsed_response = res.get_json()
+
+        self.assertEqual(parsed_response['wns_used'], 4)
+        self.assertEqual(parsed_response['cpus_used'], 3)
+        self.assertEqual(parsed_response['mem_used'], 2)
+
+        # parsed_response = json.loads(res.get_data(as_text=True))
+        # expected_values = {
+        #     'wns_used': '1',
+        #     'cpus_used': '4',
+        #     'mem_used': '2 GB'
+        # }
+        # self.assertDictEqual(expected_values, parsed_response)
 
     @patch("app.utils.getIMUserAuthData")
     @patch('requests.get')

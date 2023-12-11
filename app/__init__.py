@@ -1036,7 +1036,7 @@ def create_app(oidc_blueprint=None):
                     flash("Invalid TOSCA specified: '%s'." % msg[:512], "error")
                     if request.form.to_dict().get('tosca_url', '') == '':
                         resources = {
-                        'error': 'Invalid TOSCA recipe.',
+                            'error': 'Invalid TOSCA recipe.',
                         }
                     return json.dumps(resources)
             else:
@@ -1139,7 +1139,7 @@ def create_app(oidc_blueprint=None):
             flash("Error creating infrastrucrure: \n%s." % ex, 'error')
 
         return redirect(url_for('showinfrastructures'))
-    
+
     @app.route('/preview')
     @authorized_with_valid_token
     def preview():
