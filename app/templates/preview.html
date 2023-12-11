@@ -32,9 +32,9 @@
 <script>
 $(document).ready(function () {
     $("#depSubmit").submit(function () {
-        //disable button on click
+        // Disable button on click
         $(".submitBtn").attr("disabled", true);
-        // add spinner to button
+        // Add spinner to button
         $(".submitBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...` );
         return true;
     });
@@ -72,3 +72,4 @@ function updatePayload(value) {
 </script>
 
 {% endblock %}
+
