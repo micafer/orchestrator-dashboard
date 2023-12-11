@@ -1038,7 +1038,8 @@ def create_app(oidc_blueprint=None):
                         resources = {
                             'error': 'Invalid TOSCA recipe.',
                         }
-                    return json.dumps(resources)
+                    return jsonify(resources)
+                    # return json.dumps(resources)
             else:
                 with io.open(settings.toscaDir + request.args.get('template')) as stream:
                     template = yaml.full_load(stream)
@@ -1106,7 +1107,8 @@ def create_app(oidc_blueprint=None):
                 'mem_used': str(mem_used)
             }
 
-            return json.dumps(resources)
+            return jsonify(resources)
+            # return json.dumps(resources)
 
         if request.form.get('action') == 'preview':
             return redirect(url_for('preview', data=payload))

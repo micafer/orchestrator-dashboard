@@ -655,27 +655,32 @@ class IMDashboardTests(unittest.TestCase):
         params = {'extra_opts.selectedImage': '',
                   'extra_opts.selectedSiteImage': 'IMAGE_NAME',
                   'extra_opts.selectedCred': 'credid',
-                  'num_cpus': '4',
+                  'num_cpus': '1',
                   'mem_size': '2 GB',
                   'num_instances': '1',
                   'ports': '22,80,443',
                   'storage_size': '0 GB',
                   'mount_path': '/mnt/disk',
-                  'infra_name': 'some_infra'
+                  'infra_name': 'some_infra',
+                  'action': 'resources'
                   }
-        res = self.client.post('/configure?selected_tosca=simple-node-disk.yml&childs=', data=params)
+        res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
+
+        print("Response content type:", res.headers.get('Content-Type'))  # Print content type for debugging
+        print("Response content:", res.get_data(as_text=True))
+
         self.assertEqual(200, res.status_code)
 
         parsed_response = res.get_json()
 
-        self.assertEqual(parsed_response['wns_used'], 4)
-        self.assertEqual(parsed_response['cpus_used'], 3)
-        self.assertEqual(parsed_response['mem_used'], 2)
+        self.assertEqual(parsed_response['wns_used'], '1')
+        self.assertEqual(parsed_response['cpus_used'], '1')
+        self.assertEqual(parsed_response['mem_used'], '2 GB')
 
         # parsed_response = json.loads(res.get_data(as_text=True))
         # expected_values = {
         #     'wns_used': '1',
-        #     'cpus_used': '4',
+        #     'cpus_used': '1',
         #     'mem_used': '2 GB'
         # }
         # self.assertDictEqual(expected_values, parsed_response)

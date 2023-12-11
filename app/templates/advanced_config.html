@@ -217,9 +217,8 @@
         method: "POST",
         url: "{{ url_for('createdep', template=selectedTemplate) }}",
         data: formData,
-        success: function(resources) {
-            var parsedResources  = JSON.parse(resources);
-
+        success: function(parsedResources) {
+            // var parsedResources  = JSON.parse(resources);
             if (parsedResources.error) {
                 var resourcesHTML = parsedResources.error;
                 $('#resourcesValue').empty();
