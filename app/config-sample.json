@@ -24,5 +24,8 @@
     "ENABLE_EXTERNAL_VAULT": false,
     "VO_MAP": {},
     "EXTRA_AUTH": {},
-    "HIDE_TOSCA_TAGS": []
+    "HIDE_TOSCA_TAGS": [],
+    "OAIPMH_REPO_NAME": "IM Dashboard",
+    "OAIPMH_REPO_DESCRIPTION": "IM Dashboard OAI-PMH repository",
+    "OAIPMH_REPO_BASE_IDENTIFIER_URL": "https://github.com/grycap/tosca/blob/main/templates/"
 }

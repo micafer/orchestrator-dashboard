@@ -1,5 +1,6 @@
 import unittest
 import json
+import xml.etree.ElementTree as etree
 from app import create_app
 from urllib.parse import urlparse
 from mock import patch, MagicMock
@@ -651,6 +652,98 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/owners/infid')
         self.assertEqual(200, res.status_code)
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
+
+    def test_oai(self):
+        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+
+        # Test OAI path
+        res = self.client.get('/oai')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badArgument')
+
+        # Test Identify
+        res = self.client.get('/oai?verb=Identify')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:repositoryName", namespace).text, "IM Dashboard")
+        self.assertEqual(root.find(".//oaipmh:baseURL", namespace).text, "http://localhost/oai")
+        self.assertEqual(root.find(".//oaipmh:protocolVersion", namespace).text, "2.0")
+        self.assertIsNotNone(root.find(".//oaipmh:earliestDatestamp", namespace))
+        self.assertEqual(root.find(".//oaipmh:deletedRecord", namespace).text, "no")
+        self.assertEqual(root.find(".//oaipmh:granularity", namespace).text, "YYYY-MM-DD")
+        self.assertEqual(root.find(".//oaipmh:adminEmail", namespace).text, "admin@localhost")
+
+        # Test GetRecord
+        tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
+        res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        namespace_dc = {'dc': 'http://purl.org/dc/elements/1.1/'}
+        namespace_oaipmh = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+        namespace_datacite = {'datacite': 'http://datacite.org/schema/kernel-4'}
+
+        self.assertEqual(root.find(".//dc:title", namespace_dc).text, "Deploy a VM")
+        self.assertEqual(root.find(".//dc:creator", namespace_dc).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//dc:date", namespace_dc).text, "2020-09-08")
+        # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:identifier", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
+
+        # Test ListIdentifiers
+        res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:identifier", namespace_oaipmh).text, "simple-node-disk.yml")
+
+        # Test ListRecords oai_dc
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//dc:title", namespace_dc).text, "Deploy a VM")
+        self.assertEqual(root.find(".//dc:creator", namespace_dc).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//dc:date", namespace_dc).text, "2020-09-08")
+        # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:identifier", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
+
+        # Test ListRecords oai_openaire
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_openaire')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//datacite:creatorName", namespace_datacite).text, "Miguel Caballer")
+
+        # Test ListMetadataFormats
+        res = self.client.get('/oai?verb=ListMetadataFormats')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        prefixes = root.findall(".//oaipmh:metadataPrefix", namespace_oaipmh)
+        prefixes_text = [prefix.text for prefix in prefixes]
+
+        self.assertIn('oai_dc', prefixes_text)
+        self.assertIn('oai_openaire', prefixes_text)
+
+        # Test ListSets
+        res = self.client.get('/oai?verb=ListSets')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noSetHierarchy')
 
     @patch("hvac.Client")
     def test_secret(self, hvac):
