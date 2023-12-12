@@ -320,7 +320,7 @@ def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
     return toscaTemplates
 
 
-def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates, tags_to_hide):
+def extractToscaInfo(toscaDir, toscaTemplates, tags_to_hide):
     toscaInfoOrder = toscaInfo = {}
     for tosca in toscaTemplates:
         with io.open(toscaDir + tosca) as stream:
@@ -353,29 +353,22 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates, tags_to_hide):
                 if 'inputs' in template['topology_template']:
                     toscaInfo[tosca]['inputs'] = template['topology_template']['inputs']
 
-                # add parameters code here
-                if tosca_pars_dir:
-                    tosca_pars_path = tosca_pars_dir + "/"  # this has to be reassigned here because is local.
-                    for fpath, _, fnames in os.walk(tosca_pars_path):
-                        for fname in fnames:
-                            if fnmatch(fname, os.path.splitext(tosca)[0] + '.parameters.yml') or \
-                                    fnmatch(fname, os.path.splitext(tosca)[0] + '.parameters.yaml'):
-                                # skip hidden files
-                                if fname[0] != '.':
-                                    tosca_pars_file = os.path.join(fpath, fname)
-                                    with io.open(tosca_pars_file) as pars_file:
-                                        toscaInfo[tosca]['enable_config_form'] = True
-                                        pars_data = yaml.full_load(pars_file)
-                                        # only read expected fields tab and tag_type
-                                        for key, value in pars_data["inputs"].items():
-                                            if "tab" in value:
-                                                toscaInfo[tosca]['inputs'][key]["tab"] = value["tab"]
-                                            if "tag_type" in value:
-                                                toscaInfo[tosca]['inputs'][key]["tag_type"] = value["tag_type"]
-                                            if "pattern" in value:
-                                                toscaInfo[tosca]['inputs'][key]["pattern"] = value["pattern"]
-                                        if "tabs" in pars_data:
-                                            toscaInfo[tosca]['tabs'] = pars_data["tabs"]
+                tabs = template.get('metadata', {}).get('tabs', {})
+                for tab, input_elems in tabs.items():
+                    toscaInfo[tosca]['enable_config_form'] = True
+                    toscaInfo[tosca]['tabs'].append(tab)
+                    for input_elem in input_elems:
+                        input_name = input_elem
+                        input_params = {}
+                        if isinstance(input_elem, dict):
+                            input_name = list(input_elem.keys())[0]
+                            input_params = list(input_elem.values())[0]
+                        if input_name in toscaInfo[tosca]['inputs']:
+                            toscaInfo[tosca]['inputs'][input_name]["tab"] = tab
+                            if "tag_type" in input_params:
+                                toscaInfo[tosca]['inputs'][input_name]["tag_type"] = input_params["tag_type"]
+                            if "pattern" in input_params:
+                                toscaInfo[tosca]['inputs'][input_name]["pattern"] = input_params["pattern"]
 
         toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
 
