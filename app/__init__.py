@@ -979,9 +979,7 @@ def create_app(oidc_blueprint=None):
 
         form_data = request.form.to_dict()
         access_token = oidc_blueprint.session.token['access_token']
-        print('helo')
         if request.form.get('action'):
-            print('helo action')
             app.logger.debug("Form data: " + json.dumps(request.form.to_dict()))
 
             childs = []
@@ -1071,9 +1069,7 @@ def create_app(oidc_blueprint=None):
 
             payload = yaml.dump(template, default_flow_style=False, sort_keys=False)
 
-        print('end action')
         if request.form.get('action') == 'preview':
-            print('preview action')
             return redirect(url_for('preview', data=payload))
 
         try:
