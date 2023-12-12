@@ -25,6 +25,7 @@ import json
 import os
 import sys
 import time
+import re
 from collections import OrderedDict
 from fnmatch import fnmatch
 from hashlib import md5
@@ -357,6 +358,11 @@ def extractToscaInfo(toscaDir, toscaTemplates, tags_to_hide):
                 for tab, input_elems in tabs.items():
                     toscaInfo[tosca]['enable_config_form'] = True
                     toscaInfo[tosca]['tabs'].append(tab)
+                    # Special case for a regex to select inputs
+                    if isinstance(input_elems, str):
+                        all_inputs = list(toscaInfo[tosca]['inputs'].keys())
+                        res = [elem for elem in all_inputs if re.match(input_elems, elem)]
+                        input_elems = res
                     for input_elem in input_elems:
                         input_name = input_elem
                         input_params = {}
