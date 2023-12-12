@@ -696,7 +696,6 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(parsed_response['cpus_used'], '10')
         self.assertEqual(parsed_response['mem_used'], '16 GB')
 
-
     @patch("app.utils.getIMUserAuthData")
     @patch('requests.get')
     @patch("app.utils.avatar")
