@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Recipe Editor{% endblock %}
+{% block content %}
+
+<div class="container">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div>
+                <h4 class="font-weight-bold text-primary">Recipe editor</h4>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="col-12">
+                <textarea rows="30" class="form-control" id="recipe" style="resize: none; width: 100%;"
+                    oninput="updatePayload(this.value)">{{ payload }}</textarea>
+            </div>
+        </div>
+        <div class="card-footer">
+            <form id="depSubmit" action="{{ url_for('createdep') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button type="button" class="btn btn-small btn-outline-secondary" onclick="history.back()"><span
+                        class="fas fa-arrow-left mr-2"></span>Back</button>
+                <button class="btn btn-primary" id="downloadBtn"><span class="fa fa-download"></span> Download</button>
+                <input type="hidden" name="payload" id="payloadInput" value="{{ payload }}" />
+                <button type="submit" class="btn btn-primary submitBtn"><span
+                        class="fas fa-share mr-2"></span>Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    $("#depSubmit").submit(function () {
+        // Disable button on click
+        $(".submitBtn").attr("disabled", true);
+        // Add spinner to button
+        $(".submitBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...` );
+        return true;
+    });
+});
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+document.getElementById("downloadBtn").addEventListener("click", function (event) {
+        event.preventDefault();
+
+        var text = document.getElementById("recipe").innerHTML;
+        var filename = "recipe.yaml";
+
+        download(filename, text);
+    }, false);
+
+function updatePayload(value) {
+        var textarea = document.getElementById("recipe");
+        var payloadInput = document.getElementById("payloadInput");
+
+        textarea.innerHTML = value;
+        payloadInput.value = value;
+    }
+</script>
+
+{% endblock %}
+
