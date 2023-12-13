@@ -321,6 +321,53 @@ def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
     return toscaTemplates
 
 
+def _addTabs(tabs, toscaInfo, tosca):
+    if tabs:
+        toscaInfo[tosca]['enable_config_form'] = True
+    for tab, input_elems in tabs.items():
+        toscaInfo[tosca]['tabs'].append(tab)
+        # Special case for a regex to select inputs
+        if isinstance(input_elems, str):
+            all_inputs = list(toscaInfo[tosca]['inputs'].keys())
+            res = [elem for elem in all_inputs if re.match(input_elems, elem)]
+            input_elems = res
+        for input_elem in input_elems:
+            input_name = input_elem
+            input_params = {}
+            if isinstance(input_elem, dict):
+                input_name = list(input_elem.keys())[0]
+                input_params = list(input_elem.values())[0]
+            if input_name in toscaInfo[tosca]['inputs']:
+                toscaInfo[tosca]['inputs'][input_name]["tab"] = tab
+                if "tag_type" in input_params:
+                    toscaInfo[tosca]['inputs'][input_name]["tag_type"] = input_params["tag_type"]
+                if "pattern" in input_params:
+                    toscaInfo[tosca]['inputs'][input_name]["pattern"] = input_params["pattern"]
+
+
+def _addAddons(toscaInfo, toscaTemplates, toscaDir):
+    # Add addons to description
+    for tosca in toscaTemplates:
+        if "childs" in toscaInfo[tosca]["metadata"] and toscaInfo[tosca]["metadata"]["childs"]:
+            if 'addons' not in toscaInfo[tosca]['metadata']:
+                toscaInfo[tosca]['metadata']["addons"] = ""
+            child_names = []
+            for child in toscaInfo[tosca]["metadata"]["childs"]:
+                child_name = ""
+                if child in toscaInfo:
+                    child_name = toscaInfo[child].get("metadata", {}).get("name")
+                else:
+                    try:
+                        with io.open(toscaDir + child) as stream:
+                            child_template = yaml.full_load(stream)
+                    except Exception:
+                        child_template = {}
+                    child_name = child_template.get("metadata", {}).get("name")
+                if child_name:
+                    child_names.append(child_name)
+            toscaInfo[tosca]['metadata']["addons"] += ", ".join(child_names)
+
+
 def extractToscaInfo(toscaDir, toscaTemplates, tags_to_hide):
     toscaInfoOrder = toscaInfo = {}
     for tosca in toscaTemplates:
@@ -355,49 +402,12 @@ def extractToscaInfo(toscaDir, toscaTemplates, tags_to_hide):
                     toscaInfo[tosca]['inputs'] = template['topology_template']['inputs']
 
                 tabs = template.get('metadata', {}).get('tabs', {})
-                for tab, input_elems in tabs.items():
-                    toscaInfo[tosca]['enable_config_form'] = True
-                    toscaInfo[tosca]['tabs'].append(tab)
-                    # Special case for a regex to select inputs
-                    if isinstance(input_elems, str):
-                        all_inputs = list(toscaInfo[tosca]['inputs'].keys())
-                        res = [elem for elem in all_inputs if re.match(input_elems, elem)]
-                        input_elems = res
-                    for input_elem in input_elems:
-                        input_name = input_elem
-                        input_params = {}
-                        if isinstance(input_elem, dict):
-                            input_name = list(input_elem.keys())[0]
-                            input_params = list(input_elem.values())[0]
-                        if input_name in toscaInfo[tosca]['inputs']:
-                            toscaInfo[tosca]['inputs'][input_name]["tab"] = tab
-                            if "tag_type" in input_params:
-                                toscaInfo[tosca]['inputs'][input_name]["tag_type"] = input_params["tag_type"]
-                            if "pattern" in input_params:
-                                toscaInfo[tosca]['inputs'][input_name]["pattern"] = input_params["pattern"]
+                _addTabs(tabs, toscaInfo, tosca)
 
         toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
 
     # Add addons to description
-    for tosca in toscaTemplates:
-        if "childs" in toscaInfo[tosca]["metadata"] and toscaInfo[tosca]["metadata"]["childs"]:
-            if 'addons' not in toscaInfo[tosca]['metadata']:
-                toscaInfo[tosca]['metadata']["addons"] = ""
-            child_names = []
-            for child in toscaInfo[tosca]["metadata"]["childs"]:
-                child_name = ""
-                if child in toscaInfo:
-                    child_name = toscaInfo[child].get("metadata", {}).get("name")
-                else:
-                    try:
-                        with io.open(toscaDir + child) as stream:
-                            child_template = yaml.full_load(stream)
-                    except Exception:
-                        child_template = {}
-                    child_name = child_template.get("metadata", {}).get("name")
-                if child_name:
-                    child_names.append(child_name)
-            toscaInfo[tosca]['metadata']["addons"] += ", ".join(child_names)
+    _addAddons(toscaInfo, toscaTemplates, toscaDir)
 
     return toscaInfoOrder
 
