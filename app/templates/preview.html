@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Recipe Editor{% endblock %}
 {% block content %}
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/mode/yaml/yaml.min.js"></script>
+    
 <div class="container">
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -10,10 +13,7 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="col-12">
-                <textarea rows="30" class="form-control" id="recipe" style="resize: none; width: 100%;"
-                    oninput="updatePayload(this.value)">{{ payload }}</textarea>
-            </div>
+            <textarea rows="30" class="form-control" id="recipe">{{ payload }}</textarea>
         </div>
         <div class="card-footer">
             <form id="depSubmit" action="{{ url_for('createdep') }}" method="post">
@@ -54,22 +54,40 @@ function download(filename, text) {
 }
 
 document.getElementById("downloadBtn").addEventListener("click", function (event) {
-        event.preventDefault();
+    event.preventDefault();
 
-        var text = document.getElementById("recipe").innerHTML;
-        var filename = "recipe.yaml";
+    var text = document.getElementById("recipe").innerHTML;
+    var filename = "recipe.yaml";
 
-        download(filename, text);
-    }, false);
+    download(filename, text);
+}, false);
 
-function updatePayload(value) {
-        var textarea = document.getElementById("recipe");
+document.addEventListener('DOMContentLoaded', function () {
+    var editor = CodeMirror.fromTextArea(document.getElementById("recipe"), {
+        lineNumbers: true,
+        mode: "yaml",
+        indentUnit: 4,
+        lineWrapping: true,
+    });
+
+    editor.on("change", function (instance, changeObj) {
+        updatePayload(editor.getValue());
+    });
+
+    function updatePayload(value) {
         var payloadInput = document.getElementById("payloadInput");
-
-        textarea.innerHTML = value;
         payloadInput.value = value;
     }
+});
 </script>
+
+<style>
+.CodeMirror {
+    resize: none;
+    height: 70vh;
+    z-index: 0;
+}
+</style>
 
 {% endblock %}
 
