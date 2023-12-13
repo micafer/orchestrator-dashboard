@@ -1379,6 +1379,7 @@ def create_app(oidc_blueprint=None):
                 new_infra_id = new_im.import_inf(infra_data, auth_data)
                 if new_infra_id:
                     im.export_inf(infid, auth_data, delete=True)
+                    infra.delete_infra(infid)
                     flash("Infrastructure successfully migrated to %s." % new_infra_id, "success")
                 else:
                     flash("Error migrating the infrastructure %s." % infid, "error")
