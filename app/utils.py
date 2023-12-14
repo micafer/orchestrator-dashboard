@@ -355,14 +355,14 @@ def _addAddons(toscaInfo, toscaTemplates, toscaDir):
             for child in toscaInfo[tosca]["metadata"]["childs"]:
                 child_name = ""
                 if child in toscaInfo:
-                    child_name = toscaInfo[child].get("metadata", {}).get("name")
+                    child_name = toscaInfo[child].get("metadata", {}).get("template_name")
                 else:
                     try:
                         with io.open(toscaDir + child) as stream:
                             child_template = yaml.full_load(stream)
                     except Exception:
                         child_template = {}
-                    child_name = child_template.get("metadata", {}).get("name")
+                    child_name = child_template.get("metadata", {}).get("template_name")
                 if child_name:
                     child_names.append(child_name)
             toscaInfo[tosca]['metadata']["addons"] += ", ".join(child_names)
