@@ -702,7 +702,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        self.assertEqual(root.find(".//oaipmh:identifier", namespace_oaipmh).text, "simple-node-disk.yml")
+        self.assertEqual(root.find(".//oaipmh:identifier", namespace_oaipmh).text, "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
 
         # Test ListRecords oai_dc
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
