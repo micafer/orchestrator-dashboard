@@ -425,11 +425,11 @@ class OAI():
         etree.register_namespace('oai_dc', nsmap['oai_dc'])
 
         for key, value in metadata_dict.items():
-            if key == 'title':
+            if key == 'display_name':
                 title_element = etree.Element('{http://datacite.org/schema/kernel-4}title')
                 title_element.text = value
                 root.append(title_element)
-            if key == 'author':
+            if key == 'template_author':
                 creator_element = etree.Element('{http://datacite.org/schema/kernel-4}creator')
                 creator_name_element = etree.Element('{http://datacite.org/schema/kernel-4}creatorName')
                 creator_name_element.text = value
@@ -459,7 +459,7 @@ class OAI():
                 publisher_element = etree.Element('{http://purl.org/dc/elements/1.1/}publisher')
                 publisher_element.text = value
                 root.append(publisher_element)
-            if key == 'version':
+            if key == 'template_version':
                 version_element = etree.Element('{http://purl.org/dc/elements/1.1/}version')
                 version_element.text = value
                 root.append(version_element)
@@ -506,7 +506,7 @@ class OAI():
                 title_element = etree.Element('{http://purl.org/dc/elements/1.1/}title')
                 title_element.text = value
                 root.append(title_element)
-            if key == 'author':
+            if key == 'template_author':
                 creator_element = etree.Element('{http://purl.org/dc/elements/1.1/}creator')
                 creator_element.text = value
                 root.append(creator_element)
@@ -530,7 +530,7 @@ class OAI():
                 publisher_element = etree.Element('{http://purl.org/dc/elements/1.1/}publisher')
                 publisher_element.text = value
                 root.append(publisher_element)
-            if key == 'version':
+            if key == 'template_version':
                 related_identifier_element = etree.Element('{http://purl.org/dc/elements/1.1/}version')
                 related_identifier_element.text = value
                 root.append(related_identifier_element)
