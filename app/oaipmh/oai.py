@@ -20,6 +20,7 @@
 # under the License.
 from lxml import etree
 from datetime import datetime
+from urllib.parse import urlparse
 from app.oaipmh.errors import Errors
 
 
@@ -555,3 +556,109 @@ class OAI():
         xml_string = etree.tostring(root, pretty_print=True, encoding='unicode')
 
         return xml_string
+
+    def processRequest(self, request, metadata_dict):
+        root = self.baseXMLTree()
+
+        attributes_dict = {
+            'verb': 0,
+            'identifier': 0,
+            'metadataPrefix': 0,
+            'from': 0,
+            'until': 0,
+            'set': 0,
+            'resumptionToken': 0,
+        }
+
+        response_xml = None
+        parsed_url = urlparse(request.url)
+        query_parameters = parsed_url.query.split('&')
+
+        for param in query_parameters:
+            key = param.split('=')[0]
+            if key in attributes_dict:
+                attributes_dict[key] += 1
+                if attributes_dict[key] > 1:
+                    request_element = etree.SubElement(root, 'request')
+                    request_element.text = f"{self.repository_base_url}"
+                    error_element = Errors.badArgument()
+                    root.append(error_element)
+                    response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
+
+                    return response_xml
+
+        # Check for unknown attributes
+        unknown_attributes = [param.split('=')[0] for param in query_parameters
+                              if param.split('=')[0] not in attributes_dict]
+
+        if unknown_attributes:
+            request_element = etree.SubElement(root, 'request')
+            request_element.text = f"{self.repository_base_url}"
+            error_element = Errors.badArgument()
+            root.append(error_element)
+            response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
+
+            return response_xml
+
+        if request.method == 'GET':
+            verb = request.args.get('verb')
+            metadata_prefix = request.args.get('metadataPrefix')
+            identifier = request.args.get('identifier')
+            from_date = request.args.get('from')
+            until_date = request.args.get('until')
+            set_spec = request.args.get('set')
+            resumption_token = request.args.get('resumptionToken')
+        else:
+            verb = request.form.get('verb')
+            metadata_prefix = request.form.get('metadataPrefix')
+            identifier = request.form.get('identifier')
+            from_date = request.form.get('from')
+            until_date = request.form.get('until')
+            set_spec = request.form.get('set')
+            resumption_token = request.form.get('resumptionToken')
+
+        # Create a dictionary mapping verbs to functions
+        verb_handlers = {
+            "GetRecord": lambda metadata_dict = metadata_dict: self.getRecord(
+                root, metadata_dict, verb, identifier, metadata_prefix
+            ),
+            "Identify": lambda: self.identify(root, verb),
+            "ListIdentifiers": lambda metadata_dict = metadata_dict: self.listIdentifiers(
+                root,
+                metadata_dict,
+                verb,
+                metadata_prefix,
+                from_date,
+                until_date,
+                set_spec,
+                resumption_token,
+            ),
+            "ListRecords": lambda metadata_dict = metadata_dict: self.listRecords(
+                root,
+                metadata_dict,
+                verb,
+                metadata_prefix,
+                from_date,
+                until_date,
+                set_spec,
+                resumption_token,
+            ),
+            "ListMetadataFormats": lambda metadata_dict = metadata_dict: self.listMetadataFormats(
+                root, metadata_dict, verb, identifier
+            ),
+            "ListSets": lambda: self.listSets(root, verb, resumption_token),
+        }
+
+        # Get the handler function for the specified verb
+        handler = verb_handlers.get(verb)
+
+        if handler is None:
+            request_element = etree.SubElement(root, 'request')
+            request_element.text = f"{self.repository_base_url}"
+            error_element = Errors.badVerb()
+            root.append(error_element)
+            response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
+        else:
+            response_xml = handler()
+
+        return response_xml

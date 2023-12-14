@@ -26,7 +26,6 @@ import os
 import logging
 import copy
 import requests
-from lxml import etree
 from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
@@ -49,7 +48,6 @@ from radl.radl import deploy, description
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from toscaparser.tosca_template import ToscaTemplate
-from app.oaipmh.errors import Errors
 from app.oaipmh.oai import OAI
 
 
@@ -1486,117 +1484,15 @@ def create_app(oidc_blueprint=None):
         if not settings.oaipmh_repo_name:
             return make_response("OAI-PMH not enabled.", 404, {'Content-Type': 'text/plain'})
 
-        response_xml = None
         oai = OAI(settings.oaipmh_repo_name, request.base_url, settings.oaipmh_repo_description,
                   settings.oaipmh_repo_base_identifier_url)
-        root = OAI.baseXMLTree()
-
-        attributes_dict = {
-            'verb': 0,
-            'identifier': 0,
-            'metadataPrefix': 0,
-            'from': 0,
-            'until': 0,
-            'set': 0,
-            'resumptionToken': 0,
-        }
-
-        url = request.url
-        parsed_url = urlparse(url)
-        query_parameters = parsed_url.query.split('&')
-
-        for param in query_parameters:
-            key = param.split('=')[0]
-            if key in attributes_dict:
-                attributes_dict[key] += 1
-                if attributes_dict[key] > 1:
-                    request_element = etree.SubElement(root, 'request')
-                    request_element.text = f"{oai.repository_base_url}"
-                    error_element = Errors.badArgument()
-                    root.append(error_element)
-                    response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
-
-                    return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
-
-        # Check for unknown attributes
-        unknown_attributes = [param.split('=')[0] for param in query_parameters
-                              if param.split('=')[0] not in attributes_dict]
-
-        if unknown_attributes:
-            request_element = etree.SubElement(root, 'request')
-            request_element.text = f"{oai.repository_base_url}"
-            error_element = Errors.badArgument()
-            root.append(error_element)
-            response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
-
-            return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
-
-        if request.method == 'GET':
-            verb = request.args.get('verb')
-            metadata_prefix = request.args.get('metadataPrefix')
-            identifier = request.args.get('identifier')
-            from_date = request.args.get('from')
-            until_date = request.args.get('until')
-            set_spec = request.args.get('set')
-            resumption_token = request.args.get('resumptionToken')
-        else:
-            verb = request.form.get('verb')
-            metadata_prefix = request.form.get('metadataPrefix')
-            identifier = request.form.get('identifier')
-            from_date = request.form.get('from')
-            until_date = request.form.get('until')
-            set_spec = request.form.get('set')
-            resumption_token = request.form.get('resumptionToken')
 
         metadata_dict = {}
         for name, tosca in toscaInfo.items():
             metadata = tosca["metadata"]
             metadata_dict[name] = metadata
 
-        # Create a dictionary mapping verbs to functions
-        verb_handlers = {
-            "GetRecord": lambda metadata_dict = metadata_dict: oai.getRecord(
-                root, metadata_dict, verb, identifier, metadata_prefix
-            ),
-            "Identify": lambda: oai.identify(root, verb),
-            "ListIdentifiers": lambda metadata_dict = metadata_dict: oai.listIdentifiers(
-                root,
-                metadata_dict,
-                verb,
-                metadata_prefix,
-                from_date,
-                until_date,
-                set_spec,
-                resumption_token,
-            ),
-            "ListRecords": lambda metadata_dict = metadata_dict: oai.listRecords(
-                root,
-                metadata_dict,
-                verb,
-                metadata_prefix,
-                from_date,
-                until_date,
-                set_spec,
-                resumption_token,
-            ),
-            "ListMetadataFormats": lambda metadata_dict = metadata_dict: oai.listMetadataFormats(
-                root, metadata_dict, verb, identifier
-            ),
-            "ListSets": lambda: oai.listSets(root, verb, resumption_token),
-        }
-
-        # Get the handler function for the specified verb
-        handler = verb_handlers.get(verb)
-
-        if handler is None:
-            request_element = etree.SubElement(root, 'request')
-            request_element.text = f"{oai.repository_base_url}"
-            error_element = Errors.badVerb()
-            root.append(error_element)
-            response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
-        else:
-            response_xml = handler()
-
+        response_xml = oai.processRequest(request, metadata_dict)
         return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
 
     @app.route('/logout')
