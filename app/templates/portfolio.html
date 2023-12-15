@@ -84,9 +84,9 @@
                   <div class="corner-ribbon bottom-right sticky {{tag_color}} shadow">{{tosca['metadata']['tag']}}</div>
                 {% endif %}
             </div>
-            {% if tosca['metadata']['version'] is defined %}
+            {% if tosca['metadata']['template_version'] is defined %}
             <div class="card-img-overlay pt-1 pl-3">
-                <span class="badge badge-pill badge-secondary mb-2" style="font-size: 0.6em;">v{{tosca['metadata']['version']}}</span>
+                <span class="badge badge-pill badge-secondary mb-2" style="font-size: 0.6em;">v{{tosca['metadata']['template_version']}}</span>
             {% else %}
             <div class="card-img-overlay">
             {% endif %}
