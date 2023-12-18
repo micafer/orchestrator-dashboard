@@ -40,7 +40,8 @@ from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response,jsonify
+from flask import (Flask, json, render_template, request, redirect, url_for,
+                   flash, session, Markup, g, make_response, jsonify)
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
