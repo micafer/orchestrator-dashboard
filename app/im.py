@@ -84,7 +84,7 @@ class InfrastructureManager():
         return response
 
     def reconfigure_inf(self, infid, auth_data, vmids=None, tosca=None):
-        headers = {"Authorization": auth_data}
+        headers = {"Authorization": auth_data, "Content-Type": "text/yaml"}
         url = "%s/infrastructures/%s/reconfigure" % (self.im_url, infid)
         if vmids:
             url += "?vm_list=%s" % ",".join(vmids)

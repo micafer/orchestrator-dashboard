@@ -970,6 +970,15 @@ def create_app(oidc_blueprint=None):
                 if item not in template["topology_template"]:
                     template["topology_template"][item] = {}
                 template["topology_template"][item].update(new_template["topology_template"][item])
+
+        tabs = new_template.get("metadata", {}).get("tabs", {})
+        if tabs:
+            if "metadata" not in template:
+                template["metadata"] = {}
+            if "tabs" not in template["metadata"]:
+                template["metadata"]["tabs"] = {}
+            template["metadata"]["tabs"].update(tabs)
+
         return template
 
     @app.route('/submit', methods=['POST'])
