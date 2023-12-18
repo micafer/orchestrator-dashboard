@@ -1355,7 +1355,7 @@ def create_app(oidc_blueprint=None):
 
             elif op == "reconfigure":
                 if 'reconfigure_template' in form_data and form_data['reconfigure_template'] != "":
-
+                    # If the template has some reconfigure inputs, set them
                     try:
                         template = yaml.safe_load(form_data['reconfigure_template'])
                         template_inputs = template.get('topology_template', {}).get('inputs', {})
@@ -1369,6 +1369,7 @@ def create_app(oidc_blueprint=None):
 
                     response = im.reconfigure_inf(infid, auth_data, tosca=tosca)
                 else:
+                    # otherwise, just reconfigure the infrastructure
                     response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
