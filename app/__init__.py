@@ -123,24 +123,28 @@ def create_app(oidc_blueprint=None):
         g.motomo_info = settings.motomo_info
         g.settings = settings
 
+    def check_auth():
+        if settings.debug_oidc_token:
+            oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
+        else:
+            try:
+                if not oidc_blueprint.session.authorized or 'username' not in session:
+                    return logout(next_url=request.full_path)
+
+                if oidc_blueprint.session.token['expires_in'] < 20:
+                    app.logger.debug("Force refresh token")
+                    oidc_blueprint.session.get(settings.oidcUserInfoPath)
+            except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
+                flash("Token expired.", 'warning')
+                return logout(next_url=request.full_path)
+        return None
+
     def authorized_with_valid_token(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-
-            if settings.debug_oidc_token:
-                oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
-            else:
-                try:
-                    if not oidc_blueprint.session.authorized or 'username' not in session:
-                        return logout(next_url=request.full_path)
-
-                    if oidc_blueprint.session.token['expires_in'] < 20:
-                        app.logger.debug("Force refresh token")
-                        oidc_blueprint.session.get(settings.oidcUserInfoPath)
-                except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
-                    flash("Token expired.", 'warning')
-                    return logout(next_url=request.full_path)
-
+            check_auth_res = check_auth()
+            if check_auth_res:
+                return check_auth_res  # redirect to login
             return f(*args, **kwargs)
 
         return decorated_function
@@ -190,11 +194,9 @@ def create_app(oidc_blueprint=None):
 
         if settings.debug_oidc_token:
             oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
-        else:
-            if not oidc_blueprint.session.authorized:
-                return redirect(url_for('login'))
 
-        if 'userid' not in session or not session['userid']:
+        if ((oidc_blueprint.session.authorized or settings.debug_oidc_token) and
+                ('userid' not in session or not session['userid'])):
             # Only contact userinfo endpoint first time in session
             try:
                 account_info = oidc_blueprint.session.get(settings.oidcUserInfoPath)
@@ -668,7 +670,6 @@ def create_app(oidc_blueprint=None):
         return render_template('outputs.html', infid=infid, outputs=outputs)
 
     @app.route('/configure')
-    @authorized_with_valid_token
     def configure():
         selected_tosca = None
         inf_id = request.args.get('inf_id', None)
@@ -679,6 +680,9 @@ def create_app(oidc_blueprint=None):
         inputs = {}
         infra_name = ""
         if inf_id:
+            check_auth_res = check_auth()
+            if check_auth_res:
+                return check_auth_res  # redirect to login
             access_token = oidc_blueprint.session.token['access_token']
             auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
             try:
@@ -709,7 +713,7 @@ def create_app(oidc_blueprint=None):
             flash("Invalid TOSCA template name: %s" % selected_tosca, "error")
             return redirect(url_for('home'))
 
-        if not utils.valid_template_vos(session['vos'], toscaInfo[selected_tosca]["metadata"]):
+        if not utils.valid_template_vos(session, toscaInfo[selected_tosca]["metadata"]):
             flash("Invalid TOSCA template name: %s" % selected_tosca, "error")
             return redirect(url_for('home'))
 
@@ -718,7 +722,7 @@ def create_app(oidc_blueprint=None):
         if "childs" in toscaInfo[selected_tosca]["metadata"]:
             if childs is not None:
                 for child in childs:
-                    if child in toscaInfo and utils.valid_template_vos(session['vos'], toscaInfo[child]["metadata"]):
+                    if child in toscaInfo and utils.valid_template_vos(session, toscaInfo[child]["metadata"]):
                         child_templates[child] = toscaInfo[child]
                         if "inputs" in toscaInfo[child]:
                             for k, v in toscaInfo[child]["inputs"].items():
@@ -730,18 +734,19 @@ def create_app(oidc_blueprint=None):
                             selected_template["tabs"].extend(toscaInfo[child]["tabs"])
             else:
                 for child in toscaInfo[selected_tosca]["metadata"]["childs"]:
-                    if child in toscaInfo and utils.valid_template_vos(session['vos'], toscaInfo[child]["metadata"]):
+                    if child in toscaInfo and utils.valid_template_vos(session, toscaInfo[child]["metadata"]):
                         child_templates[child] = toscaInfo[child]
                 return render_template('portfolio.html', templates=child_templates, parent=selected_tosca)
         else:
             app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
-        try:
-            creds = cred.get_creds(get_cred_id(), 1)
-        except Exception as ex:
-            flash("Error getting user credentials: %s" % ex, "error")
-            creds = []
-        utils.get_project_ids(creds)
+        creds = []
+        if check_auth() is None:
+            try:
+                creds = cred.get_creds(get_cred_id(), 1)
+            except Exception as ex:
+                flash("Error getting user credentials: %s" % ex, "error")
+            utils.get_project_ids(creds)
 
         # Enable to get input values from URL parameters
         for input_name, input_value in selected_template["inputs"].items():
@@ -1510,9 +1515,10 @@ def create_app(oidc_blueprint=None):
     def reload_sites():
         scheduler.modify_job('reload_sites', trigger='interval', seconds=settings.appdb_cache_timeout - 30)
         with app.app_context():
-            app.logger.debug('Reload Site List.')
+            app.logger.debug('Reload Site/VO List.')
             g.settings = settings
             utils.getCachedSiteList(True)
+            utils.getCachedVOList(True)
 
     # Reload internally the TOSCA tamplates
     @scheduler.task('interval', id='reload_templates', seconds=settings.checkToscaChangesTime)
