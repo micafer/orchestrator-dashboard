@@ -1082,7 +1082,7 @@ def create_app(oidc_blueprint=None):
             cpus_used = 0
             mem_used = 0
 
-            for node_name, node in template['topology_template']['node_templates'].items():
+            for _, node in template['topology_template']['node_templates'].items():
                 if node["type"] in ["tosca.nodes.indigo.Compute", "tosca.nodes.Compute"]:
                     if 'capabilities' in node and 'scalable' in node['capabilities']:
                         count_property = node['capabilities']['scalable']['properties']['count']
