@@ -958,6 +958,4 @@ def getReconfigureInputs(template_str):
                         inputs[tab] = {}
                     inputs[tab][input_name] = elem
 
-    inputs = {"Kubernetes": {"admin_token": {"type": "string", "default": "not_very_secret_token", "description": "Access Token for the Kubernetes admin user"},
-                             "airflow_admin_password": {"type": "string", "default": "A1rfl0wJSC", "description": "Airflow Webserver admin password"}}}
     return inputs
