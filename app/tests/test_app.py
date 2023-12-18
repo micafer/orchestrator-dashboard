@@ -641,6 +641,61 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         self.assertEqual(b'{"state":"configured","vm_states":{"0":"configured"}}\n', res.data)
 
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.post')
+    @patch("app.utils.avatar")
+    @patch("app.utils.get_site_info")
+    @patch("app.db_cred.DBCredentials.get_cred")
+    def test_showResourcesUsed(self, get_cred, get_site_info, avatar, post, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        post.side_effect = self.post_response
+        get_cred.return_value = {"id": "credid", "type": "fedcloud"}
+        get_site_info.return_value = {}, "", "vo"
+        self.login(avatar)
+        params = {'extra_opts.selectedImage': '',
+                  'extra_opts.selectedSiteImage': 'IMAGE_NAME',
+                  'extra_opts.selectedCred': 'credid',
+                  'num_instances': '1',
+                  'num_cpus': '1',
+                  'mem_size': '5 GB',
+                  'ports': '22,80,443',
+                  'storage_size': '0 GB',
+                  'mount_path': '/mnt/disk',
+                  'infra_name': 'some_infra',
+                  'action': 'resources'
+                  }
+        res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
+
+        self.assertEqual(200, res.status_code)
+
+        parsed_response = res.get_json()
+
+        self.assertEqual(parsed_response['wns_used'], '1')
+        self.assertEqual(parsed_response['cpus_used'], '1')
+        self.assertEqual(parsed_response['mem_used'], '5 GB')
+
+        params = {'extra_opts.selectedImage': '',
+                  'extra_opts.selectedSiteImage': 'IMAGE_NAME',
+                  'extra_opts.selectedCred': 'credid',
+                  'num_instances': '2',
+                  'num_cpus': '10',
+                  'mem_size': '16 GB',
+                  'ports': '22,80,443',
+                  'storage_size': '0 GB',
+                  'mount_path': '/mnt/disk',
+                  'infra_name': 'some_infra',
+                  'action': 'resources'
+                  }
+        res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
+
+        self.assertEqual(200, res.status_code)
+
+        parsed_response = res.get_json()
+
+        self.assertEqual(parsed_response['wns_used'], '2')
+        self.assertEqual(parsed_response['cpus_used'], '10')
+        self.assertEqual(parsed_response['mem_used'], '16 GB')
+
     @patch("app.utils.getIMUserAuthData")
     @patch('requests.get')
     @patch("app.utils.avatar")
