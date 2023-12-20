@@ -334,7 +334,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.get('/template/infid')
         self.assertEqual(200, res.status_code)
-        expected = b"topology_template:\n  node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
+        expected = b"node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
         self.assertIn(expected, res.data)
 
     @patch("app.utils.getUserAuthData")
