@@ -96,7 +96,7 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/data":
             resp.ok = True
             resp.status_code = 200
-            resp.text = '{"some": "value"}'
+            resp.json.return_value = {'data': '{"some": "value"}'}
 
         return resp
 
