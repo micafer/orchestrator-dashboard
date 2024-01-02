@@ -152,8 +152,8 @@
               <div class="modal-body">
               </div>
               <div class="modal-footer">
-                <a class="btn btn-secondary canceltBtn" role="button" data-bs-dismiss="modal">Cancel</a>
-                <button type="submit" class="btn btn-success updatetBtn">Update</button>
+                <button class="btn btn-secondary cancelVaultBtn" role="button" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success submitBtn">Update</button>
               </div>
             </div>
           </div>
@@ -222,6 +222,17 @@ $(document).ready(function () {
      var modal = $(this)
      modal.find('.modal-body').html('Loading...').load("{{url_for('manage_vault_info')}}");
   });
+});
+
+$(document).ready(function () {
+    $("#vaultForm").submit(function () {
+        //disable button on click
+        $(".submitBtn").attr("disabled", true);
+        $(".cancelVaultBtn").attr("disabled", true);
+        // add spinner to button
+        $(".submitBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...` );
+        return true;
+    });
 });
 
 </script>
