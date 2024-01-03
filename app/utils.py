@@ -345,9 +345,9 @@ def _addTabs(tabs, toscaInfo, tosca):
                     toscaInfo[tosca]['inputs'][input_name]["pattern"] = input_params["pattern"]
 
 
-def _addAddons(toscaInfo, toscaTemplates, toscaDir):
+def _addAddons(toscaInfo, toscaDir):
     # Add addons to description
-    for tosca in toscaTemplates:
+    for tosca in toscaInfo.keys():
         if "childs" in toscaInfo[tosca]["metadata"] and toscaInfo[tosca]["metadata"]["childs"]:
             if 'addons' not in toscaInfo[tosca]['metadata']:
                 toscaInfo[tosca]['metadata']["addons"] = ""
@@ -407,7 +407,7 @@ def extractToscaInfo(toscaDir, toscaTemplates, tags_to_hide):
         toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
 
     # Add addons to description
-    _addAddons(toscaInfo, toscaTemplates, toscaDir)
+    _addAddons(toscaInfo, toscaDir)
 
     return toscaInfoOrder
 
