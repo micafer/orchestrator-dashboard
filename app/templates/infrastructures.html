@@ -253,18 +253,11 @@
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
                       <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title" id="reconfigure_confirm_label_{{infId}}">Confirm Infrastructure reconfiguration</h5>
+                        <h5 class="modal-title" id="reconfigure_confirm_label_{{infId}}">Infrastructure reconfiguration</h5>
                         <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                       </div>
                       <div class="modal-body">
                         Do you really want to reconfigure the Infrastructure "{{infInfo["name"]}}" with ID {{infId}}?
-                      </div>
-                      <div class="modal-footer">
-                        <a class="btn btn-secondary reconfCancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
-                        <form id="reconfInfra" action="{{ url_for('manage_inf', infid=infId, op='reconfigure') }}" method="post">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                          <button type="submit" class="btn btn-success reconfigureBtn" role="button">Reconfigure</button>
-                        </form>
                       </div>
                     </div>
                   </div>
@@ -453,6 +446,13 @@
                       modal.find('#owners_list').html('Loading <span class="spinner-border spinner-border-sm"></span>').load("{{ url_for('getowners', infid=infId) }}");
                     });
                   });
+
+                  $(document).ready(function () {
+                    $('#reconfigure_confirm_{{infId}}').on('show.bs.modal', function (event) {
+                      var modal = $(this)
+                      modal.find('.modal-body').html('Loading <span class="spinner-border spinner-border-sm"></span>').load("{{ url_for('reconfigure', infid=infId) }}");
+                    });
+                  });
                 </script>
                 {% endfor %}
               </tbody>
@@ -507,15 +507,6 @@ $(document).ready(function () {
         $(this).addClass("disabled", true);
         $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...` );
     });
-});
-
-$(document).ready(function () {
-  $(".reconfigureBtn").click(function () {
-      // add spinner to button
-      $(this).parent().find(".reconfCancelBtn").addClass("disabled", true);
-      $(this).addClass("disabled", true);
-      $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Reconfiguring...` );
-  });
 });
 
 $(document).ready(function () {

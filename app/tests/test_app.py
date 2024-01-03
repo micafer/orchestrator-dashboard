@@ -57,8 +57,19 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/tosca":
             resp.ok = True
             resp.status_code = 200
-            resp.text = """topology_template:
-                            node_templates:
+            resp.text = """
+                           metadata:
+                             tabs:
+                                Tab1:
+                                  - param1:
+                                      reconfigure: true
+                           topology_template:
+                             inputs:
+                               param1:
+                                 type: string
+                                 description: Param1 description
+                                 default: ''
+                             node_templates:
                                 simple_node:
                                         type: tosca.nodes.indigo.Compute"""
         elif url == "/im/infrastructures/infid/contmsg":
@@ -323,7 +334,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.get('/template/infid')
         self.assertEqual(200, res.status_code)
-        expected = b"topology_template:\n  node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
+        expected = b"node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
         self.assertIn(expected, res.data)
 
     @patch("app.utils.getUserAuthData")
@@ -662,3 +673,16 @@ class IMDashboardTests(unittest.TestCase):
         del self.client.environ_base['HTTP_AUTHORIZATION']
         self.assertEqual(200, res.status_code)
         self.assertEqual(b'some_data\nmore_data', res.data)
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.get')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_reconfigure_with_params(self, flash, avatar, get, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get.side_effect = self.get_response
+        self.login(avatar)
+        res = self.client.get('/reconfigure/infid')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b'<input type="text" class="form-control" id="param1"', res.data)
+        self.assertIn(b'<input type="hidden" name="reconfigure_template"', res.data)
