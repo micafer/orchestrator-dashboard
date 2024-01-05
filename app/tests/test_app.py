@@ -74,6 +74,9 @@ class IMDashboardTests(unittest.TestCase):
                                - users.yml
                            topology_template:
                              inputs:
+                               num_cpus:
+                                 type: integer
+                                 default: 4
                                param1:
                                  type: string
                                  description: Param1 description
