@@ -1,3 +1,8 @@
+import sys
+
+sys.path.append('..')
+sys.path.append('.')
+
 import unittest
 import json
 from app import create_app
@@ -57,10 +62,20 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/tosca":
             resp.ok = True
             resp.status_code = 200
-            resp.text = """topology_template:
-                            node_templates:
-                                simple_node:
-                                        type: tosca.nodes.indigo.Compute"""
+            resp.text = """tosca_definitions_version: tosca_simple_yaml_1_0
+metadata:
+    template_name: VM
+    filename: simple-node-disk.yml
+    childs:
+      - users.yml
+topology_template:
+    inputs:
+      num_cpus:
+        type: integer
+        default: 4
+    node_templates:
+      simple_node:
+        type: tosca.nodes.indigo.Compute"""
         elif url == "/im/infrastructures/infid/contmsg":
             resp.ok = True
             resp.status_code = 200
@@ -323,7 +338,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.get('/template/infid')
         self.assertEqual(200, res.status_code)
-        expected = b"topology_template:\n  node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
+        expected = b"  node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
         self.assertIn(expected, res.data)
 
     @patch("app.utils.getUserAuthData")
@@ -377,14 +392,18 @@ class IMDashboardTests(unittest.TestCase):
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_creds")
-    def test_configure(self, get_creds, avatar):
+    @patch('requests.get')
+    def test_configure(self, get, get_creds, avatar):
         self.login(avatar)
+        get.side_effect = self.get_response
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml')
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Select Optional Features:", res.data)
 
-        get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "vo": "voname"},
-                                  {"id": "credid1", "type": "OpenStack", "host": "site_url1", "tenant_id": "tenid"}]
+        get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url",
+                                   "vo": "voname", "enabled": True},
+                                  {"id": "credid1", "type": "OpenStack", "host": "site_url1",
+                                   "tenant_id": "tenid", "enabled": True}]
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&childs=users.yml')
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Deploy a compute node getting the IP and SSH credentials to access via ssh", res.data)
@@ -394,6 +413,10 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
                       b'name="selectedCred" value=credid1>\n                        credid1\n'
                       b'                    </option>', res.data)
+
+        res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&inf_id=infid')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b'<option selected value="4">4</option>', res.data)
 
     @patch("app.utils.avatar")
     @patch("app.appdb.get_sites")
@@ -432,10 +455,12 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.avatar")
     @patch("app.utils.get_site_info")
     @patch("app.db_cred.DBCredentials.get_cred")
-    def test_submit(self, get_cred, get_site_info, avatar, post, user_data):
+    @patch("app.ssh_key.get_ssh_keys")
+    def test_submit(self, get_ssh_keys, get_cred, get_site_info, avatar, post, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         post.side_effect = self.post_response
         get_cred.return_value = {"id": "credid", "type": "fedcloud"}
+        get_ssh_keys.return_value = [(1, "desc", "ssh-rsa AAAAB3NzaC...")]
         get_site_info.return_value = {}, "", "vo"
         self.login(avatar)
         params = {'extra_opts.selectedImage': '',
@@ -472,6 +497,27 @@ class IMDashboardTests(unittest.TestCase):
                   'mount_path': '/mnt/disk',
                   'infra_name': 'some_infra'}
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/infrastructures', res.headers['location'])
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.post')
+    @patch("app.utils.avatar")
+    @patch("app.utils.get_site_info")
+    @patch("app.db_cred.DBCredentials.get_cred")
+    def test_submit_tosca(self, get_cred, get_site_info, avatar, post, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        post.side_effect = self.post_response
+        get_cred.return_value = {"id": "credid", "type": "fedcloud"}
+        get_site_info.return_value = {}, "", "vo"
+        self.login(avatar)
+        params = {'extra_opts.selectedImage': '',
+                  'extra_opts.selectedSiteImage': 'IMAGE_NAME',
+                  'extra_opts.selectedCred': 'credid',
+                  'infra_name': 'some_infra',
+                  'tosca_url': 'https://raw.githubusercontent.com/grycap/tosca/main/templates/simple-node-disk.yml'
+                  }
+        res = self.client.post('/submit?template=tosca.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
 
