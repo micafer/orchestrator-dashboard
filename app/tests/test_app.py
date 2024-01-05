@@ -62,20 +62,28 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/tosca":
             resp.ok = True
             resp.status_code = 200
-            resp.text = """tosca_definitions_version: tosca_simple_yaml_1_0
-metadata:
-    template_name: VM
-    filename: simple-node-disk.yml
-    childs:
-      - users.yml
-topology_template:
-    inputs:
-      num_cpus:
-        type: integer
-        default: 4
-    node_templates:
-      simple_node:
-        type: tosca.nodes.indigo.Compute"""
+            resp.text = """
+                           metadata:
+                             tabs:
+                                Tab1:
+                                  - param1:
+                                      reconfigure: true
+                             template_name: VM
+                             filename: simple-node-disk.yml
+                             childs:
+                               - users.yml
+                           topology_template:
+                             inputs:
+                               num_cpus:
+                                 type: integer
+                                 default: 4
+                               param1:
+                                 type: string
+                                 description: Param1 description
+                                 default: ''
+                             node_templates:
+                                simple_node:
+                                        type: tosca.nodes.indigo.Compute"""
         elif url == "/im/infrastructures/infid/contmsg":
             resp.ok = True
             resp.status_code = 200
