@@ -141,6 +141,9 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/stop":
             resp.ok = True
             resp.status_code = 200
+        elif url == "/im/infrastructures/infid/vms/0":
+            resp.ok = True
+            resp.status_code = 200
         elif url == "/im/infrastructures":
             resp.ok = True
             resp.status_code = 200
@@ -314,7 +317,7 @@ class IMDashboardTests(unittest.TestCase):
     @patch('requests.delete')
     @patch("app.utils.avatar")
     @patch("app.flash")
-    def test_managevm_delet(self, flash, avatar, delete, user_data):
+    def test_managevm_delete(self, flash, avatar, delete, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         delete.side_effect = self.delete_response
         self.login(avatar)
@@ -323,6 +326,23 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEquals(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0",
                                                        'success'))
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.put')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_managevm_resize(self, flash, avatar, put, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        put.side_effect = self.put_response
+        self.login(avatar)
+        params = {'cpu': '4',
+                  'memory': '4',
+                  'system_name': 'front'
+                  }
+        res = self.client.post('/managevm/resize/infid/0', data=params)
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/vminfo?infId=infid&vmId=0', res.headers['location'])
+        self.assertEquals(flash.call_args_list[0][0], ("Operation 'resize' successfully made on VM ID: 0", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.put')

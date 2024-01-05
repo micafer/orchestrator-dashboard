@@ -931,3 +931,52 @@ def formatPortSpec(ports):
         elif 'source' in port_value:
             res[port_name] += "%s" % port_value['source']
     return res
+<<<<<<< HEAD
+=======
+
+
+def getReconfigureInputs(template_str):
+    """Get the inputs that can be reconfigured."""
+    inputs = {}
+    template = yaml.safe_load(template_str)
+    tabs = template.get("metadata", {}).get("tabs", {})
+
+    template_inputs = template.get('topology_template', {}).get('inputs', {})
+
+    for tab, input_elems in tabs.items():
+        for input_elem in input_elems:
+            if isinstance(input_elem, dict):
+                input_name = list(input_elem.keys())[0]
+                input_params = list(input_elem.values())[0]
+
+                elem = template_inputs.get(input_name, {})
+                if "tag_type" in input_params:
+                    elem["tag_type"] = input_params["tag_type"]
+                if "pattern" in input_params:
+                    elem["pattern"] = input_params["pattern"]
+
+                if "reconfigure" in input_params and input_params["reconfigure"]:
+                    if tab not in inputs:
+                        inputs[tab] = {}
+                    inputs[tab][input_name] = elem
+
+    return inputs
+
+
+def merge_templates(template, new_template):
+    for item in ["inputs", "node_templates", "outputs"]:
+        if item in new_template["topology_template"]:
+            if item not in template["topology_template"]:
+                template["topology_template"][item] = {}
+            template["topology_template"][item].update(new_template["topology_template"][item])
+
+    tabs = new_template.get("metadata", {}).get("tabs", {})
+    if tabs:
+        if "metadata" not in template:
+            template["metadata"] = {}
+        if "tabs" not in template["metadata"]:
+            template["metadata"]["tabs"] = {}
+        template["metadata"]["tabs"].update(tabs)
+
+    return template
+>>>>>>> 6106d53... Improve tests
