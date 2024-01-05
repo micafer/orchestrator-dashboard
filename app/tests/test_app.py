@@ -172,7 +172,7 @@ topology_template:
         if url == "/im/infrastructures":
             resp.ok = True
             resp.status_code = 200
-            self.assertIn("IMAGE_NAME", kwargs["data"])
+            self.assertTrue("IMAGE_NAME" in kwargs["data"] or "appdbimage" in kwargs["data"])
             self.assertIn("default: 4", kwargs["data"])
         elif url == "/im/infrastructures/infid":
             resp.ok = True
@@ -455,8 +455,9 @@ topology_template:
     @patch("app.utils.avatar")
     @patch("app.utils.get_site_info")
     @patch("app.db_cred.DBCredentials.get_cred")
-    @patch("app.ssh_key.get_ssh_keys")
-    def test_submit(self, get_ssh_keys, get_cred, get_site_info, avatar, post, user_data):
+    @patch("app.ssh_key.SSHKey.get_ssh_keys")
+    @patch("app.flash")
+    def test_submit(self, flash, get_ssh_keys, get_cred, get_site_info, avatar, post, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         post.side_effect = self.post_response
         get_cred.return_value = {"id": "credid", "type": "fedcloud"}
@@ -475,13 +476,15 @@ topology_template:
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEquals(flash.call_count, 0)
 
     @patch('app.utils.get_site_info')
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_cred")
-    def test_submit2(self, get_cred, avatar, post, user_data, get_site_info):
+    @patch("app.flash")
+    def test_submit2(self, flash, get_cred, avatar, post, user_data, get_site_info):
         site = {"name": "SITE", "networks": {"vo": {"public": "pub_id", "private": "priv_id"}}}
         get_site_info.return_value = site, None, "vo"
         user_data.return_value = "type = InfrastructureManager; token = access_token"
@@ -499,13 +502,15 @@ topology_template:
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEquals(flash.call_count, 0)
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
     @patch("app.utils.avatar")
     @patch("app.utils.get_site_info")
     @patch("app.db_cred.DBCredentials.get_cred")
-    def test_submit_tosca(self, get_cred, get_site_info, avatar, post, user_data):
+    @patch("app.flash")
+    def test_submit_tosca(self, flash, get_cred, get_site_info, avatar, post, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         post.side_effect = self.post_response
         get_cred.return_value = {"id": "credid", "type": "fedcloud"}
@@ -515,11 +520,13 @@ topology_template:
                   'extra_opts.selectedSiteImage': 'IMAGE_NAME',
                   'extra_opts.selectedCred': 'credid',
                   'infra_name': 'some_infra',
+                  'num_cpus': '4',
                   'tosca_url': 'https://raw.githubusercontent.com/grycap/tosca/main/templates/simple-node-disk.yml'
                   }
         res = self.client.post('/submit?template=tosca.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEquals(flash.call_count, 0)
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_creds")
