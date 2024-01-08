@@ -964,23 +964,6 @@ def create_app(oidc_blueprint=None):
 
         return template
 
-    def _merge_templates(template, new_template):
-        for item in ["inputs", "node_templates", "outputs"]:
-            if item in new_template["topology_template"]:
-                if item not in template["topology_template"]:
-                    template["topology_template"][item] = {}
-                template["topology_template"][item].update(new_template["topology_template"][item])
-
-        tabs = new_template.get("metadata", {}).get("tabs", {})
-        if tabs:
-            if "metadata" not in template:
-                template["metadata"] = {}
-            if "tabs" not in template["metadata"]:
-                template["metadata"]["tabs"] = {}
-            template["metadata"]["tabs"].update(tabs)
-
-        return template
-
     @app.route('/submit', methods=['POST'])
     @authorized_with_valid_token
     def createdep():
@@ -1049,7 +1032,7 @@ def create_app(oidc_blueprint=None):
 
         for child in childs:
             with io.open(settings.toscaDir + child) as stream:
-                template = _merge_templates(template, yaml.full_load(stream))
+                template = utils.merge_templates(template, yaml.full_load(stream))
 
         if 'metadata' not in template:
             template['metadata'] = {}

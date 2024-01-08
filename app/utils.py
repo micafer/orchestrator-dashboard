@@ -959,3 +959,21 @@ def getReconfigureInputs(template_str):
                     inputs[tab][input_name] = elem
 
     return inputs
+
+
+def merge_templates(template, new_template):
+    for item in ["inputs", "node_templates", "outputs"]:
+        if item in new_template["topology_template"]:
+            if item not in template["topology_template"]:
+                template["topology_template"][item] = {}
+            template["topology_template"][item].update(new_template["topology_template"][item])
+
+    tabs = new_template.get("metadata", {}).get("tabs", {})
+    if tabs:
+        if "metadata" not in template:
+            template["metadata"] = {}
+        if "tabs" not in template["metadata"]:
+            template["metadata"]["tabs"] = {}
+        template["metadata"]["tabs"].update(tabs)
+
+    return template

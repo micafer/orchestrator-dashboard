@@ -65,6 +65,13 @@ class TestUtils(unittest.TestCase):
             res = utils.getUserAuthData("token", cred, "user")
             self.assertEquals(res, ("Bearer token"))
 
+    def test_merge_template(self):
+        template = {"topology_template": {"node_templates": {"n1": {"type": "Compute"}}}}
+        template2 = {"topology_template": {"node_templates": {"n2": {"type": "Compute"}}}}
+        new_template = utils.merge_templates(template, template2)
+        self.assertEqual(new_template, {"topology_template": {"node_templates": {"n1": {"type": "Compute"},
+                                                                                 "n2": {"type": "Compute"}}}})
+
 
 if __name__ == '__main__':
     unittest.main()
