@@ -1560,7 +1560,7 @@ def create_app(oidc_blueprint=None):
 
     def delete_infra(infid):
         infra.delete_infra(infid)
-        scheduler.delete_job('delete_infra_%s' % infid)
+        scheduler.remove_job('delete_infra_%s' % infid)
 
     def get_cred_id():
         if settings.vault_url:
