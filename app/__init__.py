@@ -1548,19 +1548,19 @@ def create_app(oidc_blueprint=None):
     @scheduler.task('interval', id='reload_templates', seconds=settings.checkToscaChangesTime)
     def reload_templates():
         with app.app_context():
-            deletedToscaTemplates, newToscaTemplates = utils.reLoadToscaTemplates(settings.toscaDir, toscaTemplates,
-                                                                                  delay=settings.checkToscaChangesTime + 10)
-            if newToscaTemplates:
-                app.logger.info('Reloading TOSCA templates %s' % newToscaTemplates)
-                for elem in newToscaTemplates:
+            deletedTemplates, newTemplates = utils.reLoadToscaTemplates(settings.toscaDir, toscaTemplates,
+                                                                        delay=settings.checkToscaChangesTime + 10)
+            if newTemplates:
+                app.logger.info('Reloading TOSCA templates %s' % newTemplates)
+                for elem in newTemplates:
                     if elem not in toscaTemplates:
                         toscaTemplates.append(elem)
-                newToscaInfo = utils.extractToscaInfo(settings.toscaDir, newToscaTemplates, settings.hide_tosca_tags)
+                newToscaInfo = utils.extractToscaInfo(settings.toscaDir, newTemplates, settings.hide_tosca_tags)
                 toscaInfo.update(newToscaInfo)
 
-            if deletedToscaTemplates:
-                app.logger.info('Removing TOSCA templates %s' % deletedToscaTemplates)
-                for elem in deletedToscaTemplates:
+            if deletedTemplates:
+                app.logger.info('Removing TOSCA templates %s' % deletedTemplates)
+                for elem in deletedTemplates:
                     if elem in toscaInfo:
                         del toscaInfo[elem]
 
