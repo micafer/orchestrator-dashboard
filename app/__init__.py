@@ -1511,7 +1511,7 @@ def create_app(oidc_blueprint=None):
     def reload_templates():
         with app.app_context():
             deletedToscaTemplates, newToscaTemplates = utils.reLoadToscaTemplates(settings.toscaDir, toscaTemplates,
-                                                           delay=settings.checkToscaChangesTime + 10)
+                                                                                  delay=settings.checkToscaChangesTime + 10)
             if newToscaTemplates:
                 app.logger.info('Reloading TOSCA templates %s' % newToscaTemplates)
                 for elem in newToscaTemplates:
