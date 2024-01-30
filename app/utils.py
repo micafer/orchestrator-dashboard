@@ -935,8 +935,6 @@ def formatPortSpec(ports):
         elif 'source' in port_value:
             res[port_name] += "%s" % port_value['source']
     return res
-<<<<<<< HEAD
-=======
 
 
 def getReconfigureInputs(template_str):
@@ -983,4 +981,3 @@ def merge_templates(template, new_template):
         template["metadata"]["tabs"].update(tabs)
 
     return template
->>>>>>> 6106d53... Improve tests
