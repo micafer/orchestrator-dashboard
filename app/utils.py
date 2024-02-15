@@ -886,7 +886,7 @@ def valid_template_vos(user_vos, template_metadata):
         return ['all']
 
 
-def get_list_values(name, inputs, value_type="string"):
+def get_list_values(name, inputs, value_type="string", retun_type="list"):
 
     cont = 1
     # Special case for ports
@@ -906,8 +906,11 @@ def get_list_values(name, inputs, value_type="string"):
             if remote_cidr:
                 ports_value["port_%s" % port_num.replace(":", "_")]["remote_cidr"] = remote_cidr
             cont += 1
-        return ports_value
-    else:
+        if retun_type == "map":
+            return ports_value
+        else:
+            return list(ports_value.values())
+    elif retun_type == "list":
         values = []
         while "%s_list_value_%d" % (name, cont) in inputs:
             value = inputs["%s_list_value_%d" % (name, cont)]
@@ -920,11 +923,29 @@ def get_list_values(name, inputs, value_type="string"):
             values.append(value)
             cont += 1
         return values
-
+    else:
+        values = {}
+        while "%s_list_value_%d_key" % (name, cont) in inputs:
+            key = inputs["%s_list_value_%d_value" % (name, cont)]
+            value = inputs["%s_list_value_%d_value" % (name, cont)]
+            if value_type == "integer":
+                value = int(value)
+            elif value_type == "float":
+                value = float(value)
+            elif value_type == "boolean":
+                value = value.lower() in ["true", "yes", "1"]
+            values[key] = value
+            cont += 1
+        return values
 
 def formatPortSpec(ports):
     res = {}
-    for port_name, port_value in ports.items():
+    if isinstance(ports, dict):
+        ports_list = list(ports.values())
+    elif isinstance(ports, list):
+        ports_list = ports
+    for num, port_value in enumerate(ports_list):
+        port_name = "port_%s" % num
         if 'remote_cidr' in port_value and port_value['remote_cidr']:
             res[port_name] = str(port_value['remote_cidr']) + "-"
         else:
