@@ -119,8 +119,8 @@
             } else {
                 document.getElementById('imageID').setAttribute("placeholder", "Image ID");
             }
-            if (cred_type == 'OSCAR') {
-                // OSCAR do not set images
+            if (cred_type in ['OSCAR', 'Kubernetes']) {
+                // OSCAR or K8s do not set images
                 $('#cloudImages').hide();
                 activateSubmit();
             } else {
