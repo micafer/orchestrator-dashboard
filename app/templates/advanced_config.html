@@ -119,7 +119,7 @@
             } else {
                 document.getElementById('imageID').setAttribute("placeholder", "Image ID");
             }
-            if (cred_type in ['OSCAR', 'Kubernetes']) {
+            if (cred_type == 'OSCAR' || cred_type == 'Kubernetes' ) {
                 // OSCAR or K8s do not set images
                 $('#cloudImages').hide();
                 activateSubmit();
