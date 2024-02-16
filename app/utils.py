@@ -942,6 +942,7 @@ def get_list_values(name, inputs, value_type="string", retun_type="list"):
             cont += 1
         return values
 
+
 def formatPortSpec(ports):
     res = {}
     if isinstance(ports, dict):
