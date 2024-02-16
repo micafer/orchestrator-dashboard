@@ -904,17 +904,18 @@ def create_app(oidc_blueprint=None):
                         value["default"] = True
                     else:
                         value["default"] = False
-                elif value["type"] == "list" and value["entry_schema"]["type"] not in ["map", "list"]:
+                elif value["type"] in ["map", "list"] and value["entry_schema"]["type"] not in ["map", "list"]:
                     try:
-                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"])
+                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"],
+                                                                 value["type"])
                     except Exception as ex:
                         flash("Invalid input value '%s' specified: '%s'." % (name, ex), "warning")
                         value["default"] = []
                 # Special case for ports, convert a list of strings like 80,443,8080-8085,9000-10000/udp
-                # to a PortSpec map
-                elif value["type"] == "map" and value["entry_schema"]["type"] in utils.PORT_SPECT_TYPES:
+                # to a PortSpec map or list
+                elif value["type"] in ["map", "list"] and value["entry_schema"]["type"] in utils.PORT_SPECT_TYPES:
                     try:
-                        value["default"] = utils.get_list_values(name, inputs, "PortSpec")
+                        value["default"] = utils.get_list_values(name, inputs, "PortSpec", value["type"])
                     except Exception as ex:
                         flash("Invalid input value '%s' specified: '%s'." % (name, ex), "warning")
                         value["default"] = {}

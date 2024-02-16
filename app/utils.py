@@ -886,7 +886,17 @@ def valid_template_vos(user_vos, template_metadata):
         return ['all']
 
 
-def get_list_values(name, inputs, value_type="string"):
+def convert_value(value, value_type):
+    if value_type == "integer":
+        value = int(value)
+    elif value_type == "float":
+        value = float(value)
+    elif value_type == "boolean":
+        value = value.lower() in ["true", "yes", "1"]
+    return value
+
+
+def get_list_values(name, inputs, value_type="string", retun_type="list"):
 
     cont = 1
     # Special case for ports
@@ -894,46 +904,66 @@ def get_list_values(name, inputs, value_type="string"):
         ports_value = {}
         while "%s_list_value_%d_range" % (name, cont) in inputs:
             port_num = inputs["%s_list_value_%d_range" % (name, cont)]
-            remote_cidr = inputs["%s_list_value_%d_cidr" % (name, cont)]
+            remote_cidr = inputs.get("%s_list_value_%d_cidr" % (name, cont))
+            target_port = inputs.get("%s_list_value_%d_target" % (name, cont))
+            port_name = "port_%s" % port_num.replace(":", "_")
             # Should we also open UDP?
-            ports_value["port_%s" % port_num.replace(":", "_")] = {"protocol": "tcp"}
+            ports_value[port_name] = {"protocol": "tcp"}
+
+            if target_port:
+                ports_value[port_name]["target"] = int(target_port)
             if ":" in port_num:
                 port_range = port_num.split(":")
-                ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = [int(port_range[0]),
-                                                                                       int(port_range[1])]
+                ports_value[port_name]["source_range"] = [int(port_range[0]), int(port_range[1])]
             else:
-                ports_value["port_%s" % port_num.replace(":", "_")]["source"] = int(port_num)
+                ports_value[port_name]["source"] = int(port_num)
             if remote_cidr:
-                ports_value["port_%s" % port_num.replace(":", "_")]["remote_cidr"] = remote_cidr
+                ports_value[port_name]["remote_cidr"] = remote_cidr
             cont += 1
-        return ports_value
-    else:
+        if retun_type == "map":
+            return ports_value
+        else:
+            return list(ports_value.values())
+    elif retun_type == "list":
         values = []
         while "%s_list_value_%d" % (name, cont) in inputs:
             value = inputs["%s_list_value_%d" % (name, cont)]
-            if value_type == "integer":
-                value = int(value)
-            elif value_type == "float":
-                value = float(value)
-            elif value_type == "boolean":
-                value = value.lower() in ["true", "yes", "1"]
-            values.append(value)
+            values.append(convert_value(value, value_type))
+            cont += 1
+        return values
+    else:
+        values = {}
+        while "%s_list_value_%d_key" % (name, cont) in inputs:
+            key = inputs["%s_list_value_%d_key" % (name, cont)]
+            value = inputs["%s_list_value_%d_value" % (name, cont)]
+            values[key] = convert_value(value, value_type)
             cont += 1
         return values
 
 
 def formatPortSpec(ports):
     res = {}
-    for port_name, port_value in ports.items():
+    if isinstance(ports, dict):
+        ports_list = list(ports.values())
+    elif isinstance(ports, list):
+        ports_list = ports
+    for num, port_value in enumerate(ports_list):
+        port_name = "port_%s" % num
         if 'remote_cidr' in port_value and port_value['remote_cidr']:
             res[port_name] = str(port_value['remote_cidr']) + "-"
         else:
             res[port_name] = ""
-        if 'source_range' in port_value:
+
+        if 'target' in port_value and port_value['target']:
+            res[port_name] += "%s-" % port_value['target']
+
+        # if target is defined, source_range should not be defined
+        if 'source_range' in port_value and port_value['source_range']:
             res[port_name] += "%s:%s" % (port_value['source_range'][0],
                                          port_value['source_range'][1])
-        elif 'source' in port_value:
+        elif 'source' in port_value and port_value['source']:
             res[port_name] += "%s" % port_value['source']
+
     return res
 
 
