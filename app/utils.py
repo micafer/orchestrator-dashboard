@@ -886,6 +886,16 @@ def valid_template_vos(user_vos, template_metadata):
         return ['all']
 
 
+def convert_value(value, value_type):
+    if value_type == "integer":
+        value = int(value)
+    elif value_type == "float":
+        value = float(value)
+    elif value_type == "boolean":
+        value = value.lower() in ["true", "yes", "1"]
+    return value
+
+
 def get_list_values(name, inputs, value_type="string", retun_type="list"):
 
     cont = 1
@@ -896,19 +906,19 @@ def get_list_values(name, inputs, value_type="string", retun_type="list"):
             port_num = inputs["%s_list_value_%d_range" % (name, cont)]
             remote_cidr = inputs.get("%s_list_value_%d_cidr" % (name, cont))
             target_port = inputs.get("%s_list_value_%d_target" % (name, cont))
+            port_name = "port_%s" % port_num.replace(":", "_")
             # Should we also open UDP?
-            ports_value["port_%s" % port_num.replace(":", "_")] = {"protocol": "tcp"}
+            ports_value[port_name] = {"protocol": "tcp"}
 
             if target_port:
-                ports_value["port_%s" % port_num.replace(":", "_")]["target"] = int(target_port)
+                ports_value[port_name]["target"] = int(target_port)
             if ":" in port_num:
                 port_range = port_num.split(":")
-                ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = [int(port_range[0]),
-                                                                                       int(port_range[1])]
+                ports_value[port_name]["source_range"] = [int(port_range[0]), int(port_range[1])]
             else:
-                ports_value["port_%s" % port_num.replace(":", "_")]["source"] = int(port_num)
+                ports_value[port_name]["source"] = int(port_num)
             if remote_cidr:
-                ports_value["port_%s" % port_num.replace(":", "_")]["remote_cidr"] = remote_cidr
+                ports_value[port_name]["remote_cidr"] = remote_cidr
             cont += 1
         if retun_type == "map":
             return ports_value
@@ -918,13 +928,7 @@ def get_list_values(name, inputs, value_type="string", retun_type="list"):
         values = []
         while "%s_list_value_%d" % (name, cont) in inputs:
             value = inputs["%s_list_value_%d" % (name, cont)]
-            if value_type == "integer":
-                value = int(value)
-            elif value_type == "float":
-                value = float(value)
-            elif value_type == "boolean":
-                value = value.lower() in ["true", "yes", "1"]
-            values.append(value)
+            values.append(convert_value(value, value_type))
             cont += 1
         return values
     else:
@@ -932,13 +936,7 @@ def get_list_values(name, inputs, value_type="string", retun_type="list"):
         while "%s_list_value_%d_key" % (name, cont) in inputs:
             key = inputs["%s_list_value_%d_key" % (name, cont)]
             value = inputs["%s_list_value_%d_value" % (name, cont)]
-            if value_type == "integer":
-                value = int(value)
-            elif value_type == "float":
-                value = float(value)
-            elif value_type == "boolean":
-                value = value.lower() in ["true", "yes", "1"]
-            values[key] = value
+            values[key] = convert_value(value, value_type)
             cont += 1
         return values
 
