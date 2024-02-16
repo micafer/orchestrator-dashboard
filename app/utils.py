@@ -894,9 +894,13 @@ def get_list_values(name, inputs, value_type="string", retun_type="list"):
         ports_value = {}
         while "%s_list_value_%d_range" % (name, cont) in inputs:
             port_num = inputs["%s_list_value_%d_range" % (name, cont)]
-            remote_cidr = inputs["%s_list_value_%d_cidr" % (name, cont)]
+            remote_cidr = inputs.get("%s_list_value_%d_cidr" % (name, cont))
+            target_port = inputs.get("%s_list_value_%d_target" % (name, cont))
             # Should we also open UDP?
             ports_value["port_%s" % port_num.replace(":", "_")] = {"protocol": "tcp"}
+
+            if target_port:
+                ports_value["port_%s" % port_num.replace(":", "_")]["target"] = int(target_port)
             if ":" in port_num:
                 port_range = port_num.split(":")
                 ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = [int(port_range[0]),
@@ -926,7 +930,7 @@ def get_list_values(name, inputs, value_type="string", retun_type="list"):
     else:
         values = {}
         while "%s_list_value_%d_key" % (name, cont) in inputs:
-            key = inputs["%s_list_value_%d_value" % (name, cont)]
+            key = inputs["%s_list_value_%d_key" % (name, cont)]
             value = inputs["%s_list_value_%d_value" % (name, cont)]
             if value_type == "integer":
                 value = int(value)
@@ -950,11 +954,17 @@ def formatPortSpec(ports):
             res[port_name] = str(port_value['remote_cidr']) + "-"
         else:
             res[port_name] = ""
-        if 'source_range' in port_value:
+
+        if 'target' in port_value and port_value['target']:
+            res[port_name] += "%s-" % port_value['target']
+
+        # if target is defined, source_range should not be defined
+        if 'source_range' in port_value and port_value['source_range']:
             res[port_name] += "%s:%s" % (port_value['source_range'][0],
                                          port_value['source_range'][1])
-        elif 'source' in port_value:
+        elif 'source' in port_value and port_value['source']:
             res[port_name] += "%s" % port_value['source']
+
     return res
 
 

@@ -904,9 +904,9 @@ def create_app(oidc_blueprint=None):
                         value["default"] = True
                     else:
                         value["default"] = False
-                elif value["type"] == "list" and value["entry_schema"]["type"] not in ["map", "list"]:
+                elif value["type"] in ["map", "list"] and value["entry_schema"]["type"] not in ["map", "list"]:
                     try:
-                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"])
+                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"], value["type"])
                     except Exception as ex:
                         flash("Invalid input value '%s' specified: '%s'." % (name, ex), "warning")
                         value["default"] = []
