@@ -49,8 +49,8 @@ function addItem_{{key}}(object=null, value='') {
             <input type="text" class="mr-1 col-6 form-control" name="${tagname}_list_value_${num__{{key}}}_cidr" class="form-control" pattern="(([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))){0,1}" value="${cidr}" placeholder="CIDR">`;
     {% else %}
     input_template = `
-            <input type="text" class="mr-1 col-5 form-control" name="${tagname}_list_value_${num__{{key}}}_target" class="form-control" pattern="([0-9]{1,5})" value="${target}" placeholder="Target Port">
-            <input type="text" class="mr-1 col-6 form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]{1,5})" required value="${range}" placeholder="Source Port">`;
+            <input type="text" class="mr-1 col-5 form-control" name="${tagname}_list_value_${num__{{key}}}_target" class="form-control" pattern="([0-9]{1,5})" required value="${target}" placeholder="Target Port">
+            <input type="text" class="mr-1 col-6 form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]{1,5})"  value="${range}" placeholder="Source Port">`;
     {% endif %}
 
   {% elif value.type == "map" %}
