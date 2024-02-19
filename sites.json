@@ -207,5 +207,13 @@
         "vos": {
             "vo.ai4eosc.eu": "f44e296a9ea441548456d25fb5b467c9"
         }
+    },
+    {
+        "name": "GRNET-OPENSTACK",
+        "url": "https://keystone-louros.cloud.grnet.gr:5000",
+        "id": "111397G0",
+        "vos": {
+            "dev.intertwin.eu": "761d439913b34b90850ce5c44d0e96eb"
+        }
     }
 ]
