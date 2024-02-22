@@ -1378,6 +1378,7 @@ def create_app(oidc_blueprint=None):
                     raise Exception(response.text)
                 flash("VMs %s successfully deleted." % vm_list, "success")
             elif op == "migrate":
+                form_data = request.form.to_dict()
                 new_im_url = form_data.get('new_im_url')
                 new_im = InfrastructureManager(new_im_url, settings.imTimeout)
                 infra_data = im.export_inf(infid, auth_data)
