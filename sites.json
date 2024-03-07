@@ -214,6 +214,12 @@
         "id": "111397G0",
         "vos": {
             "dev.intertwin.eu": "761d439913b34b90850ce5c44d0e96eb"
+        },
+        "networks": {
+            "dev.intertwin.eu": {
+                "private": "hisea-net",
+                "public": "FloatingIP-Network"
+            }
         }
     }
 ]
