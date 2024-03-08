@@ -78,8 +78,7 @@ def create_app(oidc_blueprint=None):
     scheduler.start()
 
     toscaTemplates = utils.loadToscaTemplates(settings.toscaDir)
-    toscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir,
-                                       toscaTemplates, settings.hide_tosca_tags)
+    toscaInfo = utils.extractToscaInfo(settings.toscaDir, toscaTemplates, settings.hide_tosca_tags)
 
     app.jinja_env.filters['tojson_pretty'] = utils.to_pretty_json
     app.logger.debug("TOSCA INFO: " + json.dumps(toscaInfo))
@@ -905,17 +904,18 @@ def create_app(oidc_blueprint=None):
                         value["default"] = True
                     else:
                         value["default"] = False
-                elif value["type"] == "list" and value["entry_schema"]["type"] not in ["map", "list"]:
+                elif value["type"] in ["map", "list"] and value["entry_schema"]["type"] not in ["map", "list"]:
                     try:
-                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"])
+                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"],
+                                                                 value["type"])
                     except Exception as ex:
                         flash("Invalid input value '%s' specified: '%s'." % (name, ex), "warning")
                         value["default"] = []
                 # Special case for ports, convert a list of strings like 80,443,8080-8085,9000-10000/udp
-                # to a PortSpec map
-                elif value["type"] == "map" and value["entry_schema"]["type"] in utils.PORT_SPECT_TYPES:
+                # to a PortSpec map or list
+                elif value["type"] in ["map", "list"] and value["entry_schema"]["type"] in utils.PORT_SPECT_TYPES:
                     try:
-                        value["default"] = utils.get_list_values(name, inputs, "PortSpec")
+                        value["default"] = utils.get_list_values(name, inputs, "PortSpec", value["type"])
                     except Exception as ex:
                         flash("Invalid input value '%s' specified: '%s'." % (name, ex), "warning")
                         value["default"] = {}
@@ -963,14 +963,6 @@ def create_app(oidc_blueprint=None):
                             "requirements": [{"host": computer}]}
                 template['topology_template']['node_templates']["dash_ssh_key_%s_%s" % (computer, num)] = ssh_node
 
-        return template
-
-    def _merge_templates(template, new_template):
-        for item in ["inputs", "node_templates", "outputs"]:
-            if item in new_template["topology_template"]:
-                if item not in template["topology_template"]:
-                    template["topology_template"][item] = {}
-                template["topology_template"][item].update(new_template["topology_template"][item])
         return template
 
     @app.route('/submit', methods=['POST'])
@@ -1041,7 +1033,7 @@ def create_app(oidc_blueprint=None):
 
         for child in childs:
             with io.open(settings.toscaDir + child) as stream:
-                template = _merge_templates(template, yaml.full_load(stream))
+                template = utils.merge_templates(template, yaml.full_load(stream))
 
         if 'metadata' not in template:
             template['metadata'] = {}
@@ -1290,10 +1282,10 @@ def create_app(oidc_blueprint=None):
         # Try to get the Cred ID to restrict the auth info sent to the IM
         auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         reload = None
+        form_data = request.form.to_dict()
 
         try:
             if op == "descr":
-                form_data = request.form.to_dict()
                 if 'description' in form_data and form_data['description'] != "":
                     try:
                         infra_data = infra.get_infra(infid)
@@ -1323,7 +1315,6 @@ def create_app(oidc_blueprint=None):
                 flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'success')
                 reload = infid
             elif op in ["delete"]:
-                form_data = request.form.to_dict()
                 force = False
                 recreate = False
                 if 'force' in form_data and form_data['force'] != "0":
@@ -1347,12 +1338,27 @@ def create_app(oidc_blueprint=None):
                     return redirect(url_for('configure', inf_id=infid))
 
             elif op == "reconfigure":
-                response = im.reconfigure_inf(infid, auth_data)
+                if 'reconfigure_template' in form_data and form_data['reconfigure_template'] != "":
+                    # If the template has some reconfigure inputs, set them
+                    try:
+                        template = yaml.safe_load(form_data['reconfigure_template'])
+                        template_inputs = template.get('topology_template', {}).get('inputs', {})
+                        for input_name, input_params in template_inputs.items():
+                            if input_name in form_data:
+                                input_params['default'] = form_data[input_name]
+                        tosca = yaml.safe_dump(template)
+                    except Exception as ex:
+                        flash("Error passing reconfigure values (changes ignored): %s." % ex, 'warn')
+                        tosca = None
+
+                    response = im.reconfigure_inf(infid, auth_data, tosca=tosca)
+                else:
+                    # otherwise, just reconfigure the infrastructure
+                    response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
                 flash("Reconfiguration process successfuly started.", "success")
             elif op == "change_user":
-                form_data = request.form.to_dict()
                 overwrite = False
                 if 'overwrite' in form_data and form_data['overwrite'] != "0":
                     overwrite = True
@@ -1366,7 +1372,6 @@ def create_app(oidc_blueprint=None):
                     flash("Empty token. Owner not changed.", 'warning')
                 flash("Infrastructure owner successfully changed.", "success")
             elif op == "removeresources":
-                form_data = request.form.to_dict()
                 vm_list = form_data.get('vm_list')
                 response = im.remove_resources(infid, vm_list, auth_data)
                 if not response.ok:
@@ -1478,6 +1483,32 @@ def create_app(oidc_blueprint=None):
 
             return redirect(url_for('manage_creds'))
 
+    @app.route('/reconfigure/<infid>')
+    @authorized_with_valid_token
+    def reconfigure(infid=None):
+
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
+        template = ""
+        try:
+            response = im.get_inf_property(infid, 'tosca', auth_data)
+            if not response.ok:
+                raise Exception(response.text)
+            template = response.text
+        except Exception as ex:
+            app.logger.warn("Error getting infrastructure template: %s" % ex)
+
+        infra_name = ""
+        inputs = utils.getReconfigureInputs(template)
+        if inputs:
+            try:
+                infra_data = infra.get_infra(infid)
+            except Exception:
+                infra_data = {}
+            infra_name = infra_data.get("name", "")
+
+        return render_template('reconfigure.html', infid=infid, inputs=inputs, infra_name=infra_name, template=template)
+
     @app.route('/logout')
     def logout(next_url=None):
         session.clear()
@@ -1519,20 +1550,25 @@ def create_app(oidc_blueprint=None):
     @scheduler.task('interval', id='reload_templates', seconds=settings.checkToscaChangesTime)
     def reload_templates():
         with app.app_context():
-            newToscaTemplates = utils.reLoadToscaTemplates(settings.toscaDir, toscaTemplates,
-                                                           delay=settings.checkToscaChangesTime + 10)
-            if newToscaTemplates:
-                app.logger.info('Reloading TOSCA templates %s' % newToscaTemplates)
-                for elem in newToscaTemplates:
+            deletedTemplates, newTemplates = utils.reLoadToscaTemplates(settings.toscaDir, toscaTemplates,
+                                                                        delay=settings.checkToscaChangesTime + 10)
+            if newTemplates:
+                app.logger.info('Reloading TOSCA templates %s' % newTemplates)
+                for elem in newTemplates:
                     if elem not in toscaTemplates:
                         toscaTemplates.append(elem)
-                newToscaInfo = utils.extractToscaInfo(settings.toscaDir, settings.toscaParamsDir,
-                                                      newToscaTemplates, settings.hide_tosca_tags)
+                newToscaInfo = utils.extractToscaInfo(settings.toscaDir, newTemplates, settings.hide_tosca_tags)
                 toscaInfo.update(newToscaInfo)
+
+            if deletedTemplates:
+                app.logger.info('Removing TOSCA templates %s' % deletedTemplates)
+                for elem in deletedTemplates:
+                    if elem in toscaInfo:
+                        del toscaInfo[elem]
 
     def delete_infra(infid):
         infra.delete_infra(infid)
-        scheduler.delete_job('delete_infra_%s' % infid)
+        scheduler.remove_job('delete_infra_%s' % infid)
 
     def get_cred_id():
         if settings.vault_url:

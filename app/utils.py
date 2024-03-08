@@ -25,6 +25,7 @@ import json
 import os
 import sys
 import time
+import re
 from collections import OrderedDict
 from fnmatch import fnmatch
 from hashlib import md5
@@ -305,6 +306,7 @@ def loadToscaTemplates(directory):
 
 def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
 
+    newToscaTemplates = []
     toscaTemplates = []
     for path, _, files in os.walk(directory):
         for name in files:
@@ -313,14 +315,64 @@ def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
                 # skip hidden files
                 if name[0] != '.':
                     filename = os.path.relpath(os.path.join(path, name), directory)
+                    toscaTemplates.append(filename)
                     diff_time = time.time() - os.path.getmtime(os.path.join(path, name))
                     if filename not in oldToscaTemplates or diff_time < delay:
-                        toscaTemplates.append(filename)
+                        newToscaTemplates.append(filename)
 
-    return toscaTemplates
+    deletedToscaTemplates = [x for x in oldToscaTemplates if x not in toscaTemplates]
+
+    return deletedToscaTemplates, newToscaTemplates
 
 
-def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates, tags_to_hide):
+def _addTabs(tabs, toscaInfo, tosca):
+    if tabs:
+        toscaInfo[tosca]['enable_config_form'] = True
+    for tab, input_elems in tabs.items():
+        toscaInfo[tosca]['tabs'].append(tab)
+        # Special case for a regex to select inputs
+        if isinstance(input_elems, str):
+            all_inputs = list(toscaInfo[tosca]['inputs'].keys())
+            res = [elem for elem in all_inputs if re.match(input_elems, elem)]
+            input_elems = res
+        for input_elem in input_elems:
+            input_name = input_elem
+            input_params = {}
+            if isinstance(input_elem, dict):
+                input_name = list(input_elem.keys())[0]
+                input_params = list(input_elem.values())[0]
+            if input_name in toscaInfo[tosca]['inputs']:
+                toscaInfo[tosca]['inputs'][input_name]["tab"] = tab
+                if "tag_type" in input_params:
+                    toscaInfo[tosca]['inputs'][input_name]["tag_type"] = input_params["tag_type"]
+                if "pattern" in input_params:
+                    toscaInfo[tosca]['inputs'][input_name]["pattern"] = input_params["pattern"]
+
+
+def _addAddons(toscaInfo, toscaDir):
+    # Add addons to description
+    for tosca in toscaInfo.keys():
+        if "childs" in toscaInfo[tosca]["metadata"] and toscaInfo[tosca]["metadata"]["childs"]:
+            if 'addons' not in toscaInfo[tosca]['metadata']:
+                toscaInfo[tosca]['metadata']["addons"] = ""
+            child_names = []
+            for child in toscaInfo[tosca]["metadata"]["childs"]:
+                child_name = ""
+                if child in toscaInfo:
+                    child_name = toscaInfo[child].get("metadata", {}).get("template_name")
+                else:
+                    try:
+                        with io.open(toscaDir + child) as stream:
+                            child_template = yaml.full_load(stream)
+                    except Exception:
+                        child_template = {}
+                    child_name = child_template.get("metadata", {}).get("template_name")
+                if child_name:
+                    child_names.append(child_name)
+            toscaInfo[tosca]['metadata']["addons"] += ", ".join(child_names)
+
+
+def extractToscaInfo(toscaDir, toscaTemplates, tags_to_hide):
     toscaInfoOrder = toscaInfo = {}
     for tosca in toscaTemplates:
         with io.open(toscaDir + tosca) as stream:
@@ -353,52 +405,13 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates, tags_to_hide):
                 if 'inputs' in template['topology_template']:
                     toscaInfo[tosca]['inputs'] = template['topology_template']['inputs']
 
-                # add parameters code here
-                if tosca_pars_dir:
-                    tosca_pars_path = tosca_pars_dir + "/"  # this has to be reassigned here because is local.
-                    for fpath, _, fnames in os.walk(tosca_pars_path):
-                        for fname in fnames:
-                            if fnmatch(fname, os.path.splitext(tosca)[0] + '.parameters.yml') or \
-                                    fnmatch(fname, os.path.splitext(tosca)[0] + '.parameters.yaml'):
-                                # skip hidden files
-                                if fname[0] != '.':
-                                    tosca_pars_file = os.path.join(fpath, fname)
-                                    with io.open(tosca_pars_file) as pars_file:
-                                        toscaInfo[tosca]['enable_config_form'] = True
-                                        pars_data = yaml.full_load(pars_file)
-                                        # only read expected fields tab and tag_type
-                                        for key, value in pars_data["inputs"].items():
-                                            if "tab" in value:
-                                                toscaInfo[tosca]['inputs'][key]["tab"] = value["tab"]
-                                            if "tag_type" in value:
-                                                toscaInfo[tosca]['inputs'][key]["tag_type"] = value["tag_type"]
-                                            if "pattern" in value:
-                                                toscaInfo[tosca]['inputs'][key]["pattern"] = value["pattern"]
-                                        if "tabs" in pars_data:
-                                            toscaInfo[tosca]['tabs'] = pars_data["tabs"]
+                tabs = template.get('metadata', {}).get('tabs', {})
+                _addTabs(tabs, toscaInfo, tosca)
 
         toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
 
     # Add addons to description
-    for tosca in toscaTemplates:
-        if "childs" in toscaInfo[tosca]["metadata"] and toscaInfo[tosca]["metadata"]["childs"]:
-            if 'description' not in toscaInfo[tosca]:
-                toscaInfo[tosca]["description"] = ""
-            child_names = []
-            for child in toscaInfo[tosca]["metadata"]["childs"]:
-                child_name = ""
-                if child in toscaInfo:
-                    child_name = toscaInfo[child].get("metadata", {}).get("name")
-                else:
-                    try:
-                        with io.open(toscaDir + child) as stream:
-                            child_template = yaml.full_load(stream)
-                    except Exception:
-                        child_template = {}
-                    child_name = child_template.get("metadata", {}).get("name")
-                if child_name:
-                    child_names.append(child_name)
-            toscaInfo[tosca]["description"] += " Addons: %s" % ", ".join(child_names)
+    _addAddons(toscaInfo, toscaDir)
 
     return toscaInfoOrder
 
@@ -873,7 +886,17 @@ def valid_template_vos(user_vos, template_metadata):
         return ['all']
 
 
-def get_list_values(name, inputs, value_type="string"):
+def convert_value(value, value_type):
+    if value_type == "integer":
+        value = int(value)
+    elif value_type == "float":
+        value = float(value)
+    elif value_type == "boolean":
+        value = value.lower() in ["true", "yes", "1"]
+    return value
+
+
+def get_list_values(name, inputs, value_type="string", retun_type="list"):
 
     cont = 1
     # Special case for ports
@@ -881,44 +904,110 @@ def get_list_values(name, inputs, value_type="string"):
         ports_value = {}
         while "%s_list_value_%d_range" % (name, cont) in inputs:
             port_num = inputs["%s_list_value_%d_range" % (name, cont)]
-            remote_cidr = inputs["%s_list_value_%d_cidr" % (name, cont)]
+            remote_cidr = inputs.get("%s_list_value_%d_cidr" % (name, cont))
+            target_port = inputs.get("%s_list_value_%d_target" % (name, cont))
+            port_name = "port_%s" % port_num.replace(":", "_")
             # Should we also open UDP?
-            ports_value["port_%s" % port_num.replace(":", "_")] = {"protocol": "tcp"}
+            ports_value[port_name] = {"protocol": "tcp"}
+
+            if target_port:
+                ports_value[port_name]["target"] = int(target_port)
             if ":" in port_num:
                 port_range = port_num.split(":")
-                ports_value["port_%s" % port_num.replace(":", "_")]["source_range"] = [int(port_range[0]),
-                                                                                       int(port_range[1])]
+                ports_value[port_name]["source_range"] = [int(port_range[0]), int(port_range[1])]
             else:
-                ports_value["port_%s" % port_num.replace(":", "_")]["source"] = int(port_num)
+                ports_value[port_name]["source"] = int(port_num)
             if remote_cidr:
-                ports_value["port_%s" % port_num.replace(":", "_")]["remote_cidr"] = remote_cidr
+                ports_value[port_name]["remote_cidr"] = remote_cidr
             cont += 1
-        return ports_value
-    else:
+        if retun_type == "map":
+            return ports_value
+        else:
+            return list(ports_value.values())
+    elif retun_type == "list":
         values = []
         while "%s_list_value_%d" % (name, cont) in inputs:
             value = inputs["%s_list_value_%d" % (name, cont)]
-            if value_type == "integer":
-                value = int(value)
-            elif value_type == "float":
-                value = float(value)
-            elif value_type == "boolean":
-                value = value.lower() in ["true", "yes", "1"]
-            values.append(value)
+            values.append(convert_value(value, value_type))
+            cont += 1
+        return values
+    else:
+        values = {}
+        while "%s_list_value_%d_key" % (name, cont) in inputs:
+            key = inputs["%s_list_value_%d_key" % (name, cont)]
+            value = inputs["%s_list_value_%d_value" % (name, cont)]
+            values[key] = convert_value(value, value_type)
             cont += 1
         return values
 
 
 def formatPortSpec(ports):
     res = {}
-    for port_name, port_value in ports.items():
+    if isinstance(ports, dict):
+        ports_list = list(ports.values())
+    elif isinstance(ports, list):
+        ports_list = ports
+    for num, port_value in enumerate(ports_list):
+        port_name = "port_%s" % num
         if 'remote_cidr' in port_value and port_value['remote_cidr']:
             res[port_name] = str(port_value['remote_cidr']) + "-"
         else:
             res[port_name] = ""
-        if 'source_range' in port_value:
+
+        if 'target' in port_value and port_value['target']:
+            res[port_name] += "%s-" % port_value['target']
+
+        # if target is defined, source_range should not be defined
+        if 'source_range' in port_value and port_value['source_range']:
             res[port_name] += "%s:%s" % (port_value['source_range'][0],
                                          port_value['source_range'][1])
-        elif 'source' in port_value:
+        elif 'source' in port_value and port_value['source']:
             res[port_name] += "%s" % port_value['source']
+
     return res
+
+
+def getReconfigureInputs(template_str):
+    """Get the inputs that can be reconfigured."""
+    inputs = {}
+    template = yaml.safe_load(template_str)
+    tabs = template.get("metadata", {}).get("tabs", {})
+
+    template_inputs = template.get('topology_template', {}).get('inputs', {})
+
+    for tab, input_elems in tabs.items():
+        for input_elem in input_elems:
+            if isinstance(input_elem, dict):
+                input_name = list(input_elem.keys())[0]
+                input_params = list(input_elem.values())[0]
+
+                elem = template_inputs.get(input_name, {})
+                if "tag_type" in input_params:
+                    elem["tag_type"] = input_params["tag_type"]
+                if "pattern" in input_params:
+                    elem["pattern"] = input_params["pattern"]
+
+                if "reconfigure" in input_params and input_params["reconfigure"]:
+                    if tab not in inputs:
+                        inputs[tab] = {}
+                    inputs[tab][input_name] = elem
+
+    return inputs
+
+
+def merge_templates(template, new_template):
+    for item in ["inputs", "node_templates", "outputs"]:
+        if item in new_template["topology_template"]:
+            if item not in template["topology_template"]:
+                template["topology_template"][item] = {}
+            template["topology_template"][item].update(new_template["topology_template"][item])
+
+    tabs = new_template.get("metadata", {}).get("tabs", {})
+    if tabs:
+        if "metadata" not in template:
+            template["metadata"] = {}
+        if "tabs" not in template["metadata"]:
+            template["metadata"]["tabs"] = {}
+        template["metadata"]["tabs"].update(tabs)
+
+    return template
