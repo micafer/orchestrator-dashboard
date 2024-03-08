@@ -9,15 +9,15 @@
       document.getElementById(template).classList.remove("selected-addon");
       pos = selected_templates.indexOf(template);
       selected_templates.splice(pos, 1)
-      link.innerHTML = "<span class='fas fa-plus mr-2'></span>Add";
-      link.classList.remove("bg-danger");
-      link.classList.add("bg-primary");
+      link.innerHTML = "<span class='fas fa-plus mr-2'></span> Add";
+      link.classList.remove("btn-danger");
+      link.classList.add("btn-primary");
     } else {
       document.getElementById(template).classList.add("selected-addon");
       selected_templates.push(template);
-      link.innerHTML = "<span class='fas fa-minus mr-2'></span>Remove";
-      link.classList.remove("bg-primary");
-      link.classList.add("bg-danger");
+      link.innerHTML = "<span class='fas fa-minus mr-2'></span> Remove";
+      link.classList.remove("btn-primary");
+      link.classList.add("btn-danger");
     }
   } 
 </script>
@@ -100,17 +100,19 @@
                 <p id="toscaDescription" class="card-text tosca-descr"><small>
                   {{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}
                 </small></p>
-                <a class="badge rounded-pill bg-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
+
+                <a style="--bs-btn-font-size: .65rem;" class="btn btn-sm btn-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
                   View on <span class="fab fa-github" style="color:white;"></span>
                 </a>
-                <a selector="toscaDescription" class="text-start badge rounded-pill bg-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-bs-trigger="focus" data-bs-content="{{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}">Read More</a>
+                <a style="--bs-btn-font-size: .65rem;" selector="toscaDescription" class="text-start btn btn-sm btn-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-bs-trigger="focus" data-bs-content="{{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}">Read More</a>
                 {% if parent %}
-                <a href="#!" onclick="AddChild(this, '{{tosca_filename}}')" class="badge rounded-pill bg-primary"><span class='fas fa-plus mr-2'></span>Add</a>
+                <a style="--bs-btn-font-size: .65rem;" href="#!" onclick="AddChild(this, '{{tosca_filename}}')" class="btn btn-sm btn-primary"><span class='fas fa-plus mr-2'></span> Add</a>
                 {% elif 'link' in tosca['metadata'] %}
-                <a href="{{ url_for('configure', selected_tosca=tosca['metadata']['link']['parent'], childs=tosca['metadata']['link']['childs']|join(',')) }}" class="badge badge-pill badge-primary">Configure</a>
+                <a style="--bs-btn-font-size: .65rem;" href="{{ url_for('configure', selected_tosca=tosca['metadata']['link']['parent'], childs=tosca['metadata']['link']['childs']|join(',')) }}" class="badge badge-pill badge-primary">Configure</a>
                 {% else %}
-                <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge rounded-pill bg-primary">Configure</a>
+                <a style="--bs-btn-font-size: .65rem;" href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="btn btn-sm btn-primary">Configure</a>
                 {% endif %}
+
                 </div>
             </div>
         </div>
