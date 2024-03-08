@@ -10,14 +10,14 @@
       pos = selected_templates.indexOf(template);
       selected_templates.splice(pos, 1)
       link.innerHTML = "<span class='fas fa-plus mr-2'></span>Add";
-      link.classList.remove("badge-danger");
-      link.classList.add("badge-primary");
+      link.classList.remove("bg-danger");
+      link.classList.add("bg-primary");
     } else {
       document.getElementById(template).classList.add("selected-addon");
       selected_templates.push(template);
       link.innerHTML = "<span class='fas fa-minus mr-2'></span>Remove";
-      link.classList.remove("badge-primary");
-      link.classList.add("badge-danger");
+      link.classList.remove("bg-primary");
+      link.classList.add("bg-danger");
     }
   } 
 </script>
@@ -26,9 +26,9 @@
   {% include 'flashed_messages.html' %}
     <div class="input-group mb-4">
       <div class="input-group-prepend">
-          <div class="input-group-text"><i class="fa fa-search"></i></div>
+          <div class="input-group-text"><i class="fa fa-search m-2"></i></div>
       </div>
-      <input id="cardFilter" class="form-control py-2 border" type="text" onkeyup="cardFilter()" placeholder="Search...">
+      <input id="cardFilter" class="form-control" type="text" onkeyup="cardFilter()" placeholder="Search...">
     </div>
     {% if parent %}
     <div class="input-group mb-4">
@@ -61,7 +61,7 @@
     <div class="card-group">
     {% endif %}
 
-        <div class="card mb-3 bg-light-grey rounded card-rounded border-0" id="{{tosca_filename}}">
+        <div class="card mb-3 bg-light-grey rounded card-rounded border-0 ms-3" id="{{tosca_filename}}">
         
             <div class="card-body">
               <h5 class="card-title text-center">
@@ -85,8 +85,8 @@
                 {% endif %}
             </div>
             {% if tosca['metadata']['template_version'] is defined %}
-            <div class="card-img-overlay pt-1 pl-3">
-                <span class="badge badge-pill badge-secondary mb-2" style="font-size: 0.6em;">v{{tosca['metadata']['template_version']}}</span>
+            <div class="card-img-overlay pt-1 ps-3">
+                <span class="badge rounded-pill bg-secondary mb-2" style="font-size: 0.6em;">v{{tosca['metadata']['template_version']}}</span>
             {% else %}
             <div class="card-img-overlay">
             {% endif %}
@@ -100,16 +100,16 @@
                 <p id="toscaDescription" class="card-text tosca-descr"><small>
                   {{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}
                 </small></p>
-                <a class="badge badge-pill badge-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
+                <a class="badge rounded-pill bg-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
                   View on <span class="fab fa-github" style="color:white;"></span>
                 </a>
-                <a selector="toscaDescription" class="text-start badge badge-pill badge-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-bs-trigger="focus" data-bs-content="{{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}">Read More</a>
+                <a selector="toscaDescription" class="text-start badge rounded-pill bg-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-bs-trigger="focus" data-bs-content="{{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}">Read More</a>
                 {% if parent %}
-                <a href="#!" onclick="AddChild(this, '{{tosca_filename}}')" class="badge badge-pill badge-primary"><span class='fas fa-plus mr-2'></span>Add</a>
+                <a href="#!" onclick="AddChild(this, '{{tosca_filename}}')" class="badge rounded-pill bg-primary"><span class='fas fa-plus mr-2'></span>Add</a>
                 {% elif 'link' in tosca['metadata'] %}
                 <a href="{{ url_for('configure', selected_tosca=tosca['metadata']['link']['parent'], childs=tosca['metadata']['link']['childs']|join(',')) }}" class="badge badge-pill badge-primary">Configure</a>
                 {% else %}
-                <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge badge-pill badge-primary">Configure</a>
+                <a href="{{ url_for('configure', selected_tosca=tosca_filename) }}" class="badge rounded-pill bg-primary">Configure</a>
                 {% endif %}
                 </div>
             </div>

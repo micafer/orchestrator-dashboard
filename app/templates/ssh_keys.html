@@ -59,7 +59,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-group">
                     <label for="ssh_key_desc"><b>Description</b></label>
-                    <input placeholder="Description" name="desc" class="col-sm-12" type="text" required/>
+                    <input placeholder="Description" name="desc" class="col-sm-12 form-control" type="text" required/>
                     <label for="update_ssh_public_key"><b>SSH public key</b></label>
                     <p>Paste your public SSH key, Don't use your private SSH key.</p>
                     <textarea class="form-control" rows="5" id="update_ssh_public_key" name="sshkey"></textarea>

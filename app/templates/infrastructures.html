@@ -31,7 +31,7 @@
         vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' + tooltip + '">';
         vms += '<span class="fas fa-server mr-2"></span> ' + vmId + '</a>';
         delete_vms += '<a class="btn btn-outline-secondary btn-sm" href="#" role="button" onclick="addVMtoDel(this,\'' + infid + '\',\'' + vmId + '\')">';
-        delete_vms += '<span class="fas fa-server mr-2"></span>' + vmId + '</a>';
+        delete_vms += '<span class="fas fa-server mr-2"></span> ' + vmId + '</a>';
       });
       $('#' + infid + '_vms').html(vms);
       $('#deletevms_' + infid + '_body').html(delete_vms);
