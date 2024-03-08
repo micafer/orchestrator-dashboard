@@ -13,7 +13,7 @@
               <!-- Title -->
               <h4 class="font-weight-bold text-primary">VM ID {{ vmid }}:</h4>
             </div>
-            <div class="col-md-7 text-right">
+            <div class="col-md-7 text-end">
               <!-- Button -->
               <div class="btn-group">
                 <button type=button class="btn btn-sm btn-outline-secondary mr-2" onclick="history.back()"><span class="fas fa-arrow-left mr-2"></span> Back</button>
@@ -209,7 +209,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_start_label">Confirm VM start</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Start the VM {{vmid}}?
@@ -230,7 +230,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_reboot_label">Confirm VM reboot</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Reboot the VM {{vmid}}?
@@ -251,7 +251,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_stop_label">Confirm VM stop</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Stop the VM {{vmid}}?
@@ -272,7 +272,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_terminate_label">Confirm VM terminate</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Terminate the VM {{vmid}}?
@@ -293,7 +293,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_reconf_label">Confirm VM reconfigure</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Reconfigure the VM {{vmid}}?
@@ -314,7 +314,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_resize_label">VM resize</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <form id="resizeVM" action="{{ url_for('managevm', op='resize', infid=infid, vmid=vmid) }}" method="post">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>

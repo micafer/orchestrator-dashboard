@@ -14,7 +14,7 @@
               <!-- Title -->
               <h4 class="font-weight-bold text-primary">SSH Keys</h4>
             </div>
-            <div class="col-md-6 text-right">
+            <div class="col-md-6 text-end">
               <button type=button id="updateBtn" class="btn btn-small btn-primary" data-bs-toggle="modal" data-bs-target="#newModal"><i class='fas fa-plus m-1'></i>New SSH Key</button>
             </div>
           </div> <!-- / .row -->
@@ -51,7 +51,9 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="get_secret">SSH Key</h5>
-                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                
+
               </div>
               <div class="modal-body">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -77,7 +79,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">Confirm SSH Key deletion</h5>
-                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
                 Do you really want to delete your SSH Key?
