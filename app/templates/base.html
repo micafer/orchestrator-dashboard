@@ -13,9 +13,14 @@
   <link rel="manifest" href="{{ url_for('static', filename='images/favicon_io/site.webmanifest') }}">
   <!-- BS5-->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-  <!-- FontAwesome-->
+  <!-- FontAwesome
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css"
     integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+  -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fontawesome.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/regular.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/brands.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/solid.min.css') }}" />
   <!-- Cookie Consent -->
   <script src="{{ url_for('static', filename='js/cookieconsent-4.0.1.min.js') }}"></script>
 {% if home is not defined %}
