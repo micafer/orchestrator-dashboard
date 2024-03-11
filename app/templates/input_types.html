@@ -106,7 +106,7 @@
 	  {% else %}
 
       <!-- list type -->
-      {% if value.type == "list" %}
+      {% if value.type in ["list", "map"] %}
         <fieldset class="border p-2">
         {% include 'list.html' %}
         </fieldset>

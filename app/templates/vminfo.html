@@ -13,26 +13,26 @@
               <!-- Title -->
               <h4 class="font-weight-bold text-primary">VM ID {{ vmid }}:</h4>
             </div>
-            <div class="col-md-7 text-right">
+            <div class="col-md-7 text-end">
               <!-- Button -->
               <div class="btn-group">
                 <button type=button class="btn btn-sm btn-outline-secondary mr-2" onclick="history.back()"><span class="fas fa-arrow-left mr-2"></span> Back</button>
-                <button type=button class='btn btn-sm btn-primary-secondary mr-2' onclick='location.reload()'><span class='fas fa-sync mr-2'></span>Refresh</button>
+                <button type=button class='btn btn-sm btn-primary-secondary mr-2' onclick='location.reload()'><span class='fas fa-sync mr-2'></span> Refresh</button>
                 <div class="dropdown">
                   <button class="btn btn-sm btn-primary dropdown-toggle mr-2" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class='fas fa-server mr-2'></span> Manage VM
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                     {% if state != "stopped" %}
-                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_stop').modal('show');"><span class='fas fa-pause mr-2'></span>Stop</a>	
+                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_stop').modal('show');"><span class='fas fa-pause mr-2'></span> Stop</a>	
                     {% else %}
-                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_start').modal('show');"><span class='fas fa-play mr-2'></span>Start</a>	
+                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_start').modal('show');"><span class='fas fa-play mr-2'></span> Start</a>	
                     {% endif %}
-                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_reboot').modal('show');"><span class='fas fa-redo mr-2'></span>Reboot</a>	
-                    <a class="dropdown-item" href="#" onclick="$('#managevm_resize').modal('show');"><span class='fas fa-expand-arrows-alt mr-2'></span>Resize</a>
-                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_reconfigure').modal('show');"><span class='fas fa-recycle mr-2'></span>Reconfigure</a>	
-                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_terminate').modal('show');"><span class='fas fa-trash-alt mr-2'></span>Delete</a>	
-                    <a class="dropdown-item" href="{{ url_for('vmlog', infid=infid, vmid=vmid) }}"><span class='fas fa-file-alt mr-2'></span>Log</a>
+                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_reboot').modal('show');"><span class='fas fa-redo mr-2'></span> Reboot</a>	
+                    <a class="dropdown-item" href="#" onclick="$('#managevm_resize').modal('show');"><span class='fas fa-expand-arrows-alt mr-2'></span> Resize</a>
+                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_reconfigure').modal('show');"><span class='fas fa-recycle mr-2'></span> Reconfigure</a>	
+                    <a class="dropdown-item" href="#" onclick="$('#managevm_confirm_terminate').modal('show');"><span class='fas fa-trash-alt mr-2'></span> Delete</a>	
+                    <a class="dropdown-item" href="{{ url_for('vmlog', infid=infid, vmid=vmid) }}"><span class='fas fa-file-alt mr-2'></span> Log</a>
                   </div>
                 </div>
               </div>
@@ -52,13 +52,13 @@
                   </th>
                   <td>
                     {% if state == "configured" %}
-                    <span class="badge badge-success"/>
+                    <span class="badge bg-success"/>
                     {% elif state in ["stopped", "off"] %}
-                    <span class="badge badge-warning text-white"/>
+                    <span class="badge bg-warning text-white"/>
                     {% elif state in ["failed", "unconfigured", "unknown"] %}
-                    <span class="badge badge-danger"/>
+                    <span class="badge bg-danger"/>
                     {% else %}
-                    <span class="badge badge-warning text-white"><span class="spinner-grow spinner-grow-sm"></span>
+                    <span class="badge bg-warning text-white"><span class="spinner-grow spinner-grow-sm"></span>
                     {% endif %}
                     {{ state }}
                   </td>
@@ -209,7 +209,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_start_label">Confirm VM start</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Start the VM {{vmid}}?
@@ -230,7 +230,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_reboot_label">Confirm VM reboot</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Reboot the VM {{vmid}}?
@@ -251,7 +251,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_stop_label">Confirm VM stop</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Stop the VM {{vmid}}?
@@ -272,7 +272,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_terminate_label">Confirm VM terminate</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Terminate the VM {{vmid}}?
@@ -293,7 +293,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_confirm_reconf_label">Confirm VM reconfigure</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
                         Do you really want to Reconfigure the VM {{vmid}}?
@@ -314,7 +314,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="managevm_resize_label">VM resize</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <form id="resizeVM" action="{{ url_for('managevm', op='resize', infid=infid, vmid=vmid) }}" method="post">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>

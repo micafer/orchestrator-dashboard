@@ -1,6 +1,6 @@
 # IM-Dashboard
 
-[![Build Status](https://jenkins.i3m.upv.es/buildStatus/icon?job=grycap/im-dashboard-unit/)](https://jenkins.i3m.upv.es/job/grycap/job/im-dashboard-unit//)
+[![Tests](https://github.com/grycap/im-dashboard/actions/workflows/main.yaml/badge.svg)](https://github.com/grycap/im-dashboard/actions/workflows/main.yaml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c985310233c34f0aa6699cc9b167fba0)](https://www.codacy.com/gh/grycap/im-dashboard/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=grycap/im-dashboard&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/c985310233c34f0aa6699cc9b167fba0)](https://www.codacy.com/gh/grycap/im-dashboard/dashboard?utm_source=github.com&utm_medium=referral&utm_content=grycap/im-dashboard&utm_campaign=Badge_Coverage)
 [![License](https://img.shields.io/badge/license-GPL%20v3.0-brightgreen.svg)](LICENSE)
