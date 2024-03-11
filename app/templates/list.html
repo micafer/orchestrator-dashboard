@@ -1,6 +1,6 @@
 <div class="mt-1">
     <div id="{{key}}-container"></div>
-    <button type="button" class="ml-2 btn btn-sm btn-outline-info" id="add-new-item-{{key}}" class="add-new" data-tag-name="{{key}}"><i class='fas fa-plus mr-2'></i>Add</button>
+    <button type="button" class="ms-2 btn btn-sm btn-outline-info" id="add-new-item-{{key}}" class="add-new" data-tag-name="{{key}}"><i class='fas fa-plus me-2'></i>Add</button>
     <input id="id-{{key}}" type="hidden" data-output-type="json" name="{{key}}" value=""/>
 </div>
 
@@ -45,12 +45,12 @@ function addItem_{{key}}(object=null, value='') {
     // this can be done better
     {% if value.type == "map" %}
     input_template = `
-            <input type="text" class="mr-1 col-5 form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]+:{0,1}[0-9]+)" required value="${range}" placeholder="Port Range">
-            <input type="text" class="mr-1 col-6 form-control" name="${tagname}_list_value_${num__{{key}}}_cidr" class="form-control" pattern="(([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))){0,1}" value="${cidr}" placeholder="CIDR">`;
+            <input type="text" class="me-1 col-5 form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]+:{0,1}[0-9]+)" required value="${range}" placeholder="Port Range">
+            <input type="text" class="me-1 col-6 form-control" name="${tagname}_list_value_${num__{{key}}}_cidr" class="form-control" pattern="(([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))){0,1}" value="${cidr}" placeholder="CIDR">`;
     {% else %}
     input_template = `
-            <input type="text" class="mr-1 col-5 form-control" name="${tagname}_list_value_${num__{{key}}}_target" class="form-control" pattern="([0-9]{1,5})" required value="${target}" placeholder="Target Port">
-            <input type="text" class="mr-1 col-6 form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]{1,5})"  value="${range}" placeholder="Source Port">`;
+            <input type="text" class="me-1 col-5 form-control" name="${tagname}_list_value_${num__{{key}}}_target" class="form-control" pattern="([0-9]{1,5})" required value="${target}" placeholder="Target Port">
+            <input type="text" class="me-1 col-6 form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]{1,5})"  value="${range}" placeholder="Source Port">`;
     {% endif %}
 
   {% elif value.type == "map" %}
@@ -61,8 +61,8 @@ function addItem_{{key}}(object=null, value='') {
       v = parts[1]
     }
     input_template = `
-            <input type="text" class="mr-1 col-4 form-control" name="${tagname}_list_value_${num__{{key}}}_key" class="form-control" required value="${k}" placeholder="Key">
-            <input type="text" class="mr-1 col-7 form-control" name="${tagname}_list_value_${num__{{key}}}_value" class="form-control" required pattern="${pattern}" value="${v}" placeholder="Value">`;
+            <input type="text" class="me-1 col-4 form-control" name="${tagname}_list_value_${num__{{key}}}_key" class="form-control" required value="${k}" placeholder="Key">
+            <input type="text" class="me-1 col-7 form-control" name="${tagname}_list_value_${num__{{key}}}_value" class="form-control" required pattern="${pattern}" value="${v}" placeholder="Value">`;
   {% else %}
     input_template = `
             <input type="text" class="col-11 form-control" name="${tagname}_list_value_${num__{{key}}}" class="form-control" required pattern="${pattern}" value="${value}">`;

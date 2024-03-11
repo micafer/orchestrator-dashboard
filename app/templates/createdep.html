@@ -53,7 +53,7 @@
                 {% if child_templates %}
                 <input type="hidden" name="extra_opts.childs" value="{{ ','.join(child_templates.keys()) }}"/>
                 {% endif %}
-                <div class="form-group">
+                <div class="form-group mb-2">
                     <label for="additional_description">Infrastructure Name</label>
                     <input type="text" class="form-control" id="infra_name" name="infra_name" placeholder="description" value="{{ infra_name }}" maxlength="60" required>
                 </div>
@@ -62,9 +62,9 @@
             {% else %}
                 {% include 'default_form.html' %}
             {% endif %}
-            <button type="submit" class="btn btn-primary submitBtn" disabled><span class="fas fa-share mr-2"></span>Submit</button>
+            <button type="submit" class="btn btn-primary submitBtn" disabled><span class="fas fa-share mr-2"></span> Submit</button>
             <button id="cancelBtn" type=button class="btn btn-small btn-secondary" onclick="location.href='{{ url_for('home') }}'">
-                <span class="fas fa-ban mr-2"></span>Cancel</button>
+                <span class="fas fa-ban mr-2"></span> Cancel</button>
             </form>
         </div>
     </div>
@@ -92,7 +92,8 @@ function onSubmit() {
 }
 $(document).ready(function() {
     $('.js-example-basic-single').select2({
-      width: '100%' // https://github.com/select2/select2/issues/4220
+      width: '100%', // https://github.com/select2/select2/issues/4220
+      theme: 'bootstrap-5'
     });
 });
 </script>

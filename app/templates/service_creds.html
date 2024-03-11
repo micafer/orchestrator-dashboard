@@ -14,11 +14,11 @@
               <!-- Title -->
               <h4 class="font-weight-bold text-primary">Cloud Credentials</h4>
             </div>
-            <div class="col-md-6 text-right">
+            <div class="col-md-6 text-end">
               {% if vault %}
               <a class="btn btn-info" data-bs-toggle="modal" data-bs-target="#vaultInfo" href="#" role="button"><span class="fas fa-vault"></span> Vault Info</a>
               {% endif %}
-              <button type=button id="addBtn"class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"><span class='fas fa-plus mr-2'></span>New Credential
+              <button type=button id="addBtn"class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"><span class='fas fa-plus mr-2'></span> New Credential
                   <span class="sr-only">Toggle Dropdown</span>
               </button>
               <div class="dropdown-menu">
@@ -109,7 +109,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="get_secret">Credential</h5>
-                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
               </div>
@@ -127,7 +127,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">Confirm credentials deletion</h5>
-                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
                 Do you really want to delete your credentials?
@@ -147,7 +147,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">Vault Info</h5>
-                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
               </div>
@@ -190,6 +190,21 @@ $(document).ready(function () {
       modal.find(".updateBtn")[0].firstChild.data = "Update";
      }
   });
+});
+
+$(document).ready(function () {
+    $(".updateBtn").click(function () {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var cred_id = button.data('id')
+        // add spinner to button
+        $(this).parent().find(".updateBtn").addClass("disabled", true);
+        $(this).addClass("updateBtn", true);
+        if (cred_id == "") {
+          $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding ...` );
+        } else {
+          $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...` );
+        }
+    });
 });
 
 $(document).ready(function () {
