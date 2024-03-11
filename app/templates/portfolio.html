@@ -97,16 +97,16 @@
                   <strong>{% if tosca['metadata']['display_name'] is defined %}{{tosca['metadata']['display_name']}}{% else %}{{tosca_filename}}{% endif %}</strong>
                 </h6>
                 <p id="fullToscaDescription" class="d-none">
-                  {{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}
+                  {{tosca['description']}} {{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}
                 </p>
                 <p id="toscaDescription" class="card-text tosca-descr"><small>
-                  {{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}
+                  {{tosca['description']}} {{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}
                 </small></p>
 
                 <a style="--bs-btn-font-size: .65rem;" class="btn btn-sm btn-secondary" href="https://github.com/grycap/tosca/blob/main/templates/{{ tosca_filename }}" target="_blank" alt="Github" title="Github">
                   View on <span class="fab fa-github" style="color:white;"></span>
                 </a>
-                <a style="--bs-btn-font-size: .65rem;" selector="toscaDescription" class="text-start btn btn-sm btn-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-bs-trigger="focus" data-bs-content="{{tosca['description']}}{{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}">Read More</a>
+                <a style="--bs-btn-font-size: .65rem;" selector="toscaDescription" class="text-start btn btn-sm btn-info read_more" tabindex="0" data-bs-toggle="popover" title="Full description" data-bs-trigger="focus" data-bs-content="{{tosca['description']}} {{ 'Addons: ' + tosca['metadata']['addons'] if tosca['metadata']['addons'] is defined }}">Read More</a>
                 {% if parent %}
                 <a style="--bs-btn-font-size: .65rem;" href="#!" onclick="AddChild(this, '{{tosca_filename}}')" class="btn btn-sm btn-primary"><span class='fas fa-plus mr-2'></span> Add</a>
                 {% elif 'link' in tosca['metadata'] %}
