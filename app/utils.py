@@ -101,15 +101,6 @@ def getStaticSites(vo=None, force=False):
     return res
 
 
-def getStaticVOs():
-    res = []
-    for site in _getStaticSitesInfo():
-        if "vos" in site and site["vos"]:
-            res.extend(list(site["vos"].keys()))
-
-    return list(set(res))
-
-
 def get_site_info(cred_id, cred, userid):
     domain = None
     res_site = {}
