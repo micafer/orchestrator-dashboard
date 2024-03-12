@@ -47,9 +47,6 @@ SITE_LIST = {}
 LAST_UPDATE = 0
 PORT_SPECT_TYPES = ["PortSpec", "tosca.datatypes.network.PortSpec", "tosca.datatypes.indigo.network.PortSpec"]
 
-VO_LIST = []
-VO_LAST_UPDATE = 0
-
 
 def _getStaticSitesInfo(force=False):
     # Remove cache if force is True
@@ -104,15 +101,6 @@ def getStaticSites(vo=None, force=False):
     return res
 
 
-def getStaticVOs():
-    res = []
-    for site in _getStaticSitesInfo():
-        if "vos" in site and site["vos"]:
-            res.extend(list(site["vos"].keys()))
-
-    return list(set(res))
-
-
 def get_site_info(cred_id, cred, userid):
     domain = None
     res_site = {}
@@ -152,7 +140,9 @@ def getCachedSiteList(force=False):
     now = int(time.time())
     if force or not SITE_LIST or now - LAST_UPDATE > g.settings.appdb_cache_timeout:
         try:
-            SITE_LIST = appdb.get_sites()
+            sites = appdb.get_sites()
+            if sites:
+                SITE_LIST = appdb.get_sites()
             # in case of error do not update time
             LAST_UPDATE = now
         except Exception as ex:
@@ -790,32 +780,8 @@ def get_project_ids(creds):
     return creds
 
 
-def getCachedVOList():
-    global VO_LIST
-    global VO_LAST_UPDATE
-
-    now = int(time.time())
-    if not VO_LIST or now - VO_LAST_UPDATE > g.settings.appdb_cache_timeout:
-        try:
-            VO_LIST = appdb.get_vo_list()
-            # in case of error do not update time
-            VO_LAST_UPDATE = now
-        except Exception as ex:
-            flash("Error retrieving VO list from AppDB: %s" % ex, 'warning')
-
-    return VO_LIST
-
-
 def getVOs(session):
-    vos = getStaticVOs()
-    vos.extend(getCachedVOList())
-    vos = list(set(vos))
-    vos.sort()
-    if "vos" in session and session["vos"]:
-        vos = [vo for vo in vos if vo in session["vos"]]
-    elif not g.settings.debug_oidc_token:
-        vos = []
-    return vos
+    return session["vos"] if "vos" in session and session["vos"] else []
 
 
 def get_site_info_from_radl(radl, creds):
