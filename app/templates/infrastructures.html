@@ -11,7 +11,7 @@
     } else if (state == "failed" || state == "unconfigured" || state == "unknown" || state == "error" || state == "timeout") {
       return  "<span class='btn btn-danger btn-sm'>";
     } else {
-      return "<span class='btn btn-warning btn-sm text-white'><span class='spinner-grow spinner-grow-sm'></span>";
+      return "<span class='btn btn-warning btn-sm text-white'><span class='spinner-grow spinner-grow-sm'></span> ";
     }
   }
 
@@ -564,8 +564,7 @@ $(document).ready(function () {
         "columnDefs": [ {
             "targets"  : 'no-sort',
             "orderable": false,
-         }],
-        "order": [[ 2, "desc" ]]
+         }]
     });
 
     {% if reload %}
