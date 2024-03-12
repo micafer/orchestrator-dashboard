@@ -69,10 +69,10 @@ function addItem_{{key}}(object=null, value='') {
       v = parts[1]
     }
     input_template = `
-        <div class="col col-md-4 ps-0">
+        <div class="col col-md-5 ps-0">
             <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}_key" class="form-control" required value="${k}" placeholder="Key">
         </div>
-        <div class="col col-md-5 ps-0">
+        <div class="col col-md-6 ps-0">
             <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}_value" class="form-control" required pattern="${pattern}" value="${v}" placeholder="Value">
         </div>`;
   {% else %}
