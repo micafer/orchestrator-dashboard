@@ -130,7 +130,7 @@ def getUserVOs(entitlements, vo_role=None):
         elif elem in g.settings.vo_map:
             vos.append(g.settings.vo_map[elem])
 
-    return vos
+    return list(set(vos))
 
 
 def getCachedSiteList(force=False):
