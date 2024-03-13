@@ -36,7 +36,7 @@ from app.infra import Infrastructures
 from app.im import InfrastructureManager
 from app.ssh_key import SSHKey
 from app.ott import OneTimeTokenData
-from app import utils, appdb, db
+from app import utils, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
@@ -777,8 +777,8 @@ def create_app(oidc_blueprint=None):
         for site_name, site in static_sites.items():
             res += '<option name="selectedSite" value=%s>%s</option>' % (site['url'], site_name)
 
-        appdb_sites = appdb.get_sites(vo)
-        for site_name, site in appdb_sites.items():
+        sites = utils.getSiteInfoProvider().get_sites(vo)
+        for site_name, site in sites.items():
             # avoid site duplication
             if site_name not in static_sites:
                 if site["state"]:
@@ -807,7 +807,7 @@ def create_app(oidc_blueprint=None):
 
         else:
             site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
-            for image_name, image_id in appdb.get_images(site['id'], vo):
+            for image_name, image_id in utils.getSiteInfoProvider().get_images(site['id'], vo):
                 res += '<option name="selectedImage" value=%s>%s</option>' % (image_id, image_name)
         return res
 
@@ -1539,7 +1539,7 @@ def create_app(oidc_blueprint=None):
     # Reload internally the site cache
     @scheduler.task('interval', id='reload_sites', seconds=5)
     def reload_sites():
-        scheduler.modify_job('reload_sites', trigger='interval', seconds=settings.appdb_cache_timeout - 30)
+        scheduler.modify_job('reload_sites', trigger='interval', seconds=settings.sites_cache_timeout - 30)
         with app.app_context():
             app.logger.debug('Reload Site List.')
             g.settings = settings
