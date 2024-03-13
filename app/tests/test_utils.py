@@ -27,6 +27,7 @@ class TestUtils(unittest.TestCase):
 
     def test_getUserVOs(self):
         entitlements = ['urn:mace:egi.eu:group:vo.test.egi.eu:role=member#aai.egi.eu',
+                        'urn:mace:egi.eu:group:vo.test.egi.eu:role=vm_operator#aai.egi.eu',
                         'urn:mace:egi.eu:group:vo.test2.egi.eu:role=member#aai.egi.eu']
         res = utils.getUserVOs(entitlements)
         self.assertEquals(res, ['vo.test.egi.eu', 'vo.test2.egi.eu'])

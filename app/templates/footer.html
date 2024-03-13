@@ -1,11 +1,10 @@
 <footer class="footer bg-dark">
   <div class="container-fluid">
-    <div class="row my-2 ml-2">
-	    <div class="col-xs-3 mt-2">© 2020-2023 <a href="https://www.grycap.upv.es/" target="_blank">GRyCAP</a>
-	</div>
-	<div class="col-md-8 d-none d-sm-block">
-	  <p class="text-right">
-		 <a href="https://www.indigo-datacloud.eu/" target="_blank"><img height="5px" src="{{ url_for('static', filename='images/indigo_logo.png') }}"/></a>
+    <div class="row">
+	    <div class="col-md-3 col-6 mt-2">© 2020-2023 <a href="https://www.grycap.upv.es/" target="_blank">GRyCAP</a></div>
+	<div class="col-md-6 mt-1 d-none d-sm-block">
+	  <p class="text-center">
+		 <a href="https://www.indigo-datacloud.eu/" target="_blank"><img src="{{ url_for('static', filename='images/indigo_logo.png') }}"/></a>
 		 <a href="https://deep-hybrid-datacloud.eu/" target="_blank"><img src="{{ url_for('static', filename='images/logo_deep.png') }}"/></a>
 		 <a href="https://www.eosc-hub.eu/" target="_blank"><img src="{{ url_for('static', filename='images/eosc-hub_logo.png') }}"/></a>
 		 <a href="https://www.eosc-synergy.eu/" target="_blank"><img src="{{ url_for('static', filename='images/eosc-synergy_logo.png') }}"/></a>
@@ -14,27 +13,19 @@
 		 <a href="https://www.intertwin.eu/" target="_blank"><img src="{{ url_for('static', filename='images/intertwin_logo.png') }}"/></a>
 		 <a href="https://dt-geo.eu/" target="_blank"><img src="{{ url_for('static', filename='images/dt-geo_logo.png') }}"/></a>
 		 <a href="https://ai4eosc.eu/" target="_blank"><img src="{{ url_for('static', filename='images/ai4eosc_logo.png') }}"/></a>
-		</p>   
+		</p>
 	</div>
-	<div class="col-xs-2 mt-2 ml-auto mr-3 text-right" style="min-width:160px;">
+	<div class="col-md-2 col-4 mt-2 ms-auto me-1 text-end" style="min-width:160px;">
 		<a href="https://github.com/grycap/" target="_blank" alt="Github" title="Github">
-                  <i class="fab fa-github ml-2" style="color:white;"></i>
-	        </a>
-		<a href="https://hub.docker.com/orgs/grycap" target="_blank" alt="DockerHub" title="DockerHub">
-                  <i class="fab fa-docker ml-2" style="color:white;"></i>
-		</a>
+                  <i class="fab fa-github ms-2" style="color:white;"></i></a>
 		<a href="https://www.researchgate.net/lab/GRyCAP-Ignacio-Blanquer" target="_blank" alt="ResearchGate" title="ResearchGate">
-                  <i class="fab fa-researchgate ml-2" style="color:white;"></i>
-		</a>
+                  <i class="fab fa-researchgate ms-2" style="color:white;"></i></a>
 		<a href="https://imdocs.readthedocs.io" target="_blank" alt="Documentation" title="Documentation">
-                  <i class="fa fa-book ml-2" style="color:white;"></i>
-		</a>
+                  <i class="fa fa-book ms-2" style="color:white;"></i></a>
 		<a href="{{ url_for('static', filename='terms.html') }}" target="_blank" alt="Terms of Service" title="Terms of Service">
-			<i class="fa fa-file-contract ml-2" style="color:white;"></i>
-  		</a>
+			<i class="fa fa-file-contract ms-2" style="color:white;"></i></a>
 		  <a href="{{ url_for('static', filename='privacy.html') }}" target="_blank" alt="Privacy Notice" title="Privacy Notice">
-			<i class="fa fa-user-secret ml-2" style="color:white;"></i>
-  		</a>
+			<i class="fa fa-user-secret ms-2" style="color:white;"></i></a>
 	</div>    
     </div>
   </div>	  
@@ -45,16 +36,17 @@
 /* Sticky footer styles
 -------------------------------------------------- */
 .footer {
+  z-index: 10;
   position: fixed; 
   bottom: 0;
   width: 100%;
-  height: 50px;  /* Set the fixed height of the footer */
+  height: 40px;  /* Set the fixed height of the footer */
   line-height: 20px;
   color: white;	     
   opacity: 0.80;	   
 }
 .footer img {
- height: 36px;
+ height: 30px;
  margin-right: 20px;
 }
 </style>
