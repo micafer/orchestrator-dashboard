@@ -39,6 +39,7 @@ from radl.radl_json import parse_radl
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from app import appdb
+from app import egi_catch_all
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 urllib3.disable_warnings(InsecureRequestWarning)
@@ -73,6 +74,13 @@ def _getStaticSitesInfo(force=False):
         return []
 
 
+def getSiteInfoProvider():
+    if g.settings.site_info_provider == "AppDB":
+        return appdb
+    elif g.settings.site_info_provider == "EGI Catch All":
+        return egi_catch_all
+
+
 def getCachedProjectIDs(site_id):
     res = {}
     for site in getCachedSiteList().values():
@@ -81,7 +89,7 @@ def getCachedProjectIDs(site_id):
                 site["vos"] = {}
             if "vos_updated" not in site or not site["vos_updated"]:
                 try:
-                    site["vos"].update(appdb.get_project_ids(site_id))
+                    site["vos"].update(getSiteInfoProvider().get_project_ids(site_id))
                     site["vos_updated"] = True
                 except Exception as ex:
                     print("Error loading project IDs from AppDB: %s" % ex, file=sys.stderr)
@@ -97,6 +105,8 @@ def getStaticSites(vo=None, force=False):
         if vo is None or ("vos" in site and site["vos"] and vo in site["vos"]):
             res[site["name"]] = site
             site["state"] = ""
+            if g.settings.site_info_provider == "EGI Catch All":
+                site["id"] = site["name"]
 
     return res
 
@@ -138,11 +148,11 @@ def getCachedSiteList(force=False):
     global LAST_UPDATE
 
     now = int(time.time())
-    if force or not SITE_LIST or now - LAST_UPDATE > g.settings.appdb_cache_timeout:
+    if force or not SITE_LIST or now - LAST_UPDATE > g.settings.sites_cache_timeout:
         try:
-            sites = appdb.get_sites()
+            sites = getSiteInfoProvider().get_sites()
             if sites:
-                SITE_LIST = appdb.get_sites()
+                SITE_LIST = getSiteInfoProvider().get_sites()
             # in case of error do not update time
             LAST_UPDATE = now
         except Exception as ex:
