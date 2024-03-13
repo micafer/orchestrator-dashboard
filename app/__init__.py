@@ -37,6 +37,7 @@ from app.im import InfrastructureManager
 from app.ssh_key import SSHKey
 from app.ott import OneTimeTokenData
 from app import utils, db
+from app import appdb as sitesInfo
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden

@@ -61,6 +61,8 @@ def get_site_info(site_name):
     resp = requests.get(site_file, timeout=REQUESTS_TIMEOUT)
     if resp.status_code == 200:
         site_info = yaml.safe_load(resp.text)
+        site_info["gocdb"]
+        site_info["endpoint"]
         vos = {}
         for vo in site_info["vos"]:
             vos[vo["name"]] = vo["auth"]["project_id"]
