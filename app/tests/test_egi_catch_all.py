@@ -17,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import os
-import xmltodict
 
 from app import egi_catch_all
 from mock import patch, MagicMock
