@@ -2,6 +2,16 @@
 {% block title %}Infrastructure Log{% endblock %}
 {% block content %}
 
+<script>
+
+function goToVM(vm) {
+  var element = document.getElementById("vm_" + vm);
+  let dims = element.getBoundingClientRect();
+  window.scrollTo(window.scrollX, dims.top - 75 + window.scrollY);
+}
+
+</script>
+
 <div class="container">
 
     <br>
@@ -29,7 +39,7 @@
                 </button>
                 <div class="dropdown-menu" aria-labelledby="selectVM">
                 {% for vm in range(vms) %}
-                  <a class="dropdown-item" onclick="document.getElementById('vm_{{vm}}').scrollIntoView();window.scrollBy(0, -100);">VM: {{vm}}</a>
+                  <a class="dropdown-item" onclick="goToVM('{{vm}}')">VM: {{vm}}</a>
                 {% endfor %}
                 </div>
               </div>
