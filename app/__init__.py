@@ -309,7 +309,7 @@ def create_app(oidc_blueprint=None):
                     if cont > 0:
                         nets += Markup('<br/>')
                     nets += Markup('<i class="fa fa-network-wired"></i>')
-                    nets += Markup(' <span class="badge badge-secondary">%s</span>' % cont)
+                    nets += Markup(' <span class="badge bg-secondary">%s</span>' % cont)
                     nets += ": %s" % vminfo["net_interface.%s.ip" % cont]
                     del vminfo["net_interface.%s.ip" % cont]
                     if "net_interface.%s.dns_name" % cont in vminfo:
@@ -337,7 +337,7 @@ def create_app(oidc_blueprint=None):
             while "disk.%s.size" % cont in vminfo or "disk.%s.image.url" % cont in vminfo:
                 if cont > 0:
                     disks += Markup('<br/>')
-                disks += Markup('<i class="fa fa-database"></i> <span class="badge badge-secondary">'
+                disks += Markup('<i class="fa fa-database"></i> <span class="badge bg-secondary">'
                                 '%s</span><br/>' % cont)
 
                 prop_map = {"size": "Size", "image.url": "URL", "device": "Device", "mount_path": "Mount Path",
@@ -367,14 +367,14 @@ def create_app(oidc_blueprint=None):
                     if port.get_remote_cidr() != "0.0.0.0/0":
                         remote_cidr = "%s-" % port.get_remote_cidr()
                     str_outports += Markup('<i class="fas fa-project-diagram"></i> <span class="badge '
-                                           'badge-secondary">%s%s</span>' % (remote_cidr, port.get_remote_port()))
+                                           'bg-secondary">%s%s</span>' % (remote_cidr, port.get_remote_port()))
                     if not port.is_range():
                         if port.get_remote_port() != port.get_local_port():
                             str_outports += Markup(' <i class="fas fa-long-arrow-alt-right">'
-                                                   '</i> <span class="badge badge-secondary">%s</span>' %
+                                                   '</i> <span class="badge bg-secondary">%s</span>' %
                                                    port.get_local_port())
                     else:
-                        str_outports += Markup(' : </i> <span class="badge badge-secondary">%s</span>' %
+                        str_outports += Markup(' : </i> <span class="badge bg-secondary">%s</span>' %
                                                port.get_local_port())
                     str_outports += Markup('<br/>')
 
