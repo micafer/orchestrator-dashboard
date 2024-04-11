@@ -309,7 +309,7 @@ def create_app(oidc_blueprint=None):
                     if cont > 0:
                         nets += Markup('<br/>')
                     nets += Markup('<i class="fa fa-network-wired"></i>')
-                    nets += Markup(' <span class="badge badge-secondary">%s</span>' % cont)
+                    nets += Markup(' <span class="badge bg-secondary">%s</span>' % cont)
                     nets += ": %s" % vminfo["net_interface.%s.ip" % cont]
                     del vminfo["net_interface.%s.ip" % cont]
                     if "net_interface.%s.dns_name" % cont in vminfo:
@@ -337,7 +337,7 @@ def create_app(oidc_blueprint=None):
             while "disk.%s.size" % cont in vminfo or "disk.%s.image.url" % cont in vminfo:
                 if cont > 0:
                     disks += Markup('<br/>')
-                disks += Markup('<i class="fa fa-database"></i> <span class="badge badge-secondary">'
+                disks += Markup('<i class="fa fa-database"></i> <span class="badge bg-secondary">'
                                 '%s</span><br/>' % cont)
 
                 prop_map = {"size": "Size", "image.url": "URL", "device": "Device", "mount_path": "Mount Path",
@@ -367,14 +367,14 @@ def create_app(oidc_blueprint=None):
                     if port.get_remote_cidr() != "0.0.0.0/0":
                         remote_cidr = "%s-" % port.get_remote_cidr()
                     str_outports += Markup('<i class="fas fa-project-diagram"></i> <span class="badge '
-                                           'badge-secondary">%s%s</span>' % (remote_cidr, port.get_remote_port()))
+                                           'bg-secondary">%s%s</span>' % (remote_cidr, port.get_remote_port()))
                     if not port.is_range():
                         if port.get_remote_port() != port.get_local_port():
                             str_outports += Markup(' <i class="fas fa-long-arrow-alt-right">'
-                                                   '</i> <span class="badge badge-secondary">%s</span>' %
+                                                   '</i> <span class="badge bg-secondary">%s</span>' %
                                                    port.get_local_port())
                     else:
-                        str_outports += Markup(' : </i> <span class="badge badge-secondary">%s</span>' %
+                        str_outports += Markup(' : </i> <span class="badge bg-secondary">%s</span>' %
                                                port.get_local_port())
                     str_outports += Markup('<br/>')
 
@@ -904,17 +904,18 @@ def create_app(oidc_blueprint=None):
                         value["default"] = True
                     else:
                         value["default"] = False
-                elif value["type"] == "list" and value["entry_schema"]["type"] not in ["map", "list"]:
+                elif value["type"] in ["map", "list"] and value["entry_schema"]["type"] not in ["map", "list"]:
                     try:
-                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"])
+                        value["default"] = utils.get_list_values(name, inputs, value["entry_schema"]["type"],
+                                                                 value["type"])
                     except Exception as ex:
                         flash("Invalid input value '%s' specified: '%s'." % (name, ex), "warning")
                         value["default"] = []
                 # Special case for ports, convert a list of strings like 80,443,8080-8085,9000-10000/udp
-                # to a PortSpec map
-                elif value["type"] == "map" and value["entry_schema"]["type"] in utils.PORT_SPECT_TYPES:
+                # to a PortSpec map or list
+                elif value["type"] in ["map", "list"] and value["entry_schema"]["type"] in utils.PORT_SPECT_TYPES:
                     try:
-                        value["default"] = utils.get_list_values(name, inputs, "PortSpec")
+                        value["default"] = utils.get_list_values(name, inputs, "PortSpec", value["type"])
                     except Exception as ex:
                         flash("Invalid input value '%s' specified: '%s'." % (name, ex), "warning")
                         value["default"] = {}
@@ -1281,10 +1282,10 @@ def create_app(oidc_blueprint=None):
         # Try to get the Cred ID to restrict the auth info sent to the IM
         auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), infra.get_infra_cred_id(infid))
         reload = None
+        form_data = request.form.to_dict()
 
         try:
             if op == "descr":
-                form_data = request.form.to_dict()
                 if 'description' in form_data and form_data['description'] != "":
                     try:
                         infra_data = infra.get_infra(infid)
@@ -1314,7 +1315,6 @@ def create_app(oidc_blueprint=None):
                 flash("Operation '%s' successfully made on Infrastructure ID: %s" % (op, infid), 'success')
                 reload = infid
             elif op in ["delete"]:
-                form_data = request.form.to_dict()
                 force = False
                 recreate = False
                 if 'force' in form_data and form_data['force'] != "0":
@@ -1338,12 +1338,27 @@ def create_app(oidc_blueprint=None):
                     return redirect(url_for('configure', inf_id=infid))
 
             elif op == "reconfigure":
-                response = im.reconfigure_inf(infid, auth_data)
+                if 'reconfigure_template' in form_data and form_data['reconfigure_template'] != "":
+                    # If the template has some reconfigure inputs, set them
+                    try:
+                        template = yaml.safe_load(form_data['reconfigure_template'])
+                        template_inputs = template.get('topology_template', {}).get('inputs', {})
+                        for input_name, input_params in template_inputs.items():
+                            if input_name in form_data:
+                                input_params['default'] = form_data[input_name]
+                        tosca = yaml.safe_dump(template)
+                    except Exception as ex:
+                        flash("Error passing reconfigure values (changes ignored): %s." % ex, 'warn')
+                        tosca = None
+
+                    response = im.reconfigure_inf(infid, auth_data, tosca=tosca)
+                else:
+                    # otherwise, just reconfigure the infrastructure
+                    response = im.reconfigure_inf(infid, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
                 flash("Reconfiguration process successfuly started.", "success")
             elif op == "change_user":
-                form_data = request.form.to_dict()
                 overwrite = False
                 if 'overwrite' in form_data and form_data['overwrite'] != "0":
                     overwrite = True
@@ -1357,14 +1372,12 @@ def create_app(oidc_blueprint=None):
                     flash("Empty token. Owner not changed.", 'warning')
                 flash("Infrastructure owner successfully changed.", "success")
             elif op == "removeresources":
-                form_data = request.form.to_dict()
                 vm_list = form_data.get('vm_list')
                 response = im.remove_resources(infid, vm_list, auth_data)
                 if not response.ok:
                     raise Exception(response.text)
                 flash("VMs %s successfully deleted." % vm_list, "success")
             elif op == "migrate":
-                form_data = request.form.to_dict()
                 new_im_url = form_data.get('new_im_url')
                 new_im = InfrastructureManager(new_im_url, settings.imTimeout)
                 infra_data = im.export_inf(infid, auth_data)
@@ -1468,6 +1481,32 @@ def create_app(oidc_blueprint=None):
                     flash("Error writing Vault Info %s!" % ex, 'error')
 
             return redirect(url_for('manage_creds'))
+
+    @app.route('/reconfigure/<infid>')
+    @authorized_with_valid_token
+    def reconfigure(infid=None):
+
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
+        template = ""
+        try:
+            response = im.get_inf_property(infid, 'tosca', auth_data)
+            if not response.ok:
+                raise Exception(response.text)
+            template = response.text
+        except Exception as ex:
+            app.logger.warn("Error getting infrastructure template: %s" % ex)
+
+        infra_name = ""
+        inputs = utils.getReconfigureInputs(template)
+        if inputs:
+            try:
+                infra_data = infra.get_infra(infid)
+            except Exception:
+                infra_data = {}
+            infra_name = infra_data.get("name", "")
+
+        return render_template('reconfigure.html', infid=infid, inputs=inputs, infra_name=infra_name, template=template)
 
     @app.route('/logout')
     def logout(next_url=None):

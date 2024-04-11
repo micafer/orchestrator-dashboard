@@ -24,7 +24,6 @@ import xmltodict
 from urllib.parse import urlparse
 
 APPDB_URL = "https://appdb.egi.eu"
-VO_LIST = []
 APPDB_TIMEOUT = 10
 
 
@@ -45,18 +44,15 @@ def appdb_call(path, retries=3, url=APPDB_URL, timeout=APPDB_TIMEOUT):
 
 
 def get_vo_list():
-    global VO_LIST
-    if not VO_LIST:
-        vos = []
-        data = appdb_call('/rest/1.0/vos')
-        if data:
-            if isinstance(data['vo:vo'], list):
-                for vo in data['vo:vo']:
-                    vos.append(vo['@name'])
-            else:
-                vos.append(data['vo:vo']['@name'])
-        VO_LIST = vos
-    return VO_LIST
+    vos = []
+    data = appdb_call('/rest/1.0/vos')
+    if data:
+        if isinstance(data['vo:vo'], list):
+            for vo in data['vo:vo']:
+                vos.append(vo['@name'])
+        else:
+            vos.append(data['vo:vo']['@name'])
+    return vos
 
 
 def _get_services(vo=None):

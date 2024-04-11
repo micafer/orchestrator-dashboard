@@ -1,0 +1,78 @@
+<form id="reconfInfra" action="{{ url_for('manage_inf', infid=infid, op='reconfigure') }}" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+{% if inputs %}
+  <input type="hidden" name="reconfigure_template" value="{{ template }}"/>
+
+<!-- start tabs creation section -->
+<ul class="nav nav-tabs">
+{% set tabs=inputs.keys() | list %}
+{% for tab in tabs %}
+  {% set tab_id = tab.replace(" ", "_") %}
+  {% if loop.first %}
+    <li class="nav-item"><a class="nav-link active" data-id="#{{tab_id}}" data-bs-toggle="tab" href=#{{tab_id}}>{{tab}}</a></li>
+  {% else %}
+    <li class="nav-item"><a class="nav-link" data-id="#{{tab_id}}" data-bs-toggle="tab" href=#{{tab_id}}>{{tab}}</a></li>
+  {% endif %}
+{% endfor %}
+</ul>
+  <!-- end tab creation section -->
+
+<div class="tab-content mb-2">
+  <!-- inputs -->
+
+  {% for tab, input_dict in inputs.items() %}
+    {% set tab_id = tab.replace(" ", "_") %}
+    {% if loop.first %}
+      <div id="{{tab_id}}" class="tab-pane fade show active">
+    {% else %}
+      <div id="{{tab_id}}" class="tab-pane fade">
+    {% endif %}
+
+    <br>
+    {% for key, value in input_dict.items() %}
+        {% set input_values = {key: value['default']} %}
+        {% include 'input_types.html' %}
+    {% endfor %}
+    </div>
+  {% endfor %}
+
+  <!-- end inputs -->
+</div>
+
+{% else %}
+Do you really want to reconfigure the Infrastructure '{{ infra_name }}' with ID {{ infid }}?
+<br><br>
+{% endif %}
+
+<div class="modal-footer pb-0 pr-0">
+<a class="btn btn-secondary reconfCancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
+<button type="submit" class="btn btn-success reconfigureBtn" role="button">Reconfigure</button>
+</div>
+
+<script>
+$(document).ready(function () {
+  $(".reconfigureBtn").click(function () {
+      // add spinner to button
+      $(this).parent().find(".reconfCancelBtn").addClass("disabled", true);
+      $(this).addClass("disabled", true);
+      $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Reconfiguring...` );
+  });
+});
+
+  // Function to validate fields of each tab before changing to other tab
+ $('.nav-tabs a').on('hide.bs.tab', function(e){
+  var link = e.delegateTarget;
+  var tab_id = link.getAttribute('data-id')
+  var inputs = $(tab_id).find(':input');
+  var valid = true;
+  for (var i = 0; i < inputs.length; i++) {
+    if (!inputs[i].checkValidity()) {
+      inputs[i].reportValidity();
+      valid = false;
+    }
+  }
+  return valid;
+});
+</script>
+  
