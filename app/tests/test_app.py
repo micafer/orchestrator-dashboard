@@ -40,7 +40,7 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/vms/0":
             resp.ok = True
             resp.status_code = 200
-            resp.text = ""
+            resp.text = "system front (cpu.count = 1 and memory.size = 512 MB)"
             radl = {"class": "system",
                     "cpu.arch": "x86_64",
                     "cpu.count_min": 1,
@@ -328,12 +328,14 @@ class IMDashboardTests(unittest.TestCase):
                                                        'success'))
 
     @patch("app.utils.getUserAuthData")
+    @patch('requests.get')
     @patch('requests.put')
     @patch("app.utils.avatar")
     @patch("app.flash")
-    def test_managevm_resize(self, flash, avatar, put, user_data):
+    def test_managevm_resize(self, flash, avatar, put, get, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         put.side_effect = self.put_response
+        get.side_effect = self.get_response
         self.login(avatar)
         params = {'cpu': '4',
                   'memory': '4',

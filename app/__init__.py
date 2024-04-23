@@ -44,7 +44,7 @@ from flask import Flask, json, render_template, request, redirect, url_for, flas
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
-from radl.radl import deploy, description
+from radl.radl import deploy, description, Feature
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from toscaparser.tosca_template import ToscaTemplate
@@ -394,11 +394,20 @@ def create_app(oidc_blueprint=None):
                 form_data = request.form.to_dict()
                 cpu = int(form_data['cpu'])
                 memory = int(form_data['memory'])
-                system_name = form_data['system_name']
 
-                radl = "system %s (cpu.count >= %d and memory.size >= %dg and instance_type = '')" % (system_name,
-                                                                                                      cpu, memory)
-                response = im.resize_vm(infid, vmid, radl, auth_data)
+                vminforesp = im.get_vm_info(infid, vmid, auth_data, "text/plain")
+                if vminforesp.ok:
+                    vminfo = radl_parse.parse_radl(vminforesp.text)
+                    vminfo.systems[0].delValue("instance_type")
+                    vminfo.systems[0].delValue("cpu.count")
+                    vminfo.systems[0].addFeature(Feature("cpu.count", ">=", cpu),
+                                                 conflict="other", missing="other")
+                    vminfo.systems[0].delValue("memory.size")
+                    vminfo.systems[0].addFeature(Feature("memory.size", ">=", memory, "GB"),
+                                                 conflict="other", missing="other")
+                    response = im.resize_vm(infid, vmid, str(vminfo), auth_data)
+                else:
+                    raise Exception("Error getting VM info: %s" % vminforesp.text)
             else:
                 response = im.manage_vm(op, infid, vmid, auth_data)
         except Exception as ex:
