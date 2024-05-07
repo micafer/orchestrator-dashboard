@@ -254,7 +254,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEqual(flash.call_args_list[0][0],
-                          ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
+                         ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
@@ -269,7 +269,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEqual(flash.call_args_list[0][0],
-                          ("Infrastructure owner successfully changed.", 'success'))
+                         ("Infrastructure owner successfully changed.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.put')
@@ -285,8 +285,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEqual(flash.call_args_list[0][0],
-                          ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
-                           'success'))
+                         ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
+                          'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -325,7 +325,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
         self.assertEqual(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0",
-                                                       'success'))
+                                                      'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -598,7 +598,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEqual(flash.call_args_list[0][0], ("Credentials successfully written!", 'success'))
         self.assertEqual(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
-                                                             'id': 'credid', 'type': "OpenNebula"}, False))
+                                                            'id': 'credid', 'type': "OpenNebula"}, False))
 
         res = self.client.post('/write_creds?cred_id=&cred_type=OpenNebula', data={"host": "SITE_URL3",
                                                                                    "id": "credid",
@@ -607,8 +607,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn('/manage_creds', res.headers['location'])
         self.assertEqual(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
         self.assertEqual(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
-                                                                                  'id': 'credid',
-                                                                                  'type': 'OpenNebula'}, True))
+                                                                                 'id': 'credid',
+                                                                                 'type': 'OpenNebula'}, True))
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.delete_cred")

@@ -53,14 +53,14 @@ class TestUtils(unittest.TestCase):
             flask_context.g.settings.im_auth = ""
             res = utils.getUserAuthData("token", cred, "user")
             self.assertEqual(res, ("type = InfrastructureManager; token = token\\nid = one; type = 'OpenNebula';"
-                                    " username = 'user'; password = 'pass'\\n"
-                                    "id = fed; type = OpenStack; username = egi.eu;"
-                                    " tenant = oidc; auth_version = 3.x_oidc_access_token; host ="
-                                    " https://api.cloud.ifca.es:5000; password = 'token'; vo = vo_name;"
-                                    " domain = project_id\\n"
-                                    "id = ch; type = OpenStack; auth_version = 3.x_password;"
-                                    " host = https://identity-f1a.cloudandheat.com:5000; username = user;"
-                                    " tenant = tenant; password = 'pass'"))
+                                   " username = 'user'; password = 'pass'\\n"
+                                   "id = fed; type = OpenStack; username = egi.eu;"
+                                   " tenant = oidc; auth_version = 3.x_oidc_access_token; host ="
+                                   " https://api.cloud.ifca.es:5000; password = 'token'; vo = vo_name;"
+                                   " domain = project_id\\n"
+                                   "id = ch; type = OpenStack; auth_version = 3.x_password;"
+                                   " host = https://identity-f1a.cloudandheat.com:5000; username = user;"
+                                   " tenant = tenant; password = 'pass'"))
 
             flask_context.g.settings.im_auth = "Bearer"
             res = utils.getUserAuthData("token", cred, "user")
