@@ -1231,7 +1231,7 @@ def create_app(oidc_blueprint=None):
                     images = [(image['uri'], image['name'], image['uri'] == image_url_str)
                               for image in response.json()["images"]]
                 except Exception as ex:
-                    app.logger.warn('Error getting site images: %s', (ex))
+                    app.logger.warning('Error getting site images: %s', (ex))
 
                 return render_template('addresource.html', infid=infid, systems=systems,
                                        image_url=image_url, images=images)
@@ -1505,7 +1505,7 @@ def create_app(oidc_blueprint=None):
                 raise Exception(response.text)
             template = response.text
         except Exception as ex:
-            app.logger.warn("Error getting infrastructure template: %s" % ex)
+            app.logger.warning("Error getting infrastructure template: %s" % ex)
 
         infra_name = ""
         inputs = utils.getReconfigureInputs(template)
@@ -1524,7 +1524,7 @@ def create_app(oidc_blueprint=None):
         try:
             oidc_blueprint.session.get("/logout")
         except Exception as ex:
-            app.logger.warn("Error in OIDC logout: %s" % ex)
+            app.logger.warning("Error in OIDC logout: %s" % ex)
         return redirect(url_for('login', next_url=next_url))
 
     @app.errorhandler(403)
