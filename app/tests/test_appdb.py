@@ -57,7 +57,7 @@ class TestAppDB(unittest.TestCase):
     def test_appdb_call(self, requests):
         requests.side_effect = self.requests_response
         res = appdb.appdb_call('/rest/1.0/vos')
-        self.assertEquals(res["vo:vo"]["@name"], "acc-comp.egi.eu")
+        self.assertEqual(res["vo:vo"]["@name"], "acc-comp.egi.eu")
 
     @patch('app.appdb.appdb_call')
     def test_vo_list(self, appdb_call):
@@ -65,14 +65,14 @@ class TestAppDB(unittest.TestCase):
         vos = '<vo:vo id="15551" name="acc-comp.egi.eu"></vo:vo>'
         appdb_call.return_value = xmltodict.parse(vos.replace('\n', ''))
         res = appdb.get_vo_list()
-        self.assertEquals(res, ['acc-comp.egi.eu'])
+        self.assertEqual(res, ['acc-comp.egi.eu'])
         appdb.VO_LIST = []
 
         vos = '<appdb:appdb><vo:vo id="15551" name="acc-comp.egi.eu"></vo:vo>'
         vos += '<vo:vo id="15527" name="vo.access.egi.eu"></vo:vo></appdb:appdb>'
         appdb_call.return_value = xmltodict.parse(vos)["appdb:appdb"]
         res = appdb.get_vo_list()
-        self.assertEquals(res, ['acc-comp.egi.eu', 'vo.access.egi.eu'])
+        self.assertEqual(res, ['acc-comp.egi.eu', 'vo.access.egi.eu'])
 
     @patch('app.appdb.appdb_call')
     def test_get_services(self, appdb_call):
@@ -84,7 +84,7 @@ class TestAppDB(unittest.TestCase):
                   </appdb:site>"""
         appdb_call.return_value = xmltodict.parse(site.replace('\n', ''))
         res = appdb._get_services()
-        self.assertEquals(res[0]["@type"], "openstack")
+        self.assertEqual(res[0]["@type"], "openstack")
 
         site = """<appdb:appdb><appdb:site id="80090G0" name="100IT" infrastructure="Production" status="Certified">
                   <site:service type="openstack" id="11541G0" host="devcloud-egi.100percentit.com">
@@ -97,7 +97,7 @@ class TestAppDB(unittest.TestCase):
                   </appdb:appdb>"""
         appdb_call.return_value = xmltodict.parse(site.replace('\n', ''))["appdb:appdb"]
         res = appdb._get_services()
-        self.assertEquals(res[0]["@type"], "openstack")
+        self.assertEqual(res[0]["@type"], "openstack")
 
     @patch('app.appdb.appdb_call')
     @patch('app.appdb._get_services')
@@ -106,7 +106,7 @@ class TestAppDB(unittest.TestCase):
         va_provider = read_file_as_string("files/va_provider.xml")
         appdb_call.return_value = xmltodict.parse(va_provider.replace('\n', ''))["appdb:appdb"]
         res = appdb.get_sites("vo.access.egi.eu")
-        self.assertEquals(res, {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
+        self.assertEqual(res, {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
                                           'state': '', 'id': '1', 'name': 'CESGA'}})
         # self.assertIn(appdb_call.call_args_list[0][0][0], ["/rest/1.0/va_providers/1"])
 
@@ -120,7 +120,7 @@ class TestAppDB(unittest.TestCase):
                     </virtualization:provider>"""
         appdb_call.return_value = xmltodict.parse(shares.replace('\n', ''))
         res = appdb.get_project_ids("11548G0")
-        self.assertEquals(res, {"vo.access.egi.eu": "3a8e9d966e644405bf19b536adf7743d",
+        self.assertEqual(res, {"vo.access.egi.eu": "3a8e9d966e644405bf19b536adf7743d",
                                 "covid-19.eosc-synergy.eu": "972298c557184a2192ebc861f3184da8"})
 
     @patch('app.appdb.appdb_call')
@@ -131,7 +131,7 @@ class TestAppDB(unittest.TestCase):
                     </virtualization:provider>"""
         appdb_call.return_value = xmltodict.parse(images.replace('\n', ''))
         res = appdb.get_images('11548G0', 'vo.access.egi.eu')
-        self.assertEquals(res, [("ScipionCloud-GPU", "scipioncloud.gpu")])
+        self.assertEqual(res, [("ScipionCloud-GPU", "scipioncloud.gpu")])
 
 
 if __name__ == '__main__':
