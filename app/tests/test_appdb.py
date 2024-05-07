@@ -107,7 +107,7 @@ class TestAppDB(unittest.TestCase):
         appdb_call.return_value = xmltodict.parse(va_provider.replace('\n', ''))["appdb:appdb"]
         res = appdb.get_sites("vo.access.egi.eu")
         self.assertEqual(res, {'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000',
-                                          'state': '', 'id': '1', 'name': 'CESGA'}})
+                                         'state': '', 'id': '1', 'name': 'CESGA'}})
         # self.assertIn(appdb_call.call_args_list[0][0][0], ["/rest/1.0/va_providers/1"])
 
     @patch('app.appdb.appdb_call')
@@ -121,7 +121,7 @@ class TestAppDB(unittest.TestCase):
         appdb_call.return_value = xmltodict.parse(shares.replace('\n', ''))
         res = appdb.get_project_ids("11548G0")
         self.assertEqual(res, {"vo.access.egi.eu": "3a8e9d966e644405bf19b536adf7743d",
-                                "covid-19.eosc-synergy.eu": "972298c557184a2192ebc861f3184da8"})
+                               "covid-19.eosc-synergy.eu": "972298c557184a2192ebc861f3184da8"})
 
     @patch('app.appdb.appdb_call')
     def test_get_images(self, appdb_call):
