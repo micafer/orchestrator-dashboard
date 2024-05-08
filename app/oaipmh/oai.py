@@ -19,7 +19,7 @@
 # specific language governing permissions and limitations
 # under the License.
 from lxml import etree  # nosec
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 from app.oaipmh.errors import Errors
 
@@ -69,7 +69,7 @@ class OAI():
         root.set('xmlns', 'http://www.openarchives.org/OAI/2.0/')
 
         responseDate = etree.SubElement(root, 'responseDate')
-        current_datetime = datetime.utcnow()
+        current_datetime = datetime.now(timezone.utc)
         response_date = current_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")
         responseDate.text = response_date
 
@@ -116,7 +116,7 @@ class OAI():
         if metadata_prefix == 'oai_openaire':
             metadata_xml = self.mapOAIRE(record_data)
 
-        metadata_element.append(etree.fromstring(metadata_xml))  # nosec
+        metadata_element.append(metadata_xml)
 
         return etree.tostring(metadata_element, pretty_print=True, encoding='unicode')
 
@@ -296,7 +296,7 @@ class OAI():
                     metadata_xml = self.mapOAIRE(record_metadata)
 
                 # Append the generated XML to the metadata element
-                metadata_element.append(etree.fromstring(metadata_xml))  # nosec
+                metadata_element.append(metadata_xml)
 
                 header_element.append(identifier_element)
                 header_element.append(datestamp_element)
@@ -477,10 +477,7 @@ class OAI():
                 format_element.text = value
                 root.append(format_element)
 
-        # Serialize the XML to a string
-        xml_string = etree.tostring(root, pretty_print=True, encoding='unicode')
-
-        return xml_string
+        return root
 
     def mapDC(self, metadata_dict):
         # Create an XML document
@@ -552,10 +549,7 @@ class OAI():
                 related_identifier_element.text = value
                 root.append(related_identifier_element)
 
-        # Serialize the XML to a string
-        xml_string = etree.tostring(root, pretty_print=True, encoding='unicode')
-
-        return xml_string
+        return root
 
     def processRequest(self, request, metadata_dict):
         root = self.baseXMLTree()
