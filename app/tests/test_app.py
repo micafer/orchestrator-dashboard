@@ -1,3 +1,8 @@
+import sys
+
+sys.path.append('..')
+sys.path.append('.')
+
 import unittest
 import json
 import xml.etree.ElementTree as etree
@@ -36,7 +41,7 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/vms/0":
             resp.ok = True
             resp.status_code = 200
-            resp.text = ""
+            resp.text = "system front (cpu.count = 1 and memory.size = 512 MB)"
             radl = {"class": "system",
                     "cpu.arch": "x86_64",
                     "cpu.count_min": 1,
@@ -58,8 +63,26 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/tosca":
             resp.ok = True
             resp.status_code = 200
-            resp.text = """topology_template:
-                            node_templates:
+            resp.text = """
+                           metadata:
+                             tabs:
+                                Tab1:
+                                  - param1:
+                                      reconfigure: true
+                             template_name: VM
+                             filename: simple-node-disk.yml
+                             childs:
+                               - users.yml
+                           topology_template:
+                             inputs:
+                               num_cpus:
+                                 type: integer
+                                 default: 4
+                               param1:
+                                 type: string
+                                 description: Param1 description
+                                 default: ''
+                             node_templates:
                                 simple_node:
                                         type: tosca.nodes.indigo.Compute"""
         elif url == "/im/infrastructures/infid/contmsg":
@@ -119,6 +142,9 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/stop":
             resp.ok = True
             resp.status_code = 200
+        elif url == "/im/infrastructures/infid/vms/0":
+            resp.ok = True
+            resp.status_code = 200
         elif url == "/im/infrastructures":
             resp.ok = True
             resp.status_code = 200
@@ -158,7 +184,7 @@ class IMDashboardTests(unittest.TestCase):
         if url == "/im/infrastructures":
             resp.ok = True
             resp.status_code = 200
-            self.assertIn("IMAGE_NAME", kwargs["data"])
+            self.assertTrue("IMAGE_NAME" in kwargs["data"] or "appdbimage" in kwargs["data"])
             self.assertIn("default: 4", kwargs["data"])
         elif url == "/im/infrastructures/infid":
             resp.ok = True
@@ -228,8 +254,8 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/stop')
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0],
-                          ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
+        self.assertEqual(flash.call_args_list[0][0],
+                         ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
@@ -243,8 +269,8 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/change_user', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0],
-                          ("Infrastructure owner successfully changed.", 'success'))
+        self.assertEqual(flash.call_args_list[0][0],
+                         ("Infrastructure owner successfully changed.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.put')
@@ -259,9 +285,9 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/migrate', data={"new_im_url": "http://newim.com/im"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0],
-                          ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
-                           'success'))
+        self.assertEqual(flash.call_args_list[0][0],
+                         ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
+                          'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -286,21 +312,40 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/managevm/stop/infid/0')
         self.assertEqual(302, res.status_code)
         self.assertIn('/vminfo?infId=infid&vmId=0', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.delete')
     @patch("app.utils.avatar")
     @patch("app.flash")
-    def test_managevm_delet(self, flash, avatar, delete, user_data):
+    def test_managevm_delete(self, flash, avatar, delete, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         delete.side_effect = self.delete_response
         self.login(avatar)
         res = self.client.post('/managevm/terminate/infid/0')
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0",
-                                                       'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0",
+                                                      'success'))
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.get')
+    @patch('requests.put')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_managevm_resize(self, flash, avatar, put, get, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        put.side_effect = self.put_response
+        get.side_effect = self.get_response
+        self.login(avatar)
+        params = {'cpu': '4',
+                  'memory': '4',
+                  'system_name': 'front'
+                  }
+        res = self.client.post('/managevm/resize/infid/0', data=params)
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/vminfo?infId=infid&vmId=0', res.headers['location'])
+        self.assertEqual(flash.call_args_list[0][0], ("Operation 'resize' successfully made on VM ID: 0", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.put')
@@ -313,7 +358,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/reconfigure')
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Reconfiguration process successfuly started.", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Reconfiguration process successfuly started.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -324,7 +369,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.get('/template/infid')
         self.assertEqual(200, res.status_code)
-        expected = b"topology_template:\n  node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
+        expected = b"node_templates:\n    simple_node:\n      type: tosca.nodes.indigo.Compute"
         self.assertIn(expected, res.data)
 
     @patch("app.utils.getUserAuthData")
@@ -374,18 +419,22 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/delete')
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'success'))
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_creds")
-    def test_configure(self, get_creds, avatar):
+    @patch('requests.get')
+    def test_configure(self, get, get_creds, avatar):
         self.login(avatar)
+        get.side_effect = self.get_response
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml')
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Select Optional Features:", res.data)
 
-        get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "vo": "voname"},
-                                  {"id": "credid1", "type": "OpenStack", "host": "site_url1", "tenant_id": "tenid"}]
+        get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url",
+                                   "vo": "voname", "enabled": True},
+                                  {"id": "credid1", "type": "OpenStack", "host": "site_url1",
+                                   "tenant_id": "tenid", "enabled": True}]
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&childs=users.yml')
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Deploy a compute node getting the IP and SSH credentials to access via ssh", res.data)
@@ -395,6 +444,10 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
                       b'name="selectedCred" value=credid1>\n                        credid1\n'
                       b'                    </option>', res.data)
+
+        res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&inf_id=infid')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b'<option selected value="4">4</option>', res.data)
 
     @patch("app.utils.avatar")
     @patch("app.appdb.get_sites")
@@ -433,10 +486,13 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.avatar")
     @patch("app.utils.get_site_info")
     @patch("app.db_cred.DBCredentials.get_cred")
-    def test_submit(self, get_cred, get_site_info, avatar, post, user_data):
+    @patch("app.ssh_key.SSHKey.get_ssh_keys")
+    @patch("app.flash")
+    def test_submit(self, flash, get_ssh_keys, get_cred, get_site_info, avatar, post, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         post.side_effect = self.post_response
         get_cred.return_value = {"id": "credid", "type": "fedcloud"}
+        get_ssh_keys.return_value = [(1, "desc", "ssh-rsa AAAAB3NzaC...")]
         get_site_info.return_value = {}, "", "vo"
         self.login(avatar)
         params = {'extra_opts.selectedImage': '',
@@ -451,13 +507,15 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEqual(flash.call_count, 0)
 
     @patch('app.utils.get_site_info')
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_cred")
-    def test_submit2(self, get_cred, avatar, post, user_data, get_site_info):
+    @patch("app.flash")
+    def test_submit2(self, flash, get_cred, avatar, post, user_data, get_site_info):
         site = {"name": "SITE", "networks": {"vo": {"public": "pub_id", "private": "priv_id"}}}
         get_site_info.return_value = site, None, "vo"
         user_data.return_value = "type = InfrastructureManager; token = access_token"
@@ -475,6 +533,31 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEqual(flash.call_count, 0)
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.post')
+    @patch("app.utils.avatar")
+    @patch("app.utils.get_site_info")
+    @patch("app.db_cred.DBCredentials.get_cred")
+    @patch("app.flash")
+    def test_submit_tosca(self, flash, get_cred, get_site_info, avatar, post, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        post.side_effect = self.post_response
+        get_cred.return_value = {"id": "credid", "type": "fedcloud"}
+        get_site_info.return_value = {}, "", "vo"
+        self.login(avatar)
+        params = {'extra_opts.selectedImage': '',
+                  'extra_opts.selectedSiteImage': 'IMAGE_NAME',
+                  'extra_opts.selectedCred': 'credid',
+                  'infra_name': 'some_infra',
+                  'num_cpus': '4',
+                  'tosca_url': 'https://raw.githubusercontent.com/grycap/tosca/main/templates/simple-node-disk.yml'
+                  }
+        res = self.client.post('/submit?template=tosca.yml', data=params)
+        self.assertEqual(302, res.status_code)
+        self.assertIn('/infrastructures', res.headers['location'])
+        self.assertEqual(flash.call_count, 0)
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_creds")
@@ -514,19 +597,19 @@ class IMDashboardTests(unittest.TestCase):
                                                                                          "type": "OpenNebula"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully written!", 'success'))
-        self.assertEquals(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
-                                                             'id': 'credid', 'type': "OpenNebula"}, False))
+        self.assertEqual(flash.call_args_list[0][0], ("Credentials successfully written!", 'success'))
+        self.assertEqual(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
+                                                            'id': 'credid', 'type': "OpenNebula"}, False))
 
         res = self.client.post('/write_creds?cred_id=&cred_type=OpenNebula', data={"host": "SITE_URL3",
                                                                                    "id": "credid",
                                                                                    "type": "OpenNebula"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
-        self.assertEquals(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
-                                                                                  'id': 'credid',
-                                                                                  'type': 'OpenNebula'}, True))
+        self.assertEqual(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
+        self.assertEqual(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
+                                                                                 'id': 'credid',
+                                                                                 'type': 'OpenNebula'}, True))
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.delete_cred")
@@ -537,7 +620,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/delete_creds?service_id=SERVICE_ID')
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully deleted!", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Credentials successfully deleted!", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -563,7 +646,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.post('/addresources/infid', data={"wn_num": "1"})
         self.assertEqual(302, res.status_code)
-        self.assertEquals(flash.call_args_list[0][0], ("1 nodes added successfully", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("1 nodes added successfully", 'success'))
 
     @patch("app.utils.avatar")
     @patch("app.utils.getUserAuthData")
@@ -580,7 +663,7 @@ class IMDashboardTests(unittest.TestCase):
                         "instances": {"used": 1, "limit": 10},
                         "floating_ips": {"used": 1, "limit": 10},
                         "security_groups": {"used": 1, "limit": 10}}
-        self.assertEquals(expected_res, json.loads(res.data))
+        self.assertEqual(expected_res, json.loads(res.data))
 
     @patch("app.utils.avatar")
     @patch("app.ssh_key.SSHKey.get_ssh_keys")
@@ -615,7 +698,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/delete_ssh_key?ssh_id=1')
         self.assertEqual(302, res.status_code)
         self.assertIn('/ssh_key', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("SSH Key successfully deleted!", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("SSH Key successfully deleted!", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.delete')
@@ -628,7 +711,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/removeresources', data={'vm_list': '1,2'})
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("VMs 1,2 successfully deleted.", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("VMs 1,2 successfully deleted.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -756,3 +839,16 @@ class IMDashboardTests(unittest.TestCase):
         del self.client.environ_base['HTTP_AUTHORIZATION']
         self.assertEqual(200, res.status_code)
         self.assertEqual(b'some_data\nmore_data', res.data)
+
+    @patch("app.utils.getUserAuthData")
+    @patch('requests.get')
+    @patch("app.utils.avatar")
+    @patch("app.flash")
+    def test_reconfigure_with_params(self, flash, avatar, get, user_data):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get.side_effect = self.get_response
+        self.login(avatar)
+        res = self.client.get('/reconfigure/infid')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b'<input type="text" class="form-control" id="param1"', res.data)
+        self.assertIn(b'<input type="hidden" name="reconfigure_template"', res.data)

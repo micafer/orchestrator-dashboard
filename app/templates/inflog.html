@@ -2,6 +2,16 @@
 {% block title %}Infrastructure Log{% endblock %}
 {% block content %}
 
+<script>
+
+function goToVM(vm) {
+  var element = document.getElementById("vm_" + vm);
+  let dims = element.getBoundingClientRect();
+  window.scrollTo(window.scrollX, dims.top - 75 + window.scrollY);
+}
+
+</script>
+
 <div class="container">
 
     <br>
@@ -19,7 +29,7 @@
                 {% endif %}
               </h4>
             </div>
-            <div class="col-md-6 text-right">
+            <div class="col-md-6 text-end">
               <!-- Button -->
               <div class="btn-group">
               {% if vms %}
@@ -29,13 +39,13 @@
                 </button>
                 <div class="dropdown-menu" aria-labelledby="selectVM">
                 {% for vm in range(vms) %}
-                  <a class="dropdown-item" onclick="document.getElementById('vm_{{vm}}').scrollIntoView();window.scrollBy(0, -100);">VM: {{vm}}</a>
+                  <a class="dropdown-item" onclick="goToVM('{{vm}}')">VM: {{vm}}</a>
                 {% endfor %}
                 </div>
               </div>
               {% endif %}
               <button class="btn btn-outline-primary" id="bottomBtn" onclick="bottomFunction()"><i class="fa fa-angle-double-down"></i> Bottom</a>
-	            <button type=button class='btn btn-outline-primary' onclick='location.reload(true)'><span class='fas fa-sync mr-2'></span>Refresh</button>
+	            <button type=button class='btn btn-outline-primary' onclick='location.reload(true)'><span class='fas fa-sync mr-2'></span> Refresh</button>
               <button type=button class="btn btn-small btn-outline-secondary" onclick="history.back()"><span class="fas fa-arrow-left mr-2"></span> Back</button>
             </div>
             </div>
@@ -47,7 +57,7 @@
         </div>
 	<div class="card-footer text-center">
 	<!-- input type="button" id="downloadBtn" value="Download log file"/-->
-	  <button type=button class='btn btn-outline-primary' onclick='location.reload(true)'><span class='fas fa-sync mr-2'></span>Refresh</button>
+	  <button type=button class='btn btn-outline-primary' onclick='location.reload(true)'><span class='fas fa-sync mr-2'></span> Refresh</button>
 	  <button class="btn btn-primary" id="downloadBtn"><i class="fa fa-download"></i> Download</button>
 	  <button class="btn btn-outline-primary" id="topBtn" onclick="topFunction()"><i class="fa fa-angle-double-up"></i> Top</a>
 	</div>  

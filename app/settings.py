@@ -24,9 +24,8 @@
 class Settings:
     def __init__(self, config):
         """Creator function."""
-        self.version = "2.5.3"
+        self.version = "2.5.6"
         self.toscaDir = config.get('TOSCA_TEMPLATES_DIR', '') + "/"
-        self.toscaParamsDir = config.get('TOSCA_PARAMETERS_DIR', '') + "/"
         self.imUrl = config['IM_URL']
         self.oidcName = config['OIDC_NAME']
         self.oidcImage = config.get('OIDC_IMAGE')

@@ -11,29 +11,30 @@
   <link rel="icon" href="{{ url_for('static', filename='images/favicon_io/favicon-32x32.png') }}">
   <link rel="icon" href="{{ url_for('static', filename='images/favicon_io/favicon-16x16.png') }}">
   <link rel="manifest" href="{{ url_for('static', filename='images/favicon_io/site.webmanifest') }}">
-  <!-- BS4-->
+  <!-- BS5-->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-  <!-- FontAwesome-->
+  <!-- FontAwesome
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css"
     integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+  -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fontawesome.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/regular.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/brands.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/solid.min.css') }}" />
   <!-- Cookie Consent -->
   <script src="{{ url_for('static', filename='js/cookieconsent-4.0.1.min.js') }}"></script>
 {% if home is not defined %}
   <!-- General Bootstrap JS -->
-  <script src="{{ url_for('static', filename='js/jquery-3.6.4.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
   <!-- DataTables -->
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dataTables.bootstrap5.min.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/responsive.bootstrap5.min.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scroller.bootstrap5.min.css') }}" />
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.bootstrap5.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.responsive.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/responsive.bootstrap5.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.scroller.min.js') }}"></script>
   <!-- Select2 -->
   <link href="{{ url_for('static', filename='css/select2.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/select2-bootstrap-5-theme.min.css') }}" rel="stylesheet">
   <script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
   <!-- Toggle -->
   <link href="{{ url_for('static', filename='css/bootstrap5-toggle.min.css') }}" rel="stylesheet">
@@ -41,7 +42,11 @@
   <!-- Latest compiled and minified JavaScript -->
   <script src="{{ url_for('static', filename='js/bootstrap-show-password.min.js') }}"></script>
 {% endif %}
-  <style>
+  <style> 
+/* Make the navbar a bit transparent */
+  .navbar {  
+    opacity: 0.95;	   
+  }
   .cookieconsent-com---palette-dark .cc-nb-okagree {
     background-color: #ffc107;
     color: white;
@@ -117,7 +122,7 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark navbar-expand-md sticky-top">
+  <nav class="navbar navbar-dark bg-dark navbar-expand-md sticky-top shadow">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for("home") }}"><img src="{{ url_for('static', filename='images/im-logo-only.png') }}" width="40"> IM Dashboard</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar">
@@ -147,16 +152,16 @@
           {% endif %}
         </ul>
         {% if session['username'] %}
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
               <img class="rounded-circle" src="{{ session['gravatar'] }}" </src>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ session['username'] }}<span class="caret"></span>
             </a>
-            <div class="dropdown-menu dropdown-menu-right"">
-              <a class="dropdown-item text-right" href="{{ url_for("manage_creds") }}">Cloud Credentials</a>
-              <a class="dropdown-item text-right" href="{{ url_for("get_ssh_keys") }}">SSH Key</a>
-              <a class="dropdown-item text-right" href="{{ url_for("logout") }}">Logout</a>
+            <div class="dropdown-menu dropdown-menu-end">
+              <a class="dropdown-item text-end" href="{{ url_for("manage_creds") }}">Cloud Credentials</a>
+              <a class="dropdown-item text-end" href="{{ url_for("get_ssh_keys") }}">SSH Key</a>
+              <a class="dropdown-item text-end" href="{{ url_for("logout") }}">Logout</a>
             </div>
           </li>
         </ul>

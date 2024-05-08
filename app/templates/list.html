@@ -1,6 +1,6 @@
 <div class="mt-1">
     <div id="{{key}}-container"></div>
-    <button type="button" class="ml-2 btn btn-sm btn-outline-info" id="add-new-item-{{key}}" class="add-new" data-tag-name="{{key}}"><i class='fas fa-plus mr-2'></i>Add</button>
+    <button type="button" class="ms-2 mt-2 btn btn-sm btn-outline-info" id="add-new-item-{{key}}" class="add-new" data-tag-name="{{key}}"><i class='fas fa-plus me-2'></i>Add</button>
     <input id="id-{{key}}" type="hidden" data-output-type="json" name="{{key}}" value=""/>
 </div>
 
@@ -11,19 +11,6 @@ let num__{{key}} = 1;
 function addItem_{{key}}(object=null, value='') {
   var tagname = document.getElementById('add-new-item-{{key}}').getAttribute('data-tag-name');
 
-  {% if value.entry_schema.type in utils.PORT_SPECT_TYPES %}
-    var parts = value.split('-');
-    var range = parts[0];
-    var cidr = "";
-    if (parts.length > 1) {
-      range = parts[1]
-      cidr = parts[0]
-    }
-
-    let input_template = `
-            <input type="text" class="mr-1 col-5 form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]+:{0,1}[0-9]+)" required value="${range}" placeholder="Port Range">
-            <input type="text" class="mr-1 col-6 form-control" name="${tagname}_list_value_${num__{{key}}}_cidr" class="form-control" pattern="(([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))){0,1}" value="${cidr}" placeholder="CIDR">`;
-  {% else %}
     {% if value.entry_schema.type == "integer" %}
     var pattern = "[0-9]+";
     {% elif value.entry_schema.type == "float" %}
@@ -33,14 +20,74 @@ function addItem_{{key}}(object=null, value='') {
     {% else %}
     var pattern = ".*";
     {% endif %}
-    let input_template = `
-            <input type="text" class="col-11 form-control" name="${tagname}_list_value_${num__{{key}}}" class="form-control" required pattern="${pattern}" value="${value}">`;
+
+
+  {% if value.entry_schema.type in utils.PORT_SPECT_TYPES %}
+    var parts = value.split('-');
+    var range = parts[0];
+    var cidr = "";
+    var target = "";
+    var input_template = ""
+    if (parts.length > 1) {
+      range = parts[1]
+      if (parts[0].includes('/') && parts[0].includes('.')) {
+        cidr = parts[0]
+      } else {
+        target = parts[0]
+      }
+    }
+    if (parts.length > 2) {
+      range = parts[2]
+      target = parts[1]
+      cidr = parts[0]
+    }
+
+    // this can be done better
+    {% if value.type == "map" %}
+    input_template = `
+        <div class="col col-md-5 ps-0">
+            <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]+:{0,1}[0-9]+)" required value="${range}" placeholder="Port Range">
+        </div>
+        <div class="col col-md-6 ps-0">
+            <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}_cidr" class="form-control" pattern="(([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))){0,1}" value="${cidr}" placeholder="CIDR">
+        </div>`;
+    {% else %}
+    input_template = `
+      <div class="col col-md-5 ps-0">
+            <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}_target" class="form-control" pattern="([0-9]{1,5})" required value="${target}" placeholder="Target Port">
+      </div>
+      <div class="col col-md-6 ps-0">
+            <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}_range" class="form-control" pattern="([0-9]{1,5})"  value="${range}" placeholder="Source Port">
+       </div>`;
+    {% endif %}
+
+  {% elif value.type == "map" %}
+    var parts = value.split(':');
+    var k = parts[0];
+    var v = ""
+    if (parts.length > 1) {
+      v = parts[1]
+    }
+    input_template = `
+        <div class="col col-md-5 ps-0">
+            <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}_key" class="form-control" required value="${k}" placeholder="Key">
+        </div>
+        <div class="col col-md-6 ps-0">
+            <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}_value" class="form-control" required pattern="${pattern}" value="${v}" placeholder="Value">
+        </div>`;
+  {% else %}
+    input_template = `
+        <div class="col col-md-11 ps-0">
+            <input type="text" class="form-control" name="${tagname}_list_value_${num__{{key}}}" class="form-control" required pattern="${pattern}" value="${value}">
+        </div>`;
   {% endif %}
 
   let template = `
-        <div class="form-group mt-1 mx-2 row" id="${tagname}-${num__{{key}}}">
+        <div class="mt-1 mx-2 row" id="${tagname}-${num__{{key}}}">
         ${input_template}
-          <button type=button class='btn btn-sm btn-outline-danger' href="" onclick="javascript:removeItem('${tagname}'+ '-' + ${num__{{key}}} + '' ); return false;"><i class='far fa-trash-alt m-1'></i></button>
+          <div class="col col-md-1 ps-0">
+            <button type=button class='btn btn-sm btn-outline-danger' href="" onclick="javascript:removeItem('${tagname}'+ '-' + ${num__{{key}}} + '' ); return false;"><i class='far fa-trash-alt' style='margin: 0.4rem !important;'></i></button>
+          </div>
         </div>`;
 
   let container = document.getElementById(tagname + '-container');
@@ -59,11 +106,19 @@ function removeItem(elementId) {
     element.parentNode.removeChild(element);
 }
 
-{% if value.entry_schema.type in utils.PORT_SPECT_TYPES %}
-  {% if input_value %}
+{% if input_value %}
+  {% if value.entry_schema.type in utils.PORT_SPECT_TYPES %}
     {% set ports = utils.formatPortSpec(input_value) %}
     {% for k, v in ports.items() %}
     addItem_{{key}}(null, value='{{v}}')
+    {% endfor %}
+  {% elif value.type == "map" %}
+  {% for k, v in input_value.items() %}
+    addItem_{{key}}(null, value='{{k}}:{{v}}')
+    {% endfor %}
+  {% else %}
+    {% for item in input_value %}
+    addItem_{{key}}(null, value='{{item}}')
     {% endfor %}
   {% endif %}
 {% endif %}

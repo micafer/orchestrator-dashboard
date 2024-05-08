@@ -1,4 +1,4 @@
-<div class="form-group">
+<div>
   {% if value.tag_type is not defined or value.tag_type not in ["hidden", "random"] %}
   <label for="{{key}}" style="white-space: pre-wrap;">{% if value.description is defined %}{{value.description}}{% else %}{{key}}{% endif %}</label>
   {% endif %}
@@ -106,7 +106,7 @@
 	  {% else %}
 
       <!-- list type -->
-      {% if value.type == "list" %}
+      {% if value.type in ["list", "map"] %}
         <fieldset class="border p-2">
         {% include 'list.html' %}
         </fieldset>
