@@ -14,3 +14,4 @@ hvac==2.2.0
 tosca-parser==2.10.0
 mysqlclient==2.2.4
 lxml==4.9.3
+defusedxml==0.7.1

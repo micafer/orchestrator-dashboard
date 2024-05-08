@@ -5,7 +5,7 @@ sys.path.append('.')
 
 import unittest
 import json
-import xml.etree.ElementTree as etree
+import defusedxml.ElementTree as etree
 from app import create_app
 from urllib.parse import urlparse
 from mock import patch, MagicMock

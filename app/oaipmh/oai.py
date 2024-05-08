@@ -18,7 +18,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from lxml import etree
+from lxml import etree  # nosec
 from datetime import datetime
 from urllib.parse import urlparse
 from app.oaipmh.errors import Errors

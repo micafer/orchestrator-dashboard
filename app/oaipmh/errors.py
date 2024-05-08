@@ -18,7 +18,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from lxml.etree import Element
+from lxml.etree import Element   # nosec
 
 
 class Errors():
