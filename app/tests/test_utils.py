@@ -30,7 +30,7 @@ class TestUtils(unittest.TestCase):
                         'urn:mace:egi.eu:group:vo.test.egi.eu:role=vm_operator#aai.egi.eu',
                         'urn:mace:egi.eu:group:vo.test2.egi.eu:role=member#aai.egi.eu']
         res = utils.getUserVOs(entitlements)
-        self.assertEquals(res, ['vo.test.egi.eu', 'vo.test2.egi.eu'])
+        self.assertEqual(res, ['vo.test.egi.eu', 'vo.test2.egi.eu'])
 
     @patch("app.utils.getCachedProjectIDs")
     @patch("app.utils.getCachedSiteList")
@@ -52,19 +52,19 @@ class TestUtils(unittest.TestCase):
             flask_context.g.settings = MagicMock()
             flask_context.g.settings.im_auth = ""
             res = utils.getUserAuthData("token", cred, "user")
-            self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = one; type = 'OpenNebula';"
-                                    " username = 'user'; password = 'pass'\\n"
-                                    "id = fed; type = OpenStack; username = egi.eu;"
-                                    " tenant = oidc; auth_version = 3.x_oidc_access_token; host ="
-                                    " https://api.cloud.ifca.es:5000; password = 'token'; vo = vo_name;"
-                                    " domain = project_id\\n"
-                                    "id = ch; type = OpenStack; auth_version = 3.x_password;"
-                                    " host = https://identity-f1a.cloudandheat.com:5000; username = user;"
-                                    " tenant = tenant; password = 'pass'"))
+            self.assertEqual(res, ("type = InfrastructureManager; token = token\\nid = one; type = 'OpenNebula';"
+                                   " username = 'user'; password = 'pass'\\n"
+                                   "id = fed; type = OpenStack; username = egi.eu;"
+                                   " tenant = oidc; auth_version = 3.x_oidc_access_token; host ="
+                                   " https://api.cloud.ifca.es:5000; password = 'token'; vo = vo_name;"
+                                   " domain = project_id\\n"
+                                   "id = ch; type = OpenStack; auth_version = 3.x_password;"
+                                   " host = https://identity-f1a.cloudandheat.com:5000; username = user;"
+                                   " tenant = tenant; password = 'pass'"))
 
             flask_context.g.settings.im_auth = "Bearer"
             res = utils.getUserAuthData("token", cred, "user")
-            self.assertEquals(res, ("Bearer token"))
+            self.assertEqual(res, ("Bearer token"))
 
     def test_merge_template(self):
         template = {"topology_template": {"node_templates": {"n1": {"type": "Compute"}}}}

@@ -40,7 +40,8 @@ from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response
+from flask import Flask, json, render_template, request, redirect, url_for, flash, session, g, make_response
+from markupsafe import Markup
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
@@ -48,6 +49,7 @@ from radl.radl import deploy, description, Feature
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from toscaparser.tosca_template import ToscaTemplate
+from app.oaipmh.oai import OAI
 
 
 def create_app(oidc_blueprint=None):
@@ -1230,7 +1232,7 @@ def create_app(oidc_blueprint=None):
                     images = [(image['uri'], image['name'], image['uri'] == image_url_str)
                               for image in response.json()["images"]]
                 except Exception as ex:
-                    app.logger.warn('Error getting site images: %s', (ex))
+                    app.logger.warning('Error getting site images: %s', (ex))
 
                 return render_template('addresource.html', infid=infid, systems=systems,
                                        image_url=image_url, images=images)
@@ -1491,6 +1493,22 @@ def create_app(oidc_blueprint=None):
 
             return redirect(url_for('manage_creds'))
 
+    @app.route('/oai', methods=['GET', 'POST'])
+    def oai_pmh():
+        if not settings.oaipmh_repo_name:
+            return make_response("OAI-PMH not enabled.", 404, {'Content-Type': 'text/plain'})
+
+        oai = OAI(settings.oaipmh_repo_name, request.base_url, settings.oaipmh_repo_description,
+                  settings.oaipmh_repo_base_identifier_url, repo_admin_email=app.config.get('SUPPORT_EMAIL'))
+
+        metadata_dict = {}
+        for name, tosca in toscaInfo.items():
+            metadata = tosca["metadata"]
+            metadata_dict[name] = metadata
+
+        response_xml = oai.processRequest(request, metadata_dict)
+        return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
+
     @app.route('/reconfigure/<infid>')
     @authorized_with_valid_token
     def reconfigure(infid=None):
@@ -1504,7 +1522,7 @@ def create_app(oidc_blueprint=None):
                 raise Exception(response.text)
             template = response.text
         except Exception as ex:
-            app.logger.warn("Error getting infrastructure template: %s" % ex)
+            app.logger.warning("Error getting infrastructure template: %s" % ex)
 
         infra_name = ""
         inputs = utils.getReconfigureInputs(template)
@@ -1523,7 +1541,7 @@ def create_app(oidc_blueprint=None):
         try:
             oidc_blueprint.session.get("/logout")
         except Exception as ex:
-            app.logger.warn("Error in OIDC logout: %s" % ex)
+            app.logger.warning("Error in OIDC logout: %s" % ex)
         return redirect(url_for('login', next_url=next_url))
 
     @app.errorhandler(403)
