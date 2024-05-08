@@ -759,7 +759,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIsNotNone(root.find(".//oaipmh:earliestDatestamp", namespace))
         self.assertEqual(root.find(".//oaipmh:deletedRecord", namespace).text, "no")
         self.assertEqual(root.find(".//oaipmh:granularity", namespace).text, "YYYY-MM-DD")
-        self.assertEqual(root.find(".//oaipmh:adminEmail", namespace).text, "admin@localhost")
+        self.assertEqual(root.find(".//oaipmh:adminEmail", namespace).text, "support@example.com")
 
         # Test GetRecord
         tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"

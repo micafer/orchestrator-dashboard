@@ -1499,7 +1499,7 @@ def create_app(oidc_blueprint=None):
             return make_response("OAI-PMH not enabled.", 404, {'Content-Type': 'text/plain'})
 
         oai = OAI(settings.oaipmh_repo_name, request.base_url, settings.oaipmh_repo_description,
-                  settings.oaipmh_repo_base_identifier_url)
+                  settings.oaipmh_repo_base_identifier_url, repo_admin_email=app.config.get('SUPPORT_EMAIL'))
 
         metadata_dict = {}
         for name, tosca in toscaInfo.items():
