@@ -52,3 +52,6 @@ class Settings:
         self.vos_user_role = config.get('VOS_USER_ROLE')
         self.enable_external_vault = config.get('ENABLE_EXTERNAL_VAULT', False)
         self.hide_tosca_tags = config.get('HIDE_TOSCA_TAGS', [])
+        self.oaipmh_repo_name = config.get('OAIPMH_REPO_NAME', "")
+        self.oaipmh_repo_description = config.get('OAIPMH_REPO_DESCRIPTION', "")
+        self.oaipmh_repo_base_identifier_url = config.get('OAIPMH_REPO_BASE_IDENTIFIER_URL', "")

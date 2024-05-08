@@ -49,6 +49,7 @@ from radl.radl import deploy, description, Feature
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from toscaparser.tosca_template import ToscaTemplate
+from app.oaipmh.oai import OAI
 
 
 def create_app(oidc_blueprint=None):
@@ -1491,6 +1492,22 @@ def create_app(oidc_blueprint=None):
                     flash("Error writing Vault Info %s!" % ex, 'error')
 
             return redirect(url_for('manage_creds'))
+
+    @app.route('/oai', methods=['GET', 'POST'])
+    def oai_pmh():
+        if not settings.oaipmh_repo_name:
+            return make_response("OAI-PMH not enabled.", 404, {'Content-Type': 'text/plain'})
+
+        oai = OAI(settings.oaipmh_repo_name, request.base_url, settings.oaipmh_repo_description,
+                  settings.oaipmh_repo_base_identifier_url)
+
+        metadata_dict = {}
+        for name, tosca in toscaInfo.items():
+            metadata = tosca["metadata"]
+            metadata_dict[name] = metadata
+
+        response_xml = oai.processRequest(request, metadata_dict)
+        return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
 
     @app.route('/reconfigure/<infid>')
     @authorized_with_valid_token
