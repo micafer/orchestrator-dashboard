@@ -1535,7 +1535,6 @@ def create_app(oidc_blueprint=None):
 
         return render_template('reconfigure.html', infid=infid, inputs=inputs, infra_name=infra_name, template=template)
 
-
     @app.route('/logout')
     def logout(next_url=None):
         session.clear()
