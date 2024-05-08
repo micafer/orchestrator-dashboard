@@ -837,10 +837,16 @@ class IMDashboardTests(unittest.TestCase):
         # Test ListRecords oai_openaire
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_openaire')
         self.assertEqual(200, res.status_code)
-
         root = etree.fromstring(res.data)
-
+        elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 1)
         self.assertEqual(root.find(".//datacite:creatorName", namespaces).text, "Miguel Caballer")
+
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc&until=2020-09-07')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 0)
 
         # Test ListMetadataFormats
         res = self.client.get('/oai?verb=ListMetadataFormats')
