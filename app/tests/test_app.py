@@ -768,15 +768,14 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        namespaces = {'ns0': 'http://www.openarchives.org/OAI/2.0/',
-                      'dc': 'http://purl.org/dc/elements/1.1/',
+        namespaces = {'dc': 'http://purl.org/dc/elements/1.1/',
                       'oaipmh': 'http://www.openarchives.org/OAI/2.0/',
                       'datacite': 'http://datacite.org/schema/kernel-4'}
 
         self.assertEqual(root.find(".//dc:title", namespaces).text, "Deploy a VM")
         self.assertEqual(root.find(".//dc:creator", namespaces).text, "Miguel Caballer")
         self.assertEqual(root.find(".//dc:date", namespaces).text, "2020-09-08")
-        self.assertEqual(root.find(".//ns0:identifier", namespaces).text,
+        self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
                          "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
         # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
@@ -799,7 +798,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(root.find(".//dc:title", namespaces).text, "Deploy a VM")
         self.assertEqual(root.find(".//dc:creator", namespaces).text, "Miguel Caballer")
         self.assertEqual(root.find(".//dc:date", namespaces).text, "2020-09-08")
-        self.assertEqual(root.find(".//ns0:identifier", namespaces).text,
+        self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
                          "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
         # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
