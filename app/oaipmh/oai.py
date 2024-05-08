@@ -158,23 +158,26 @@ class OAI():
             root.append(error_element)
             return etree.tostring(root, pretty_print=True, encoding='unicode')
 
-        # if from_date is not None:
-        #     from_date_dt = self.isValidDate(from_date)
-        # if until_date is not None:
-        #     until_date_dt = self.isValidDate(until_date)
+        if from_date is not None:
+            from_date_dt = self.isValidDate(from_date)
+        if until_date is not None:
+            until_date_dt = self.isValidDate(until_date)
 
-        # # Filter identifiers based on the date range specified by from_date and until_date
-        # filtered_identifiers = []
+        # Filter identifiers based on the date range specified by from_date and until_date
+        filtered_identifiers = list(metadata_dict.keys())
 
-        # for record_identifier, record_data in metadata_dict.items():
-        #     record_date_str = record_data["metadata"]["date"]
+        if from_date is not None or until_date is not None:
+            filtered_identifiers = []
+            for record_identifier, record_data in metadata_dict.items():
+                if record_data.get("creation_date"):
+                    record_date = datetime.combine(record_data.get("creation_date"), datetime.min.time())
+                else:
+                    # Convert the date string to a datetime object
+                    record_date = datetime.strptime(self.earliest_datestamp, "%Y-%m-%d")
 
-        #     # Convert the date string to a datetime object
-        #     record_date = datetime.strptime(record_date_str, "%Y-%m-%d")
-
-            # if (from_date_dt is None or record_date >= from_date_dt) and \
-            #     (until_date_dt is None or record_date <= until_date_dt):
-            #     filtered_identifiers.append((record_identifier, record_date_str))
+                if (from_date is None or record_date >= from_date_dt) and \
+                    (until_date is None or record_date <= until_date_dt):
+                    filtered_identifiers.append(record_identifier)
 
         # Create the ListIdentifiers element
         list_identifiers_element = etree.Element('ListIdentifiers')
@@ -184,15 +187,15 @@ class OAI():
             error_element = Errors.noRecordsMatch()
             root.append(error_element)
         else:
-            for record_identifier, record_medatada in metadata_dict.items():
+            for record_identifier in filtered_identifiers:
                 record_element = etree.Element('record')
 
                 header_element = etree.Element('header')
                 identifier_element = etree.Element('identifier')
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_identifier}'
                 datestamp_element = etree.Element('datestamp')
-                if record_medatada.get('creation_date'):
-                    datestamp_element.text = record_medatada.get('creation_date').strftime("%Y-%m-%d")
+                if metadata_dict[record_identifier].get('creation_date'):
+                    datestamp_element.text = metadata_dict[record_identifier].get('creation_date').strftime("%Y-%m-%d")
 
                 header_element.append(identifier_element)
                 header_element.append(datestamp_element)
