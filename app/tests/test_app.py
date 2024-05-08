@@ -745,7 +745,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badArgument')
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badVerb')
 
         # Test Identify
         res = self.client.get('/oai?verb=Identify')
@@ -782,11 +782,18 @@ class IMDashboardTests(unittest.TestCase):
         # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
 
+        # Test GetRecord with invalid identifier
+        tosca_id = 'invalid"id'
+        res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'idDoesNotExist')
+
         # Test ListIdentifiers
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc')
         self.assertEqual(200, res.status_code)
         root = etree.fromstring(res.data)
-        elems = root.findall(".//oaipmh:identifier", namespaces)
+        elems = root.findall(".//oaipmh:header", namespaces)
         self.assertEqual(len(elems), 1)
 
         self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
@@ -796,13 +803,13 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=2020-09-10')
         self.assertEqual(200, res.status_code)
         root = etree.fromstring(res.data)
-        elems = root.findall(".//oaipmh:identifier", namespaces)
+        elems = root.findall(".//oaipmh:header", namespaces)
         self.assertEqual(len(elems), 0)
 
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=2020-09-07')
         self.assertEqual(200, res.status_code)
         root = etree.fromstring(res.data)
-        elems = root.findall(".//oaipmh:identifier", namespaces)
+        elems = root.findall(".//oaipmh:header", namespaces)
         self.assertEqual(len(elems), 1)
 
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&until=2020-09-07')
@@ -830,10 +837,16 @@ class IMDashboardTests(unittest.TestCase):
         # Test ListRecords oai_openaire
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_openaire')
         self.assertEqual(200, res.status_code)
-
         root = etree.fromstring(res.data)
-
+        elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 1)
         self.assertEqual(root.find(".//datacite:creatorName", namespaces).text, "Miguel Caballer")
+
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc&until=2020-09-07')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 0)
 
         # Test ListMetadataFormats
         res = self.client.get('/oai?verb=ListMetadataFormats')

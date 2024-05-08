@@ -28,7 +28,7 @@ class OAI():
 
     def __init__(self, repo_name, repo_base_url, repo_description,
                  repo_identifier_base_url="https://github.com/grycap/tosca/blob/main/templates/",
-                 earliest_datestamp="2023-03-01", datestamp_granularity="YYYY-MM-DD",
+                 earliest_datestamp="2000-01-01", datestamp_granularity="YYYY-MM-DD",
                  repo_admin_email="admin@localhost", ):
         self.repository_name = repo_name
         self.repository_base_url = repo_base_url
@@ -89,7 +89,12 @@ class OAI():
             return etree.tostring(root, pretty_print=True, encoding='unicode')
 
         identifier = identifier
-        name_identifier = identifier.split('templates/')[1]
+        if 'templates/' in identifier:
+            name_identifier = identifier.split('templates/')[1]
+        else:
+            error_element = Errors.idDoesNotExist()
+            root.append(error_element)
+            return etree.tostring(root, pretty_print=True, encoding='unicode')
 
         if name_identifier not in metadata_dict:
             error_element = Errors.idDoesNotExist()
@@ -129,6 +134,30 @@ class OAI():
 
         return etree.tostring(root, pretty_print=True, encoding='unicode')
 
+    def filterIdentifiers(self, metadata_dict, from_date, until_date):
+        if from_date is not None:
+            from_date_dt = self.isValidDate(from_date)
+        if until_date is not None:
+            until_date_dt = self.isValidDate(until_date)
+
+        # Filter identifiers based on the date range specified by from_date and until_date
+        filtered_identifiers = list(metadata_dict.keys())
+
+        if from_date is not None or until_date is not None:
+            filtered_identifiers = []
+            for record_identifier, record_data in metadata_dict.items():
+                if record_data.get("creation_date"):
+                    record_date = datetime.combine(record_data.get("creation_date"), datetime.min.time())
+                else:
+                    # Convert the date string to a datetime object
+                    record_date = datetime.strptime(self.earliest_datestamp, "%Y-%m-%d")
+
+                if (from_date is None or record_date >= from_date_dt) and \
+                        (until_date is None or record_date <= until_date_dt):
+                    filtered_identifiers.append(record_identifier)
+
+        return filtered_identifiers
+
     def listIdentifiers(self, root, metadata_dict, verb, metadata_prefix, from_date=None,
                         until_date=None, set_spec=None, resumption_token=None):
         self.addRequestElement(root, verb, metadata_prefix=metadata_prefix, from_date=from_date,
@@ -158,26 +187,7 @@ class OAI():
             root.append(error_element)
             return etree.tostring(root, pretty_print=True, encoding='unicode')
 
-        if from_date is not None:
-            from_date_dt = self.isValidDate(from_date)
-        if until_date is not None:
-            until_date_dt = self.isValidDate(until_date)
-
-        # Filter identifiers based on the date range specified by from_date and until_date
-        filtered_identifiers = list(metadata_dict.keys())
-
-        if from_date is not None or until_date is not None:
-            filtered_identifiers = []
-            for record_identifier, record_data in metadata_dict.items():
-                if record_data.get("creation_date"):
-                    record_date = datetime.combine(record_data.get("creation_date"), datetime.min.time())
-                else:
-                    # Convert the date string to a datetime object
-                    record_date = datetime.strptime(self.earliest_datestamp, "%Y-%m-%d")
-
-                if (from_date is None or record_date >= from_date_dt) and \
-                        (until_date is None or record_date <= until_date_dt):
-                    filtered_identifiers.append(record_identifier)
+        filtered_identifiers = self.filterIdentifiers(metadata_dict, from_date, until_date)
 
         # Create the ListIdentifiers element
         list_identifiers_element = etree.Element('ListIdentifiers')
@@ -188,19 +198,17 @@ class OAI():
             root.append(error_element)
         else:
             for record_identifier in filtered_identifiers:
-                record_element = etree.Element('record')
-
                 header_element = etree.Element('header')
                 identifier_element = etree.Element('identifier')
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_identifier}'
                 datestamp_element = etree.Element('datestamp')
+                datestamp_element.text = self.earliest_datestamp
                 if metadata_dict[record_identifier].get('creation_date'):
                     datestamp_element.text = metadata_dict[record_identifier].get('creation_date').strftime("%Y-%m-%d")
 
                 header_element.append(identifier_element)
                 header_element.append(datestamp_element)
-                record_element.append(header_element)
-                list_identifiers_element.append(record_element)
+                list_identifiers_element.append(header_element)
 
         root.append(list_identifiers_element)
 
@@ -259,24 +267,7 @@ class OAI():
             root.append(error_element)
             return etree.tostring(root, pretty_print=True, encoding='unicode')
 
-        # if from_date is not None:
-        #     from_date_dt = self.isValidDate(from_date)
-        # if until_date is not None:
-        #     until_date_dt = self.isValidDate(until_date)
-
-        # Filter identifiers based on the date range specified by from_date and until_date
-        # filtered_identifiers = []
-
-        # for record_identifier, record_data in metadata_dict.items():
-        #     record_date_str = record_data["date"]
-        #     record_metadata = record_data
-
-        #     # Convert the date string to a datetime object
-        #     record_date = datetime.strptime(record_date_str, "%Y-%m-%d")
-
-            # if (from_date_dt is None or record_date >= from_date_dt) and \
-            #     (until_date_dt is None or record_date <= until_date_dt):
-            #     filtered_identifiers.append((record_identifier, record_date_str, record_metadata))
+        filtered_identifiers = self.filterIdentifiers(metadata_dict, from_date, until_date)
 
         list_records_element = etree.Element('ListRecords')
 
@@ -285,7 +276,7 @@ class OAI():
             error_element = Errors.noRecordsMatch()
             root.append(error_element)
         else:
-            for record_name, record_metadata in metadata_dict.items():
+            for record_name in filtered_identifiers:
                 record_element = etree.Element('record')
 
                 header_element = etree.Element('header')
@@ -293,16 +284,16 @@ class OAI():
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_name}'
                 datestamp_element = etree.Element('datestamp')
                 datestamp_element.text = 'datestamp'
-                if record_metadata.get('creation_date'):
-                    datestamp_element.text = record_metadata.get('creation_date').strftime("%Y-%m-%d")
+                if metadata_dict[record_name].get('creation_date'):
+                    datestamp_element.text = metadata_dict[record_name].get('creation_date').strftime("%Y-%m-%d")
 
                 metadata_element = etree.Element('metadata')
 
                 if metadata_prefix == 'oai_dc':
-                    metadata_xml = self.mapDC(record_metadata)
+                    metadata_xml = self.mapDC(metadata_dict[record_name])
 
                 if metadata_prefix == 'oai_openaire':
-                    metadata_xml = self.mapOAIRE(record_metadata)
+                    metadata_xml = self.mapOAIRE(metadata_dict[record_name])
 
                 # Append the generated XML to the metadata element
                 metadata_element.append(metadata_xml)
@@ -560,6 +551,12 @@ class OAI():
 
         return root
 
+    def addError(self, root, error_type):
+        request_element = etree.SubElement(root, 'request')
+        request_element.text = f"{self.repository_base_url}"
+        error_element = error_type
+        root.append(error_element)
+
     def processRequest(self, request, metadata_dict):
         root = self.baseXMLTree()
 
@@ -573,6 +570,10 @@ class OAI():
             'resumptionToken': 0,
         }
 
+        if not request.args.get('verb'):
+            self.addError(root, Errors.badVerb())
+            return etree.tostring(root, pretty_print=True, encoding='unicode')
+
         response_xml = None
         parsed_url = urlparse(request.url)
         query_parameters = parsed_url.query.split('&')
@@ -582,23 +583,15 @@ class OAI():
             if key in attributes_dict:
                 attributes_dict[key] += 1
                 if attributes_dict[key] > 1:
-                    request_element = etree.SubElement(root, 'request')
-                    request_element.text = f"{self.repository_base_url}"
-                    error_element = Errors.badArgument()
-                    root.append(error_element)
-                    response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
-
-                    return response_xml
+                    self.addError(root, Errors.badArgument())
+                    return etree.tostring(root, pretty_print=True, encoding='unicode')
 
         # Check for unknown attributes
         unknown_attributes = [param.split('=')[0] for param in query_parameters
                               if param.split('=')[0] not in attributes_dict]
 
         if unknown_attributes:
-            request_element = etree.SubElement(root, 'request')
-            request_element.text = f"{self.repository_base_url}"
-            error_element = Errors.badArgument()
-            root.append(error_element)
+            self.addError(root, Errors.badArgument())
             response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
 
             return response_xml
@@ -656,10 +649,7 @@ class OAI():
         handler = verb_handlers.get(verb)
 
         if handler is None:
-            request_element = etree.SubElement(root, 'request')
-            request_element.text = f"{self.repository_base_url}"
-            error_element = Errors.badVerb()
-            root.append(error_element)
+            self.addError(root, Errors.badVerb())
             response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
         else:
             response_xml = handler()
