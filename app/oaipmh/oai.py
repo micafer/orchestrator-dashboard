@@ -28,7 +28,7 @@ class OAI():
 
     def __init__(self, repo_name, repo_base_url, repo_description,
                  repo_identifier_base_url="https://github.com/grycap/tosca/blob/main/templates/",
-                 earliest_datestamp="2023-03-01", datestamp_granularity="YYYY-MM-DD",
+                 earliest_datestamp="2000-01-01", datestamp_granularity="YYYY-MM-DD",
                  repo_admin_email="admin@localhost", ):
         self.repository_name = repo_name
         self.repository_base_url = repo_base_url
@@ -89,7 +89,12 @@ class OAI():
             return etree.tostring(root, pretty_print=True, encoding='unicode')
 
         identifier = identifier
-        name_identifier = identifier.split('templates/')[1]
+        if 'templates/' in identifier:
+            name_identifier = identifier.split('templates/')[1]
+        else:
+            error_element = Errors.idDoesNotExist()
+            root.append(error_element)
+            return etree.tostring(root, pretty_print=True, encoding='unicode')
 
         if name_identifier not in metadata_dict:
             error_element = Errors.idDoesNotExist()
@@ -192,6 +197,7 @@ class OAI():
                 identifier_element = etree.Element('identifier')
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_identifier}'
                 datestamp_element = etree.Element('datestamp')
+                datestamp_element.text = self.earliest_datestamp
                 if metadata_dict[record_identifier].get('creation_date'):
                     datestamp_element.text = metadata_dict[record_identifier].get('creation_date').strftime("%Y-%m-%d")
 
@@ -557,6 +563,12 @@ class OAI():
 
         return root
 
+    def addError(self, root, error_type):
+        request_element = etree.SubElement(root, 'request')
+        request_element.text = f"{self.repository_base_url}"
+        error_element = error_type
+        root.append(error_element)
+
     def processRequest(self, request, metadata_dict):
         root = self.baseXMLTree()
 
@@ -570,6 +582,10 @@ class OAI():
             'resumptionToken': 0,
         }
 
+        if not request.args.get('verb'):
+            self.addError(root, Errors.badVerb())
+            return etree.tostring(root, pretty_print=True, encoding='unicode')
+
         response_xml = None
         parsed_url = urlparse(request.url)
         query_parameters = parsed_url.query.split('&')
@@ -579,23 +595,16 @@ class OAI():
             if key in attributes_dict:
                 attributes_dict[key] += 1
                 if attributes_dict[key] > 1:
-                    request_element = etree.SubElement(root, 'request')
-                    request_element.text = f"{self.repository_base_url}"
-                    error_element = Errors.badArgument()
-                    root.append(error_element)
-                    response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
+                    self.addError(root, Errors.badArgument())
+                    return etree.tostring(root, pretty_print=True, encoding='unicode')
 
-                    return response_xml
 
         # Check for unknown attributes
         unknown_attributes = [param.split('=')[0] for param in query_parameters
                               if param.split('=')[0] not in attributes_dict]
 
         if unknown_attributes:
-            request_element = etree.SubElement(root, 'request')
-            request_element.text = f"{self.repository_base_url}"
-            error_element = Errors.badArgument()
-            root.append(error_element)
+            self.addError(root, Errors.badArgument())
             response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
 
             return response_xml
@@ -653,10 +662,7 @@ class OAI():
         handler = verb_handlers.get(verb)
 
         if handler is None:
-            request_element = etree.SubElement(root, 'request')
-            request_element.text = f"{self.repository_base_url}"
-            error_element = Errors.badVerb()
-            root.append(error_element)
+            self.addError(root, Errors.badVerb())
             response_xml = etree.tostring(root, pretty_print=True, encoding='unicode')
         else:
             response_xml = handler()

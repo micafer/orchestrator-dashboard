@@ -745,7 +745,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badArgument')
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badVerb')
 
         # Test Identify
         res = self.client.get('/oai?verb=Identify')
@@ -781,6 +781,13 @@ class IMDashboardTests(unittest.TestCase):
                          "2020-09-08")
         # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
+
+        # Test GetRecord with invalid identifier
+        tosca_id = 'invalid"id'
+        res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'idDoesNotExist')
 
         # Test ListIdentifiers
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc')
