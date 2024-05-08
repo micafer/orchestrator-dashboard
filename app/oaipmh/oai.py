@@ -188,8 +188,6 @@ class OAI():
             root.append(error_element)
         else:
             for record_identifier in filtered_identifiers:
-                record_element = etree.Element('record')
-
                 header_element = etree.Element('header')
                 identifier_element = etree.Element('identifier')
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_identifier}'
@@ -199,8 +197,7 @@ class OAI():
 
                 header_element.append(identifier_element)
                 header_element.append(datestamp_element)
-                record_element.append(header_element)
-                list_identifiers_element.append(record_element)
+                list_identifiers_element.append(header_element)
 
         root.append(list_identifiers_element)
 
