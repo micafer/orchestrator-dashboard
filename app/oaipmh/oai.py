@@ -176,7 +176,7 @@ class OAI():
                     record_date = datetime.strptime(self.earliest_datestamp, "%Y-%m-%d")
 
                 if (from_date is None or record_date >= from_date_dt) and \
-                    (until_date is None or record_date <= until_date_dt):
+                        (until_date is None or record_date <= until_date_dt):
                     filtered_identifiers.append(record_identifier)
 
         # Create the ListIdentifiers element

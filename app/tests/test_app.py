@@ -785,8 +785,9 @@ class IMDashboardTests(unittest.TestCase):
         # Test ListIdentifiers
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc')
         self.assertEqual(200, res.status_code)
-
         root = etree.fromstring(res.data)
+        elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 1)
 
         self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
                          "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
@@ -796,6 +797,19 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         root = etree.fromstring(res.data)
         elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 0)
+
+        res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=2020-09-07')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 1)
+
+        res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&until=2020-09-07')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 0)
 
         # Test ListRecords oai_dc
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
