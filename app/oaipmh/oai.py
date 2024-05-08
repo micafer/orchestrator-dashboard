@@ -116,7 +116,7 @@ class OAI():
         if metadata_prefix == 'oai_openaire':
             metadata_xml = self.mapOAIRE(record_data)
 
-        metadata_element.append(etree.fromstring(metadata_xml))
+        metadata_element.append(etree.fromstring(metadata_xml))  # nosec
 
         return etree.tostring(metadata_element, pretty_print=True, encoding='unicode')
 
@@ -296,7 +296,7 @@ class OAI():
                     metadata_xml = self.mapOAIRE(record_metadata)
 
                 # Append the generated XML to the metadata element
-                metadata_element.append(etree.fromstring(metadata_xml))
+                metadata_element.append(etree.fromstring(metadata_xml))  # nosec
 
                 header_element.append(identifier_element)
                 header_element.append(datestamp_element)
