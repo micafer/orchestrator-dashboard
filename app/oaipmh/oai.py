@@ -106,7 +106,9 @@ class OAI():
         identifier_element = etree.SubElement(header, 'identifier')
         identifier_element.text = identifier
         datestamp_element = etree.SubElement(header, 'datestamp')
-        datestamp_element.text = 'datestamp'
+        datestamp_element.text = self.earliest_datestamp
+        if record_data.get('creation_date'):
+            datestamp_element.text = record_data.get('creation_date').strftime("%Y-%m-%d")
 
         metadata_element = etree.SubElement(record, 'metadata')
 
@@ -182,14 +184,15 @@ class OAI():
             error_element = Errors.noRecordsMatch()
             root.append(error_element)
         else:
-            for record_identifier in list(metadata_dict.keys()):
+            for record_identifier, record_medatada in metadata_dict.items():
                 record_element = etree.Element('record')
 
                 header_element = etree.Element('header')
                 identifier_element = etree.Element('identifier')
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_identifier}'
                 datestamp_element = etree.Element('datestamp')
-                datestamp_element.text = 'datestamp'
+                if record_medatada.get('creation_date'):
+                    datestamp_element.text = record_medatada.get('creation_date').strftime("%Y-%m-%d")
 
                 header_element.append(identifier_element)
                 header_element.append(datestamp_element)
@@ -287,6 +290,9 @@ class OAI():
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_name}'
                 datestamp_element = etree.Element('datestamp')
                 datestamp_element.text = 'datestamp'
+                if record_metadata.get('creation_date'):
+                    datestamp_element.text = record_metadata.get('creation_date').strftime("%Y-%m-%d")
+
                 metadata_element = etree.Element('metadata')
 
                 if metadata_prefix == 'oai_dc':

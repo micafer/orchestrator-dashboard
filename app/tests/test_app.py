@@ -777,6 +777,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(root.find(".//dc:date", namespaces).text, "2020-09-08")
         self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
                          "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
+        self.assertEqual(root.find(".//oaipmh:datestamp", namespaces).text,
+                         "2020-09-08")
         # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
 
@@ -800,6 +802,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(root.find(".//dc:date", namespaces).text, "2020-09-08")
         self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
                          "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
+        self.assertEqual(root.find(".//oaipmh:datestamp", namespaces).text,
+                         "2020-09-08")
         # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
 
