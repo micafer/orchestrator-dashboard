@@ -192,10 +192,11 @@ class OAI():
         # Create the ListIdentifiers element
         list_identifiers_element = etree.Element('ListIdentifiers')
 
-        if not metadata_dict:
+        if not metadata_dict or filtered_identifiers == []:
             # If the metadata_dict is empty, add a noRecordsMatch error
             error_element = Errors.noRecordsMatch()
             root.append(error_element)
+            return etree.tostring(root, pretty_print=True, encoding='unicode')
         else:
             for record_identifier in filtered_identifiers:
                 header_element = etree.Element('header')
@@ -271,10 +272,11 @@ class OAI():
 
         list_records_element = etree.Element('ListRecords')
 
-        if not metadata_dict:
+        if not metadata_dict or filtered_identifiers == []:
             # If the metadata_dict dictionary is empty
             error_element = Errors.noRecordsMatch()
             root.append(error_element)
+            return etree.tostring(root, pretty_print=True, encoding='unicode')
         else:
             for record_name in filtered_identifiers:
                 record_element = etree.Element('record')
