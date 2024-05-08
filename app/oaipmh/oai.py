@@ -598,7 +598,6 @@ class OAI():
                     self.addError(root, Errors.badArgument())
                     return etree.tostring(root, pretty_print=True, encoding='unicode')
 
-
         # Check for unknown attributes
         unknown_attributes = [param.split('=')[0] for param in query_parameters
                               if param.split('=')[0] not in attributes_dict]
