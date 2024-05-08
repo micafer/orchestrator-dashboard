@@ -768,15 +768,17 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        namespace_dc = {'dc': 'http://purl.org/dc/elements/1.1/'}
-        namespace_oaipmh = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
-        namespace_datacite = {'datacite': 'http://datacite.org/schema/kernel-4'}
+        namespaces = {'ns0': 'http://www.openarchives.org/OAI/2.0/',
+                      'dc': 'http://purl.org/dc/elements/1.1/',
+                      'oaipmh': 'http://www.openarchives.org/OAI/2.0/',
+                      'datacite': 'http://datacite.org/schema/kernel-4'}
 
-        self.assertEqual(root.find(".//dc:title", namespace_dc).text, "Deploy a VM")
-        self.assertEqual(root.find(".//dc:creator", namespace_dc).text, "Miguel Caballer")
-        self.assertEqual(root.find(".//dc:date", namespace_dc).text, "2020-09-08")
+        self.assertEqual(root.find(".//dc:title", namespaces).text, "Deploy a VM")
+        self.assertEqual(root.find(".//dc:creator", namespaces).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//dc:date", namespaces).text, "2020-09-08")
+        self.assertEqual(root.find(".//ns0:identifier", namespaces).text,
+                         "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
         # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
-        # self.assertIsNotNone(root.find(".//dc:identifier", namespace_dc))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
 
         # Test ListIdentifiers
@@ -785,7 +787,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        self.assertEqual(root.find(".//oaipmh:identifier", namespace_oaipmh).text,
+        self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
                          "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
 
         # Test ListRecords oai_dc
@@ -794,11 +796,12 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        self.assertEqual(root.find(".//dc:title", namespace_dc).text, "Deploy a VM")
-        self.assertEqual(root.find(".//dc:creator", namespace_dc).text, "Miguel Caballer")
-        self.assertEqual(root.find(".//dc:date", namespace_dc).text, "2020-09-08")
+        self.assertEqual(root.find(".//dc:title", namespaces).text, "Deploy a VM")
+        self.assertEqual(root.find(".//dc:creator", namespaces).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//dc:date", namespaces).text, "2020-09-08")
+        self.assertEqual(root.find(".//ns0:identifier", namespaces).text,
+                         "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
         # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
-        # self.assertIsNotNone(root.find(".//dc:identifier", namespace_dc))
         # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
 
         # Test ListRecords oai_openaire
@@ -807,7 +810,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        self.assertEqual(root.find(".//datacite:creatorName", namespace_datacite).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//datacite:creatorName", namespaces).text, "Miguel Caballer")
 
         # Test ListMetadataFormats
         res = self.client.get('/oai?verb=ListMetadataFormats')
@@ -815,7 +818,7 @@ class IMDashboardTests(unittest.TestCase):
 
         root = etree.fromstring(res.data)
 
-        prefixes = root.findall(".//oaipmh:metadataPrefix", namespace_oaipmh)
+        prefixes = root.findall(".//oaipmh:metadataPrefix", namespaces)
         prefixes_text = [prefix.text for prefix in prefixes]
 
         self.assertIn('oai_dc', prefixes_text)

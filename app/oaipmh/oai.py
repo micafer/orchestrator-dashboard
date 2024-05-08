@@ -118,7 +118,7 @@ class OAI():
 
         metadata_element.append(metadata_xml)
 
-        return etree.tostring(metadata_element, pretty_print=True, encoding='unicode')
+        return etree.tostring(root, pretty_print=True, encoding='unicode')
 
     def identify(self, root, verb):
         self.addRequestElement(root, verb)
