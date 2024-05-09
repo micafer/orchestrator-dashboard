@@ -761,6 +761,10 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(root.find(".//oaipmh:granularity", namespace).text, "YYYY-MM-DD")
         self.assertEqual(root.find(".//oaipmh:adminEmail", namespace).text, "support@example.com")
 
+        # Test Identify
+        res = self.client.post('/oai?verb=Identify')
+        self.assertEqual(200, res.status_code)
+
         # Test GetRecord
         tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
         res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
@@ -803,8 +807,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=2020-09-10')
         self.assertEqual(200, res.status_code)
         root = etree.fromstring(res.data)
-        elems = root.findall(".//oaipmh:header", namespaces)
-        self.assertEqual(len(elems), 0)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noRecordsMatch')
 
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=2020-09-07')
         self.assertEqual(200, res.status_code)
@@ -815,8 +818,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&until=2020-09-07')
         self.assertEqual(200, res.status_code)
         root = etree.fromstring(res.data)
-        elems = root.findall(".//oaipmh:identifier", namespaces)
-        self.assertEqual(len(elems), 0)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noRecordsMatch')
 
         # Test ListRecords oai_dc
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
@@ -845,8 +847,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc&until=2020-09-07')
         self.assertEqual(200, res.status_code)
         root = etree.fromstring(res.data)
-        elems = root.findall(".//oaipmh:identifier", namespaces)
-        self.assertEqual(len(elems), 0)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noRecordsMatch')
 
         # Test ListMetadataFormats
         res = self.client.get('/oai?verb=ListMetadataFormats')

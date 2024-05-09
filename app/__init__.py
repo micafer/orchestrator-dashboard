@@ -66,7 +66,7 @@ def create_app(oidc_blueprint=None):
         else:
             key = None
         cred = DBCredentials(settings.db_url, key)
-    CSRFProtect(app)
+    csrf = CSRFProtect(app)
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
     ssh_key = SSHKey(settings.db_url)
@@ -1494,6 +1494,7 @@ def create_app(oidc_blueprint=None):
             return redirect(url_for('manage_creds'))
 
     @app.route('/oai', methods=['GET', 'POST'])
+    @csrf.exempt
     def oai_pmh():
         if not settings.oaipmh_repo_name:
             return make_response("OAI-PMH not enabled.", 404, {'Content-Type': 'text/plain'})
