@@ -597,7 +597,6 @@ class OAI():
 
             return response_xml
 
-        verb = request.values.get('verb')
         metadata_prefix = request.values.get('metadataPrefix')
         identifier = request.values.get('identifier')
         from_date = request.values.get('from')
