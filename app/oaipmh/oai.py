@@ -598,22 +598,13 @@ class OAI():
 
             return response_xml
 
-        if request.method == 'GET':
-            verb = request.args.get('verb')
-            metadata_prefix = request.args.get('metadataPrefix')
-            identifier = request.args.get('identifier')
-            from_date = request.args.get('from')
-            until_date = request.args.get('until')
-            set_spec = request.args.get('set')
-            resumption_token = request.args.get('resumptionToken')
-        else:
-            verb = request.form.get('verb')
-            metadata_prefix = request.form.get('metadataPrefix')
-            identifier = request.form.get('identifier')
-            from_date = request.form.get('from')
-            until_date = request.form.get('until')
-            set_spec = request.form.get('set')
-            resumption_token = request.form.get('resumptionToken')
+        verb = request.args.get('verb', request.form.get('verb'))
+        metadata_prefix = request.args.get('metadataPrefix', request.form.get('metadataPrefix'))
+        identifier = request.args.get('identifier', request.form.get('identifier'))
+        from_date = request.args.get('from', request.form.get('from'))
+        until_date = request.args.get('until', request.form.get('until'))
+        set_spec = request.args.get('set', request.form.get('set'))
+        resumption_token = request.args.get('resumptionToken', request.form.get('resumptionToken'))
 
         # Create a dictionary mapping verbs to functions
         verb_handlers = {
