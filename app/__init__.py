@@ -1431,7 +1431,7 @@ def create_app(oidc_blueprint=None):
 
         key = request.form['sshkey']
         desc = request.form['desc']
-        if key == "" or str(SSHKey.check_ssh_key(key.encode())) != "0":
+        if key == "" or not SSHKey.check_ssh_key(key):
             flash("Invaild SSH public key. Please insert a correct one.", 'warning')
             return redirect(url_for('get_ssh_keys'))
 

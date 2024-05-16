@@ -13,3 +13,4 @@ Flask-WTF==1.2.1
 hvac==2.2.0
 tosca-parser==2.10.0
 mysqlclient==2.2.4
+paramiko==3.4.0
