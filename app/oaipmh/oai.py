@@ -572,25 +572,24 @@ class OAI():
             'resumptionToken': 0,
         }
 
-        if not request.args.get('verb'):
+        verb = request.values.get('verb')
+
+        if not verb:
             self.addError(root, Errors.badVerb())
             return etree.tostring(root, pretty_print=True, encoding='unicode')
 
         response_xml = None
-        parsed_url = urlparse(request.url)
-        query_parameters = parsed_url.query.split('&')
 
-        for param in query_parameters:
-            key = param.split('=')[0]
+        for key in list(request.values.keys()):
             if key in attributes_dict:
                 attributes_dict[key] += 1
+                # Check for duplicate attributes
                 if attributes_dict[key] > 1:
                     self.addError(root, Errors.badArgument())
                     return etree.tostring(root, pretty_print=True, encoding='unicode')
 
         # Check for unknown attributes
-        unknown_attributes = [param.split('=')[0] for param in query_parameters
-                              if param.split('=')[0] not in attributes_dict]
+        unknown_attributes = [key for key in list(request.values.keys()) if key not in attributes_dict]
 
         if unknown_attributes:
             self.addError(root, Errors.badArgument())
@@ -598,22 +597,12 @@ class OAI():
 
             return response_xml
 
-        if request.method == 'GET':
-            verb = request.args.get('verb')
-            metadata_prefix = request.args.get('metadataPrefix')
-            identifier = request.args.get('identifier')
-            from_date = request.args.get('from')
-            until_date = request.args.get('until')
-            set_spec = request.args.get('set')
-            resumption_token = request.args.get('resumptionToken')
-        else:
-            verb = request.form.get('verb')
-            metadata_prefix = request.form.get('metadataPrefix')
-            identifier = request.form.get('identifier')
-            from_date = request.form.get('from')
-            until_date = request.form.get('until')
-            set_spec = request.form.get('set')
-            resumption_token = request.form.get('resumptionToken')
+        metadata_prefix = request.values.get('metadataPrefix')
+        identifier = request.values.get('identifier')
+        from_date = request.values.get('from')
+        until_date = request.values.get('until')
+        set_spec = request.values.get('set')
+        resumption_token = request.values.get('resumptionToken')
 
         # Create a dictionary mapping verbs to functions
         verb_handlers = {

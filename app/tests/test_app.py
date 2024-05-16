@@ -761,6 +761,13 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(root.find(".//oaipmh:granularity", namespace).text, "YYYY-MM-DD")
         self.assertEqual(root.find(".//oaipmh:adminEmail", namespace).text, "support@example.com")
 
+        # Test Identify Post with body params
+        res = self.client.post('/oai', headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                               data="verb=Identify")
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        self.assertEqual(root.find(".//oaipmh:repositoryName", namespace).text, "IM Dashboard")
+
         # Test GetRecord
         tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
         res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
