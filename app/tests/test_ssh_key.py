@@ -72,16 +72,18 @@ class TestSSHKey(unittest.TestCase):
         res = SSHKey.check_ssh_key(key)
         self.assertTrue(res)
 
-        key = ("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBC4bNaGHkWJW6xoQUmbpJaNzsVz22xsBYwAEBQkaL2A micafer@DESKTOP-6VOC4C3")
+        key = ("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBC4bNaGHkWJW6xoQUmbpJaNzsVz22xsBYwAEBQkaL2A"
+               " micafer@DESKTOP-6VOC4C3")
         res = SSHKey.check_ssh_key(key)
         self.assertTrue(res)
 
-        key = ("ssh-dss AAAAB3NzaC1kc3MAAACBAIUsxgWjdFpzAG8QJtg1ogDrWgkLXRNA+eXeB5Xq/9Z/NaJ2ZZFGpkgtyvJRInc0E+4RcetAk5zRYN"
-               "pefw2WRaxXtdyprpcch8O3InpatpSH9L3sIF8FnJLmX+s4V2PlanGFDBA8IvNfrV4IQvD3PoTi4OqlwJTuSMtOXTJ3NrRFAAAAFQDh/v0J"
-               "ma1BSBFTi4+wKfa7nhh06QAAAIAxcPrc+PomR9u+P9hIOoz8vpsqZ+V5V1Caev+Oiq/JyI4iRg0Hig5br47c6Ckb1DupqgQAD9cJGQ8Fo7"
-               "RCmNpdvcOmUxTCN3GDWrceCjv/d+ce1hDVPKlleQ5RNAbJr0/MULswhJb5wHq1aoHm/fnXgtAwwBMgZe+Z3ruggLt7YgAAAIAfPpAYiobe"
-               "ANSlTgS/tDM9nYCjXENBOcpAwXtN9qMCYxf+DCygz6Jr6CCmxrcVPTHbMq6Pjn4gKiGYnQDoulctW9zOWiX3SMc30N/ipkpPjau/ZJiQ2xX"
-               "PLMfH+SYlYH9O7Mh8TLfKuf9Ketp2LUWRIGyzR2SkNYM/cw3X91Tbxw== micafer@DESKTOP-6VOC4C3")
+        key = ("ssh-dss AAAAB3NzaC1kc3MAAACBAIUsxgWjdFpzAG8QJtg1ogDrWgkLXRNA+eXeB5Xq/9Z/NaJ2ZZFGpkgtyvJRInc0E+4RcetAk"
+               "5zRYNpefw2WRaxXtdyprpcch8O3InpatpSH9L3sIF8FnJLmX+s4V2PlanGFDBA8IvNfrV4IQvD3PoTi4OqlwJTuSMtOXTJ3NrRFA"
+               "AAAFQDh/v0Jma1BSBFTi4+wKfa7nhh06QAAAIAxcPrc+PomR9u+P9hIOoz8vpsqZ+V5V1Caev+Oiq/JyI4iRg0Hig5br47c6Ckb1"
+               "DupqgQAD9cJGQ8Fo7RCmNpdvcOmUxTCN3GDWrceCjv/d+ce1hDVPKlleQ5RNAbJr0/MULswhJb5wHq1aoHm/fnXgtAwwBMgZe+Z3r"
+               "uggLt7YgAAAIAfPpAYiobeANSlTgS/tDM9nYCjXENBOcpAwXtN9qMCYxf+DCygz6Jr6CCmxrcVPTHbMq6Pjn4gKiGYnQDoulctW9z"
+               "OWiX3SMc30N/ipkpPjau/ZJiQ2xXPLMfH+SYlYH9O7Mh8TLfKuf9Ketp2LUWRIGyzR2SkNYM/cw3X91Tbxw=="
+               " micafer@DESKTOP-6VOC4C3")
         res = SSHKey.check_ssh_key(key)
         self.assertTrue(res)
 

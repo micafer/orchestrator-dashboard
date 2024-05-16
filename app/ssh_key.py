@@ -78,6 +78,6 @@ class SSHKey():
     def check_ssh_key(key):
         try:
             paramiko.PublicBlob.from_string(key)
-        except Exception as ex:
+        except Exception:
             return False
         return True
