@@ -40,9 +40,10 @@
       <input name="type" type="hidden" value="{{ cred_type }}"/>
       <div class="row form-group">
         <div class="col">
+          <small id="passwordHelpBlock" class="form-text text-muted">
+            Unique ID in your credentials (free-form e.g. SITE_NAME-VO_NAME).
+          </small>
         <input placeholder="ID" name="id" class="col-sm-12 form-control my-1" pattern="[a-zA-Z_.][\w\d_.-]*" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required {{ 'readonly' if cred_id else '' }}/>
-        </div>
-        <div class="col">
         </div>
       </div>
 {% if cred_type == "EC2" %}

@@ -1004,9 +1004,9 @@ def create_app(oidc_blueprint=None):
                     if "public" in site["networks"][vo]:
                         pub_network_id = site["networks"][vo]["public"]
 
-            if form_data['extra_opts.selectedImage'] != "" and 'name' in site:
+            if form_data.get('extra_opts.selectedImage', "") != "" and 'name' in site:
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
-            elif form_data['extra_opts.selectedSiteImage'] != "":
+            elif form_data.get('extra_opts.selectedSiteImage', "") != "":
                 image = form_data['extra_opts.selectedSiteImage']
         else:
             image_id = form_data['extra_opts.imageID']
@@ -1432,7 +1432,7 @@ def create_app(oidc_blueprint=None):
 
         key = request.form['sshkey']
         desc = request.form['desc']
-        if key == "" or str(SSHKey.check_ssh_key(key.encode())) != "0":
+        if key == "" or not SSHKey.check_ssh_key(key):
             flash("Invaild SSH public key. Please insert a correct one.", 'warning')
             return redirect(url_for('get_ssh_keys'))
 
