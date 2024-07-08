@@ -40,14 +40,16 @@ from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, Markup, g, make_response
+from flask import Flask, json, render_template, request, redirect, url_for, flash, session, g, make_response
+from markupsafe import Markup
 from functools import wraps
 from urllib.parse import urlparse
 from radl import radl_parse
-from radl.radl import deploy, description
+from radl.radl import deploy, description, Feature
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from toscaparser.tosca_template import ToscaTemplate
+from app.oaipmh.oai import OAI
 
 
 def create_app(oidc_blueprint=None):
@@ -64,7 +66,7 @@ def create_app(oidc_blueprint=None):
         else:
             key = None
         cred = DBCredentials(settings.db_url, key)
-    CSRFProtect(app)
+    csrf = CSRFProtect(app)
     infra = Infrastructures(settings.db_url)
     im = InfrastructureManager(settings.imUrl, settings.imTimeout)
     ssh_key = SSHKey(settings.db_url)
@@ -394,11 +396,20 @@ def create_app(oidc_blueprint=None):
                 form_data = request.form.to_dict()
                 cpu = int(form_data['cpu'])
                 memory = int(form_data['memory'])
-                system_name = form_data['system_name']
 
-                radl = "system %s (cpu.count >= %d and memory.size >= %dg and instance_type = '')" % (system_name,
-                                                                                                      cpu, memory)
-                response = im.resize_vm(infid, vmid, radl, auth_data)
+                vminforesp = im.get_vm_info(infid, vmid, auth_data, "text/plain")
+                if vminforesp.ok:
+                    vminfo = radl_parse.parse_radl(vminforesp.text)
+                    vminfo.systems[0].delValue("instance_type")
+                    vminfo.systems[0].delValue("cpu.count")
+                    vminfo.systems[0].addFeature(Feature("cpu.count", ">=", cpu),
+                                                 conflict="other", missing="other")
+                    vminfo.systems[0].delValue("memory.size")
+                    vminfo.systems[0].addFeature(Feature("memory.size", ">=", memory, "GB"),
+                                                 conflict="other", missing="other")
+                    response = im.resize_vm(infid, vmid, str(vminfo), auth_data)
+                else:
+                    raise Exception("Error getting VM info: %s" % vminforesp.text)
             else:
                 response = im.manage_vm(op, infid, vmid, auth_data)
         except Exception as ex:
@@ -993,9 +1004,9 @@ def create_app(oidc_blueprint=None):
                     if "public" in site["networks"][vo]:
                         pub_network_id = site["networks"][vo]["public"]
 
-            if form_data['extra_opts.selectedImage'] != "" and 'name' in site:
+            if form_data.get('extra_opts.selectedImage', "") != "" and 'name' in site:
                 image = "appdb://%s/%s?%s" % (site['name'], form_data['extra_opts.selectedImage'], vo)
-            elif form_data['extra_opts.selectedSiteImage'] != "":
+            elif form_data.get('extra_opts.selectedSiteImage', "") != "":
                 image = form_data['extra_opts.selectedSiteImage']
         else:
             image_id = form_data['extra_opts.imageID']
@@ -1221,7 +1232,7 @@ def create_app(oidc_blueprint=None):
                     images = [(image['uri'], image['name'], image['uri'] == image_url_str)
                               for image in response.json()["images"]]
                 except Exception as ex:
-                    app.logger.warn('Error getting site images: %s', (ex))
+                    app.logger.warning('Error getting site images: %s', (ex))
 
                 return render_template('addresource.html', infid=infid, systems=systems,
                                        image_url=image_url, images=images)
@@ -1421,7 +1432,7 @@ def create_app(oidc_blueprint=None):
 
         key = request.form['sshkey']
         desc = request.form['desc']
-        if key == "" or str(SSHKey.check_ssh_key(key.encode())) != "0":
+        if key == "" or not SSHKey.check_ssh_key(key):
             flash("Invaild SSH public key. Please insert a correct one.", 'warning')
             return redirect(url_for('get_ssh_keys'))
 
@@ -1482,6 +1493,23 @@ def create_app(oidc_blueprint=None):
 
             return redirect(url_for('manage_creds'))
 
+    @app.route('/oai', methods=['GET', 'POST'])
+    @csrf.exempt
+    def oai_pmh():
+        if not settings.oaipmh_repo_name:
+            return make_response("OAI-PMH not enabled.", 404, {'Content-Type': 'text/plain'})
+
+        oai = OAI(settings.oaipmh_repo_name, request.base_url, settings.oaipmh_repo_description,
+                  settings.oaipmh_repo_base_identifier_url, repo_admin_email=app.config.get('SUPPORT_EMAIL'))
+
+        metadata_dict = {}
+        for name, tosca in toscaInfo.items():
+            metadata = tosca["metadata"]
+            metadata_dict[name] = metadata
+
+        response_xml = oai.processRequest(request, metadata_dict)
+        return make_response(response_xml, 200, {'Content-Type': 'text/xml'})
+
     @app.route('/reconfigure/<infid>')
     @authorized_with_valid_token
     def reconfigure(infid=None):
@@ -1495,7 +1523,7 @@ def create_app(oidc_blueprint=None):
                 raise Exception(response.text)
             template = response.text
         except Exception as ex:
-            app.logger.warn("Error getting infrastructure template: %s" % ex)
+            app.logger.warning("Error getting infrastructure template: %s" % ex)
 
         infra_name = ""
         inputs = utils.getReconfigureInputs(template)
@@ -1514,7 +1542,7 @@ def create_app(oidc_blueprint=None):
         try:
             oidc_blueprint.session.get("/logout")
         except Exception as ex:
-            app.logger.warn("Error in OIDC logout: %s" % ex)
+            app.logger.warning("Error in OIDC logout: %s" % ex)
         return redirect(url_for('login', next_url=next_url))
 
     @app.errorhandler(403)

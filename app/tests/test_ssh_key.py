@@ -64,9 +64,29 @@ class TestSSHKey(unittest.TestCase):
                "+ttuEqy3SM2ZBuhD6xrpAUGrr0TrJBJnVVBKL31zFSu6GcDtVyjoYGJhM/vU9VuBrUHO+qYIrcGP7VaPSOgTSj7V3OLD7pp8kYmFP"
                "vLKleDSI/eiKO0nH/J6W2mGa1J6FDFaIIsLIyERdgakjvrkecfv/YfqPWkUGp1xnzNugkOug1ZMQHfuSs7Ag+kVP3TDPQoAo8u2Yy"
                "EwbLK/vVSFlTe5eaotfCmiltVu3UaPYM8QylCCTW7QCncE= micafer")
-        res = SSHKey.check_ssh_key(key.encode())
-        self.assertFalse(res)
+        res = SSHKey.check_ssh_key(key)
+        self.assertTrue(res)
+
+        key = ("ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBGTCowf1QVu0fi73aFWfsSnYixGeO6"
+               "03FxkmUtDAuBop2kNnjupKyf7QNSw6D8HJmWGjaeGUUhmL2r3PltoLjMA= micafer@some")
+        res = SSHKey.check_ssh_key(key)
+        self.assertTrue(res)
+
+        key = ("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBC4bNaGHkWJW6xoQUmbpJaNzsVz22xsBYwAEBQkaL2A"
+               " micafer@DESKTOP-6VOC4C3")
+        res = SSHKey.check_ssh_key(key)
+        self.assertTrue(res)
+
+        key = ("ssh-dss AAAAB3NzaC1kc3MAAACBAIUsxgWjdFpzAG8QJtg1ogDrWgkLXRNA+eXeB5Xq/9Z/NaJ2ZZFGpkgtyvJRInc0E+4RcetAk"
+               "5zRYNpefw2WRaxXtdyprpcch8O3InpatpSH9L3sIF8FnJLmX+s4V2PlanGFDBA8IvNfrV4IQvD3PoTi4OqlwJTuSMtOXTJ3NrRFA"
+               "AAAFQDh/v0Jma1BSBFTi4+wKfa7nhh06QAAAIAxcPrc+PomR9u+P9hIOoz8vpsqZ+V5V1Caev+Oiq/JyI4iRg0Hig5br47c6Ckb1"
+               "DupqgQAD9cJGQ8Fo7RCmNpdvcOmUxTCN3GDWrceCjv/d+ce1hDVPKlleQ5RNAbJr0/MULswhJb5wHq1aoHm/fnXgtAwwBMgZe+Z3r"
+               "uggLt7YgAAAIAfPpAYiobeANSlTgS/tDM9nYCjXENBOcpAwXtN9qMCYxf+DCygz6Jr6CCmxrcVPTHbMq6Pjn4gKiGYnQDoulctW9z"
+               "OWiX3SMc30N/ipkpPjau/ZJiQ2xXPLMfH+SYlYH9O7Mh8TLfKuf9Ketp2LUWRIGyzR2SkNYM/cw3X91Tbxw=="
+               " micafer@DESKTOP-6VOC4C3")
+        res = SSHKey.check_ssh_key(key)
+        self.assertTrue(res)
 
         key = "ssh-rsa AAAAB3NzaC1yc2EAAAADA..."
-        res = SSHKey.check_ssh_key(key.encode())
-        self.assertTrue(res)
+        res = SSHKey.check_ssh_key(key)
+        self.assertFalse(res)

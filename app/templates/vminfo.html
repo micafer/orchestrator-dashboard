@@ -60,7 +60,11 @@
                     {% else %}
                     <span class="badge bg-warning text-white"><span class="spinner-grow spinner-grow-sm"></span>
                     {% endif %}
+                    {% if state == "running" %}
+                    configuring
+                    {% else %}
                     {{ state }}
+                    {% endif %}
                   </td>
                 </tr>
                 <tr>
@@ -318,7 +322,6 @@
                       </div>
                       <form id="resizeVM" action="{{ url_for('managevm', op='resize', infid=infid, vmid=vmid) }}" method="post">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <input type="hidden" name="system_name" value="{{ system_name }}"/>
                       <div class="modal-body">
 
                         <div class="row form-group">

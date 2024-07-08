@@ -64,8 +64,8 @@ class InfrastructureManager():
         inf_state = response.json()
         return inf_state['state']
 
-    def get_vm_info(self, infid, vmid, auth_data):
-        headers = {"Authorization": auth_data, "Accept": "application/json"}
+    def get_vm_info(self, infid, vmid, auth_data, accept="application/json"):
+        headers = {"Authorization": auth_data, "Accept": accept}
         url = "%s/infrastructures/%s/vms/%s" % (self.im_url, infid, vmid)
         return requests.get(url, headers=headers, timeout=self.timeout)
 

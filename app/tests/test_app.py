@@ -5,6 +5,7 @@ sys.path.append('.')
 
 import unittest
 import json
+import defusedxml.ElementTree as etree
 from app import create_app
 from urllib.parse import urlparse
 from mock import patch, MagicMock
@@ -40,7 +41,7 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/vms/0":
             resp.ok = True
             resp.status_code = 200
-            resp.text = ""
+            resp.text = "system front (cpu.count = 1 and memory.size = 512 MB)"
             radl = {"class": "system",
                     "cpu.arch": "x86_64",
                     "cpu.count_min": 1,
@@ -253,8 +254,8 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/stop')
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0],
-                          ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
+        self.assertEqual(flash.call_args_list[0][0],
+                         ("Operation 'stop' successfully made on Infrastructure ID: infid", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
@@ -268,8 +269,8 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/change_user', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0],
-                          ("Infrastructure owner successfully changed.", 'success'))
+        self.assertEqual(flash.call_args_list[0][0],
+                         ("Infrastructure owner successfully changed.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.put')
@@ -284,9 +285,9 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/migrate', data={"new_im_url": "http://newim.com/im"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0],
-                          ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
-                           'success'))
+        self.assertEqual(flash.call_args_list[0][0],
+                         ("Infrastructure successfully migrated to http://server.com/im/infrastructures/infid.",
+                          'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -311,7 +312,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/managevm/stop/infid/0')
         self.assertEqual(302, res.status_code)
         self.assertIn('/vminfo?infId=infid&vmId=0', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Operation 'stop' successfully made on VM ID: 0", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.delete')
@@ -324,16 +325,18 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/managevm/terminate/infid/0')
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0",
-                                                       'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Operation 'terminate' successfully made on VM ID: 0",
+                                                      'success'))
 
     @patch("app.utils.getUserAuthData")
+    @patch('requests.get')
     @patch('requests.put')
     @patch("app.utils.avatar")
     @patch("app.flash")
-    def test_managevm_resize(self, flash, avatar, put, user_data):
+    def test_managevm_resize(self, flash, avatar, put, get, user_data):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         put.side_effect = self.put_response
+        get.side_effect = self.get_response
         self.login(avatar)
         params = {'cpu': '4',
                   'memory': '4',
@@ -342,7 +345,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/managevm/resize/infid/0', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/vminfo?infId=infid&vmId=0', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Operation 'resize' successfully made on VM ID: 0", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Operation 'resize' successfully made on VM ID: 0", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.put')
@@ -355,7 +358,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/reconfigure')
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Reconfiguration process successfuly started.", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Reconfiguration process successfuly started.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -416,7 +419,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/delete')
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Infrastructure 'infid' successfuly deleted.", 'success'))
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_creds")
@@ -504,7 +507,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_count, 0)
+        self.assertEqual(flash.call_count, 0)
 
     @patch('app.utils.get_site_info')
     @patch("app.utils.getUserAuthData")
@@ -530,7 +533,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/submit?template=simple-node-disk.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_count, 0)
+        self.assertEqual(flash.call_count, 0)
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.post')
@@ -554,7 +557,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/submit?template=tosca.yml', data=params)
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_count, 0)
+        self.assertEqual(flash.call_count, 0)
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_creds")
@@ -594,19 +597,19 @@ class IMDashboardTests(unittest.TestCase):
                                                                                          "type": "OpenNebula"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully written!", 'success'))
-        self.assertEquals(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
-                                                             'id': 'credid', 'type': "OpenNebula"}, False))
+        self.assertEqual(flash.call_args_list[0][0], ("Credentials successfully written!", 'success'))
+        self.assertEqual(write_creds.call_args_list[0][0], ('credid', 'userid', {'host': 'SITE_URL2',
+                                                            'id': 'credid', 'type': "OpenNebula"}, False))
 
         res = self.client.post('/write_creds?cred_id=&cred_type=OpenNebula', data={"host": "SITE_URL3",
                                                                                    "id": "credid",
                                                                                    "type": "OpenNebula"})
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
-        self.assertEquals(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
-                                                                                  'id': 'credid',
-                                                                                  'type': 'OpenNebula'}, True))
+        self.assertEqual(flash.call_args_list[1][0], ("Credentials successfully written!", 'success'))
+        self.assertEqual(write_creds.call_args_list[1][0], ('credid', 'userid', {'host': 'SITE_URL3',
+                                                                                 'id': 'credid',
+                                                                                 'type': 'OpenNebula'}, True))
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.delete_cred")
@@ -617,7 +620,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/delete_creds?service_id=SERVICE_ID')
         self.assertEqual(302, res.status_code)
         self.assertIn('/manage_creds', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("Credentials successfully deleted!", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("Credentials successfully deleted!", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -643,7 +646,7 @@ class IMDashboardTests(unittest.TestCase):
         self.login(avatar)
         res = self.client.post('/addresources/infid', data={"wn_num": "1"})
         self.assertEqual(302, res.status_code)
-        self.assertEquals(flash.call_args_list[0][0], ("1 nodes added successfully", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("1 nodes added successfully", 'success'))
 
     @patch("app.utils.avatar")
     @patch("app.utils.getUserAuthData")
@@ -660,7 +663,7 @@ class IMDashboardTests(unittest.TestCase):
                         "instances": {"used": 1, "limit": 10},
                         "floating_ips": {"used": 1, "limit": 10},
                         "security_groups": {"used": 1, "limit": 10}}
-        self.assertEquals(expected_res, json.loads(res.data))
+        self.assertEqual(expected_res, json.loads(res.data))
 
     @patch("app.utils.avatar")
     @patch("app.ssh_key.SSHKey.get_ssh_keys")
@@ -695,7 +698,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/delete_ssh_key?ssh_id=1')
         self.assertEqual(302, res.status_code)
         self.assertIn('/ssh_key', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("SSH Key successfully deleted!", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("SSH Key successfully deleted!", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.delete')
@@ -708,7 +711,7 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.post('/manage_inf/infid/removeresources', data={'vm_list': '1,2'})
         self.assertEqual(302, res.status_code)
         self.assertIn('/infrastructures', res.headers['location'])
-        self.assertEquals(flash.call_args_list[0][0], ("VMs 1,2 successfully deleted.", 'success'))
+        self.assertEqual(flash.call_args_list[0][0], ("VMs 1,2 successfully deleted.", 'success'))
 
     @patch("app.utils.getUserAuthData")
     @patch('requests.get')
@@ -732,6 +735,142 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/owners/infid')
         self.assertEqual(200, res.status_code)
         self.assertEqual(b'Current Owners:<br><ul><li>user1</li><li>user2</li></ul>', res.data)
+
+    def test_oai(self):
+        namespace = {'oaipmh': 'http://www.openarchives.org/OAI/2.0/'}
+
+        # Test OAI path
+        res = self.client.get('/oai')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'badVerb')
+
+        # Test Identify
+        res = self.client.get('/oai?verb=Identify')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:repositoryName", namespace).text, "IM Dashboard")
+        self.assertEqual(root.find(".//oaipmh:baseURL", namespace).text, "http://localhost/oai")
+        self.assertEqual(root.find(".//oaipmh:protocolVersion", namespace).text, "2.0")
+        self.assertIsNotNone(root.find(".//oaipmh:earliestDatestamp", namespace))
+        self.assertEqual(root.find(".//oaipmh:deletedRecord", namespace).text, "no")
+        self.assertEqual(root.find(".//oaipmh:granularity", namespace).text, "YYYY-MM-DD")
+        self.assertEqual(root.find(".//oaipmh:adminEmail", namespace).text, "support@example.com")
+
+        # Test Identify Post with body params
+        res = self.client.post('/oai', headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                               data="verb=Identify")
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        self.assertEqual(root.find(".//oaipmh:repositoryName", namespace).text, "IM Dashboard")
+
+        # Test GetRecord
+        tosca_id = "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml"
+        res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        namespaces = {'dc': 'http://purl.org/dc/elements/1.1/',
+                      'oaipmh': 'http://www.openarchives.org/OAI/2.0/',
+                      'datacite': 'http://datacite.org/schema/kernel-4'}
+
+        self.assertEqual(root.find(".//dc:title", namespaces).text, "Deploy a VM")
+        self.assertEqual(root.find(".//dc:creator", namespaces).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//dc:date", namespaces).text, "2020-09-08")
+        self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
+                         "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
+        self.assertEqual(root.find(".//oaipmh:datestamp", namespaces).text,
+                         "2020-09-08")
+        # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
+
+        # Test GetRecord with invalid identifier
+        tosca_id = 'invalid"id'
+        res = self.client.get('/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=%s' % tosca_id)
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'idDoesNotExist')
+
+        # Test ListIdentifiers
+        res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        elems = root.findall(".//oaipmh:header", namespaces)
+        self.assertEqual(len(elems), 1)
+
+        self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
+                         "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
+
+        # Test ListIdentifiers with from
+        res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=2020-09-10')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noRecordsMatch')
+
+        res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=2020-09-07')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        elems = root.findall(".//oaipmh:header", namespaces)
+        self.assertEqual(len(elems), 1)
+
+        res = self.client.get('/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&until=2020-09-07')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noRecordsMatch')
+
+        # Test ListRecords oai_dc
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//dc:title", namespaces).text, "Deploy a VM")
+        self.assertEqual(root.find(".//dc:creator", namespaces).text, "Miguel Caballer")
+        self.assertEqual(root.find(".//dc:date", namespaces).text, "2020-09-08")
+        self.assertEqual(root.find(".//oaipmh:identifier", namespaces).text,
+                         "https://github.com/grycap/tosca/blob/main/templates/simple-node-disk.yml")
+        self.assertEqual(root.find(".//oaipmh:datestamp", namespaces).text,
+                         "2020-09-08")
+        # self.assertIsNotNone(root.find(".//dc:type", namespace_dc))
+        # self.assertIsNotNone(root.find(".//dc:rights", namespace_dc))
+
+        # Test ListRecords oai_openaire
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_openaire')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        elems = root.findall(".//oaipmh:identifier", namespaces)
+        self.assertEqual(len(elems), 1)
+        self.assertEqual(root.find(".//datacite:creatorName", namespaces).text, "Miguel Caballer")
+
+        res = self.client.get('/oai?verb=ListRecords&metadataPrefix=oai_dc&until=2020-09-07')
+        self.assertEqual(200, res.status_code)
+        root = etree.fromstring(res.data)
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noRecordsMatch')
+
+        # Test ListMetadataFormats
+        res = self.client.get('/oai?verb=ListMetadataFormats')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        prefixes = root.findall(".//oaipmh:metadataPrefix", namespaces)
+        prefixes_text = [prefix.text for prefix in prefixes]
+
+        self.assertIn('oai_dc', prefixes_text)
+        self.assertIn('oai_openaire', prefixes_text)
+
+        # Test ListSets
+        res = self.client.get('/oai?verb=ListSets')
+        self.assertEqual(200, res.status_code)
+
+        root = etree.fromstring(res.data)
+
+        self.assertEqual(root.find(".//oaipmh:error", namespace).attrib['code'], 'noSetHierarchy')
 
     @patch("hvac.Client")
     def test_secret(self, hvac):

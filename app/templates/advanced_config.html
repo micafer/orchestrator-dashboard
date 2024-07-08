@@ -130,6 +130,8 @@
             $('#siteImages').hide();
             $('#fedcloudUsage').hide();
         }
+        $("#selectedImage").prop('disabled', false);
+        $("#selectedSiteImage").prop('disabled', false);
    }
 
    function loadImages() {
@@ -209,6 +211,28 @@
         });
    }
 
+   function selectedSiteImageChanged() {
+        // disable the other select of AppDB images
+        var selected = $("#selectedSiteImage option:selected" ).text();
+        if (selected == " - Select one image - ") {
+            $("#selectedImage").prop('disabled', false);
+        } else {
+            $("#selectedImage").prop('disabled', true);
+        }
+        activateSubmit()
+   }
+
+   function selectedImageChanged() {
+    // disable the other select of site images
+        var selected = $("#selectedImage option:selected" ).text();
+        if (selected == " - Select one image - ") {
+            $("#selectedSiteImage").prop('disabled', false);
+        } else {
+            $("#selectedSiteImage").prop('disabled', true);
+        }
+        activateSubmit()
+   }
+
    function activateSubmit() {
        $(".submitBtn").attr("disabled", false);
    }
@@ -252,7 +276,7 @@
               <label>Select only one of this options AppDB or Site image:</label>
               <br/>
               <label>Select AppDB image:</label>
-              <select class="js-example-basic-single js-states form-control" id="selectedImage" name="extra_opts.selectedImage" onchange="activateSubmit()">
+              <select class="js-example-basic-single js-states form-control" id="selectedImage" name="extra_opts.selectedImage" onchange="selectedImageChanged()">
                   <option name="selectedImage" value="">Select provider</option>
               </select>
             </div>
@@ -260,7 +284,7 @@
             <div id="siteImages" style="display: none;">
               <br/>
               <label>Select Site image:</label>
-              <select class="js-example-basic-single js-states form-control" id="selectedSiteImage" name="extra_opts.selectedSiteImage" onchange="activateSubmit()">
+              <select class="js-example-basic-single js-states form-control" id="selectedSiteImage" name="extra_opts.selectedSiteImage" onchange="selectedSiteImageChanged()">
                   <option name="selectedSiteImage" value="">Select provider</option>
               </select>
            </div>
