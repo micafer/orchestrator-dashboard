@@ -62,10 +62,10 @@
                         {% if 'vo' in cred %}
                          <br><strong>VO: </strong> {{cred["vo"]}}
                          {% if session['vos'] and cred['vo'] not in session['vos'] %}
-                         <i class='fas fa-exclamation-triangle text-warning' title="VO currently not available for the user!. It may cause errors in the Cloud Provider Selection list."></i>
+                         <i class='fas fa-exclamation-triangle text-warning' title="VO currently not available for the user!. It may cause errors in the Cloud Provider list."></i>
                          {% endif %}
                          {% if 'project_id' not in cred %}
-                         <i class='fas fa-exclamation-triangle text-danger' title="Site does not publish this VO on AppDB!. It may cause errors in the Cloud Provider Selection list."></i>
+                         <i class='fas fa-exclamation-triangle text-danger' title="Site does not publish this VO on AppDB!. It may cause errors in the Cloud Provider list."></i>
                          {% endif %}
                         {% endif %}
                         {% if 'host' in cred and 'tenant' in cred %}
