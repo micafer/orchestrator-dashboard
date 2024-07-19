@@ -38,7 +38,7 @@ from app.ssh_key import SSHKey
 from app.ott import OneTimeTokenData
 from app import utils, appdb, db
 from app.vault_info import VaultInfo
-from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError
+from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError, MissingTokenError
 from werkzeug.exceptions import Forbidden
 from flask import Flask, json, render_template, request, redirect, url_for, flash, session, g, make_response
 from markupsafe import Markup
@@ -139,7 +139,7 @@ def create_app(oidc_blueprint=None):
                     if oidc_blueprint.session.token['expires_in'] < 20:
                         app.logger.debug("Force refresh token")
                         oidc_blueprint.session.get(settings.oidcUserInfoPath)
-                except (InvalidTokenError, TokenExpiredError, InvalidGrantError):
+                except (InvalidTokenError, TokenExpiredError, InvalidGrantError, MissingTokenError):
                     flash("Token expired.", 'warning')
                     return logout(next_url=request.full_path)
 
