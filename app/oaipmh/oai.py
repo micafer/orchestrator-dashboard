@@ -343,6 +343,9 @@ class OAI():
         protocol_version_element = etree.SubElement(identify_element, 'protocolVersion')
         protocol_version_element.text = self.repository_protocol_version
 
+        admin_email_element = etree.SubElement(identify_element, 'adminEmail')
+        admin_email_element.text = self.repository_admin_email
+
         earliest_datestamp_element = etree.SubElement(identify_element, 'earliestDatestamp')
         earliest_datestamp_element.text = self.earliest_datestamp
 
@@ -351,9 +354,6 @@ class OAI():
 
         granularity_element = etree.SubElement(identify_element, 'granularity')
         granularity_element.text = self.datestamp_granularity
-
-        admin_email_element = etree.SubElement(identify_element, 'adminEmail')
-        admin_email_element.text = self.repository_admin_email
 
     def addRequestElement(self, root, verb=None, metadata_prefix=None, identifier=None,
                           from_date=None, until_date=None, set_spec=None, resumption_token=None):
