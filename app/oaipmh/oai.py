@@ -20,7 +20,6 @@
 # under the License.
 from lxml import etree  # nosec
 from datetime import datetime, timezone
-from urllib.parse import urlparse
 from app.oaipmh.errors import Errors
 
 

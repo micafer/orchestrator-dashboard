@@ -18,7 +18,11 @@
   function setInfrState(infid, data) {
       // Set state
       var state = getSpanFromState(data["state"]) ;
-      state += '<strong>' + data["state"] + '&nbsp;</strong>';
+      if (data["state"] == "running") {
+        state += '<strong>configuring&nbsp;</strong>';
+      } else {
+        state += '<strong>' + data["state"] + '&nbsp;</strong>';
+      }
       state += '<div style="display: none;" id="' + infid + '_state_spinner" class="spinner-border spinner-border-sm"></div>';
       state += '</span>';
       $('#' + infid + '_state').html(state);
@@ -27,6 +31,9 @@
       var vms = '';
       var delete_vms = '';
       $.each( data["vm_states"], function( vmId, vmState ) {
+        if (vmState == "running") {
+          vmState = "configuring";
+        }
         var tooltip = getSpanFromState(vmState) + vmState + '</span>';
         vms += '<a class="btn btn-outline-secondary btn-sm" role="button" href="{{ url_for('showvminfo') }}?infId=' + infid + '&vmId=' + vmId + '" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="' + tooltip + '">';
         vms += '<span class="fas fa-server mr-2"></span> ' + vmId + '</a>';

@@ -1,7 +1,7 @@
 Flask_Dance==7.1.0
 Werkzeug==3.0.3
 Flask==3.0.3
-requests==2.31.0
+requests==2.32.2
 PyYAML==6.0.1
 packaging==24.0
 xmltodict==0.13.0

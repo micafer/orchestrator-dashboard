@@ -60,7 +60,11 @@
                     {% else %}
                     <span class="badge bg-warning text-white"><span class="spinner-grow spinner-grow-sm"></span>
                     {% endif %}
+                    {% if state == "running" %}
+                    configuring
+                    {% else %}
                     {{ state }}
+                    {% endif %}
                   </td>
                 </tr>
                 <tr>
