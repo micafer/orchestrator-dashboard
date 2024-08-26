@@ -846,8 +846,11 @@ def discover_oidc_urls(base_url):
 
 
 def valid_template_vos(user_vos, template_metadata):
-    if 'vos' in template_metadata:
-        return [vo for vo in user_vos if vo in template_metadata['vos']]
+    if 'vos' in template_metadata and template_metadata['vos']:
+        if not user_vos:
+            return []
+        else:
+            return [vo for vo in user_vos if vo in template_metadata['vos']]
     else:
         return ['all']
 
