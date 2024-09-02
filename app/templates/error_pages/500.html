@@ -19,7 +19,8 @@
 	<div class="card-body">
           <div class="alert alert-danger">
               Sorry, something went wrong..Please, try again. 
-	      Contact the support {%if support_email %}({{ support_email }}){%endif %} if the error persists.
+	      {%if support_email %} Contact the support ({{ support_email }}) if the error persists.{% endif %}
+        {%if support_link %} Contact the support (<a href="{{ support_link }}" target="_blank">{{ support_link_name }}</a>) if the error persists.{% endif %}
           </div>
   	</div>
     </div>
