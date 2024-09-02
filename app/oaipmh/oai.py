@@ -207,7 +207,7 @@ class OAI():
                 record_metadata = metadata_dict[record_identifier]
                 if 'creation_date' in record_metadata:
                     datestamp_element.text = record_metadata['creation_date'].strftime("%Y-%m-%d")
-                else: # if creation_date is not present in the metadata
+                else:  # if creation_date is not present in the metadata
                     datestamp_element.text = f'{self.earliest_datestamp}'
 
                 header_element.append(identifier_element)
@@ -290,7 +290,7 @@ class OAI():
                 datestamp_element = etree.Element('datestamp')
                 if 'creation_date' in record_metadata:
                     datestamp_element.text = record_metadata['creation_date'].strftime("%Y-%m-%d")
-                else: # if creation_date is not present in the metadata
+                else:  # if creation_date is not present in the metadata
                     datestamp_element.text = f'{self.earliest_datestamp}'
 
                 metadata_element = etree.Element('metadata')
@@ -537,7 +537,7 @@ class OAI():
                 related_identifier_element = etree.Element('{http://purl.org/dc/elements/1.1/}version')
                 related_identifier_element.text = value
                 root.append(related_identifier_element)
-            if key == 'display_name': # tag
+            if key == 'display_name':  # tag
                 subject_element = etree.Element('{http://purl.org/dc/elements/1.1/}subject')
                 subject_element.text = value
                 root.append(subject_element)
