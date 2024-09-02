@@ -52,6 +52,8 @@ Create the `config.json` file (see the [example](app/config-sample.json)) settin
 | IM_URL | Infrastructure Manager service URL | Y | N/A |
 | IM_TIMEOUT | Infrastructure Manager service calls timeout | N | 60 |
 | SUPPORT_EMAIL | Email address that will be shown in case of errors | N | "" |
+| SUPPORT_LINK | Link that will be shown in case of errors | N | "" |
+| SUPPORT_LINK_NAME | Text Link that that will be shown in case of errors | N | "" |
 | EXTERNAL_LINKS | List of dictionaries ({ "url": "example.com" , "menu_item_name": "Example link"}) specifying links that will be shown under the "External Links" menu | N | [] |
 | LOG_LEVEL | Set Logging level | N | info |
 | DB_URL | URL to the DB to store dashboard data | N | sqlite:///creds.db |
