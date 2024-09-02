@@ -111,9 +111,10 @@ class OAI():
         identifier_element = etree.SubElement(header, 'identifier')
         identifier_element.text = identifier
         datestamp_element = etree.SubElement(header, 'datestamp')
-        datestamp_element.text = self.earliest_datestamp
-        if record_data.get('creation_date'):
-            datestamp_element.text = record_data.get('creation_date').strftime("%Y-%m-%d")
+        if 'creation_date' in record_data:
+            datestamp_element.text = record_data['creation_date'].strftime("%Y-%m-%d")
+        else:  # if creation_date is not present in the metadata
+            datestamp_element.text = self.earliest_datestamp
 
         metadata_element = etree.SubElement(record, 'metadata')
 
@@ -203,9 +204,11 @@ class OAI():
                 identifier_element = etree.Element('identifier')
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_identifier}'
                 datestamp_element = etree.Element('datestamp')
-                datestamp_element.text = self.earliest_datestamp
-                if metadata_dict[record_identifier].get('creation_date'):
-                    datestamp_element.text = metadata_dict[record_identifier].get('creation_date').strftime("%Y-%m-%d")
+                record_metadata = metadata_dict[record_identifier]
+                if 'creation_date' in record_metadata:
+                    datestamp_element.text = record_metadata['creation_date'].strftime("%Y-%m-%d")
+                else: # if creation_date is not present in the metadata
+                    datestamp_element.text = f'{self.earliest_datestamp}'
 
                 header_element.append(identifier_element)
                 header_element.append(datestamp_element)
@@ -278,16 +281,17 @@ class OAI():
             root.append(error_element)
             return etree.tostring(root, pretty_print=True, encoding='unicode')
         else:
-            for record_name in filtered_identifiers:
+            for record_name, record_metadata in filtered_identifiers:
                 record_element = etree.Element('record')
 
                 header_element = etree.Element('header')
                 identifier_element = etree.Element('identifier')
                 identifier_element.text = f'{self.repository_indentifier_base_url}{record_name}'
                 datestamp_element = etree.Element('datestamp')
-                datestamp_element.text = 'datestamp'
-                if metadata_dict[record_name].get('creation_date'):
-                    datestamp_element.text = metadata_dict[record_name].get('creation_date').strftime("%Y-%m-%d")
+                if 'creation_date' in record_metadata:
+                    datestamp_element.text = record_metadata['creation_date'].strftime("%Y-%m-%d")
+                else: # if creation_date is not present in the metadata
+                    datestamp_element.text = f'{self.earliest_datestamp}'
 
                 metadata_element = etree.Element('metadata')
 
@@ -339,6 +343,9 @@ class OAI():
         protocol_version_element = etree.SubElement(identify_element, 'protocolVersion')
         protocol_version_element.text = self.repository_protocol_version
 
+        admin_email_element = etree.SubElement(identify_element, 'adminEmail')
+        admin_email_element.text = self.repository_admin_email
+
         earliest_datestamp_element = etree.SubElement(identify_element, 'earliestDatestamp')
         earliest_datestamp_element.text = self.earliest_datestamp
 
@@ -347,9 +354,6 @@ class OAI():
 
         granularity_element = etree.SubElement(identify_element, 'granularity')
         granularity_element.text = self.datestamp_granularity
-
-        admin_email_element = etree.SubElement(identify_element, 'adminEmail')
-        admin_email_element.text = self.repository_admin_email
 
     def addRequestElement(self, root, verb=None, metadata_prefix=None, identifier=None,
                           from_date=None, until_date=None, set_spec=None, resumption_token=None):
@@ -427,7 +431,7 @@ class OAI():
         etree.register_namespace('oai_dc', nsmap['oai_dc'])
 
         for key, value in metadata_dict.items():
-            if key == 'display_name':
+            if key == 'template_name':
                 title_element = etree.Element('{http://datacite.org/schema/kernel-4}title')
                 title_element.text = value
                 root.append(title_element)
@@ -465,7 +469,7 @@ class OAI():
                 version_element = etree.Element('{http://purl.org/dc/elements/1.1/}version')
                 version_element.text = value
                 root.append(version_element)
-            if key == 'subject':
+            if key == 'display_name':  # tag
                 subject_element = etree.Element('{http://namespace.openaire.eu/schema/oaire/}subject')
                 subject_element.text = value
                 root.append(subject_element)
@@ -501,7 +505,7 @@ class OAI():
         etree.register_namespace('oai_dc', nsmap['oai_dc'])
 
         for key, value in metadata_dict.items():
-            if key == 'display_name':
+            if key == 'template_name':
                 title_element = etree.Element('{http://purl.org/dc/elements/1.1/}title')
                 title_element.text = value
                 root.append(title_element)
@@ -533,14 +537,14 @@ class OAI():
                 related_identifier_element = etree.Element('{http://purl.org/dc/elements/1.1/}version')
                 related_identifier_element.text = value
                 root.append(related_identifier_element)
-            if key == 'tag':
+            if key == 'display_name': # tag
                 subject_element = etree.Element('{http://purl.org/dc/elements/1.1/}subject')
                 subject_element.text = value
                 root.append(subject_element)
             if key == 'childs':
                 related_identifier_element = etree.Element('{http://purl.org/dc/elements/1.1/}relation')
-                # childs = value["childs"]
-                # related_identifier_element.text = ', '.join(childs)
+                childs = value
+                related_identifier_element.text = ', '.join(childs)
                 root.append(related_identifier_element)
             if key == 'format':
                 format_element = etree.Element('{http://purl.org/dc/elements/1.1/}format')
