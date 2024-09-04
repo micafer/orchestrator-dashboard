@@ -2,9 +2,9 @@ name: Test IM-Dashboard
 
 on:
   push:
-    branches: ["master"]
+    branches: ["master", "egi_brand"]
   pull_request:
-    branches: ["master"]
+    branches: ["master", "egi_brand"]
 
 jobs:
   test:

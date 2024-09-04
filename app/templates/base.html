@@ -42,7 +42,10 @@
   <!-- Latest compiled and minified JavaScript -->
   <script src="{{ url_for('static', filename='js/bootstrap-show-password.min.js') }}"></script>
 {% endif %}
-  <style> 
+  <!-- EGI Custom theme -->
+  <link href='https://fonts.googleapis.com/css?family=DM Sans' rel='stylesheet'>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/egi.css') }}" />
+  <style>
 /* Make the navbar a bit transparent */
   .navbar {  
     opacity: 0.95;	   
@@ -122,9 +125,9 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark navbar-expand-md sticky-top shadow">
+  <nav class="navbar navbar-light bg-light navbar-expand-md sticky-top shadow">
     <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for("home") }}"><img src="{{ url_for('static', filename='images/im-logo-only.png') }}" width="40"> IM Dashboard</a>
+      <a href="https://www.egi.eu" target="_blank" class="me-3"><img src="{{ url_for('static', filename='images/egi-logo.png') }}" width="60"></a><a class="navbar-brand" href="{{ url_for("home") }}"><img src="{{ url_for('static', filename='images/im-logo-only.png') }}" width="30"> IM Dashboard</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar">
         <span class="navbar-toggler-icon"></span>
       </button>
