@@ -123,10 +123,12 @@ def getUserVOs(entitlements, vo_role=None):
     vos = []
     for elem in entitlements:
         # format: urn:mace:egi.eu:group:eosc-synergy.eu:role=vm_operator#aai.egi.eu
+        # or      urn:mace:egi.eu:group:demo.fedcloud.egi.eu:vm_operator:role=member#aai.egi.eu
         if elem.startswith('urn:mace:egi.eu:group:'):
             vo = elem[22:22 + elem[22:].find(':')]
-            if vo and (not vo_role or ":role=%s#" % vo_role in elem) and vo not in vos:
-                vos.append(vo)
+            if vo and vo not in vos:
+                if not vo_role or ":role=%s#" % vo_role in elem or ":%s:" % vo_role in elem:
+                    vos.append(vo)
         elif elem in g.settings.vo_map and g.settings.vo_map[elem] not in vos:
             vos.append(g.settings.vo_map[elem])
     vos.sort()
