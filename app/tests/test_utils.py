@@ -28,9 +28,10 @@ class TestUtils(unittest.TestCase):
     def test_getUserVOs(self):
         entitlements = ['urn:mace:egi.eu:group:vo.test.egi.eu:role=member#aai.egi.eu',
                         'urn:mace:egi.eu:group:vo.test.egi.eu:role=vm_operator#aai.egi.eu',
-                        'urn:mace:egi.eu:group:vo.test2.egi.eu:role=member#aai.egi.eu']
+                        'urn:mace:egi.eu:group:vo.test2.egi.eu:role=member#aai.egi.eu',
+                        'urn:mace:egi.eu:group:vo.test3.egi.eu:vm_operator:role=member#aai.egi.eu']
         res = utils.getUserVOs(entitlements)
-        self.assertEqual(res, ['vo.test.egi.eu', 'vo.test2.egi.eu'])
+        self.assertEqual(res, ['vo.test.egi.eu', 'vo.test2.egi.eu', 'vo.test3.egi.eu'])
 
     @patch("app.utils.getCachedProjectIDs")
     @patch("app.utils.getCachedSiteList")
