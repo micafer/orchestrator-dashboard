@@ -396,6 +396,8 @@ def create_app(oidc_blueprint=None):
                 form_data = request.form.to_dict()
                 cpu = int(form_data['cpu'])
                 memory = int(form_data['memory'])
+                gpu = int(form_data.get('gpu', 0))
+                disk_size = int(form_data.get('disk_size', 0))
 
                 vminforesp = im.get_vm_info(infid, vmid, auth_data, "text/plain")
                 if vminforesp.ok:
@@ -407,6 +409,15 @@ def create_app(oidc_blueprint=None):
                     vminfo.systems[0].delValue("memory.size")
                     vminfo.systems[0].addFeature(Feature("memory.size", ">=", memory, "GB"),
                                                  conflict="other", missing="other")
+                    if gpu > 0:
+                        vminfo.systems[0].delValue("gpu.count")
+                        vminfo.systems[0].addFeature(Feature("gpu.count", ">=", gpu),
+                                                     conflict="other", missing="other")
+                    if disk_size > 0:
+                        vminfo.systems[0].delValue("disks.free_size")
+                        vminfo.systems[0].delValue("disks.0.free_size")
+                        vminfo.systems[0].addFeature(Feature("disks.free_size", ">=", disk_size, "GB"),
+                                                     conflict="other", missing="other")
                     response = im.resize_vm(infid, vmid, str(vminfo), auth_data)
                 else:
                     raise Exception("Error getting VM info: %s" % vminforesp.text)
