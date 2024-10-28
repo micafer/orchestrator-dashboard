@@ -395,9 +395,9 @@ def create_app(oidc_blueprint=None):
             elif op == "resize":
                 form_data = request.form.to_dict()
                 cpu = int(form_data['cpu'])
-                memory = int(form_data['memory'])
+                memory = float(form_data['memory'])
                 gpu = int(form_data.get('gpu', 0))
-                disk_size = int(form_data.get('disk_size', 0))
+                disk_size = float(form_data.get('disk_size', 0))
 
                 vminforesp = im.get_vm_info(infid, vmid, auth_data, "text/plain")
                 if vminforesp.ok:
