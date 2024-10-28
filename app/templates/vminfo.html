@@ -328,21 +328,21 @@
 
                         <div class="row form-group">
                           <div class="col">
-                            CPU Number: <input name="cpu" class="col-sm-12" type="number" value="{{ cpu }}" required/>
+                            CPU Number: <input name="cpu" class="col-sm-12" type="number" min="0" step="1" value="{{ cpu }}" required/>
                           </div>
                           <div class="col">
                             {% set memory_parts = memory.split() %}
-                            Memory (GB): <input name="memory" class="col-sm-12" type="number" value="{{ memory_parts[0] | int }}" required/>
+                            Memory (GB): <input name="memory" class="col-sm-12" type="number" min="0" value="{{ memory_parts[0] | float }}" required/>
                           </div>
                         </div>
 
                         <div class="row form-group">
                           <div class="col">
-                            GPU Number: <input name="gcpu" class="col-sm-12" type="number" value="{{ gpu }}"/>
+                            GPU Number: <input name="gcpu" class="col-sm-12" type="number" min="0" step="1" value="{{ gpu }}"/>
                           </div>
                           <div class="col">
                           {% set disk_size_parts = disk_size.split() %}
-                            Disk Size (GB): <input name="disk_size" class="col-sm-12" type="number" value="{{ disk_size_parts[0] | int  }}"/>
+                            Disk Size (GB): <input name="disk_size" class="col-sm-12" type="number" min="0" value="{{ disk_size_parts[0] | float  }}"/>
                           </div>
                         </div>
 
