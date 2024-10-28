@@ -1,5 +1,5 @@
 Flask_Dance==7.1.0
-Werkzeug==3.0.4
+Werkzeug==3.0.6
 Flask==3.0.3
 requests==2.32.2
 PyYAML==6.0.2
