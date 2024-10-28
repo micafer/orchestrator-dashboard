@@ -166,8 +166,9 @@
               <!--Table head-->
               <!--Table body-->
               <tbody>
-                {% for infId, infInfo in infrastructures.items() %}
+                {% for infId in inf_list %}
                 <tr>
+                    {% set infInfo=infrastructures[infId] %}
                     <th scope="row">
                       {% if infInfo["name"] != "" %}
                         {{infInfo["name"]}}

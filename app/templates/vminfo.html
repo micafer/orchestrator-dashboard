@@ -108,6 +108,8 @@
                     HW Features:
                   </th>
                   <td>
+                    {% set disk_size="0.0 GB" %}
+                    {% set gpu="0" %}
                     {% if 'instance_type' in vminfo %}
                       {% if vminfo['instance_type'] %}
                        {{ vminfo['instance_type'] }}<br/>
@@ -124,14 +126,14 @@
                     {% endif %}
                     {% if 'disks.free_size' in vminfo %}
                       , {{ vminfo['disks.free_size'] }} of HD
-                      {% set _dummy=vminfo.pop('disks.free_size') %}
+                      {% set disk_size=vminfo.pop('disks.free_size') %}
                     {% elif 'disk.0.free_size' in vminfo %}
                       , {{ vminfo['disk.0.free_size'] }} of HD
-                      {% set _dummy=vminfo.pop('disk.0.free_size') %}
+                      {% set disk_size=vminfo.pop('disk.0.free_size') %}
                     {% endif %}
                     {% if 'gpu.count' in vminfo and vminfo['gpu.count'] > 0 %}
                       , {{ vminfo['gpu.count'] }} GPUs
-                      {% set _dummy=vminfo.pop('gpu.count') %}
+                      {% set gpu=vminfo.pop('gpu.count') %}
                       {% if 'gpu.vendor' in vminfo or 'gpu.model' in vminfo %}
                         (
                         {% if 'gpu.model' in vminfo %}
@@ -326,11 +328,21 @@
 
                         <div class="row form-group">
                           <div class="col">
-                            CPU Number: <input name="cpu" class="col-sm-12" type="number" value="{{ cpu }}" required/>
+                            CPU Number: <input name="cpu" class="col-sm-12" type="number" min="0" step="1" value="{{ cpu }}" required/>
                           </div>
                           <div class="col">
                             {% set memory_parts = memory.split() %}
-                            Memory (GB): <input name="memory" class="col-sm-12" type="number" value="{{ memory_parts[0] | int }}" required/>
+                            Memory (GB): <input name="memory" class="col-sm-12" type="number" min="0" value="{{ memory_parts[0] | float }}" required/>
+                          </div>
+                        </div>
+
+                        <div class="row form-group">
+                          <div class="col">
+                            GPU Number: <input name="gcpu" class="col-sm-12" type="number" min="0" step="1" value="{{ gpu }}"/>
+                          </div>
+                          <div class="col">
+                          {% set disk_size_parts = disk_size.split() %}
+                            Disk Size (GB): <input name="disk_size" class="col-sm-12" type="number" min="0" value="{{ disk_size_parts[0] | float  }}"/>
                           </div>
                         </div>
 

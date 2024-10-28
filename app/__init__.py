@@ -395,7 +395,9 @@ def create_app(oidc_blueprint=None):
             elif op == "resize":
                 form_data = request.form.to_dict()
                 cpu = int(form_data['cpu'])
-                memory = int(form_data['memory'])
+                memory = float(form_data['memory'])
+                gpu = int(form_data.get('gpu', 0))
+                disk_size = float(form_data.get('disk_size', 0))
 
                 vminforesp = im.get_vm_info(infid, vmid, auth_data, "text/plain")
                 if vminforesp.ok:
@@ -407,6 +409,15 @@ def create_app(oidc_blueprint=None):
                     vminfo.systems[0].delValue("memory.size")
                     vminfo.systems[0].addFeature(Feature("memory.size", ">=", memory, "GB"),
                                                  conflict="other", missing="other")
+                    if gpu > 0:
+                        vminfo.systems[0].delValue("gpu.count")
+                        vminfo.systems[0].addFeature(Feature("gpu.count", ">=", gpu),
+                                                     conflict="other", missing="other")
+                    if disk_size > 0:
+                        vminfo.systems[0].delValue("disks.free_size")
+                        vminfo.systems[0].delValue("disks.0.free_size")
+                        vminfo.systems[0].addFeature(Feature("disks.free_size", ">=", disk_size, "GB"),
+                                                     conflict="other", missing="other")
                     response = im.resize_vm(infid, vmid, str(vminfo), auth_data)
                 else:
                     raise Exception("Error getting VM info: %s" % vminforesp.text)
@@ -512,7 +523,8 @@ def create_app(oidc_blueprint=None):
                 infrastructures[inf_id]['cloud_type'] = infra_data["site"]["type"]
                 infrastructures[inf_id]['site'] = Markup(site_info)
 
-        return render_template('infrastructures.html', infrastructures=infrastructures, reload=reload_infid)
+        return render_template('infrastructures.html', infrastructures=infrastructures,
+                               reload=reload_infid, inf_list=inf_list)
 
     @app.route('/infrastructures/state')
     @authorized_with_valid_token
