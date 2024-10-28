@@ -523,7 +523,7 @@ def create_app(oidc_blueprint=None):
                 infrastructures[inf_id]['cloud_type'] = infra_data["site"]["type"]
                 infrastructures[inf_id]['site'] = Markup(site_info)
 
-        return render_template('infrastructures.html', infrastructures=infrastructures, reload=reload_infid)
+        return render_template('infrastructures.html', infrastructures=infrastructures, reload=reload_infid, inf_list=inf_list)
 
     @app.route('/infrastructures/state')
     @authorized_with_valid_token
