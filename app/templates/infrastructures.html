@@ -154,13 +154,13 @@
             <!--Table head-->
               <thead>
                 <tr>
-                  <th style="width: 10%" scope="col">Name</th>
-                  <th style="width: 25%; white-space: nowrap;" scope="col">Infrastructure uuid</th>
-                  <th style="width: 5%; white-space: nowrap;" scope="col">Cloud Type</th>
-                  <th style="width: 20%; white-space: nowrap;" scope="col">Cloud Info</th>
-                  <th style="width: 10%" scope="col">Status</th>
-                  <th style="width: 17%" scope="col">VMs</th>
-                  <th style="width: 13%" scope="col">Actions</th>
+                  <th style="width: 10%" scope="col" class="no-sort">Name</th>
+                  <th style="width: 25%; white-space: nowrap;" scope="col" class="no-sort">Infrastructure uuid</th>
+                  <th style="width: 5%; white-space: nowrap;" scope="col" class="no-sort">Cloud Type</th>
+                  <th style="width: 20%; white-space: nowrap;" scope="col" class="no-sort">Cloud Info</th>
+                  <th style="width: 10%" scope="col" class="no-sort">Status</th>
+                  <th style="width: 17%" scope="col" class="no-sort">VMs</th>
+                  <th style="width: 13%" scope="col" class="no-sort">Actions</th>
                 </tr>
               </thead>
               <!--Table head-->
@@ -569,6 +569,7 @@ $(document).ready(function () {
     $('#tableUserDeployments').dataTable( {
         "responsive": true,
         "order": [],
+        //"ordering": false
         "columnDefs": [ {
             "targets"  : 'no-sort',
             "orderable": false,
