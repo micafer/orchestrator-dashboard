@@ -120,8 +120,10 @@
       <!-- end PortSpec type -->
 
       {% elif value.type == "integer" %}
+      {% set min_value = value.constraints | selectattr('greater_than') | map(attribute='greater_than') | list  %}
+      {% set max_value = value.constraints | selectattr('less_than') | map(attribute='less_than') | list  %}
       <!-- number type -->
-      <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
+      <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_value %}min="{{min_value[0]}}"{%endif%} {% if max_value %}max="{{max_value[0]}}"{%endif%}/>
       {% elif value.type == "scalar-unit.size" %}
       <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" pattern="[0-9]*( )([TMG]B)" title="Number Unit(MB, GB or TB)">
       {% else %}
