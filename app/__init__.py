@@ -242,9 +242,6 @@ def create_app(oidc_blueprint=None):
                 else:
                     session['gravatar'] = utils.avatar(account_info_json['sub'], 26)
             else:
-                return render_template('error_pages/500.html', support_email=app.config.get('SUPPORT_EMAIL'),
-                               support_link=app.config.get('SUPPORT_LINK'),
-                               support_link_name=app.config.get('SUPPORT_LINK_NAME')), 500
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
 
