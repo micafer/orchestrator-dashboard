@@ -395,9 +395,9 @@ def create_app(oidc_blueprint=None):
             elif op == "resize":
                 form_data = request.form.to_dict()
                 cpu = int(form_data['cpu'])
-                memory = int(form_data['memory'])
+                memory = float(form_data['memory'])
                 gpu = int(form_data.get('gpu', 0))
-                disk_size = int(form_data.get('disk_size', 0))
+                disk_size = float(form_data.get('disk_size', 0))
 
                 vminforesp = im.get_vm_info(infid, vmid, auth_data, "text/plain")
                 if vminforesp.ok:
@@ -523,7 +523,8 @@ def create_app(oidc_blueprint=None):
                 infrastructures[inf_id]['cloud_type'] = infra_data["site"]["type"]
                 infrastructures[inf_id]['site'] = Markup(site_info)
 
-        return render_template('infrastructures.html', infrastructures=infrastructures, reload=reload_infid)
+        return render_template('infrastructures.html', infrastructures=infrastructures,
+                               reload=reload_infid, inf_list=inf_list)
 
     @app.route('/infrastructures/state')
     @authorized_with_valid_token
