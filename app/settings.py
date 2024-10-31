@@ -24,16 +24,21 @@
 class Settings:
     def __init__(self, config):
         """Creator function."""
+        self.version = "2.5.7"
         self.toscaDir = config.get('TOSCA_TEMPLATES_DIR', '') + "/"
-        self.toscaParamsDir = config.get('TOSCA_PARAMETERS_DIR', '') + "/"
         self.imUrl = config['IM_URL']
         self.oidcName = config['OIDC_NAME']
+        self.oidcImage = config.get('OIDC_IMAGE')
         self.oidcUrl = config['OIDC_BASE_URL']
+        self.oidcTokenUrl = config.get('OIDC_TOKEN_URL', self.oidcUrl + "/token")
+        self.oidcAuthorizeUrl = config.get('OIDC_AUTHORIZE_URL', self.oidcUrl + "/authorize")
+        self.oidcUserInfoPath = config.get('OIDC_USER_INFO_PATH', "/userinfo")
         self.tempSlamUrl = config.get('SLAM_URL') if config.get('SLAM_URL') else ""
         self.external_links = config.get('EXTERNAL_LINKS') if config.get('EXTERNAL_LINKS') else []
         self.oidcGroups = config.get('OIDC_GROUP_MEMBERSHIP')
         self.db_url = config.get('DB_URL')
         self.analytics_tag = config.get('ANALYTICS_TAG')
+        self.motomo_info = config.get('MOTOMO_INFO')
         self.static_sites = config.get('STATIC_SITES', [])
         self.static_sites_url = config.get('STATIC_SITES_URL', "")
         self.appdb_cache_timeout = config.get('APPDB_CACHE_TIMEOUT', 3600)
@@ -43,3 +48,10 @@ class Settings:
         self.vault_url = config.get('VAULT_URL', None)
         self.im_auth = config.get('IM_AUTH', None)
         self.vo_map = config.get('VO_MAP', {})
+        self.extra_auth = config.get('EXTRA_AUTH', [])
+        self.vos_user_role = config.get('VOS_USER_ROLE')
+        self.enable_external_vault = config.get('ENABLE_EXTERNAL_VAULT', False)
+        self.hide_tosca_tags = config.get('HIDE_TOSCA_TAGS', [])
+        self.oaipmh_repo_name = config.get('OAIPMH_REPO_NAME', "")
+        self.oaipmh_repo_description = config.get('OAIPMH_REPO_DESCRIPTION', "")
+        self.oaipmh_repo_base_identifier_url = config.get('OAIPMH_REPO_BASE_IDENTIFIER_URL', "")

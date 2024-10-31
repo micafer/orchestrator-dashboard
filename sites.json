@@ -9,13 +9,41 @@
             "biomed": "eca73ad6a84d4c0088063505c36349ab",
             "vo.indigo-datacloud.eu": "25cb49baedbf40a194729ff6802c8491",
             "umsa.cerit-sc.cz": "10e31299a9b548fdbe36e4dbe571168e",
-	    "cryoem.instruct-eric.eu": "d0ebf0fad0a04be19f93fdf794469544",
-            "vo.eoscfuture-sp.panosc.eu": "c91eeff7bf7845bc901b319512f2ebdb"
+            "cryoem.instruct-eric.eu": "d0ebf0fad0a04be19f93fdf794469544",
+            "vo.eoscfuture-sp.panosc.eu": "c91eeff7bf7845bc901b319512f2ebdb",
+            "vo.pangeo.eu": "05e0ff6e03774082aadacc75bfc1d783",
+            "training.egi.eu": "eae2aa7f26334104906106bca4b82ae3",
+            "eval.c-scale.eu": "d6283bc95d5c4296abb799596867818c",
+	    "vo.enes.org": "786566209a7444f89a561172fa28e117"
         },
         "networks": {
             "cryoem.instruct-eric.eu": {
                 "private": "group-project-network",
                 "public": "public-muni-147-251-21-GROUP"
+            },
+            "vo.eoscfuture-sp.panosc.eu": {
+                "private": "group-project-network",
+                "public": "public-muni-147-251-21-GROUP"
+            },
+            "vo.pangeo.eu": {
+                "private": "group-project-network",
+                "public": "public-muni-147-251-21-GROUP"
+            },
+	    "training.egi.eu": {
+                "private": "auto_allocated_network",
+                "public": "public-cesnet-78-128-251-GROUP"
+            },
+            "eval.c-scale.eu": {
+                "private": "group-project-network",
+                "public": "public-muni-147-251-21-GROUP"
+            },
+            "in-sar-cubes.c-scale.eu": {
+                "private": "group-project-network",
+                "public": "public-muni-147-251-21-GROUP"
+            },
+            "vo.enes.org": {
+                "private": "78-128-250-pers-proj-net",
+                "public": "public-cesnet-78-128-250-PERSONAL"
             }
         }
     },
@@ -26,8 +54,9 @@
         "vos": {
             "eosc-synergy.eu": "ddf0c468c8af4e0bbb9808bfc0288381",
             "worsica.vo.incd.pt": "a53ca78c534046e5b13f4537ae698411",
-            "covid19.eosc-synergy.eu": "05e52356addc44e18ef2bd14f2e2f67d",
-            "lagoproject.net": "14e8f964db4c4a8ea286b0886ab51e7c"
+            "vo.imagine-ai.eu": "009f77df459b4a6389910e0fb20ddcaf",
+            "vo.ai4eosc.eu": "c61c1bb323414a248cb142eb6183d4b2",
+            "cloud.egi.eu": "6b042927bcfa466cb9eb56d3ea679987"
         }
     },
     {
@@ -80,11 +109,11 @@
         "url": "https://colossus.cesar.unizar.es:5000",
         "id": "12249G0",
         "vos": {
-            "eosc-synergy.eu": "fdfa9b81582447729f16de6cf61b16e4",
-            "covid19.eosc-synergy.eu": "36b6d10a0c194fa8991e7e8d15297478",
+            "eosc-synergy.eu": "0c1de26753ed4311a6cefff9094ad3e3",
+            "covid19.eosc-synergy.eu": "f07679a8d4ac40379b51db4236bc3c27",
             "o3as.data.kit.edu": "621b1977bb384beab1519713c7e695f0",
-            "worsica.vo.incd.pt": "fce23a2c4eca447a9d5b9c2bdab55e26",
-            "lagoproject.net": "bb8a629f3e644b69befbf17130c1dee3"
+            "worsica.vo.incd.pt": "46f55a92f3904d509d75525930d8d0eb",
+            "lagoproject.net": "21a85c6ead0346b08e22709d0422799d"
         }
     },
     {
@@ -92,12 +121,12 @@
         "url": "https://controller.ceta-ciemat.es:5000",
         "id": "7540G0",
         "vos": {
-            "eosc-synergy.eu": "0819ebde41fd4c0d95560fc23dc575a4",
-            "covid19.eosc-synergy.eu": "e3716e9fb6a241fd91469a6ee05358a1",
-            "o3as.data.kit.edu": "91b83525d63c48d78740e6799cfed2c4",
-            "worsica.vo.incd.pt": "38414631e27c485eae87f6dcb3082873",
-            "fedcloud.egi.eu": "aa7f62b244c946038c093d0bf05827a1",
-            "lagoproject.net": "9d234e59f4734ebdaf1e271067e40978"
+            "eosc-synergy.eu": "8e0f99db8b7845d38512f0ddce9049e3",
+            "covid19.eosc-synergy.eu": "4eda27e5514c496b9878e2b87a7c8515",
+            "o3as.data.kit.edu": "b8f5431e14e64c1ca2264f44ce6b0567",
+            "worsica.vo.incd.pt": "ef3e041a01a44915a3654c7c09af1fb1",
+            "fedcloud.egi.eu": "8ad2ac56f33540cdbfbd45ad5095d924",
+            "lagoproject.net": "3afddede673548a99dc5c2e819baf5a8"
         }
     },
     {
@@ -107,7 +136,8 @@
         "vos": {
             "eosc-synergy.eu": "51f736d36ce34b9ebdf196cfcabd24ee",
             "covid19.eosc-synergy.eu": "a22bbffb007745b2934bf308b0a4d186",
-	    "mswss.ui.savba.sk": "a3684e7440aa42f287cf5e9e85ea4cae" 
+	    "mswss.ui.savba.sk": "a3684e7440aa42f287cf5e9e85ea4cae",
+	    "vo.ai4eosc.eu": "4d40037774784f22907d537070e85f42"
         }
     },
     {
@@ -143,6 +173,54 @@
         "vos": {
             "vo.cite.gr": "cf702115862145869d78aadab4021f81"
         }
+    },
+    {
+        "name": "IN2P3-IRES",
+        "url": "https://sbgcloud.in2p3.fr:5000",
+        "id": "7535G0",
+        "vos": {
+            "vo.lethe-project.eu": "f064d2b5f42a4704958f3bfbff7404bd",
+            "vo.operas-eu.org": "bc4fed7e87514dd884924c77cad714bc",
+            "vo.instruct.eu" : "e459576d88a141e9b5ffd52b2f4abcf4"
+        }
+    },
+    {
+        "name": "INFN-CLOUD-CNAF",
+        "url": "https://cloud-api-pub.cr.cnaf.infn.it:5000",
+        "id": "13252G0",
+        "region": "sdds"
+    },
+    {
+        "name": "CESGA-CLOUD",
+        "url": "https://cloud.srv.cesga.es:5000",
+        "id": "14059G0",
+        "vos": {
+            "eosc-synergy.eu": "8b3f809f2b0841e6b91b7f60d08da8c9",
+	    "vo.deltares.nl": "8a244d1b0d0f4f8e8c9519fae4cfc8ee",
+	    "vo.obsea.es": "277dd78e3b3b4c8caf93ad42fddaec38",
+	    "bioisi": "458f3225272243d7b1c0551d3af3f130"
+        }
+    },
+    {
+        "name": "IFCA-LCG2",
+        "url": "https://api.cloud.ifca.es:5000",
+        "id": "7513G0",
+        "vos": {
+            "vo.ai4eosc.eu": "f44e296a9ea441548456d25fb5b467c9"
+        }
+    },
+    {
+        "name": "GRNET-OPENSTACK",
+        "url": "https://keystone-louros.cloud.grnet.gr:5000",
+        "id": "111397G0",
+        "vos": {
+            "dev.intertwin.eu": "761d439913b34b90850ce5c44d0e96eb"
+        },
+        "networks": {
+            "dev.intertwin.eu": {
+                "private": "hisea-net",
+                "public": "FloatingIP-Network"
+            }
+        }
     }
-
 ]

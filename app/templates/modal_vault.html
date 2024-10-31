@@ -1,0 +1,78 @@
+<script>
+
+  function disable() {
+    $('#url').prop('disabled', true);
+    $('#mount_point').prop('disabled', true);
+    $('#path').prop('disabled', true);
+    $('#kv_ver').prop('disabled', true);
+    $('#overwrite').prop('checked', false);
+    $('#egi_vault').prop('disabled', true);
+  }
+
+  function toggleDisable() {
+    $('#url').prop('disabled', (i, v) => !v);
+    $('#mount_point').prop('disabled', (i, v) => !v);
+    $('#path').prop('disabled', (i, v) => !v);
+    $('#kv_ver').prop('disabled', (i, v) => !v);
+    $('#egi_vault').prop('disabled', (i, v) => !v);
+  }
+
+  $(document).ready(function () {
+    $("#overwrite").click(function () {
+      toggleDisable();
+    });
+  });
+
+  $(document).ready(function () {
+    $("#egi_vault").click(function () {
+      $('#url').val("https://secrets.egi.eu")
+      $('#mount_point').val("/secrets")
+      $('#path').val("users/{{ session['userid'] }}/secrets")
+      $('#kv_ver').val("1")
+    });
+  });
+
+</script>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+      <div class="row form-group">
+        <div class="col">
+          <input type="checkbox" name="overwrite" id="overwrite" value="1"> Use extenal Vault instance (disable internal one.).<br/>
+          <span class="small">
+            Set <a href="https://secrets.egi.eu/" target="_blank">Fedcloud Secret management service</a> values. <button type="button" class="btn btn-info btn-sm" id="egi_vault" role="button" href="#"><span class="fas fa-gears"></span></button>
+          </span>
+        </div>
+      </div>
+
+      <div class="row form-group">
+        <div class="col col-6">
+          <label for="url"><strong>URL </strong></label>
+          <input placeholder="URL" name="url" class="form-control" type="text" id="url" value="{{ vinfo[0] if vinfo else '' }}" required/>
+        </div>
+        <div class="col col-4">
+          <label for="mount_point"><strong>Mount point </strong></label>
+          <input placeholder="Mount point" name="mount_point" class="form-control" type="text" id="mount_point" value="{{ vinfo[1] if vinfo else '' }}" required/>
+        </div>
+        <div class="col col-2">
+          <label for="kv_ver"><strong>KV Version</strong></label>
+          <select class="js-example-basic-single js-states form-control" id="kv_ver" name="kv_ver">
+            <option value="1" {% if (vinfo[3] if vinfo else 0) == 1 %}selected{%endif%}>1</option>
+            <option value="2" {% if (vinfo[3] if vinfo else 0) == 2 %}selected{%endif%}>2</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row form-group">
+        <div class="col">
+          <label for="path"><strong>Path </strong></label>
+          <input placeholder="Path" name="path" class="form-control" type="text" id="path" value="{{ vinfo[2] if vinfo else '' }}" required/>
+        </div>
+      </div>
+
+<script>
+{% if not vinfo %}
+disable();
+{% else %}
+$('#overwrite').prop('checked', true);
+{% endif %}
+</script>

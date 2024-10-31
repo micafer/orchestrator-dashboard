@@ -1,4 +1,12 @@
-# im-dashboard
+# IM-Dashboard
+
+[![Tests](https://github.com/grycap/im-dashboard/actions/workflows/main.yaml/badge.svg)](https://github.com/grycap/im-dashboard/actions/workflows/main.yaml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c985310233c34f0aa6699cc9b167fba0)](https://www.codacy.com/gh/grycap/im-dashboard/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=grycap/im-dashboard&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/c985310233c34f0aa6699cc9b167fba0)](https://www.codacy.com/gh/grycap/im-dashboard/dashboard?utm_source=github.com&utm_medium=referral&utm_content=grycap/im-dashboard&utm_campaign=Badge_Coverage)
+[![License](https://img.shields.io/badge/license-GPL%20v3.0-brightgreen.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://imdocs.readthedocs.io/en/latest/dashboard.html)
+[![SQAaaS badge](https://img.shields.io/badge/sqaaas%20software-gold-yellow)](https://eu.badgr.com/public/assertions/oFwlnWtbR-u4kQa_BPnmUg)
+
 
 Infrastructure Manager - Simple Graphical UI (based on [INDIGO PaaS Orchestrator Dashboard](https://github.com/indigo-dc/orchestrator-dashboard))
 
@@ -13,6 +21,14 @@ Functionalities:
 The im-dashboard is a Python application built with the [Flask](http://flask.pocoo.org/) microframework; [Flask-Dance](https://flask-dance.readthedocs.io/en/latest/) is used for Openid-Connect/OAuth2 integration.
 
 The docker image uses [Gunicorn](https://gunicorn.org/) as WSGI HTTP server to serve the Flask Application.
+
+## Achievements
+
+[![SQAaaS badge](https://github.com/EOSC-synergy/SQAaaS/raw/master/badges/badges_150x116/badge_software_gold.png)](https://eu.badgr.com/public/assertions/oFwlnWtbR-u4kQa_BPnmUg "SQAaaS gold badge achieved")
+
+This software has received a gold badge according to the
+[Software Quality Baseline criteria](https://github.com/indigo-dc/sqa-baseline)
+defined by the [EOSC-Synergy](https://www.eosc-synergy.eu) project.
 
 ## How to deploy the dashboard
 
@@ -36,6 +52,8 @@ Create the `config.json` file (see the [example](app/config-sample.json)) settin
 | IM_URL | Infrastructure Manager service URL | Y | N/A |
 | IM_TIMEOUT | Infrastructure Manager service calls timeout | N | 60 |
 | SUPPORT_EMAIL | Email address that will be shown in case of errors | N | "" |
+| SUPPORT_LINK | Link that will be shown in case of errors | N | "" |
+| SUPPORT_LINK_NAME | Text Link that that will be shown in case of errors | N | "" |
 | EXTERNAL_LINKS | List of dictionaries ({ "url": "example.com" , "menu_item_name": "Example link"}) specifying links that will be shown under the "External Links" menu | N | [] |
 | LOG_LEVEL | Set Logging level | N | info |
 | DB_URL | URL to the DB to store dashboard data | N | sqlite:///creds.db |
@@ -98,6 +116,8 @@ topology_template:
 
 ....
 ```
+
+You can find the set of available TOSCA templates in the following [repo](https://github.com/grycap/tosca).
 
 ### Enabling HTTPS
 

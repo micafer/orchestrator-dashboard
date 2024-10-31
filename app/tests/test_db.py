@@ -18,9 +18,8 @@
 
 import unittest
 import os
-
-from app.db import DataBase
 from mock import patch, MagicMock
+from app.db import DataBase
 
 
 class TestDataBase(unittest.TestCase):
@@ -76,7 +75,7 @@ class TestDataBase(unittest.TestCase):
         db = DataBase(db_url)
         self.assertTrue(db.connect())
 
-        database.collection_names.return_value = ['table1']
+        database.list_collection_names.return_value = ['table1']
         res = db.table_exists("test")
         self.assertFalse(res)
         res = db.table_exists("table1")

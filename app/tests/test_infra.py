@@ -37,22 +37,22 @@ class TestInfrastructures(unittest.TestCase):
         res.close()
 
         res = infra.get_infra("infid")
-        self.assertEquals(res, {'name': 'infra_name'})
+        self.assertEqual(res, {'name': 'infra_name'})
 
     def test_write_infra(self):
         infra = Infrastructures("sqlite:///tmp/creds.db")
         infra.write_infra("infid", {"name": "infra_name"})
         res = infra.get_infra("infid")
-        self.assertEquals(res, {"name": "infra_name"})
+        self.assertEqual(res, {"name": "infra_name"})
         infra.write_infra("infid", {"state": "infra_state"})
         res = infra.get_infra("infid")
-        self.assertEquals(res, {"name": "infra_name", "state": "infra_state"})
+        self.assertEqual(res, {"name": "infra_name", "state": "infra_state"})
 
     def test_delete_infra(self):
         infra = Infrastructures("sqlite:///tmp/creds.db")
         infra.delete_infra("infid")
         res = infra.get_infra("infid")
-        self.assertEquals(res, {})
+        self.assertEqual(res, {})
 
 
 if __name__ == '__main__':

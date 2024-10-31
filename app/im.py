@@ -64,8 +64,8 @@ class InfrastructureManager():
         inf_state = response.json()
         return inf_state['state']
 
-    def get_vm_info(self, infid, vmid, auth_data):
-        headers = {"Authorization": auth_data, "Accept": "application/json"}
+    def get_vm_info(self, infid, vmid, auth_data, accept="application/json"):
+        headers = {"Authorization": auth_data, "Accept": accept}
         url = "%s/infrastructures/%s/vms/%s" % (self.im_url, infid, vmid)
         return requests.get(url, headers=headers, timeout=self.timeout)
 
@@ -83,12 +83,12 @@ class InfrastructureManager():
 
         return response
 
-    def reconfigure_inf(self, infid, auth_data, vmids=None):
-        headers = {"Authorization": auth_data}
+    def reconfigure_inf(self, infid, auth_data, vmids=None, tosca=None):
+        headers = {"Authorization": auth_data, "Content-Type": "text/yaml"}
         url = "%s/infrastructures/%s/reconfigure" % (self.im_url, infid)
         if vmids:
             url += "?vm_list=%s" % ",".join(vmids)
-        return requests.put(url, headers=headers, timeout=self.timeout)
+        return requests.put(url, headers=headers, data=tosca, timeout=self.timeout)
 
     def get_inf_property(self, infid, prop, auth_data):
         headers = {"Authorization": auth_data}
@@ -112,9 +112,11 @@ class InfrastructureManager():
         url = "%s/infrastructures?async=1" % self.im_url
         return requests.post(url, headers=headers, data=payload, timeout=self.timeout)
 
-    def addresource_inf(self, infid, payload, auth_data):
+    def addresource_inf(self, infid, payload, auth_data, context=None):
         headers = {"Authorization": auth_data, "Accept": "application/json"}
         url = "%s/infrastructures/%s" % (self.im_url, infid)
+        if context is False:
+            url += "?context=0"
         return requests.post(url, headers=headers, data=payload, timeout=self.timeout)
 
     def get_cloud_images(self, cloud_id, auth_data):
@@ -173,3 +175,26 @@ class InfrastructureManager():
         response.raise_for_status()
         stats = response.json()
         return stats['stats']
+
+    def remove_resources(self, infid, vm_list, auth_data):
+        headers = {"Authorization": auth_data}
+        url = "%s/infrastructures/%s/vms/%s" % (self.im_url, infid, vm_list)
+        response = requests.delete(url, headers=headers, timeout=self.timeout)
+
+        return response
+
+    def export_inf(self, infid, auth_data, delete=False):
+        headers = {"Authorization": auth_data}
+        url = "%s/infrastructures/%s/data" % (self.im_url, infid)
+        if delete:
+            url += "?delete=1"
+        response = requests.get(url, headers=headers, timeout=self.timeout)
+        response.raise_for_status()
+        return response.json()['data']
+
+    def import_inf(self, data, auth_data):
+        headers = {"Authorization": auth_data}
+        url = "%s/infrastructures" % self.im_url
+        response = requests.put(url, headers=headers, timeout=self.timeout, data=data)
+        response.raise_for_status()
+        return response.text

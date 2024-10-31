@@ -27,37 +27,52 @@ class TestUtils(unittest.TestCase):
 
     def test_getUserVOs(self):
         entitlements = ['urn:mace:egi.eu:group:vo.test.egi.eu:role=member#aai.egi.eu',
-                        'urn:mace:egi.eu:group:vo.test2.egi.eu:role=member#aai.egi.eu']
+                        'urn:mace:egi.eu:group:vo.test.egi.eu:role=vm_operator#aai.egi.eu',
+                        'urn:mace:egi.eu:group:vo.test2.egi.eu:role=member#aai.egi.eu',
+                        'urn:mace:egi.eu:group:vo.test3.egi.eu:vm_operator:role=member#aai.egi.eu']
         res = utils.getUserVOs(entitlements)
-        self.assertEquals(res, ['vo.test.egi.eu', 'vo.test2.egi.eu'])
+        self.assertEqual(res, ['vo.test.egi.eu', 'vo.test2.egi.eu', 'vo.test3.egi.eu'])
 
     @patch("app.utils.getCachedProjectIDs")
     @patch("app.utils.getCachedSiteList")
     def test_getUserAuthData(self, getCachedSiteList, getCachedProjectIDs):
         cred = MagicMock()
-        with flask.Flask(__name__).test_request_context() as flask_context:
+        with flask.Flask(__name__).app_context() as flask_context:
             cred.get_creds.return_value = [{'enabled': 1, 'type': 'OpenNebula', 'id': 'one',
                                             'username': 'user', 'password': 'pass'},
                                            {'enabled': 1, 'type': 'fedcloud', 'id': 'fed',
-                                            'host': 'https://api.cloud.ifca.es:5000', 'vo': 'vo_name'}]
+                                            'host': 'https://api.cloud.ifca.es:5000', 'vo': 'vo_name'},
+                                           {'enabled': 1, 'type': 'CH', 'id': 'ch', 'region': 'f1a',
+                                            'username': 'user', 'password': 'pass', 'tenant': 'tenant'}]
             getCachedSiteList.return_value = {
                 'CESGA': {'url': 'https://fedcloud-osservices.egi.cesga.es:5000', 'state': '', 'id': '11548G0'},
-                'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca'}
+                'IFCA': {'url': 'https://api.cloud.ifca.es:5000', 'state': '', 'id': 'ifca', 'identity_method': 'oidc'}
             }
             getCachedProjectIDs.return_value = {"vo_name_st": "project_id_st", "vo_name": "project_id"}
 
             flask_context.g.settings = MagicMock()
             flask_context.g.settings.im_auth = ""
             res = utils.getUserAuthData("token", cred, "user")
-            self.assertEquals(res, ("type = InfrastructureManager; token = token\\nid = one; type = OpenNebula;"
-                                    " username = user; password = pass\\n"
-                                    "id = fed; type = OpenStack; username = egi.eu;"
-                                    " tenant = openid; auth_version = 3.x_oidc_access_token; host ="
-                                    " https://api.cloud.ifca.es:5000; password = 'token'; domain = project_id"))
+            self.assertEqual(res, ("type = InfrastructureManager; token = token\\nid = one; type = 'OpenNebula';"
+                                   " username = 'user'; password = 'pass'\\n"
+                                   "id = fed; type = OpenStack; username = egi.eu;"
+                                   " tenant = oidc; auth_version = 3.x_oidc_access_token; host ="
+                                   " https://api.cloud.ifca.es:5000; password = 'token'; vo = vo_name;"
+                                   " domain = project_id\\n"
+                                   "id = ch; type = OpenStack; auth_version = 3.x_password;"
+                                   " host = https://identity-f1a.cloudandheat.com:5000; username = user;"
+                                   " tenant = tenant; password = 'pass'"))
 
             flask_context.g.settings.im_auth = "Bearer"
             res = utils.getUserAuthData("token", cred, "user")
-            self.assertEquals(res, ("Bearer token"))
+            self.assertEqual(res, ("Bearer token"))
+
+    def test_merge_template(self):
+        template = {"topology_template": {"node_templates": {"n1": {"type": "Compute"}}}}
+        template2 = {"topology_template": {"node_templates": {"n2": {"type": "Compute"}}}}
+        new_template = utils.merge_templates(template, template2)
+        self.assertEqual(new_template, {"topology_template": {"node_templates": {"n1": {"type": "Compute"},
+                                                                                 "n2": {"type": "Compute"}}}})
 
 
 if __name__ == '__main__':

@@ -22,8 +22,16 @@
             </thead>
             <tbody>
                 <tr>
+                    <td>Version</td>
+                    <td>{{ version }}</td>
+                </tr>
+                <tr>
                     <td>OIDC issuer</td>
                     <td>{{ oidc_url }}</td>
+                </tr>
+                <tr>
+                    <td>OIDC Identifier</td>
+                    <td>{{ session['userid'] }}</td>
                 </tr>
                 <tr>
                     <td>OIDC Access token</td>

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -10,37 +11,42 @@
   <link rel="icon" href="{{ url_for('static', filename='images/favicon_io/favicon-32x32.png') }}">
   <link rel="icon" href="{{ url_for('static', filename='images/favicon_io/favicon-16x16.png') }}">
   <link rel="manifest" href="{{ url_for('static', filename='images/favicon_io/site.webmanifest') }}">
-  <!-- BS4-->
+  <!-- BS5-->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-  <!-- FontAwesome-->
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
-    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <!-- FontAwesome
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css"
+    integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+  -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fontawesome.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/regular.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/brands.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/solid.min.css') }}" />
   <!-- Cookie Consent -->
   <script src="{{ url_for('static', filename='js/cookieconsent-4.0.1.min.js') }}"></script>
 {% if home is not defined %}
   <!-- General Bootstrap JS -->
-  <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
   <!-- DataTables -->
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dataTables.bootstrap4.min.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/responsive.bootstrap4.min.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scroller.bootstrap4.min.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dataTables.bootstrap5.min.css') }}" />
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.bootstrap4.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.responsive.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/responsive.bootstrap4.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.scroller.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/dataTables.bootstrap5.min.js') }}"></script>
   <!-- Select2 -->
   <link href="{{ url_for('static', filename='css/select2.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/select2-bootstrap-5-theme.min.css') }}" rel="stylesheet">
   <script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
   <!-- Toggle -->
-  <link href="{{ url_for('static', filename='css/bootstrap4-toggle.min.css') }}" rel="stylesheet">
-  <script src="{{ url_for('static', filename='js/bootstrap4-toggle.min.js') }}"></script>
+  <link href="{{ url_for('static', filename='css/bootstrap5-toggle.min.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='js/bootstrap5-toggle.jquery.min.js') }}"></script>
   <!-- Latest compiled and minified JavaScript -->
   <script src="{{ url_for('static', filename='js/bootstrap-show-password.min.js') }}"></script>
 {% endif %}
-  <style>
+  <style> 
+/* Make the navbar a bit transparent */
+  .navbar {  
+    opacity: 0.95;	   
+  }
   .cookieconsent-com---palette-dark .cc-nb-okagree {
     background-color: #ffc107;
     color: white;
@@ -90,6 +96,25 @@
       </script>
     <!-- end of Google Analytics-->
     {% endif %}
+
+    {% if g.motomo_info and "url" in g.motomo_info and g.motomo_info["url"] %}
+    <!-- Matomo -->
+    <script>
+      var _paq = window._paq = window._paq || [];
+      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+      _paq.push(['requireCookieConsent']);
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u="{{ g.motomo_info['url'] }}";
+        _paq.push(['setTrackerUrl', u+'matomo.php']);
+        _paq.push(['setSiteId', '{{ g.motomo_info["siteid"] }}']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.async=true; g.src='//cdn.matomo.cloud/egi.matomo.cloud/matomo.js'; s.parentNode.insertBefore(g,s);
+      })();
+    </script>
+    <!-- End Matomo Code -->
+    {% endif %}
     
     <noscript>ePrivacy and GPDR Cookie Consent by <a href="https://www.CookieConsent.com/" rel="nofollow noopener">Cookie Consent</a></noscript>
 
@@ -97,10 +122,10 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark navbar-expand-md sticky-top">
+  <nav class="navbar navbar-dark bg-dark navbar-expand-md sticky-top shadow">
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for("home") }}"><img src="{{ url_for('static', filename='images/im-logo-only.png') }}" width="40"> IM Dashboard</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#myNavbar">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="myNavbar">
@@ -109,7 +134,7 @@
           <li class="nav-item active"><a class="nav-link"
               href="{{ url_for("showinfrastructures") }}">Infrastructures</a></li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Advanced</a>
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Advanced</a>
             <div class="dropdown-menu">
               <a class="dropdown-item" href="{{ url_for("show_settings") }}">Settings</a>
               <a class="dropdown-item" href="{{ url_for("show_stats") }}">Stats</a>
@@ -117,7 +142,7 @@
           </li>
           {% if session["external_links"]|length > 0 %}
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">External Links</a>
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">External Links</a>
             <div class="dropdown-menu">
               {% for link in session["external_links"] %}
               <a class="dropdown-item" href="{{ link.url }}" target="blank">{{link.menu_item_name}}</a>
@@ -128,18 +153,16 @@
           {% endif %}
         </ul>
         {% if session['username'] %}
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
               <img class="rounded-circle" src="{{ session['gravatar'] }}" </src>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ session['username'] }}<span class="caret"></span>
             </a>
-            <div class="dropdown-menu dropdown-menu-right"">
-              <a class="dropdown-item text-right disabled">{{ session['userid'] }}</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item text-right" href="{{ url_for("manage_creds") }}">Cloud Credentials</a>
-	      <a class="dropdown-item text-right" href="{{ url_for("get_ssh_keys") }}">SSH Keys</a>
-              <a class="dropdown-item text-right" href="{{ url_for("logout") }}">Logout</a>
+            <div class="dropdown-menu dropdown-menu-end">
+              <a class="dropdown-item text-end" href="{{ url_for("manage_creds") }}">Cloud Credentials</a>
+              <a class="dropdown-item text-end" href="{{ url_for("get_ssh_keys") }}">SSH Key</a>
+              <a class="dropdown-item text-end" href="{{ url_for("logout") }}">Logout</a>
             </div>
           </li>
         </ul>

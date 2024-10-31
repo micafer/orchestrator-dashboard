@@ -20,31 +20,39 @@
 # under the License.
 """Util functions."""
 
-import json
-import yaml
-import requests
-import os
 import io
-import ast
-import time
+import json
+import os
 import sys
-import urllib3
-from radl.radl_json import parse_radl
-from flask import flash, g
-from app import appdb
+import time
+import re
+from collections import OrderedDict
 from fnmatch import fnmatch
 from hashlib import md5
 from random import randint
-from collections import OrderedDict
+
+import requests
+import urllib3
+import yaml
+from flask import flash, g
+from radl.radl_json import parse_radl
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+from app import appdb
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 urllib3.disable_warnings(InsecureRequestWarning)
 
 SITE_LIST = {}
 LAST_UPDATE = 0
+PORT_SPECT_TYPES = ["PortSpec", "tosca.datatypes.network.PortSpec", "tosca.datatypes.indigo.network.PortSpec"]
 
 
-def _getStaticSitesInfo():
+def _getStaticSitesInfo(force=False):
+    # Remove cache if force is True
+    if force and g.settings.static_sites_url:
+        g.settings.static_sites = None
+
     if g.settings.static_sites:
         return g.settings.static_sites
     elif g.settings.static_sites_url:
@@ -83,9 +91,9 @@ def getCachedProjectIDs(site_id):
     return res
 
 
-def getStaticSites(vo=None):
+def getStaticSites(vo=None, force=False):
     res = {}
-    for site in _getStaticSitesInfo():
+    for site in _getStaticSitesInfo(force=force):
         if vo is None or ("vos" in site and site["vos"] and vo in site["vos"]):
             res[site["name"]] = site
             site["state"] = ""
@@ -93,42 +101,37 @@ def getStaticSites(vo=None):
     return res
 
 
-def getStaticVOs():
-    res = []
-    for site in _getStaticSitesInfo():
-        if "vos" in site and site["vos"]:
-            res.extend(list(site["vos"].keys()))
-
-    return list(set(res))
-
-
 def get_site_info(cred_id, cred, userid):
     domain = None
+    res_site = {}
 
     cred_data = cred.get_cred(cred_id, userid)
     vo = cred_data['vo']
 
     for site in list(getCachedSiteList().values()):
         if site['url'] == cred_data['host']:
+            res_site = site
+            project_ids = getCachedProjectIDs(site["id"])
+            if vo in project_ids:
+                domain = project_ids[vo]
             break
 
-    project_ids = getCachedProjectIDs(site["id"])
-    if vo in project_ids:
-        domain = project_ids[vo]
-
-    return site, domain, vo
+    return res_site, domain, vo
 
 
-def getUserVOs(entitlements):
+def getUserVOs(entitlements, vo_role=None):
     vos = []
     for elem in entitlements:
+        # format: urn:mace:egi.eu:group:eosc-synergy.eu:role=vm_operator#aai.egi.eu
+        # or      urn:mace:egi.eu:group:demo.fedcloud.egi.eu:vm_operator:role=member#aai.egi.eu
         if elem.startswith('urn:mace:egi.eu:group:'):
             vo = elem[22:22 + elem[22:].find(':')]
-            if vo:
-                vos.append(vo)
-        elif elem in g.settings.vo_map:
+            if vo and vo not in vos:
+                if not vo_role or ":role=%s#" % vo_role in elem or ":%s:" % vo_role in elem:
+                    vos.append(vo)
+        elif elem in g.settings.vo_map and g.settings.vo_map[elem] not in vos:
             vos.append(g.settings.vo_map[elem])
-
+    vos.sort()
     return vos
 
 
@@ -139,13 +142,15 @@ def getCachedSiteList(force=False):
     now = int(time.time())
     if force or not SITE_LIST or now - LAST_UPDATE > g.settings.appdb_cache_timeout:
         try:
-            SITE_LIST = appdb.get_sites()
+            sites = appdb.get_sites()
+            if sites:
+                SITE_LIST = appdb.get_sites()
             # in case of error do not update time
             LAST_UPDATE = now
         except Exception as ex:
             flash("Error retrieving site list from AppDB: %s" % ex, 'warning')
 
-        SITE_LIST.update(getStaticSites())
+        SITE_LIST.update(getStaticSites(force=force))
 
     return SITE_LIST
 
@@ -153,34 +158,64 @@ def getCachedSiteList(force=False):
 def getIMUserAuthData(access_token, cred, userid):
     if g.settings.im_auth == "Bearer":
         return "Bearer %s" % access_token
-    res = "type = InfrastructureManager; token = %s" % access_token
+    res = "type = InfrastructureManager; token = '%s'" % access_token
     for cred in cred.get_creds(userid):
         if cred['enabled']:
             if cred['type'] == "InfrastructureManager":
                 res += "\\nid = %s" % cred['id']
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
-                        res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
+                        res += "; %s = '%s'" % (key, value.replace('\n', '\\\\n'))
     return res
 
 
-def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
+def getUserAuthData(access_token, cred, userid, cred_id=None, full=False, add_extra_auth=True):
     if g.settings.im_auth == "Bearer" and not full:
         return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = %s" % access_token
 
     fedcloud_sites = None
-    for cred in cred.get_creds(userid):
-        if cred['enabled'] and (cred_id is None or cred_id == cred['id']):
+    creds = cred.get_creds(userid)
+
+    # Add the extra auth configured in the Dashboard
+    extra_auth_ids = []
+    try:
+        if g.settings.extra_auth and add_extra_auth:
+            creds.extend(g.settings.extra_auth)
+            extra_auth_ids = [elem["id"] for elem in g.settings.extra_auth]
+    except Exception:
+        print("Error getting extra credentials.", file=sys.stderr)
+
+    # Check if the cred_id provided exists
+    cred_found = False
+    for cred in creds:
+        if cred['enabled'] and (cred_id is None or cred_id == cred['id'] or cred['id'] in extra_auth_ids):
+            cred_found = True
+            break
+    # if not, set to none to send all creds
+    if not cred_found:
+        cred_id = None
+
+    for cred in creds:
+        if cred['enabled'] and (cred_id is None or cred_id == cred['id'] or cred['id'] in extra_auth_ids):
             res += "\\nid = %s" % cred['id']
-            if cred['type'] != "fedcloud":
+            if cred['type'] == "CH":
+                # Add the Cloud&Heat provider as OpenStack
+                res += "; type = OpenStack; auth_version = 3.x_password;"
+                res += " host = https://identity-%s.cloudandheat.com:5000;" % cred['region']
+                res += " username = %s; tenant = %s; password = '%s'" % (cred['username'],
+                                                                         cred['tenant'],
+                                                                         cred['password'])
+                if "tenant_id" in cred:
+                    res += "; tenant_id = %s;" % cred["tenant_id"]
+            elif cred['type'] != "fedcloud":
                 for key, value in cred.items():
                     if value and key not in ['enabled', 'id']:
-                        res += "; %s = %s" % (key, value.replace('\n', '\\\\n'))
+                        res += "; %s = '%s'" % (key, value.replace('\n', '\\\\n'))
             else:
                 res += "; type = OpenStack;"
                 res += " username = egi.eu; tenant = openid; auth_version = 3.x_oidc_access_token;"
-                res += " host = %s; password = '%s'" % (cred['host'], access_token)
+                res += " host = %s; password = '%s'; vo = %s" % (cred['host'], access_token, cred['vo'])
 
                 projectid = cred['project_id'] if 'project_id' in cred else None
                 # only load this data if a EGI Cloud site appears
@@ -193,6 +228,10 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False):
                     site_info = fedcloud_sites[cred['host']]
                     if 'api_version' in site_info:
                         res += "; api_version  = %s" % site_info['api_version']
+                    if 'identity_method' in site_info:
+                        res = res.replace("tenant = openid", "tenant = %s" % site_info['identity_method'])
+                    if 'region' in site_info:
+                        res += "; service_region = %s" % site_info['region']
 
                     project_ids = getCachedProjectIDs(site_info["id"])
                     if cred['vo'] in project_ids and project_ids[cred['vo']]:
@@ -239,7 +278,7 @@ def to_pretty_json(value):
 
 
 def avatar(email, size):
-    digest = md5(email.lower().encode('utf-8')).hexdigest()
+    digest = md5(email.lower().encode('utf-8')).hexdigest()  # nosec
     return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
 
@@ -259,6 +298,7 @@ def loadToscaTemplates(directory):
 
 def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
 
+    newToscaTemplates = []
     toscaTemplates = []
     for path, _, files in os.walk(directory):
         for name in files:
@@ -267,18 +307,72 @@ def reLoadToscaTemplates(directory, oldToscaTemplates, delay):
                 # skip hidden files
                 if name[0] != '.':
                     filename = os.path.relpath(os.path.join(path, name), directory)
+                    toscaTemplates.append(filename)
                     diff_time = time.time() - os.path.getmtime(os.path.join(path, name))
                     if filename not in oldToscaTemplates or diff_time < delay:
-                        toscaTemplates.append(filename)
+                        newToscaTemplates.append(filename)
 
-    return toscaTemplates
+    deletedToscaTemplates = [x for x in oldToscaTemplates if x not in toscaTemplates]
+
+    return deletedToscaTemplates, newToscaTemplates
 
 
-def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
+def _addTabs(tabs, toscaInfo, tosca):
+    if tabs:
+        toscaInfo[tosca]['enable_config_form'] = True
+    for tab, input_elems in tabs.items():
+        toscaInfo[tosca]['tabs'].append(tab)
+        # Special case for a regex to select inputs
+        if isinstance(input_elems, str):
+            all_inputs = list(toscaInfo[tosca]['inputs'].keys())
+            res = [elem for elem in all_inputs if re.match(input_elems, elem)]
+            input_elems = res
+        for input_elem in input_elems:
+            input_name = input_elem
+            input_params = {}
+            if isinstance(input_elem, dict):
+                input_name = list(input_elem.keys())[0]
+                input_params = list(input_elem.values())[0]
+            if input_name in toscaInfo[tosca]['inputs']:
+                toscaInfo[tosca]['inputs'][input_name]["tab"] = tab
+                if "tag_type" in input_params:
+                    toscaInfo[tosca]['inputs'][input_name]["tag_type"] = input_params["tag_type"]
+                if "pattern" in input_params:
+                    toscaInfo[tosca]['inputs'][input_name]["pattern"] = input_params["pattern"]
+
+
+def _addAddons(toscaInfo, toscaDir):
+    # Add addons to description
+    for tosca in toscaInfo.keys():
+        if "childs" in toscaInfo[tosca]["metadata"] and toscaInfo[tosca]["metadata"]["childs"]:
+            if 'addons' not in toscaInfo[tosca]['metadata']:
+                toscaInfo[tosca]['metadata']["addons"] = ""
+            child_names = []
+            for child in toscaInfo[tosca]["metadata"]["childs"]:
+                child_name = ""
+                if child in toscaInfo:
+                    child_name = toscaInfo[child].get("metadata", {}).get("template_name")
+                else:
+                    try:
+                        with io.open(toscaDir + child) as stream:
+                            child_template = yaml.full_load(stream)
+                    except Exception:
+                        child_template = {}
+                    child_name = child_template.get("metadata", {}).get("template_name")
+                if child_name:
+                    child_names.append(child_name)
+            toscaInfo[tosca]['metadata']["addons"] += ", ".join(child_names)
+
+
+def extractToscaInfo(toscaDir, toscaTemplates, tags_to_hide):
     toscaInfoOrder = toscaInfo = {}
     for tosca in toscaTemplates:
         with io.open(toscaDir + tosca) as stream:
             template = yaml.full_load(stream)
+
+            # skip tosca templates with hidden tags
+            if tags_to_hide and template.get('metadata', {}).get('tag') in tags_to_hide:
+                continue
 
             toscaInfo[tosca] = {"valid": True,
                                 "description": "TOSCA Template",
@@ -288,7 +382,7 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                                 },
                                 "enable_config_form": False,
                                 "inputs": {},
-                                "tabs": {}}
+                                "tabs": []}
 
             if 'topology_template' not in template:
                 toscaInfo[tosca]["valid"] = False
@@ -303,121 +397,15 @@ def extractToscaInfo(toscaDir, tosca_pars_dir, toscaTemplates):
                 if 'inputs' in template['topology_template']:
                     toscaInfo[tosca]['inputs'] = template['topology_template']['inputs']
 
-                # add parameters code here
-                if tosca_pars_dir:
-                    tosca_pars_path = tosca_pars_dir + "/"  # this has to be reassigned here because is local.
-                    for fpath, _, fnames in os.walk(tosca_pars_path):
-                        for fname in fnames:
-                            if fnmatch(fname, os.path.splitext(tosca)[0] + '.parameters.yml') or \
-                                    fnmatch(fname, os.path.splitext(tosca)[0] + '.parameters.yaml'):
-                                # skip hidden files
-                                if fname[0] != '.':
-                                    tosca_pars_file = os.path.join(fpath, fname)
-                                    with io.open(tosca_pars_file) as pars_file:
-                                        toscaInfo[tosca]['enable_config_form'] = True
-                                        pars_data = yaml.full_load(pars_file)
-                                        # only read expected fields tab and tag_type
-                                        for key, value in pars_data["inputs"].items():
-                                            if "tab" in value:
-                                                toscaInfo[tosca]['inputs'][key]["tab"] = value["tab"]
-                                            if "tag_type" in value:
-                                                toscaInfo[tosca]['inputs'][key]["tag_type"] = value["tag_type"]
-                                            if "pattern" in value:
-                                                toscaInfo[tosca]['inputs'][key]["pattern"] = value["pattern"]
-                                        if "tabs" in pars_data:
-                                            toscaInfo[tosca]['tabs'] = pars_data["tabs"]
+                tabs = template.get('metadata', {}).get('tabs', {})
+                _addTabs(tabs, toscaInfo, tosca)
 
         toscaInfoOrder = OrderedDict(sorted(toscaInfo.items(), key=lambda x: x[1]["metadata"]['order']))
 
+    # Add addons to description
+    _addAddons(toscaInfo, toscaDir)
+
     return toscaInfoOrder
-
-
-def exchange_token_with_audience(oidc_url, client_id, client_secret, oidc_token, audience):
-
-    payload_string = ('{ "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange", "audience": "' +
-                      audience + '", "subject_token": "' + oidc_token + '", "scope": "openid profile" }')
-
-    # Convert string payload to dictionary
-    payload = ast.literal_eval(payload_string)
-
-    oidc_response = requests.post(oidc_url + "/token", data=payload, auth=(client_id, client_secret), verify=False)
-
-    if not oidc_response.ok:
-        raise Exception("Error exchanging token: {} - {}".format(oidc_response.status_code, oidc_response.text))
-
-    deserialized_oidc_response = json.loads(oidc_response.text)
-
-    return deserialized_oidc_response['access_token']
-
-
-def delete_dns_record(infid, im, auth_data):
-    """Helper function to delete DNS registry created with the tosca.nodes.ec3.DNSRegistry node type."""
-    template = ""
-    try:
-        response = im.get_inf_property(infid, 'tosca', auth_data)
-        if not response.ok:
-            raise Exception(response.text)
-        template = response.text
-    except Exception as ex:
-        return False, "Error getting infrastructure template: %s" % ex
-
-    msg = ""
-    success = True
-    try:
-        yaml_template = yaml.safe_load(template)
-        for node in list(yaml_template['topology_template']['node_templates'].values()):
-            if node["type"] == "tosca.nodes.ec3.DNSRegistry":
-                record = node["properties"]["record_name"]
-                domain = node["properties"]["domain_name"]
-                credentials = node["properties"]["dns_service_credentials"]["token"].strip()
-                res, dm = delete_route53_record(record, domain, credentials)
-                if not res:
-                    success = False
-                msg += dm + "\n"
-    except Exception as ex:
-        return False, "Error deleting DNS record: %s" % ex
-
-    return success, msg
-
-
-def delete_route53_record(record_name, domain, credentials):
-    if not (record_name and domain and credentials):
-        return False, "Error some empty value deleting DNS record"
-
-    import boto3
-
-    if credentials.find(":") != -1:
-        parts = credentials.split(":")
-        route53 = boto3.client(
-            'route53',
-            aws_access_key_id=parts[0],
-            aws_secret_access_key=parts[1]
-        )
-    else:
-        raise Exception("Invalid credentials")
-
-    zone = route53.list_hosted_zones_by_name(DNSName=domain)["HostedZones"][0]
-
-    record = route53.list_resource_record_sets(HostedZoneId=zone['Id'],
-                                               StartRecordType='A',
-                                               StartRecordName='%s.%s.' % (record_name, domain),
-                                               MaxItems='1')["ResourceRecordSets"][0]
-
-    if record["Name"] != '%s.%s.' % (record_name, domain):
-        return False, "Discard to delete DNS record %s as is not %s.%s." % (record["Name"], record_name, domain)
-
-    route53.change_resource_record_sets(
-        HostedZoneId=zone['Id'],
-        ChangeBatch={
-            'Changes': [
-                {
-                    'Action': 'DELETE',
-                    'ResourceRecordSet': record
-                }
-            ]
-        })
-
-    return True, record["Name"]
 
 
 def generate_random_name():
@@ -792,3 +780,205 @@ def get_project_ids(creds):
                     cred['project_id'] = project_ids[cred['vo']]
 
     return creds
+
+
+def getVOs(session):
+    return session["vos"] if "vos" in session and session["vos"] else []
+
+
+def get_site_info_from_radl(radl, creds):
+    res_site = {}
+
+    site_type = None
+    site_host = None
+    site_vo = None
+
+    # Get provider info from RADL
+    for elem in radl:
+        if elem["class"] == "system":
+            site_type = elem.get("provider.type")
+            site_host = elem.get("provider.host")
+            site_vo = elem.get("provider.vo")
+            if site_vo:
+                site_type = "fedcloud"
+            break
+
+    if not site_type:
+        return res_site
+
+    # Now try to get the corresponding cred
+    # only for EGI sites
+    for cred in creds:
+        if cred["type"] == "fedcloud" and site_host in cred["host"] and site_vo == cred["vo"]:
+            return cred
+
+    # If there is no cred for it
+    if site_vo:
+        res_site["vo"] = site_vo
+
+        # in case of FedCLoud sites get site name
+        for site_name, site in getCachedSiteList().items():
+            if site_host in site['url']:
+                res_site["site_name"] = site_name
+                break
+
+    if site_host and "cloudandheat" in site_host:
+        site_type = "CH"
+
+    if site_host:
+        res_site["host"] = site_host
+    res_site["type"] = site_type
+
+    return res_site
+
+
+def discover_oidc_urls(base_url):
+    """Get OIDC URLs"""
+    url = "%s/.well-known/openid-configuration" % base_url
+    res = {}
+    try:
+        response = requests.get(url, timeout=10)
+        if response.ok:
+            data = response.json()
+            for elem in ["authorization_endpoint", "token_endpoint", "introspection_endpoint", "userinfo_endpoint"]:
+                res[elem] = data[elem]
+    except Exception:
+        return res
+    return res
+
+
+def valid_template_vos(user_vos, template_metadata):
+    if 'vos' in template_metadata and template_metadata['vos']:
+        if not user_vos:
+            return []
+        else:
+            return [vo for vo in user_vos if vo in template_metadata['vos']]
+    else:
+        return ['all']
+
+
+def convert_value(value, value_type):
+    if value_type == "integer":
+        value = int(value)
+    elif value_type == "float":
+        value = float(value)
+    elif value_type == "boolean":
+        value = value.lower() in ["true", "yes", "1"]
+    return value
+
+
+def get_list_values(name, inputs, value_type="string", retun_type="list"):
+
+    cont = 1
+    # Special case for ports
+    if value_type in PORT_SPECT_TYPES:
+        ports_value = {}
+        while "%s_list_value_%d_range" % (name, cont) in inputs:
+            port_num = inputs["%s_list_value_%d_range" % (name, cont)]
+            remote_cidr = inputs.get("%s_list_value_%d_cidr" % (name, cont))
+            target_port = inputs.get("%s_list_value_%d_target" % (name, cont))
+            port_name = "port_%s" % port_num.replace(":", "_")
+            # Should we also open UDP?
+            ports_value[port_name] = {"protocol": "tcp"}
+
+            if target_port:
+                ports_value[port_name]["target"] = int(target_port)
+            if ":" in port_num:
+                port_range = port_num.split(":")
+                ports_value[port_name]["source_range"] = [int(port_range[0]), int(port_range[1])]
+            else:
+                ports_value[port_name]["source"] = int(port_num)
+            if remote_cidr:
+                ports_value[port_name]["remote_cidr"] = remote_cidr
+            cont += 1
+        if retun_type == "map":
+            return ports_value
+        else:
+            return list(ports_value.values())
+    elif retun_type == "list":
+        values = []
+        while "%s_list_value_%d" % (name, cont) in inputs:
+            value = inputs["%s_list_value_%d" % (name, cont)]
+            values.append(convert_value(value, value_type))
+            cont += 1
+        return values
+    else:
+        values = {}
+        while "%s_list_value_%d_key" % (name, cont) in inputs:
+            key = inputs["%s_list_value_%d_key" % (name, cont)]
+            value = inputs["%s_list_value_%d_value" % (name, cont)]
+            values[key] = convert_value(value, value_type)
+            cont += 1
+        return values
+
+
+def formatPortSpec(ports):
+    res = {}
+    if isinstance(ports, dict):
+        ports_list = list(ports.values())
+    elif isinstance(ports, list):
+        ports_list = ports
+    for num, port_value in enumerate(ports_list):
+        port_name = "port_%s" % num
+        if 'remote_cidr' in port_value and port_value['remote_cidr']:
+            res[port_name] = str(port_value['remote_cidr']) + "-"
+        else:
+            res[port_name] = ""
+
+        if 'target' in port_value and port_value['target']:
+            res[port_name] += "%s-" % port_value['target']
+
+        # if target is defined, source_range should not be defined
+        if 'source_range' in port_value and port_value['source_range']:
+            res[port_name] += "%s:%s" % (port_value['source_range'][0],
+                                         port_value['source_range'][1])
+        elif 'source' in port_value and port_value['source']:
+            res[port_name] += "%s" % port_value['source']
+
+    return res
+
+
+def getReconfigureInputs(template_str):
+    """Get the inputs that can be reconfigured."""
+    inputs = {}
+    template = yaml.safe_load(template_str)
+    tabs = template.get("metadata", {}).get("tabs", {})
+
+    template_inputs = template.get('topology_template', {}).get('inputs', {})
+
+    for tab, input_elems in tabs.items():
+        for input_elem in input_elems:
+            if isinstance(input_elem, dict):
+                input_name = list(input_elem.keys())[0]
+                input_params = list(input_elem.values())[0]
+
+                elem = template_inputs.get(input_name, {})
+                if "tag_type" in input_params:
+                    elem["tag_type"] = input_params["tag_type"]
+                if "pattern" in input_params:
+                    elem["pattern"] = input_params["pattern"]
+
+                if "reconfigure" in input_params and input_params["reconfigure"]:
+                    if tab not in inputs:
+                        inputs[tab] = {}
+                    inputs[tab][input_name] = elem
+
+    return inputs
+
+
+def merge_templates(template, new_template):
+    for item in ["inputs", "node_templates", "outputs"]:
+        if item in new_template["topology_template"]:
+            if item not in template["topology_template"]:
+                template["topology_template"][item] = {}
+            template["topology_template"][item].update(new_template["topology_template"][item])
+
+    tabs = new_template.get("metadata", {}).get("tabs", {})
+    if tabs:
+        if "metadata" not in template:
+            template["metadata"] = {}
+        if "tabs" not in template["metadata"]:
+            template["metadata"]["tabs"] = {}
+        template["metadata"]["tabs"].update(tabs)
+
+    return template

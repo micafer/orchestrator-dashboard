@@ -13,7 +13,7 @@
               <!-- Title -->
               <h4 class="font-weight-bold text-primary">Add nodes to Inf: {{infid}}</h4>
             </div>
-            <div class="col-md-3 text-right">
+            <div class="col-md-3 text-end">
               <!-- Button -->
               <button type=button class="btn btn-small btn-outline-secondary" onclick="history.back()"><span class="fas fa-arrow-left mr-2"></span> Back</button>
             </div>
@@ -42,9 +42,38 @@
                     </td>
                 </tr>
                 {% endfor %}
+                <tr>
+                    <td>Select New Image:</td>
+                    <td>
+                        <div class="form-group">
+ 
+                            {% if images %}
+                                <div class="form-group" id="siteImages">
+                                    <select class="js-example-basic-single js-states form-control" id="selectedSiteImage" name="newImage" onchange="activateSubmit()">
+                                        <option name="selectedSiteImage" value="">Do not change the image.</option>
+                                        {% for image_uri, image_name, selected in images %}
+                                        <option name="selectedSiteImage" value="{{image_uri}}" {{"selected" if selected else ""}}>{{image_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                 </div>
+                            {% else %}
+                                {% set placeholder = "Image ID" %}
+                                {% if image_url.scheme == 'aws' %}
+                                {% set placeholder = "Region / Image ID (e.g.: us-east-1/ami-f9f8ba9c)" %}
+                                {% elif image_url.scheme == 'azr' %}
+                                {% set placeholder = "Publisher / Offer / SKU / Version" %}
+                                {% endif %}
+                            <div class="form-group" id="cloudImages">
+                             <input placeholder="{{placeholder}}" type="text" class="form-control" id="imageID" name="imageID" value="{{image_url[0]}}://{{image_url[1]}}{{image_url[2]}}">
+                            </div>
+                            {% endif %}
+                 
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
-        <button type="submit" class="btn btn-success submitBtn">Submit</button>
+        <button type="submit" class="btn btn-success submitBtn">Add</button>
         </form>
     </div>
     </div>
@@ -56,7 +85,7 @@ $(document).ready(function () {
         //disable button on click
         $(".submitBtn").attr("disabled", true);
         // add spinner to button
-        $(".submitBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...` );
+        $(".submitBtn").html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...` );
         return true;
     });
 });

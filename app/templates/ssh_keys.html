@@ -14,8 +14,8 @@
               <!-- Title -->
               <h4 class="font-weight-bold text-primary">SSH Keys</h4>
             </div>
-            <div class="col-md-6 text-right">
-              <button type=button id="updateBtn" class="btn btn-small btn-primary" data-toggle="modal" data-target="#newModal"><i class='fas fa-plus m-1'></i>New SSH Key</button>
+            <div class="col-md-6 text-end">
+              <button type=button id="updateBtn" class="btn btn-small btn-primary" data-bs-toggle="modal" data-bs-target="#newModal"><i class='fas fa-plus m-1'></i>New SSH Key</button>
             </div>
           </div> <!-- / .row -->
         </div>
@@ -36,7 +36,7 @@
                       <td>{{ssh_key[1]}}</td>
                       <td>{{ssh_key[2] | truncate(32, True, " . . . ")}}{{ssh_key[2][-32:]}}</td>
                       <td>
-                        <button type=button id="deleteBtn" data-id="{{ssh_key[0]}}" data-type="{{ssh_key[1]}}" class="btn btn-small btn-danger" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
+                        <button type=button id="deleteBtn" data-id="{{ssh_key[0]}}" data-type="{{ssh_key[1]}}" class="btn btn-small btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-backdrop="static" data-keyboard="false"><i class='far fa-trash-alt m-1'></i></button>
                       </td>
                     </tr>
                     {% endfor %}
@@ -51,20 +51,22 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="get_secret">SSH Key</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                
+
               </div>
               <div class="modal-body">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-group">
                     <label for="ssh_key_desc"><b>Description</b></label>
-                    <input placeholder="Description" name="desc" class="col-sm-12" type="text" required/>
+                    <input placeholder="Description" name="desc" class="col-sm-12 form-control" type="text" required/>
                     <label for="update_ssh_public_key"><b>SSH public key</b></label>
                     <p>Paste your public SSH key, Don't use your private SSH key.</p>
                     <textarea class="form-control" rows="5" id="update_ssh_public_key" name="sshkey"></textarea>
                 </div>
               </div>
               <div class="modal-footer">
-                <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                <a class="btn btn-primary cancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                 <button type="submit" class="btn btn-success updateBtn"><span class="fas fa-upload mr-2"></span> Upload</button>
               </div>
             </div>
@@ -77,13 +79,13 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">Confirm SSH Key deletion</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
                 Do you really want to delete your SSH Key?
               </div>
               <div class="modal-footer">
-                <a class="btn btn-primary cancelBtn" role="button" data-dismiss="modal">Cancel</a>
+                <a class="btn btn-primary cancelBtn" role="button" data-bs-dismiss="modal">Cancel</a>
                 <a class="btn btn-danger deleteBtn" role="button" href="">Delete</a>
               </div>
             </div>

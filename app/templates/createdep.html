@@ -15,20 +15,45 @@
             {% else %}
             Template: {{selectedTemplate}}
             {% endif %}
+            {% if child_templates %}
+             + 
+            {% for name, child_template in child_templates.items() %}
+                {%- if 'metadata' in child_template and 'template_name' in child_template['metadata'] and child_template['metadata']['template_name'] -%}
+                {{ child_template['metadata']['template_name'] }}
+                {%- else -%}
+                {{ name }}
+                {%- endif -%}
+                {%- if loop.index != loop.length -%}
+                ,
+                {% endif -%}
+            {% endfor %}
+            {% endif %}
             </h4>
         </div>
 
         <div class="card-body">
             <div class="alert alert-info">
-                <strong>Description:</strong> {{template['description']}}
+                <strong>Description:</strong>
+                {{template['description']}}
                 {% if 'metadata' in template and 'web' in template['metadata'] and template['metadata']['web'] %}
                 (<a taget="_blank" href="{{template['metadata']['web']}}">{{template['metadata']['web']}}</a>)
                 {% endif %}
+                <!-- Add childs descriptions -->
+                {% if child_templates %}
+                {% for name, child_template in child_templates.items() %}
+                   {%- if child_template['description'] is defined and child_template['description'] -%}
+                   <br> {{ child_template['description'] }}
+                   {% endif -%}
+               {% endfor %}
+               {% endif %}
             </div>
 
             <form id="depSubmit" action="{{ url_for('createdep', template=selectedTemplate) }}" method="post" onsubmit="return onSubmit();">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="form-group">
+                {% if child_templates %}
+                <input type="hidden" name="extra_opts.childs" value="{{ ','.join(child_templates.keys()) }}"/>
+                {% endif %}
+                <div class="form-group mb-2">
                     <label for="additional_description">Infrastructure Name</label>
                     <input type="text" class="form-control" id="infra_name" name="infra_name" placeholder="description" value="{{ infra_name }}" maxlength="60" required>
                 </div>
@@ -37,9 +62,9 @@
             {% else %}
                 {% include 'default_form.html' %}
             {% endif %}
-            <button type="submit" class="btn btn-success submitBtn" disabled>Submit</button>
-            <button id="cancelBtn" type=button class="btn btn-small btn-primary" onclick="location.href='{{ url_for('home') }}'">
-                <span class="fas fa-ban mr-2"></span>Cancel</button>
+            <button type="submit" class="btn btn-primary submitBtn" disabled><span class="fas fa-share mr-2"></span> Submit</button>
+            <button id="cancelBtn" type=button class="btn btn-small btn-secondary" onclick="location.href='{{ url_for('home') }}'">
+                <span class="fas fa-ban mr-2"></span> Cancel</button>
             </form>
         </div>
     </div>
@@ -58,13 +83,17 @@
 
 function onSubmit() {
 {% if g.analytics_tag %}
-    gtag('event', 'submit', {'event_category' : '{{selectedTemplate}}', 'event_label' : 'Submit'});
+    gtag('event', 'submit', {'event_category' : '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}', 'event_label' : 'Submit'});
+{% endif %}
+{% if g.motomo_info and "url" in g.motomo_info and g.motomo_info["url"] %}
+    _paq.push(['trackEvent', 'Infrastructure', 'Deploy', '{{selectedTemplate}},{{ ",".join(child_templates.keys()) }}']);
 {% endif %}
     return true;
 }
 $(document).ready(function() {
     $('.js-example-basic-single').select2({
-      width: '100%' // https://github.com/select2/select2/issues/4220
+      width: '100%', // https://github.com/select2/select2/issues/4220
+      theme: 'bootstrap-5'
     });
 });
 </script>

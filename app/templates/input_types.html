@@ -1,5 +1,5 @@
-<div class="form-group">
-  {% if value.tag_type is not defined or value.tag_type != "hidden" %}
+<div>
+  {% if value.tag_type is not defined or value.tag_type not in ["hidden", "random"] %}
   <label for="{{key}}" style="white-space: pre-wrap;">{% if value.description is defined %}{{value.description}}{% else %}{{key}}{% endif %}</label>
   {% endif %}
 
@@ -59,10 +59,37 @@
     {% elif value.tag_type == "toggle" %}
       {% for constraint in value.constraints %}
       <div>
-        <input type="checkbox" data-toggle="toggle" id="{{key}}" name="{{key}}" data-size="sm" data-offstyle="dark" value={{constraint['value']}}>
+        <input type="checkbox" data-bs-toggle="toggle" id="{{key}}" name="{{key}}" data-size="sm" data-offstyle="dark" value={{constraint['value']}}>
       </div>
       {% endfor %}
     <!-- end toggle type -->
+
+    <!-- userid type -->
+    {% elif value.tag_type == "userid" %}
+    <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{session['userid']}}" aria-describedby="help{{key}}" readonly/>
+    <!-- end userid type -->
+
+    <!-- vo_list type -->
+    {% elif value.tag_type == "vo_list" %}
+    <select class="js-example-basic-single js-states form-control" id="{{key}}" name="{{key}}">
+      <option value="">None</option>
+      {% for vo in vos %}
+        <option {% if input_value == vo%}selected{%endif%} value="{{vo}}">{{vo}}</option>
+      {% endfor %}
+    </select>
+    <!--
+    {% for vo in vos %}
+    <div>
+      <input type="checkbox" data-bs-toggle="toggle" id="{{key}}" name="{{key}}" data-size="sm" data-offstyle="dark" value={{vo}}><label for="{{key}}">{{vo}}</label>
+    </div>
+    {% endfor %}
+    -->
+    <!-- end vo_list type -->
+
+    <!-- random text type -->
+    {% elif value.tag_type == "random" %}
+      <input type="hidden" class="form-control" id="{{key}}" name="{{key}}" value="{{utils.generate_random_name()}}" >
+    <!-- end random text type -->
 
     {% endif %} <!-- end tag type if -->
 
@@ -78,9 +105,25 @@
           </select>
 	  {% else %}
 
-      {% if value.type == "integer" %}
+      <!-- list type -->
+      {% if value.type in ["list", "map"] %}
+        <fieldset class="border p-2">
+        {% include 'list.html' %}
+        </fieldset>
+      <!-- end list type -->
+
+      <!-- Special case of map of PortSpec -->
+      {% elif value.type == "map" and value.entry_schema.type in utils.PORT_SPECT_TYPES %}
+        <fieldset class="border p-2">
+        {% include 'list.html' %}
+        </fieldset>
+      <!-- end PortSpec type -->
+
+      {% elif value.type == "integer" %}
+      {% set min_value = value.constraints | selectattr('greater_than') | map(attribute='greater_than') | list  %}
+      {% set max_value = value.constraints | selectattr('less_than') | map(attribute='less_than') | list  %}
       <!-- number type -->
-      <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%}/>
+      <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_value %}min="{{min_value[0]}}"{%endif%} {% if max_value %}max="{{max_value[0]}}"{%endif%}/>
       {% elif value.type == "scalar-unit.size" %}
       <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" pattern="[0-9]*( )([TMG]B)" title="Number Unit(MB, GB or TB)">
       {% else %}

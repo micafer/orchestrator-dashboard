@@ -1,0 +1,70 @@
+{
+    "@context": [
+        "https://doi.org/10.5063/schema/codemeta-2.0",
+        "http://schema.org"
+    ],
+    "@type": "SoftwareSourceCode",
+    "identifier": "im-dashboard",
+    "name": "Infrastructure Manager Dashboard",
+    "version": "2.5.7",
+    "description": "Infrastructure Manager - Simple Graphical UI",
+    "license": "GNU General Public License v3.0",
+    "author": [
+        {
+            "@type": "Person",
+            "givenName": "Miguel",
+            "familyName": "Caballer",
+            "@id": "https://orcid.org/0000-0001-9393-3077",
+            "email": "micafer1@upv.es"
+        }
+    ],
+    "audience": [
+        {
+            "@type": "Audience",
+            "audienceType": "Developers"
+        },
+        {
+            "@type": "Audience",
+            "audienceType": "End Users/Desktop"
+        },
+        {
+            "@type": "Audience",
+            "audienceType": "Science/Research"
+        }
+    ],
+    "runtimePlatform": "Python 3",
+    "url": "https://github.com/grycap/im-dashboard",
+    "keywords": "Ansible, DevOps, cloud, Infrastructure-Management, TOSCA, Contextualization",
+    "developmentStatus": "5 - Production/Stable",
+    "programmingLanguage": "Python 3, Python 3.6, Python 3.7, Python 3.8, Python 3.9, Python 3.10",
+    "applicationCategory": "System, Utilities, Web Application",
+    "codeRepository": "https://github.com/grycap/im-dashboard",
+    "releaseNotes": "https://github.com/grycap/im-dashboard/blob/master/changelog",
+    "citation": "https://doi.org/10.1007/s10723-014-9296-5",
+    "copyrightHolder": "GRyCAP-UPV",
+    "copyrightYear": 2018,
+    "creator": [
+        {
+            "@type": "Person",
+            "givenName": "Miguel",
+            "familyName": "Caballer",
+            "@id": "https://orcid.org/0000-0001-9393-3077",
+            "email": "micafer1@upv.es"
+        }
+    ],
+    "dateCreated": "2022-11-24",
+    "affiliation": "UPV",
+    "maintainer": [
+        {
+            "@type": "Person",
+            "givenName": "Miguel",
+            "familyName": "Caballer",
+            "@id": "https://orcid.org/0000-0001-9393-3077",
+            "email": "micafer1@upv.es"
+        }
+    ],
+    "contIntegration": "https://jenkins.i3m.upv.es/job/grycap/job/im-dashboard-unit/",
+    "buildInstructions": "https://imdocs.readthedocs.io/en/latest/dashboard.html",
+    "referencePublication": "https://doi.org/10.1007/s10723-014-9296-5",
+    "readme": "https://github.com/grycap/im-dashboard/blob/master/README.md"
+}

@@ -6,21 +6,6 @@
       });
     });
 
-    function loadVOs() {
-       $('#selectedVO').empty();
-       $('#selectedVO').append("<option value=''>Loading VOs ...</option>");
-       $.ajax({
-           method: "GET",
-           url: "{{ url_for('home') }}vos",
-           success : function(text)
-           {
-               $('#selectedVO').empty();
-               $('#selectedVO').append("<option value=''> - Select one VO - </option>");
-               $('#selectedVO').append(text);
-           }
-       });
-   }
-
     function loadSites() {
        $('#selectedSite').empty();
        $('#selectedSite').append("<option value=''>Loading Sites ...</option>");
@@ -55,27 +40,28 @@
       <input name="type" type="hidden" value="{{ cred_type }}"/>
       <div class="row form-group">
         <div class="col">
-        <input placeholder="ID" name="id" class="col-sm-12" pattern="[a-zA-Z_.][\w\d_.-]*" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required {{ 'readonly' if cred_id else '' }}/>
-        </div>
-        <div class="col">
+          <small id="passwordHelpBlock" class="form-text text-muted">
+            Unique ID in your credentials (free-form e.g. SITE_NAME-VO_NAME).
+          </small>
+        <input placeholder="ID" name="id" class="col-sm-12 form-control my-1" pattern="[a-zA-Z_.][\w\d_.-]*" type="text" id="id" value="{{ cred_id if cred_id else '' }}" required {{ 'readonly' if cred_id else '' }}/>
         </div>
       </div>
 {% if cred_type == "EC2" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Access Key" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Access Key" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Secret Key" name="password" class="col-sm-12" type="password" id="password"/>
+              <input placeholder="Secret Key" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
           </div>
         </div>
 {% elif cred_type == "GCE" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Project" name="project" class="col-sm-12" type="project" id="project" value="{{ creds['project'] if creds else '' }}" required/>
+              <input placeholder="Project" name="project" class="col-sm-12 form-control my-1" type="project" id="project" value="{{ creds['project'] if creds else '' }}" required/>
           </div>
         </div>
         <div class="row form-group">
@@ -89,31 +75,32 @@
 {% elif cred_type == "OpenStack" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
-          </div>
-        </div>
-
-        <div class="row form-group">
-          <div class="col">
-              <input placeholder="Tenant" name="tenant" class="col-sm-12" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}" required/>
-          </div>
-          <div class="col">
-              <input placeholder="Domain" name="domain" class="col-sm-12" type="text" id="domain" value="{{ creds['domain'] if creds else '' }}"/>
+              <input placeholder="Password" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Region" name="service_region" class="col-sm-12" type="text" id="service_region" value="{{ creds['service_region'] if creds else '' }}"/>
+              <input placeholder="Tenant" name="tenant" class="col-sm-12 form-control my-1" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+              <input placeholder="Domain" name="domain" class="col-sm-12 form-control my-1" type="text" id="domain" value="{{ creds['domain'] if creds else '' }}"/>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Region" name="service_region" class="col-sm-12 form-control my-1" type="text" id="service_region" value="{{ creds['service_region'] if creds else '' }}"/>
           </div>
           <div class="col">
             <select class="js-example-basic-single js-states form-control" id="auth_version" name="auth_version" required>
               <option name="auth_version" value="">Set Auth Version</option>
               <option name="auth_version" value="3.x_password" {{ "selected" if creds and creds['auth_version'] == "3.x_password" else '' }}>3.x_password</option>
               <option name="auth_version" value="3.x_oidc_access_token" {{ "selected" if creds and creds['auth_version'] == "3.x_oidc_access_token" else '' }}>3.x_oidc_access_token</option>
+              <option name="auth_version" value="3.x_appcred" {{ "selected" if creds and creds['auth_version'] == "3.x_appcred" else '' }}>3.x_appcred</option>
               <option name="auth_version" value="2.0_voms" {{ "selected" if creds and creds['auth_version'] == "2.0_voms" else '' }}>2.0_voms</option>
               <option name="auth_version" value="2.0_password" {{ "selected" if creds and creds['auth_version'] == "2.0_password" else '' }}>2.0_password</option>
           </select>
@@ -123,34 +110,35 @@
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Host" name="host" class="col-sm-12" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
+              <input placeholder="Host" name="host" class="col-sm-12 form-control my-1" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
           </div>
           <div class="col">
-            <input placeholder="Api Version" name="api_version" class="col-sm-12" type="text" id="api_version" value="{{ creds['api_version'] if creds else '' }}"/>
+            <input placeholder="Api Version" name="api_version" class="col-sm-12 form-control my-1" type="text" id="api_version" value="{{ creds['api_version'] if creds else '' }}"/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Tenant ID" name="tenant_id" class="col-sm-12" type="text" id="tenant_id" value="{{ creds['tenant_id'] if creds else '' }}"/>
+              <input placeholder="Tenant ID" name="tenant_id" class="col-sm-12 form-control my-1" type="text" id="tenant_id" value="{{ creds['tenant_id'] if creds else '' }}"/>
           </div>
           <div class="col">
+            <input placeholder="Domain ID" name="tenant_domain_id" class="col-sm-12 form-control my-1" type="text" id="tenant_domain_id" value="{{ creds['tenant_domain_id'] if creds else '' }}"/>
           </div>
         </div>
 
 {% elif cred_type == "OpenNebula" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
+              <input placeholder="Password" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Host" name="host" class="col-sm-12" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
+              <input placeholder="Host" name="host" class="col-sm-12 form-control my-1" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
@@ -159,52 +147,52 @@
 {% elif cred_type == "Azure" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Subscription ID" name="subscription_id" class="col-sm-12" type="text" id="subscription_id" value="{{ creds['subscription_id'] if creds else '' }}" required/>
+              <input placeholder="Subscription ID" name="subscription_id" class="col-sm-12 form-control my-1" type="text" id="subscription_id" value="{{ creds['subscription_id'] if creds else '' }}" required/>
           </div>
           <div class="col">
-            <input placeholder="Client ID" name="client_id" class="col-sm-12" type="text" id="client_id" value="{{ creds['client_id'] if creds else '' }}" required/>
-          </div>
-        </div>
-        <hr/>
-        <div class="row form-group">
-          <div class="col">
-              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
-          </div>
-          <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
+            <input placeholder="Client ID" name="client_id" class="col-sm-12 form-control my-1" type="text" id="client_id" value="{{ creds['client_id'] if creds else '' }}" required/>
           </div>
         </div>
         <hr/>
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Client Secret" name="secret" class="col-sm-12" type="text" id="secret"/>
+              <input placeholder="Username" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}"/>
           </div>
           <div class="col">
-              <input placeholder="Tenant ID" name="tenant" class="col-sm-12" type="tenant" id="tenant" value="{{ creds['tenant'] if creds else '' }}"/>
+              <input placeholder="Password" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
+          </div>
+        </div>
+        <hr/>
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Client Secret" name="secret" class="col-sm-12 form-control my-1" type="text" id="secret"/>
+          </div>
+          <div class="col">
+              <input placeholder="Tenant ID" name="tenant" class="col-sm-12 form-control my-1" type="tenant" id="tenant" value="{{ creds['tenant'] if creds else '' }}"/>
           </div>
         </div>
 {% elif cred_type == "Orange" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
-          </div>
-        </div>
-
-        <div class="row form-group">
-          <div class="col">
-              <input placeholder="Tenant" name="tenant" class="col-sm-12" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}" required/>
-          </div>
-          <div class="col">
-              <input placeholder="Domain" name="domain" class="col-sm-12" type="text" id="domain" value="{{ creds['domain'] if creds else '' }}" required/>
+              <input placeholder="Password" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Region" name="region" class="col-sm-12" type="text" id="region" value="{{ creds['region'] if creds else '' }}" required/>
+              <input placeholder="Tenant" name="tenant" class="col-sm-12 form-control my-1" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+              <input placeholder="Domain" name="domain" class="col-sm-12 form-control my-1" type="text" id="domain" value="{{ creds['domain'] if creds else '' }}" required/>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Region" name="region" class="col-sm-12 form-control my-1" type="text" id="region" value="{{ creds['region'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
@@ -213,7 +201,7 @@
 {% elif cred_type == "Linode" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="API Token" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="API Token" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
@@ -223,23 +211,23 @@
 {% elif cred_type == "Kubernetes" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Token" name="token" class="col-sm-12" type="text" id="token" value="{{ creds['token'] if creds else '' }}" required/>
+              <input placeholder="Token" name="token" class="col-sm-12 form-control my-1" type="text" id="token" value="{{ creds['token'] if creds else '' }}" required/>
           </div>
           <div class="col">
-            <input placeholder="Host" name="host" class="col-sm-12" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
+            <input placeholder="Host" name="host" class="col-sm-12 form-control my-1" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
           </div>
         </div>
 
 {% elif cred_type == "fedcloud" %}
-        <script>
-          loadVOs();
-        </script>
 
         <div class="row form-group">
           <div class="col">
             <label>Select VO:</label>
             <select class="js-example-basic-single js-states form-control" id="selectedVO" name="vo" onchange="loadSites()" required>
-                <option name="selectedVO" value="">  </option>
+                <option name="selectedVO" value="">- Select one VO -</option>
+              {% for vo in vos %}
+                <option name="selectedVO" value="{{ vo }}">{{ vo }}</option>
+              {% endfor %}
             </select>
 
             <label>Select provider:</label>
@@ -252,31 +240,59 @@
 {% elif cred_type == "InfrastructureManager" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
+              <input placeholder="Password" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
           </div>
         </div>
 
 {% elif cred_type == "OSCAR" %}
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Username" name="username" class="col-sm-12" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+              <input placeholder="Username" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
           </div>
           <div class="col">
-              <input placeholder="Password" name="password" class="col-sm-12" type="password" id="password"/>
+              <input placeholder="Password" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
           </div>
         </div>
 
         <div class="row form-group">
           <div class="col">
-              <input placeholder="Host" name="host" class="col-sm-12" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
+              <input placeholder="Host" name="host" class="col-sm-12 form-control my-1" type="text" id="host" value="{{ creds['host'] if creds else '' }}" required/>
           </div>
           <div class="col">
           </div>
         </div>
 
+{% elif cred_type == "CH" %}
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Username" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+              <input placeholder="Password" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+            <input placeholder="Tenant" name="tenant" class="col-sm-12 form-control my-1" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}" required/>
+        </div>
+          <div class="col">
+            <div class="col">
+              <input placeholder="Region" name="region" class="col-sm-12 form-control my-1" type="text" id="region" value="{{ creds['region'] if creds else '' }}" required/>
+          </div>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Tenant ID" name="tenant_id" class="col-sm-12 form-control my-1" type="text" id="tenant_id" value="{{ creds['tenant_id'] if creds else '' }}"/>
+          </div>
+          <div class="col">
+          </div>
+        </div>
 {% else %}
 
 

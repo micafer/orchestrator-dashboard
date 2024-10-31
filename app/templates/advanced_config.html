@@ -1,7 +1,7 @@
 
 <br>
 <div id="confScheduling">
-  <div class="form-group">
+  <div>
       <h5>Cloud Provider:</h5>
   </div>
 
@@ -88,7 +88,7 @@
             loadImages();
             loadSiteImages();
             loadSiteInfo();
-        } else if (cred_type == 'OpenStack') {
+        } else if (cred_type == 'OpenStack' || cred_type == 'CH') {
             $('#cloudImages').hide();
             $('#fedcloudImages').hide();
             $('#siteImages').show();
@@ -121,8 +121,8 @@
             } else {
                 document.getElementById('imageID').setAttribute("placeholder", "Image ID");
             }
-            if (cred_type == 'OSCAR') {
-                // OSCAR do not set images
+            if (cred_type == 'OSCAR' || cred_type == 'Kubernetes' ) {
+                // OSCAR or K8s do not set images
                 $('#cloudImages').hide();
                 activateSubmit();
             } else {
@@ -132,6 +132,8 @@
             $('#siteImages').hide();
             $('#fedcloudUsage').hide();
         }
+        $("#selectedImage").prop('disabled', false);
+        $("#selectedSiteImage").prop('disabled', false);
    }
 
    function loadImages() {
@@ -211,19 +213,41 @@
         });
    }
 
+   function selectedSiteImageChanged() {
+        // disable the other select of AppDB images
+        var selected = $("#selectedSiteImage option:selected" ).text();
+        if (selected == " - Select one image - ") {
+            $("#selectedImage").prop('disabled', false);
+        } else {
+            $("#selectedImage").prop('disabled', true);
+        }
+        activateSubmit()
+   }
+
+   function selectedImageChanged() {
+    // disable the other select of site images
+        var selected = $("#selectedImage option:selected" ).text();
+        if (selected == " - Select one image - ") {
+            $("#selectedSiteImage").prop('disabled', false);
+        } else {
+            $("#selectedSiteImage").prop('disabled', true);
+        }
+        activateSubmit()
+   }
+
    function activateSubmit() {
        $(".submitBtn").attr("disabled", false);
    }
    </script>
 
 
-  <div id="manschedConf" class="form-group">
+  <div id="manschedConf">
       <p></p>
 
-      <div class="form-row">
-       <div class="form-group col-md-6">
+      <div class="row">
+       <div class="col-md-6">
 
-           <div class="form-group">
+           <div>
                <label>Select Cloud Provider:</label>
                {% if not creds %}
                <label>No Cloud Provider defined. Add it in the Cloud Credentials page: <a class="btn btn-success text-white" href="{{ url_for('manage_creds') }}">Add</a></label>
@@ -244,53 +268,51 @@
                {% endif %}
            </div>
 
-           <div class="form-group" id="cloudImages" style="display: none;">
+           <div id="cloudImages" style="display: none;">
             <label>Set image ID:</label>
             <input placeholder="Image ID" type="text" class="form-control" id="imageID" name="extra_opts.imageID" value="" oninput="activateSubmit()">
             <br/>
            </div>
 
-           <div class="form-group" id="fedcloudImages" style="display: none;">
+           <div id="fedcloudImages" style="display: none;">
               <label>Select only one of this options AppDB or Site image:</label>
               <br/>
               <label>Select AppDB image:</label>
-              <select class="js-example-basic-single js-states form-control" id="selectedImage" name="extra_opts.selectedImage" onchange="activateSubmit()">
+              <select class="js-example-basic-single js-states form-control" id="selectedImage" name="extra_opts.selectedImage" onchange="selectedImageChanged()">
                   <option name="selectedImage" value="">Select provider</option>
               </select>
             </div>
 
-            <div class="form-group" id="siteImages" style="display: none;">
+            <div id="siteImages" style="display: none;">
               <br/>
               <label>Select Site image:</label>
-              <select class="js-example-basic-single js-states form-control" id="selectedSiteImage" name="extra_opts.selectedSiteImage" onchange="activateSubmit()">
+              <select class="js-example-basic-single js-states form-control" id="selectedSiteImage" name="extra_opts.selectedSiteImage" onchange="selectedSiteImageChanged()">
                   <option name="selectedSiteImage" value="">Select provider</option>
               </select>
            </div>
 
        </div>
-       <div class="form-group col-md-6">
+       <div class="col-md-6">
 
-           <div class="form-group" id="fedcloudUsage" style="display: none;">
+           <div id="fedcloudUsage" style="display: none;">
                <label>Site Resource Usage:</label>
                <div id="divLoadingUsage" style="display: none; position: absolute; margin-left: 40px; margin-top: 30px; padding:10px; background-color:white; z-index: 3;">
                    Loading Site Resource Usage Data <span class='spinner-grow spinner-grow-sm'></span>
                </div>
-               <div class="form-row">
-                   <div class="form-group col-md-1">
-                   </div>
-                   <div class="form-group col-md-2">
+               <div class="row ms-2">
+                   <div class="col-md-2">
                        <canvas id="chart-area-cores" width="100px" height="100px"></canvas>
                    </div>
-                   <div class="form-group col-md-2">
+                   <div class="col-md-2">
                        <canvas id="chart-area-ram" width="100px" height="100px"></canvas>
                    </div>
-                   <div class="form-group col-md-2">
+                   <div class="col-md-2">
                        <canvas id="chart-area-instances" width="100px" height="100px"></canvas>
                    </div>
-                   <div class="form-group col-md-2">
+                   <div class="col-md-2">
                        <canvas id="chart-area-floating_ips" width="100px" height="100px"></canvas>
                    </div>
-                   <div class="form-group col-md-2">
+                   <div class="col-md-2">
                        <canvas id="chart-area-security_groups" width="100px" height="100px"></canvas>
                    </div>
                </div>
