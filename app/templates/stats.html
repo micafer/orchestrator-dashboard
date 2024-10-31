@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Stats{% endblock %}
+{% block content %}
+{% include 'flashed_messages.html' %}
+
+<script src="{{ url_for('static', filename='chart/Chart.min.js') }}"></script>
+<script src="{{ url_for('static', filename='chart/chartjs-adapter-date-fns.bundle.min.js') }}"></script>
+
+<script>
+  // Get raw data from stats
+  const clouds = [];
+  {%- for elem in clouds %}
+  clouds.push("{{elem}}");
+  {%- endfor %}
+  const labels = [];
+  {%- for elem in labels %}
+  labels.push("{{elem}}");
+  {%- endfor %}
+  const infs = {{ infs }};
+  const vms = {{ vms }};
+  const cpus = {{ cpus }};
+  const mems = {{ mems }};
+
+  // to store the accumulated values to use in the chart
+  var data_infs = [];
+  var data_vms = [];
+  var data_cpus = [];
+  var data_mems = [];
+  var data_labels = [];
+
+  function filterByCloud(cloud) {
+    const ctx = document.getElementById('statsChart');
+    // Add a 0 in the initial time
+    data_infs = [0];
+    var inf_count = 0
+    data_vms = [0];
+    var vms_count = 0;
+    data_cpus = [0];
+    var cpus_count = 0
+    data_mems = [0];
+    var mems_count = 0
+    data_labels = [labels[0]];
+    // filter the values by cloud
+    for (var i=1; i<clouds.length; i++) {
+      if (cloud == "" || clouds[i] == cloud) {
+        inf_count += infs[i];
+        data_infs.push(inf_count);
+        vms_count += vms[i];
+        data_vms.push(vms_count);
+        cpus_count += cpus[i];
+        data_cpus.push(cpus_count);
+        mems_count += mems[i];
+        data_mems.push(mems_count);
+        data_labels.push(labels[i]);
+      }
+    }
+
+    // add the last value on the end time
+    data_infs.push(data_infs[data_infs.length-1]);
+    data_vms.push(data_vms[data_vms.length-1]);
+    data_cpus.push(data_cpus[data_cpus.length-1]);
+    data_mems.push(data_mems[data_mems.length-1]);
+    data_labels.push(labels[labels.length-1]);
+
+    // update the chart
+    myChart.data.datasets[0].data = data_infs;
+    myChart.data.datasets[1].data = data_vms;
+    myChart.data.datasets[2].data = data_cpus;
+    myChart.data.datasets[3].data = data_mems;
+    myChart.data.labels = data_labels;
+    if (cloud != "") {
+      myChart.options.plugins.title.text = cloud;
+    } else {
+      myChart.options.plugins.title.text = 'All Cloud Sites';
+    }
+    myChart.update();
+  }
+</script>
+
+<div class="container-fluid">
+
+    <br>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <div class="row">
+            <div class="col-md-6">
+              <!-- Title -->
+              <h4 class="font-weight-bold text-primary">Infrastructures Deployed by the user</h4>
+            </div>
+            <div class="col-md-6 text-right">
+              <!-- Button -->
+              <form action="{{ url_for('show_stats') }}">
+                <div class="input-group text-right">
+                  <select class="form-control col-md-4" name="cloud_host" onchange="javascript:filterByCloud(this.value)">
+                    <option value="">- Cloud Site -</option>
+                    {% for host in cloud_hosts %}
+                      <option {% if cloud_host == host %}selected{%endif%} value="{{ host }}">{{ host }}</option>
+                    {% endfor %}
+                    </select>
+                  <input type="date" value="{{init_date}}" max="{{today}}" id="init_date" class="form-control col-md-4" name="init_date">
+                  <input type="date" value="{{end_date}}" max="{{today}}" id="end_date" class="form-control col-md-4" name="end_date">
+                  <button type="submit" class="btn btn-primary submitBtn"><span class='fas fa-sync mr-2'></span>Update</button>
+                </div>
+              </form>
+            </div>
+          </div> <!-- / .row -->
+        </div>
+        </div>
+        <div class="card-body">
+
+          <canvas id="statsChart" height="80px"></canvas>
+
+          <script>      
+            var data = {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Infrastructures',
+                  data: data_infs,
+                  stepped: true,
+                  fill: true,
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  backgroundColor: 'rgba(255, 99, 132, 0.2)'
+                },
+                {
+                  label: 'VMs',
+                  data: data_vms,
+                  stepped: true,
+                  fill: true,
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  backgroundColor: 'rgba(54, 162, 235, 0.2)'
+                },
+                {
+                  label: 'VCPUs',
+                  data: data_cpus,
+                  stepped: true,
+                  fill: true,
+                  borderColor: 'rgba(255, 206, 86, 1)',
+                  backgroundColor: 'rgba(255, 206, 86, 0.2)'
+                },
+                {
+                  label: 'Memory in GB',
+                  data: data_mems,
+                  stepped: true,
+                  fill: true,
+                  borderColor: 'rgba(153, 102, 255, 1)',
+                  backgroundColor: 'rgba(153, 102, 255, 0.2)'
+                }
+              ]
+            };
+
+            const config = {
+              type: 'line',
+              data: data,
+              options: {
+                elements: {
+                  point:{
+                        radius: 0
+                    }
+                },
+                responsive: true,
+                interaction: {
+                  mode: 'index',
+                  intersect: false,
+                },
+                plugins: {
+                  title: {
+                    display: true,
+                    text: 'All Cloud Sites',
+                    padding: 0,
+                    fullSize: false
+                  }
+                },
+                scales: {
+                  x: {
+                    type: 'time',
+                    time: {
+                      round: 'day',
+                      minUnit: 'day',
+                      displayFormats: {
+                        day: 'MMM dd yyyy'
+                      }
+                    },
+                    display: true,
+                    title: {
+                      display: true,
+                      text: 'Date'
+                    },
+                  },
+                  y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left'
+                  },
+                }
+              },
+            };
+
+            const ctx = document.getElementById('statsChart');
+            const myChart = new Chart(ctx, config);
+            filterByCloud("");
+          </script>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
