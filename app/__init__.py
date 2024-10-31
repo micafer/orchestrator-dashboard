@@ -1648,7 +1648,8 @@ def create_app(oidc_blueprint=None):
         clouds = [""]
         site_name = None
         try:
-            for inf_stat in sorted(im.get_stats(auth_data, init_date, end_date), key=lambda stat: stat['creation_date']):
+            for inf_stat in sorted(im.get_stats(auth_data, init_date, end_date),
+                                   key=lambda stat: stat['creation_date']):
                 if inf_stat['cloud_host']:
                     # only load this data if a EGI Cloud site appears
                     if fedcloud_sites is None:
