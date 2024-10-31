@@ -694,8 +694,8 @@ class IMDashboardTests(unittest.TestCase):
         self.assertNotIn(b'Error Getting Stats:', res.data)
         self.assertIn(b'clouds.push("sharp-elbakyan5.im.grycap.net");', res.data)
         self.assertIn(b'labels.push("2022-03-07 13:16:14");', res.data)
-        self.assertIn(b'const infs = [1];', res.data)
-        self.assertIn(b'const vms = [2];', res.data)
+        self.assertIn(b'const infs = [0, 1, 0];', res.data)
+        self.assertIn(b'const vms = [0, 2, 0];', res.data)
 
     @patch("app.utils.avatar")
     @patch("app.ssh_key.SSHKey.get_ssh_keys")
