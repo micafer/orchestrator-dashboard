@@ -333,7 +333,7 @@ def create_app(oidc_blueprint=None):
 
             for elem in vminfo:
                 if elem.endswith("size") and isinstance(vminfo[elem], (int, float)):
-                    vminfo[elem] = "%.1f GB" % (vminfo[elem] / 1073741824.0)
+                    vminfo[elem] = "%.1f GiB" % (vminfo[elem] / 1073741824.0)
 
             cont = 0
             while "disk.%s.size" % cont in vminfo or "disk.%s.image.url" % cont in vminfo:
