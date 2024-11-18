@@ -125,7 +125,7 @@
       <!-- number type -->
       <input type="number" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_value %}min="{{min_value[0]}}"{%endif%} {% if max_value %}max="{{max_value[0]}}"{%endif%}/>
       {% elif value.type == "scalar-unit.size" %}
-      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" pattern="[0-9]*( )([TMG]B)" title="Number Unit(MB, GB or TB)">
+      <input type="text" class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" pattern="[0-9]*( )[TMG]i{0,1}B" title="Number Unit(MB, GB or TB)">
       {% else %}
 	    <!-- text type, hide fields with password -->
       <input {% if 'password' in key %}type="password"{% else %}type="text"{% endif %} class="form-control" id="{{key}}" name="{{key}}" value="{{input_value}}" aria-describedby="help{{key}}" {% if value.required %}required{%endif%} {% if min_length %}minlength="{{min_length[0]}}"{%endif%} {% if max_length %}maxlength="{{max_length[0]}}"{%endif%}/>
