@@ -41,7 +41,7 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/vms/0":
             resp.ok = True
             resp.status_code = 200
-            resp.text = "system front (cpu.count = 1 and memory.size = 512 MB)"
+            resp.text = "system front (cpu.count = 1 and memory.size = 512 MiB)"
             radl = {"class": "system",
                     "cpu.arch": "x86_64",
                     "cpu.count_min": 1,

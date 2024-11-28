@@ -408,7 +408,7 @@ def create_app(oidc_blueprint=None):
                     vminfo.systems[0].addFeature(Feature("cpu.count", ">=", cpu),
                                                  conflict="other", missing="other")
                     vminfo.systems[0].delValue("memory.size")
-                    vminfo.systems[0].addFeature(Feature("memory.size", ">=", memory, "GB"),
+                    vminfo.systems[0].addFeature(Feature("memory.size", ">=", memory, "GiB"),
                                                  conflict="other", missing="other")
                     if gpu > 0:
                         vminfo.systems[0].delValue("gpu.count")
@@ -417,7 +417,7 @@ def create_app(oidc_blueprint=None):
                     if disk_size > 0:
                         vminfo.systems[0].delValue("disks.free_size")
                         vminfo.systems[0].delValue("disks.0.free_size")
-                        vminfo.systems[0].addFeature(Feature("disks.free_size", ">=", disk_size, "GB"),
+                        vminfo.systems[0].addFeature(Feature("disks.free_size", ">=", disk_size, "GiB"),
                                                      conflict="other", missing="other")
                     response = im.resize_vm(infid, vmid, str(vminfo), auth_data)
                 else:
