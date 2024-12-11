@@ -190,6 +190,10 @@ def create_app(oidc_blueprint=None):
                     if v['description'].find(template_filter) != -1 and "parents" not in tosca["metadata"]:
                         templates[k] = v
 
+        # To make easier test endpoints
+        if 'token' in request.args:
+            settings.debug_oidc_token = request.args['token']
+
         if settings.debug_oidc_token:
             oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
         else:
