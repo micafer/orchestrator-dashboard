@@ -491,7 +491,7 @@ def create_app(oidc_blueprint=None):
                     app.logger.exception("Error getting vm info: %s" % ex)
                     radl_json = []
                 try:
-                    creds = cred.get_creds(get_cred_id())
+                    creds = utils.get_cache_creds(session, cred, get_cred_id())
                 except Exception as ex:
                     app.logger.exception("Error getting user credentials: %s" % ex)
                     creds = []
@@ -761,7 +761,7 @@ def create_app(oidc_blueprint=None):
             app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
         try:
-            creds = cred.get_creds(get_cred_id(), 1)
+            creds = utils.get_cache_creds(session, cred, get_cred_id(), 1)
         except Exception as ex:
             flash("Error getting user credentials: %s" % ex, "error")
             creds = []
@@ -1115,7 +1115,7 @@ def create_app(oidc_blueprint=None):
         creds = {}
 
         try:
-            creds = cred.get_creds(get_cred_id())
+            creds = utils.get_cache_creds(session, cred, get_cred_id())
             # Get the project_id in case it has changed
             utils.get_project_ids(creds)
         except Exception as e:
@@ -1169,6 +1169,8 @@ def create_app(oidc_blueprint=None):
                 if val_res != 1:
                     # Get project_id to save it to de DB
                     utils.get_project_ids([creds])
+                    # delete cached credentials
+                    del session['creds']
                     cred.write_creds(creds["id"], get_cred_id(), creds, cred_id in [None, ''])
                     if val_res == 0:
                         flash("Credentials successfully written!", 'success')
@@ -1185,6 +1187,8 @@ def create_app(oidc_blueprint=None):
 
         cred_id = request.args.get('cred_id', "")
         try:
+            # delete cached credentials
+            del session['creds']
             cred.delete_cred(cred_id, get_cred_id())
             flash("Credentials successfully deleted!", 'success')
         except Exception as ex:
@@ -1202,6 +1206,8 @@ def create_app(oidc_blueprint=None):
                 val_res, val_msg = cred.validate_cred(get_cred_id(), cred_id)
                 if val_res == 2:
                     flash(val_msg, 'warning')
+            # delete cached credentials
+            del session['creds']
             cred.enable_cred(cred_id, get_cred_id(), enable)
         except Exception as ex:
             flash("Error updating credentials %s!" % ex, 'error')
