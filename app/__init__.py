@@ -1170,7 +1170,8 @@ def create_app(oidc_blueprint=None):
                     # Get project_id to save it to de DB
                     utils.get_project_ids([creds])
                     # delete cached credentials
-                    del session['creds']
+                    if 'creds' in session:
+                        del session['creds']
                     cred.write_creds(creds["id"], get_cred_id(), creds, cred_id in [None, ''])
                     if val_res == 0:
                         flash("Credentials successfully written!", 'success')
@@ -1188,7 +1189,8 @@ def create_app(oidc_blueprint=None):
         cred_id = request.args.get('cred_id', "")
         try:
             # delete cached credentials
-            del session['creds']
+            if 'creds' in session:
+                del session['creds']
             cred.delete_cred(cred_id, get_cred_id())
             flash("Credentials successfully deleted!", 'success')
         except Exception as ex:
@@ -1207,7 +1209,8 @@ def create_app(oidc_blueprint=None):
                 if val_res == 2:
                     flash(val_msg, 'warning')
             # delete cached credentials
-            del session['creds']
+            if 'creds' in session:
+                del session['creds']
             cred.enable_cred(cred_id, get_cred_id(), enable)
         except Exception as ex:
             flash("Error updating credentials %s!" % ex, 'error')
