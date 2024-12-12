@@ -130,7 +130,9 @@ def create_app(oidc_blueprint=None):
         @wraps(f)
         def decorated_function(*args, **kwargs):
 
-            if settings.debug_oidc_token:
+            if 'token' in session:
+                oidc_blueprint.session.token = {'access_token': session['token']}
+            elif settings.debug_oidc_token:
                 oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
             else:
                 try:
@@ -193,9 +195,9 @@ def create_app(oidc_blueprint=None):
 
         # To make easier test endpoints
         if 'token' in request.args:
-            settings.debug_oidc_token = request.args['token']
-
-        if settings.debug_oidc_token:
+            session["token"] = request.args['token']
+            oidc_blueprint.session.token = {'access_token': request.args['token']}
+        elif settings.debug_oidc_token:
             oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
         else:
             if not oidc_blueprint.session.authorized:
