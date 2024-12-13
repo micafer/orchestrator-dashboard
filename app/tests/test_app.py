@@ -431,6 +431,7 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Select Optional Features:", res.data)
 
+        utils.CREDS_CACHE = {}
         get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url",
                                    "vo": "voname", "enabled": True},
                                   {"id": "credid1", "type": "OpenStack", "host": "site_url1",
