@@ -985,10 +985,10 @@ def merge_templates(template, new_template):
     return template
 
 
-def get_cache_creds(cred, userid, enabled=None):
+def get_cache_creds(cred, userid, creduserid, enabled=None):
     global CREDS_CACHE
     if userid not in CREDS_CACHE:
-        CREDS_CACHE[userid] = cred.get_creds(userid)
+        CREDS_CACHE[userid] = cred.get_creds(creduserid)
 
     res = []
     for cred in CREDS_CACHE[userid]:
