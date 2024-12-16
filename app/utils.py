@@ -982,9 +982,3 @@ def merge_templates(template, new_template):
         template["metadata"]["tabs"].update(tabs)
 
     return template
-
-
-def get_cache_creds(session, cred, userid, enabled=None):
-    if "creds" not in session:
-        session["creds"] = cred.get_creds(userid, enabled)
-    return session["creds"]
