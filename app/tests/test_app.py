@@ -577,6 +577,16 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'credid', res.data)
         self.assertIn(b'site_url', res.data)
         self.assertIn(b'fedcloudRow.png', res.data)
+        self.assertEqual(utils.CREDS_CACHE, {"userid": [{"id": "credid", "type": "fedcloud",
+                                                         "host": "site_url", "project_id": "project"}]})
+        self.assertEqual(get_creds.call_count, 2)
+
+        res = self.client.get('/manage_creds')
+        self.assertEqual(200, res.status_code)
+        self.assertIn(b'credid', res.data)
+        self.assertIn(b'site_url', res.data)
+        self.assertIn(b'fedcloudRow.png', res.data)
+        self.assertEqual(get_creds.call_count, 2)
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_cred")
