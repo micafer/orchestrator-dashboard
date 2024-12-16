@@ -234,7 +234,6 @@ class IMDashboardTests(unittest.TestCase):
     def test_infrastructures(self, avatar, get, user_data, get_creds):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         get_creds.return_value = []
-        utils.CREDS_CACHE = {}
         get.side_effect = self.get_response
         self.login(avatar)
         res = self.client.get('/infrastructures')
@@ -432,7 +431,6 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Select Optional Features:", res.data)
 
-        utils.CREDS_CACHE = {}
         get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url",
                                    "vo": "voname", "enabled": True},
                                   {"id": "credid1", "type": "OpenStack", "host": "site_url1",
@@ -577,16 +575,6 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'credid', res.data)
         self.assertIn(b'site_url', res.data)
         self.assertIn(b'fedcloudRow.png', res.data)
-        self.assertEqual(utils.CREDS_CACHE, {"userid": [{"id": "credid", "type": "fedcloud",
-                                                         "host": "site_url", "project_id": "project"}]})
-        self.assertEqual(get_creds.call_count, 2)
-
-        res = self.client.get('/manage_creds')
-        self.assertEqual(200, res.status_code)
-        self.assertIn(b'credid', res.data)
-        self.assertIn(b'site_url', res.data)
-        self.assertIn(b'fedcloudRow.png', res.data)
-        self.assertEqual(get_creds.call_count, 2)
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_cred")
