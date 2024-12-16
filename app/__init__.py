@@ -74,12 +74,11 @@ def create_app(oidc_blueprint=None):
     vault_info = VaultInfo(settings.db_url)
     ott = OneTimeTokenData(settings.vault_url)
 
-    scheduler = APScheduler()
     # To Reload internally the site cache
-    if 'DISABLE_APPSCHEDULER' not in app.config:
-        scheduler.api_enabled = False
-        scheduler.init_app(app)
-        scheduler.start()
+    scheduler = APScheduler()
+    scheduler.api_enabled = False
+    scheduler.init_app(app)
+    scheduler.start()
 
     toscaTemplates = utils.loadToscaTemplates(settings.toscaDir)
     toscaInfo = utils.extractToscaInfo(settings.toscaDir, toscaTemplates, settings.hide_tosca_tags)
