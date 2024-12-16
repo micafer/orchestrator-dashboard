@@ -73,7 +73,7 @@ def create_app(oidc_blueprint=None):
     ssh_key = SSHKey(settings.db_url)
     vault_info = VaultInfo(settings.db_url)
     ott = OneTimeTokenData(settings.vault_url)
-
+    
     # To Reload internally the site cache
     scheduler = APScheduler()
     scheduler.api_enabled = False
