@@ -252,7 +252,6 @@ def create_app(oidc_blueprint=None):
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
 
-        # Force to get the user credentials to cache them
         scheduler.add_job(func=utils.get_cache_creds, trigger='date', run_date=datetime.datetime.now(),
                           misfire_grace_time=20, args=[cred, get_cred_id()], id='get_cache_creds')
 
