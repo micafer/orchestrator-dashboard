@@ -986,11 +986,5 @@ def merge_templates(template, new_template):
 
 def get_cache_creds(session, cred, userid, enabled=None):
     if "creds" not in session:
-        session["creds"] = cred.get_creds(userid)
-
-    res = []
-    for cred in session["creds"]:
-        if enabled is None or enabled == cred['enabled']:
-            res.append(cred)
-
-    return res
+        session["creds"] = cred.get_creds(userid, enabled)
+    return session["creds"]
