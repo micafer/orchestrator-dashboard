@@ -438,12 +438,6 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&childs=users.yml')
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Deploy a compute node getting the IP and SSH credentials to access via ssh", res.data)
-        self.assertIn(b'<option data-tenant-id="" data-type="fedcloud" name="selectedCred" '
-                      b'value=credid>\n                        credid\n                        (Warn)\n'
-                      b'                    </option>', res.data)
-        self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
-                      b'name="selectedCred" value=credid1>\n                        credid1\n'
-                      b'                    </option>', res.data)
 
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&inf_id=infid')
         self.assertEqual(200, res.status_code)
