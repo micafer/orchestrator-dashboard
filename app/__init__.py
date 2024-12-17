@@ -760,13 +760,6 @@ def create_app(oidc_blueprint=None):
         else:
             app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
-        try:
-            creds = cred.get_creds(get_cred_id(), 1)
-        except Exception as ex:
-            flash("Error getting user credentials: %s" % ex, "error")
-            creds = []
-        utils.get_project_ids(creds)
-
         # Enable to get input values from URL parameters
         for input_name, input_value in selected_template["inputs"].items():
             value = request.args.get(input_name, None)
@@ -783,7 +776,7 @@ def create_app(oidc_blueprint=None):
         return render_template('createdep.html',
                                template=selected_template,
                                selectedTemplate=selected_tosca,
-                               creds=creds, input_values=inputs,
+                               input_values=inputs,
                                infra_name=infra_name, child_templates=child_templates,
                                vos=utils.getVOs(session), utils=utils)
 
@@ -1121,8 +1114,17 @@ def create_app(oidc_blueprint=None):
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
 
-        return render_template('service_creds.html', creds=creds,
-                               vault=(settings.vault_url and settings.enable_external_vault))
+        if request.args.get('json', 0):
+            json_creds = json.dumps(creds)
+            to_delete = ['password', 'token', 'proxy', 'private_key', 'client_id', 'secret']
+            for cred in json_creds:
+                for key in to_delete:
+                    if key in cred:
+                        del cred[key]
+            return json_creds
+        else:
+            return render_template('service_creds.html', creds=creds,
+                                   vault=(settings.vault_url and settings.enable_external_vault))
 
     @app.route('/write_creds', methods=['GET', 'POST'])
     @authorized_with_valid_token
