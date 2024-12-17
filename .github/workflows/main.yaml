@@ -37,6 +37,7 @@ jobs:
           wget -P tosca-templates https://raw.githubusercontent.com/grycap/tosca/main/templates/simple-node-disk.yml
           sed -i -e 's|/opt|'${GITHUB_WORKSPACE}'|g' app/config.json
           sed -i -e 's|creds.db|tmp/creds.db|g' app/config.json
+          sed -i -e 's|"EXTRA_AUTH": {},|"DISABLE_APPSCHEDULER": true,|g' app/config.json
 
       - name: Unit tests
         run: python -m coverage run --source=. -m unittest discover -s app/tests -p 'test*.py'

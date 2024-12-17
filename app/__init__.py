@@ -73,12 +73,13 @@ def create_app(oidc_blueprint=None):
     ssh_key = SSHKey(settings.db_url)
     vault_info = VaultInfo(settings.db_url)
     ott = OneTimeTokenData(settings.vault_url)
-    
-    # To Reload internally the site cache
+
     scheduler = APScheduler()
-    scheduler.api_enabled = False
-    scheduler.init_app(app)
-    scheduler.start()
+    # To Reload internally the site cache
+    if 'DISABLE_APPSCHEDULER' not in app.config:
+        scheduler.api_enabled = False
+        scheduler.init_app(app)
+        scheduler.start()
 
     toscaTemplates = utils.loadToscaTemplates(settings.toscaDir)
     toscaInfo = utils.extractToscaInfo(settings.toscaDir, toscaTemplates, settings.hide_tosca_tags)
@@ -247,7 +248,8 @@ def create_app(oidc_blueprint=None):
                 return render_template('home.html', oidc_name=settings.oidcName)
 
         # Force to get the user credentials to cache them
-        scheduler.add_job(func=utils.get_cache_creds, trigger='date', run_date=datetime.datetime.now(),
+        ndate = datetime.datetime.now() + datetime.timedelta(0, 2)
+        scheduler.add_job(func=utils.get_cache_creds, trigger='date', run_date=ndate,
                           misfire_grace_time=20, args=[cred, get_cred_id()], id='get_cache_creds')
 
         # if there are any next url, redirect to it
