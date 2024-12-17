@@ -153,11 +153,10 @@ $(document).ready(function () {
             for (var i = 0; i < data.length; i++) {
                 var option = "<option name='selectedCred' value='" + data[i]["id"] + "'";
                 if ("tenant_id" in data[i]) {
-                    option = option + " data-tenant-id='" + data[i]["tenant_id"];
+                    option = option + " data-tenant-id='" + data[i]["tenant_id"] + "'";
                 }
                 option = option + " data-type='" + data[i]["type"] + "'";
                 option = option + ">" + data[i]["id"] + "</option>"
-                console.log(option);
                 $('#selectedCred').append(option);
             }
         }
