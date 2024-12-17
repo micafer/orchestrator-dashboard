@@ -6,7 +6,7 @@ sys.path.append('.')
 import unittest
 import json
 import defusedxml.ElementTree as etree
-from app import create_app, utils
+from app import create_app
 from urllib.parse import urlparse
 from mock import patch, MagicMock
 
@@ -431,7 +431,6 @@ class IMDashboardTests(unittest.TestCase):
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Select Optional Features:", res.data)
 
-        utils.CREDS_CACHE = {}
         get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url",
                                    "vo": "voname", "enabled": True},
                                   {"id": "credid1", "type": "OpenStack", "host": "site_url1",
@@ -439,12 +438,6 @@ class IMDashboardTests(unittest.TestCase):
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&childs=users.yml')
         self.assertEqual(200, res.status_code)
         self.assertIn(b"Deploy a compute node getting the IP and SSH credentials to access via ssh", res.data)
-        self.assertIn(b'<option data-tenant-id="" data-type="fedcloud" name="selectedCred" '
-                      b'value=credid>\n                        credid\n                        (Warn)\n'
-                      b'                    </option>', res.data)
-        self.assertIn(b'<option data-tenant-id="tenid" data-type="OpenStack" '
-                      b'name="selectedCred" value=credid1>\n                        credid1\n'
-                      b'                    </option>', res.data)
 
         res = self.client.get('/configure?selected_tosca=simple-node-disk.yml&inf_id=infid')
         self.assertEqual(200, res.status_code)
@@ -570,12 +563,16 @@ class IMDashboardTests(unittest.TestCase):
         get_sites.return_value = {"SITE_NAME": {"url": "URL", "state": "", "id": ""},
                                   "SITE2": {"url": "URL2", "state": "CRITICAL", "id": ""}}
         get_creds.return_value = [{"id": "credid", "type": "fedcloud", "host": "site_url", "project_id": "project"}]
-        utils.CREDS_CACHE = {}
         res = self.client.get('/manage_creds')
         self.assertEqual(200, res.status_code)
         self.assertIn(b'credid', res.data)
         self.assertIn(b'site_url', res.data)
         self.assertIn(b'fedcloudRow.png', res.data)
+
+        res = self.client.get('/manage_creds?json=1')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(json.loads(res.data), [{"id": "credid", "type": "fedcloud", "host": "site_url",
+                                                 "project_id": "project"}])
 
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_cred")

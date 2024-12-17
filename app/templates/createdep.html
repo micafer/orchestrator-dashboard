@@ -134,5 +134,33 @@ $(document).ready(function () {
     }
   });
 });
+
+// Load cloud sites
+$(document).ready(function () {
+    $('#selectedCred').empty();
+    $('#selectedCred').append("<option value=''>Loading Cloud Sites ...</option>");
+    $.getJSON("{{url_for('manage_creds')}}?json=1", function( data ) {
+        if (data.length == 0) {
+            $('#selectedCred').empty();
+            $('#noCloud').show();
+            $('#cloudSelect').hide();
+            $('#tabAdvanced').tab('show');
+        } else {
+            $('#noCloud').hide();
+            $('#cloudSelect').show();
+            $('#selectedCred').empty();
+            $('#selectedCred').append("<option value=''> - Select Cloud site - </option>");
+            for (var i = 0; i < data.length; i++) {
+                var option = "<option name='selectedCred' value='" + data[i]["id"] + "'";
+                if ("tenant_id" in data[i]) {
+                    option = option + " data-tenant-id='" + data[i]["tenant_id"] + "'";
+                }
+                option = option + " data-type='" + data[i]["type"] + "'";
+                option = option + ">" + data[i]["id"] + "</option>"
+                $('#selectedCred').append(option);
+            }
+        }
+    });
+});
 </script>
 {% endblock %}

@@ -26,7 +26,6 @@ import os
 import logging
 import copy
 import requests
-import datetime
 from requests.exceptions import Timeout
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.consumer import OAuth2ConsumerBlueprint
@@ -245,10 +244,6 @@ def create_app(oidc_blueprint=None):
             else:
                 flash("Error getting User info: \n" + account_info.text, 'error')
                 return render_template('home.html', oidc_name=settings.oidcName)
-
-        # Force to get the user credentials to cache them
-        scheduler.add_job(func=utils.get_cache_creds, trigger='date', run_date=datetime.datetime.now(),
-                          misfire_grace_time=20, args=[cred, session['userid'], get_cred_id()], id='get_cache_creds')
 
         # if there are any next url, redirect to it
         if "next" in session and session["next"]:
@@ -496,7 +491,7 @@ def create_app(oidc_blueprint=None):
                     app.logger.exception("Error getting vm info: %s" % ex)
                     radl_json = []
                 try:
-                    creds = utils.get_cache_creds(cred, session['userid'], get_cred_id())
+                    creds = cred.get_creds(get_cred_id())
                 except Exception as ex:
                     app.logger.exception("Error getting user credentials: %s" % ex)
                     creds = []
@@ -765,13 +760,6 @@ def create_app(oidc_blueprint=None):
         else:
             app.logger.debug("Template: " + json.dumps(toscaInfo[selected_tosca]))
 
-        try:
-            creds = utils.get_cache_creds(cred, session['userid'], get_cred_id(), 1)
-        except Exception as ex:
-            flash("Error getting user credentials: %s" % ex, "error")
-            creds = []
-        utils.get_project_ids(creds)
-
         # Enable to get input values from URL parameters
         for input_name, input_value in selected_template["inputs"].items():
             value = request.args.get(input_name, None)
@@ -788,7 +776,7 @@ def create_app(oidc_blueprint=None):
         return render_template('createdep.html',
                                template=selected_template,
                                selectedTemplate=selected_tosca,
-                               creds=creds, input_values=inputs,
+                               input_values=inputs,
                                infra_name=infra_name, child_templates=child_templates,
                                vos=utils.getVOs(session), utils=utils)
 
@@ -1120,14 +1108,23 @@ def create_app(oidc_blueprint=None):
         creds = {}
 
         try:
-            creds = utils.get_cache_creds(cred, session['userid'], get_cred_id())
+            creds = cred.get_creds(get_cred_id())
             # Get the project_id in case it has changed
             utils.get_project_ids(creds)
         except Exception as e:
             flash("Error retrieving credentials: \n" + str(e), 'warning')
 
-        return render_template('service_creds.html', creds=creds,
-                               vault=(settings.vault_url and settings.enable_external_vault))
+        if request.args.get('json', 0):
+            json_creds = json.dumps(creds)
+            to_delete = ['password', 'token', 'proxy', 'private_key', 'client_id', 'secret']
+            for elem in json_creds:
+                for key in to_delete:
+                    if key in elem:
+                        del elem[key]
+            return json_creds
+        else:
+            return render_template('service_creds.html', creds=creds,
+                                   vault=(settings.vault_url and settings.enable_external_vault))
 
     @app.route('/write_creds', methods=['GET', 'POST'])
     @authorized_with_valid_token
@@ -1174,8 +1171,6 @@ def create_app(oidc_blueprint=None):
                 if val_res != 1:
                     # Get project_id to save it to de DB
                     utils.get_project_ids([creds])
-                    # delete cached credentials
-                    utils.clear_cache_creds(session['userid'])
                     cred.write_creds(creds["id"], get_cred_id(), creds, cred_id in [None, ''])
                     if val_res == 0:
                         flash("Credentials successfully written!", 'success')
@@ -1192,8 +1187,6 @@ def create_app(oidc_blueprint=None):
 
         cred_id = request.args.get('cred_id', "")
         try:
-            # delete cached credentials
-            utils.clear_cache_creds(session['userid'])
             cred.delete_cred(cred_id, get_cred_id())
             flash("Credentials successfully deleted!", 'success')
         except Exception as ex:
@@ -1211,8 +1204,6 @@ def create_app(oidc_blueprint=None):
                 val_res, val_msg = cred.validate_cred(get_cred_id(), cred_id)
                 if val_res == 2:
                     flash(val_msg, 'warning')
-            # delete cached credentials
-            utils.clear_cache_creds(session['userid'])
             cred.enable_cred(cred_id, get_cred_id(), enable)
         except Exception as ex:
             flash("Error updating credentials %s!" % ex, 'error')
