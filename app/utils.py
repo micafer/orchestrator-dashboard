@@ -46,7 +46,6 @@ urllib3.disable_warnings(InsecureRequestWarning)
 SITE_LIST = {}
 LAST_UPDATE = 0
 PORT_SPECT_TYPES = ["PortSpec", "tosca.datatypes.network.PortSpec", "tosca.datatypes.indigo.network.PortSpec"]
-CREDS_CACHE = {}
 
 
 def _getStaticSitesInfo(force=False):
@@ -983,22 +982,3 @@ def merge_templates(template, new_template):
         template["metadata"]["tabs"].update(tabs)
 
     return template
-
-
-def get_cache_creds(cred, userid, creduserid, enabled=None):
-    global CREDS_CACHE
-    if userid not in CREDS_CACHE:
-        CREDS_CACHE[userid] = cred.get_creds(creduserid)
-
-    res = []
-    for cred in CREDS_CACHE[userid]:
-        if enabled is None or enabled == cred['enabled']:
-            res.append(cred)
-
-    return res
-
-
-def clear_cache_creds(userid):
-    global CREDS_CACHE
-    if userid in CREDS_CACHE:
-        del CREDS_CACHE[userid]

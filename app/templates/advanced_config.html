@@ -249,23 +249,14 @@
 
            <div>
                <label>Select Cloud Provider:</label>
-               {% if not creds %}
-               <label>No Cloud Provider defined. Add it in the Cloud Credentials page: <a class="btn btn-success text-white" href="{{ url_for('manage_creds') }}">Add</a></label>
-               {% else %}
+               <div id="noCloud" style="display: none;">
+                <label>No Cloud Provider defined. Add it in the Cloud Credentials page: <a class="btn btn-success text-white" href="{{ url_for('manage_creds') }}">Add</a></label>
+               </div>
+               <div id="cloudSelect">
                 <select class="js-example-basic-single js-states form-control" id="selectedCred" name="extra_opts.selectedCred" onchange="changedCred();">
                     <option name="selectedCred" value=""> - Select Cloud site - </option>
-                    {% for cred in creds %}
-                    {% if cred[type] not in ["InfrastructureManager"] %}
-                    <option data-tenant-id="{{cred['tenant_id'] if 'tenant_id' in cred else '' }}" data-type="{{ cred['type'] }}" name="selectedCred" value={{ cred['id'] }}>
-                        {{ cred['id'] }}
-                        {%- if cred['type'] == 'fedcloud' and ((session['vos'] and cred['vo'] not in session['vos']) or 'project_id' not in cred) %}
-                        (Warn)
-                        {%- endif %}
-                    </option>
-                    {% endif %}
-                    {% endfor %}
                 </select>
-               {% endif %}
+               </div>
            </div>
 
            <div id="cloudImages" style="display: none;">
