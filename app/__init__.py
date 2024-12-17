@@ -1123,10 +1123,10 @@ def create_app(oidc_blueprint=None):
         if request.args.get('json', 0):
             json_creds = json.dumps(creds)
             to_delete = ['password', 'token', 'proxy', 'private_key', 'client_id', 'secret']
-            for cred in json_creds:
+            for elem in json_creds:
                 for key in to_delete:
-                    if key in cred:
-                        del cred[key]
+                    if key in elem:
+                        del elem[key]
             return json_creds
         else:
             return render_template('service_creds.html', creds=creds,
