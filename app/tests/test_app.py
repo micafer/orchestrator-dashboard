@@ -569,6 +569,11 @@ class IMDashboardTests(unittest.TestCase):
         self.assertIn(b'site_url', res.data)
         self.assertIn(b'fedcloudRow.png', res.data)
 
+        res = self.client.get('/manage_creds?json=1')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(json.loads(res.data), [{"id": "credid", "type": "fedcloud", "host": "site_url",
+                                                 "project_id": "project"}])
+
     @patch("app.utils.avatar")
     @patch("app.db_cred.DBCredentials.get_cred")
     @patch("app.db_cred.DBCredentials.write_creds")
