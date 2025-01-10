@@ -332,7 +332,7 @@
                           </div>
                           <div class="col">
                             {% set memory_parts = memory.split() %}
-                            Memory (GiB): <input name="memory" class="col-sm-12" type="number" min="0" value="{{ memory_parts[0] | float }}" required/>
+                            Memory (GiB): <input name="memory" class="col-sm-12" type="number" min="0" step="0.01" value="{{ memory_parts[0] | float }}" required/>
                           </div>
                         </div>
 
@@ -342,7 +342,7 @@
                           </div>
                           <div class="col">
                           {% set disk_size_parts = disk_size.split() %}
-                            Disk Size (GiB): <input name="disk_size" class="col-sm-12" type="number" min="0" value="{{ disk_size_parts[0] | float  }}"/>
+                            Disk Size (GiB): <input name="disk_size" class="col-sm-12" type="number" min="0" step="0.01" value="{{ disk_size_parts[0] | float  }}"/>
                           </div>
                         </div>
 
