@@ -175,7 +175,11 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False, add_ex
     res = "type = InfrastructureManager; token = %s" % access_token
 
     fedcloud_sites = None
-    creds = cred.get_creds(userid)
+    try:
+        creds = cred.get_creds(userid)
+    except Exception as ex:
+        creds = []
+        print("Error getting credentials: %s." % ex, file=sys.stderr)
 
     # Add the extra auth configured in the Dashboard
     extra_auth_ids = []
