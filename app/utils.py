@@ -159,7 +159,14 @@ def getIMUserAuthData(access_token, cred, userid):
     if g.settings.im_auth == "Bearer":
         return "Bearer %s" % access_token
     res = "type = InfrastructureManager; token = '%s'" % access_token
-    for cred in cred.get_creds(userid):
+
+    try:
+        creds = cred.get_creds(userid)
+    except Exception as ex:
+        creds = []
+        print("Error getting credentials: %s." % ex, file=sys.stderr)
+
+    for cred in creds:
         if cred['enabled']:
             if cred['type'] == "InfrastructureManager":
                 res += "\\nid = %s" % cred['id']
