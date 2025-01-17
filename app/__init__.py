@@ -520,6 +520,8 @@ def create_app(oidc_blueprint=None):
                             site_info += "<br>"
                         site_info += "Tenant: " + infra_data["site"]["tenant"]
 
+                if "node" in infra_data["site"] and infra_data["site"]["node"]:
+                    site_info += "Node: " + infra_data["site"]["node"]
                 if "subscription_id" in infra_data["site"] and infra_data["site"]["subscription_id"]:
                     site_info += "Subs. ID: " + infra_data["site"]["subscription_id"]
                 if "vo" in infra_data["site"] and infra_data["site"]["vo"]:
@@ -1007,7 +1009,7 @@ def create_app(oidc_blueprint=None):
         image = None
         priv_network_id = None
         pub_network_id = None
-        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE', 'CH']:
+        if cred_data['type'] in ['fedcloud', 'OpenStack', 'OpenNebula', 'Linode', 'Orange', 'GCE', 'CH', 'EUNode']:
             if cred_data['type'] == 'fedcloud':
                 site, _, vo = utils.get_site_info(cred_id, cred, get_cred_id())
                 if "networks" in site and vo in site["networks"]:
