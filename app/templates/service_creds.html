@@ -34,6 +34,7 @@
                 <a class="dropdown-item" data-id="" data-type="InfrastructureManager" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/InfrastructureManagerRow.png') }}"/></a>
                 <a class="dropdown-item" data-id="" data-type="OSCAR" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/OSCARRow.png') }}"/></a>
                 <a class="dropdown-item" data-id="" data-type="CH" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/CHRow.png') }}"/></a>
+                <a class="dropdown-item" data-id="" data-type="EUNode" data-bs-toggle="modal" data-bs-target="#newModal" href="#"><img src="{{ url_for('static', filename='images/EUNodeRow.png') }}"/></a>
               </div>
             </div>
           </div> <!-- / .row -->
@@ -56,6 +57,9 @@
                       <td>{{cred['id']}}</td>
                       <td><img src="{{ url_for('static', filename='images/' + cred['type'] + 'Row.png') }}"/></td>
                       <td>
+                        {% if 'node' in cred %}
+                        <strong>Node: </strong> {{cred["node"]}}<br>
+                        {% endif %}
                         {% if 'host' in cred %}
                         <strong>Host: </strong> {{cred["host"]}}
                         {% endif %}
