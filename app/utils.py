@@ -210,7 +210,16 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False, add_ex
     for cred in creds:
         if cred['enabled'] and (cred_id is None or cred_id == cred['id'] or cred['id'] in extra_auth_ids):
             res += "\\nid = %s" % cred['id']
-            if cred['type'] == "CH":
+            if cred['type'] == "EUNode":
+                # Add the EUNode provider as OpenStack
+                res += "; type = OpenStack; auth_version = 3.x_appcred;"
+                res += " host = https://api.%s.iaas.open-science-cloud.ec.europa.eu:5000" % cred['node']
+                res += "/identity;" if cred['node'] == "eu-2" else ";"
+                res += " username = %s; tenant = %s; password = '%s'" % (cred['username'],
+                                                                         cred['tenant'],
+                                                                         cred['password'])
+                res += "; tenant_id = %s;" % cred["tenant"]
+            elif cred['type'] == "CH":
                 # Add the Cloud&Heat provider as OpenStack
                 res += "; type = OpenStack; auth_version = 3.x_password;"
                 res += " host = https://identity-%s.cloudandheat.com:5000;" % cred['region']

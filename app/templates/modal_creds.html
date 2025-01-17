@@ -293,6 +293,27 @@
           <div class="col">
           </div>
         </div>
+{% elif cred_type == "EUNode" %}
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="ID" name="username" class="col-sm-12 form-control my-1" type="text" id="username" value="{{ creds['username'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+              <input placeholder="Secret" name="password" class="col-sm-12 form-control my-1" type="password" id="password"/>
+          </div>
+        </div>
+        <div class="row form-group">
+          <div class="col">
+              <input placeholder="Project ID" name="tenant" class="col-sm-12 form-control my-1" type="text" id="tenant" value="{{ creds['tenant'] if creds else '' }}" required/>
+          </div>
+          <div class="col">
+            <select class="js-example-basic-single js-states form-control" id="node" name="node" required>
+              <option name="node" value="">-- Set EU Node Provider --</option>
+              <option name="node" value="eu-1" {{ "selected" if creds and creds['node'] == "eu-1" else '' }}>eu-1</option>
+              <option name="node" value="eu-2" {{ "selected" if creds and creds['node'] == "eu-2" else '' }}>eu-2</option>
+            </select>
+          </div>
+        </div>
 {% else %}
 
 
