@@ -58,7 +58,7 @@
                       <td><img src="{{ url_for('static', filename='images/' + cred['type'] + 'Row.png') }}"/></td>
                       <td>
                         {% if 'node' in cred %}
-                        <strong>Node: </strong> {{cred["node"]}}
+                        <strong>Node: </strong> {{cred["node"]}}<br>
                         {% endif %}
                         {% if 'host' in cred %}
                         <strong>Host: </strong> {{cred["host"]}}

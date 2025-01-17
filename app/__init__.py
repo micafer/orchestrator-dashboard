@@ -522,7 +522,7 @@ def create_app(oidc_blueprint=None):
                         site_info += "Tenant: " + infra_data["site"]["tenant"]
 
                 if "node" in infra_data["site"] and infra_data["site"]["node"]:
-                    site_info += "Node: " + infra_data["site"]["node"]
+                    site_info += "<br>Node: " + infra_data["site"]["node"]
                 if "subscription_id" in infra_data["site"] and infra_data["site"]["subscription_id"]:
                     site_info += "Subs. ID: " + infra_data["site"]["subscription_id"]
                 if "vo" in infra_data["site"] and infra_data["site"]["vo"]:
