@@ -196,13 +196,15 @@ $(document).ready(function () {
     $(".updateBtn").click(function () {
         var button = $(event.relatedTarget) // Button that triggered the modal
         var cred_id = button.data('id')
-        // add spinner to button
-        $(this).parent().find(".updateBtn").addClass("disabled", true);
-        $(this).addClass("updateBtn", true);
-        if (cred_id == "") {
-          $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding ...` );
-        } else {
-          $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...` );
+        if ($('#credForm')[0].checkValidity()) {
+          // add spinner to button
+          $(this).parent().find(".updateBtn").addClass("disabled", true);
+          $(this).addClass("updateBtn", true);
+          if (cred_id == "") {
+            $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding ...` );
+          } else {
+            $(this).html( `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...` );
+          }
         }
     });
 });
