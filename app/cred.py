@@ -64,7 +64,7 @@ class Credentials:
                 if isequal:
                     return 1, "Credentials already available."
 
-                if new_cred["type"] == "EUNode":
+                if new_cred["type"] in ["EUNode", "EUNodeCont"]:
                     if new_cred["node"] == cred["node"]:
                         return 2, ("This site has already a Credential with the same EU Node site." +
                                    " This may cause problems authenticating with the site." +
