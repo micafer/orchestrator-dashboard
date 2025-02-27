@@ -130,7 +130,9 @@ def create_app(oidc_blueprint=None):
         @wraps(f)
         def decorated_function(*args, **kwargs):
 
-            if settings.debug_oidc_token:
+            if 'token' in session:
+                oidc_blueprint.session.token = {'access_token': session['token']}
+            elif settings.debug_oidc_token:
                 oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
             else:
                 try:
@@ -191,7 +193,11 @@ def create_app(oidc_blueprint=None):
                     if v['description'].find(template_filter) != -1 and "parents" not in tosca["metadata"]:
                         templates[k] = v
 
-        if settings.debug_oidc_token:
+        # To make easier test endpoints
+        if 'token' in request.args:
+            session["token"] = request.args['token']
+            oidc_blueprint.session.token = {'access_token': request.args['token']}
+        elif settings.debug_oidc_token:
             oidc_blueprint.session.token = {'access_token': settings.debug_oidc_token}
         else:
             if not oidc_blueprint.session.authorized:
@@ -409,7 +415,7 @@ def create_app(oidc_blueprint=None):
                     vminfo.systems[0].addFeature(Feature("cpu.count", ">=", cpu),
                                                  conflict="other", missing="other")
                     vminfo.systems[0].delValue("memory.size")
-                    vminfo.systems[0].addFeature(Feature("memory.size", ">=", memory, "GB"),
+                    vminfo.systems[0].addFeature(Feature("memory.size", ">=", memory, "GiB"),
                                                  conflict="other", missing="other")
                     if gpu > 0:
                         vminfo.systems[0].delValue("gpu.count")
@@ -418,7 +424,7 @@ def create_app(oidc_blueprint=None):
                     if disk_size > 0:
                         vminfo.systems[0].delValue("disks.free_size")
                         vminfo.systems[0].delValue("disks.0.free_size")
-                        vminfo.systems[0].addFeature(Feature("disks.free_size", ">=", disk_size, "GB"),
+                        vminfo.systems[0].addFeature(Feature("disks.free_size", ">=", disk_size, "GiB"),
                                                      conflict="other", missing="other")
                     response = im.resize_vm(infid, vmid, str(vminfo), auth_data)
                 else:

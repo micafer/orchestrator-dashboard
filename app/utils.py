@@ -210,7 +210,13 @@ def getUserAuthData(access_token, cred, userid, cred_id=None, full=False, add_ex
     for cred in creds:
         if cred['enabled'] and (cred_id is None or cred_id == cred['id'] or cred['id'] in extra_auth_ids):
             res += "\\nid = %s" % cred['id']
-            if cred['type'] == "EUNode":
+            if cred['type'] == "EUNodeCont":
+                # Add the EUNode provider as Kubernetes
+                res += "; type = Kubernetes; token = '%s';" % cred['token']
+                res += " host = https://api.%s.paas.open-science-cloud.ec.europa.eu:6443;" % cred['node']
+                res += " namespace = %s;" % cred['namespace']
+                res += " apps_dns = %s.open-science-cloud-user-apps.eu" % cred['node']
+            elif cred['type'] == "EUNode":
                 # Add the EUNode provider as OpenStack
                 res += "; type = OpenStack; auth_version = 3.x_appcred;"
                 res += " host = https://api.%s.iaas.open-science-cloud.ec.europa.eu:5000" % cred['node']
