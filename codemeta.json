@@ -6,7 +6,7 @@
     "@type": "SoftwareSourceCode",
     "identifier": "im-dashboard",
     "name": "Infrastructure Manager Dashboard",
-    "version": "2.5.7",
+    "version": "2.6.0",
     "description": "Infrastructure Manager - Simple Graphical UI",
     "license": "GNU General Public License v3.0",
     "author": [
