@@ -20,6 +20,7 @@
 # under the License.
 """Main Flask App file."""
 
+import datetime
 import yaml
 import io
 import os
@@ -1621,6 +1622,105 @@ def create_app(oidc_blueprint=None):
             return oidc_blueprint.session.token['access_token'], vault_info.get_vault_info(session['userid'])
         else:
             return session['userid']
+
+    @app.route('/stats')
+    @authorized_with_valid_token
+    def show_stats():
+        init_date = request.args.get('init_date')
+        end_date = request.args.get('end_date')
+        active = request.args.get('active')
+        today = datetime.datetime.today().date()
+
+        if not end_date:
+            end_date = str(today)
+
+        if not init_date:
+            init_date = str(today - datetime.timedelta(days=180))
+
+        access_token = oidc_blueprint.session.token['access_token']
+
+        auth_data = utils.getIMUserAuthData(access_token, cred, get_cred_id())
+        fedcloud_sites = None
+        inf_actives = []
+        # Add an element in the first date
+        infs = [0]
+        vms = [0]
+        cpus = [0]
+        mems = [0]
+        labels = ["%s 00:00:00" % init_date]
+        cloud_hosts = []
+        clouds = [""]
+        site_name = None
+        try:
+            for inf_stat in sorted(im.get_stats(auth_data, init_date, end_date),
+                                   key=lambda stat: stat['creation_date']):
+                if inf_stat['cloud_host']:
+                    # only load this data if a EGI Cloud site appears
+                    if fedcloud_sites is None:
+                        fedcloud_sites = {}
+                        for site in list(utils.getCachedSiteList().values()):
+                            site_host = urlparse(site['url'])[1].split(":")[0]
+                            fedcloud_sites[site_host] = site["name"]
+
+                    site_name = inf_stat['cloud_host']
+                    if site_name in fedcloud_sites:
+                        site_name = fedcloud_sites[site_name]
+                elif inf_stat['cloud_type']:
+                    site_name = inf_stat['cloud_type']
+
+                if site_name not in cloud_hosts:
+                    cloud_hosts.append(site_name)
+
+                if active:
+                    curr_date = datetime.datetime.strptime(inf_stat['creation_date'], "%Y-%m-%d %H:%M:%S")
+                    inf_list = list(inf_actives)
+                    for inf in inf_list:
+                        del_time = datetime.datetime.strptime(inf[4], "%Y-%m-%d %H:%M:%S")
+                        if del_time <= curr_date:
+                            infs.append(-1)
+                            vms.append(inf[0] * -1)
+                            mems.append(inf[1] * -1.0)
+                            cpus.append(inf[2] * -1)
+                            clouds.append(inf[3])
+                            labels.append(inf[4])
+                            inf_actives.remove(inf)
+
+                    inf_actives.append((inf_stat['vm_count'], (inf_stat['memory_size'] / 1024),
+                                        inf_stat['cpu_count'], site_name, "%s 12:00:00" % inf_stat['last_date']))
+
+                infs.append(1)
+                vms.append(inf_stat['vm_count'])
+                mems.append((inf_stat['memory_size'] / 1024))
+                cpus.append(inf_stat['cpu_count'])
+                labels.append(inf_stat['creation_date'])
+                clouds.append(site_name)
+
+            if active:
+                curr_date = datetime.datetime.strptime("%s 23:59:59" % end_date, "%Y-%m-%d %H:%M:%S")
+                for inf in inf_actives:
+                    del_time = datetime.datetime.strptime(inf[4], "%Y-%m-%d %H:%M:%S")
+                    if del_time <= curr_date:
+                        infs.append(-1)
+                        vms.append(inf[0])
+                        mems.append(inf[1])
+                        cpus.append(inf[2])
+                        clouds.append(inf[3])
+                        labels.append(inf[4])
+
+            # Add an element in the last date
+            infs.append(0)
+            vms.append(0)
+            mems.append(0)
+            cpus.append(0)
+            labels.append("%s 23:59:59" % end_date)
+            clouds.append("")
+
+        except Exception as ex:
+            flash("Error Getting Stats: %s." % ex, 'error')
+
+        return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels,
+                               today=str(today), init_date=init_date or "", end_date=end_date or "",
+                               cloud_hosts=cloud_hosts, clouds=clouds)
 
     return app
 

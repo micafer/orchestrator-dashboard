@@ -25,7 +25,7 @@ import requests
 
 class InfrastructureManager():
 
-    def __init__(self, im_url, timeout=60):
+    def __init__(self, im_url, timeout=120):
         self.im_url = im_url
         self.timeout = timeout
 
@@ -159,6 +159,22 @@ class InfrastructureManager():
             url += "?overwrite=1"
 
         return requests.post(url, headers=headers, timeout=self.timeout, data=new_auth)
+
+    def get_stats(self, auth_data, init_date=None, end_date=None):
+        headers = {"Authorization": auth_data}
+        url = "%s/stats" % self.im_url
+        if init_date:
+            url += "?init_date=%s" % init_date
+        if end_date:
+            if init_date:
+                url += "&"
+            else:
+                url += "?"
+            url += "end_date=%s" % end_date
+        response = requests.get(url, headers=headers, timeout=self.timeout)
+        response.raise_for_status()
+        stats = response.json()
+        return stats['stats']
 
     def remove_resources(self, infid, vm_list, auth_data):
         headers = {"Authorization": auth_data}
