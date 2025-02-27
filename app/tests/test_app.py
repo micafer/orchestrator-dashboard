@@ -41,7 +41,7 @@ class IMDashboardTests(unittest.TestCase):
         elif url == "/im/infrastructures/infid/vms/0":
             resp.ok = True
             resp.status_code = 200
-            resp.text = "system front (cpu.count = 1 and memory.size = 512 MB)"
+            resp.text = "system front (cpu.count = 1 and memory.size = 512 MiB)"
             radl = {"class": "system",
                     "cpu.arch": "x86_64",
                     "cpu.count_min": 1,
@@ -113,6 +113,20 @@ class IMDashboardTests(unittest.TestCase):
                                                  "instances": {"used": 1, "limit": 10},
                                                  "floating_ips": {"used": 1, "limit": 10},
                                                  "security_groups": {"used": 1, "limit": 10}}}
+        elif url == "/im/stats":
+            resp.ok = True
+            resp.status_code = 200
+            resp.json.return_value = {"stats": [{'creation_date': '2022-03-07 13:16:14',
+                                                 'tosca_name': 'kubernetes',
+                                                 'vm_count': 2,
+                                                 'cpu_count': 4,
+                                                 'memory_size': 1024,
+                                                 'cloud_type': 'OSCAR',
+                                                 'cloud_host': 'sharp-elbakyan5.im.grycap.net',
+                                                 'hybrid': False,
+                                                 'im_user': '__OPENID__mcaballer',
+                                                 'inf_id': '1',
+                                                 'last_date': '2022-03-23'}]}
         elif url == "/im/infrastructures/infid/authorization":
             resp.ok = True
             resp.status_code = 200
@@ -662,7 +676,25 @@ class IMDashboardTests(unittest.TestCase):
                         "instances": {"used": 1, "limit": 10},
                         "floating_ips": {"used": 1, "limit": 10},
                         "security_groups": {"used": 1, "limit": 10}}
-        self.assertEqual(expected_res, json.loads(res.data))
+        self.assertEquals(expected_res, json.loads(res.data))
+
+    @patch("app.utils.avatar")
+    @patch("app.utils.getIMUserAuthData")
+    @patch('requests.get')
+    @patch("app.appdb.get_sites")
+    def test_stats(self, get_sites, get, user_data, avatar):
+        user_data.return_value = "type = InfrastructureManager; token = access_token"
+        get.side_effect = self.get_response
+        self.login(avatar)
+        get_sites.return_value = {"SITE_NAME": {"url": "URL", "state": "", "id": "", "name": ""},
+                                  "SITE2": {"url": "URL2", "state": "CRITICAL", "id": "", "name": ""}}
+        res = self.client.get('/stats')
+        self.assertEqual(200, res.status_code)
+        self.assertNotIn(b'Error Getting Stats:', res.data)
+        self.assertIn(b'clouds.push("sharp-elbakyan5.im.grycap.net");', res.data)
+        self.assertIn(b'labels.push("2022-03-07 13:16:14");', res.data)
+        self.assertIn(b'const infs = [0, 1, 0];', res.data)
+        self.assertIn(b'const vms = [0, 2, 0];', res.data)
 
     @patch("app.utils.avatar")
     @patch("app.ssh_key.SSHKey.get_ssh_keys")
