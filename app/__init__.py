@@ -1727,7 +1727,7 @@ def create_app(oidc_blueprint=None):
 
         return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels,
                                today=str(today), init_date=init_date or "", end_date=end_date or "",
-                               cloud_hosts=cloud_hosts, clouds=clouds)
+                               cloud_hosts=cloud_hosts, clouds=clouds, active=active)
 
     return app
 
