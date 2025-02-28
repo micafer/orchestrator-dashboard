@@ -681,7 +681,7 @@ class IMDashboardTests(unittest.TestCase):
     @patch("app.utils.avatar")
     @patch("app.utils.getIMUserAuthData")
     @patch('requests.get')
-    @patch("app.appdb.get_sites")
+    @patch("app.utils.getCachedSiteList")
     def test_stats(self, get_sites, get, user_data, avatar):
         user_data.return_value = "type = InfrastructureManager; token = access_token"
         get.side_effect = self.get_response
