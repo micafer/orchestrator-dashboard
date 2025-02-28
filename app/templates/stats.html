@@ -5,6 +5,7 @@
 
 <script src="{{ url_for('static', filename='chart/chart.min.js') }}"></script>
 <script src="{{ url_for('static', filename='chart/chartjs-adapter-date-fns.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='chart/chartjs-plugin-zoom.min.js') }}"></script>
 
 <script>
   // Get raw data from stats
@@ -152,6 +153,25 @@
               ]
             };
 
+
+            const zoomOptions = {
+              limits: {
+                x: {min: 'original', max: 'original', minRange: 60 * 1000},
+              },
+              zoom: {
+                wheel: {
+                  enabled: true,
+                },
+                drag: {
+                  enabled: true,
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x'
+              }
+            };
+
             const config = {
               type: 'line',
               data: data,
@@ -166,7 +186,15 @@
                   mode: 'index',
                   intersect: false,
                 },
+                transitions: {
+                  zoom: {
+                    animation: {
+                      duration: 100
+                    }
+                  }
+                },
                 plugins: {
+                  zoom: zoomOptions,
                   title: {
                     display: true,
                     text: 'All Cloud Sites',
