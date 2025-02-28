@@ -91,9 +91,9 @@
             <div class="col-md-6 text-right">
               <!-- Button -->
               <form action="{{ url_for('show_stats') }}">
-                <div class="input-group text-right">
-                  <input type="checkbox" class="btn-check" id="active" autocomplete="off" name="active" value="1" {% if active %}checked{%endif%}>
+                <div class="input-group">
                   <label class="btn btn-outline-primary" for="active">Show Active</label><br>
+                  <input type="checkbox" class="btn-check" id="active" autocomplete="off" name="active" value="1" {% if active %}checked{%endif%}>
                   <select class="form-control col-md-4" name="cloud_host" onchange="javascript:filterByCloud(this.value)">
                     <option value="">- Cloud Site -</option>
                     {% for host in cloud_hosts %}
