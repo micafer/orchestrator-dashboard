@@ -1682,7 +1682,7 @@ def create_app(oidc_blueprint=None):
                     inf_list = list(inf_actives)
                     for inf in inf_list:
                         del_time = datetime.datetime.strptime(inf[4], "%Y-%m-%d %H:%M:%S")
-                        if del_time <= curr_date:
+                        if inf[5] and del_time <= curr_date:
                             infs.append(-1)
                             vms.append(inf[0] * -1)
                             mems.append(inf[1] * -1.0)
@@ -1692,7 +1692,8 @@ def create_app(oidc_blueprint=None):
                             inf_actives.remove(inf)
 
                     inf_actives.append((inf_stat['vm_count'], (inf_stat['memory_size'] / 1024),
-                                        inf_stat['cpu_count'], site_name, "%s 12:00:00" % inf_stat['last_date']))
+                                        inf_stat['cpu_count'], site_name, inf_stat['last_date'],
+                                        inf_stat['deleted']))
 
                 infs.append(1)
                 vms.append(inf_stat['vm_count'])
@@ -1705,11 +1706,11 @@ def create_app(oidc_blueprint=None):
                 curr_date = datetime.datetime.strptime("%s 23:59:59" % end_date, "%Y-%m-%d %H:%M:%S")
                 for inf in inf_actives:
                     del_time = datetime.datetime.strptime(inf[4], "%Y-%m-%d %H:%M:%S")
-                    if del_time <= curr_date:
+                    if inf[5] and del_time <= curr_date:
                         infs.append(-1)
-                        vms.append(inf[0])
-                        mems.append(inf[1])
-                        cpus.append(inf[2])
+                        vms.append(inf[0] * -1)
+                        mems.append(inf[1] * -1.0)
+                        cpus.append(inf[2] * -1)
                         clouds.append(inf[3])
                         labels.append(inf[4])
 
