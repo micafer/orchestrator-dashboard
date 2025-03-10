@@ -15,6 +15,7 @@
               <h4 class="font-weight-bold text-primary">Cloud Credentials</h4>
             </div>
             <div class="col-md-6 text-end">
+              <a class="btn btn-secondary" href="{{ url_for('get_auth_file') }}" role="button"><span class="fa-solid fa-file-export"></span> CLI auth file</a>
               {% if vault %}
               <a class="btn btn-info" data-bs-toggle="modal" data-bs-target="#vaultInfo" href="#" role="button"><span class="fas fa-vault"></span> Vault Info</a>
               {% endif %}
