@@ -328,21 +328,37 @@
 
                         <div class="row form-group">
                           <div class="col">
-                            CPU Number: <input name="cpu" class="col-sm-12" type="number" min="0" step="1" value="{{ cpu }}" required/>
+                            <label for="cpu" class="col-form-label">CPU Number</label>
+                            <input name="cpu" class="form-control" type="number" min="0" step="1" value="{{ cpu }}" required/>
                           </div>
                           <div class="col">
                             {% set memory_parts = memory.split() %}
-                            Memory (GiB): <input name="memory" class="col-sm-12" type="number" min="0" step="0.01" value="{{ memory_parts[0] | float }}" required/>
+                            <label for="memory" class="col-form-label">Memory</label>
+                            <div class="d-flex align-items-center">
+                              <input name="memory" class="form-control me-1" type="number" min="0" step="0.01" value="{{ memory_parts[0] | float }}" required/>
+                              <select name="memory_unit" class="form-select" required>
+                                <option value="GB" {% if memory_parts[1] == "GB" %} selected {% endif %}>GB</option>
+                                <option value="GiB" {% if memory_parts[1] == "GiB" %} selected {% endif %}>GiB</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
 
                         <div class="row form-group">
                           <div class="col">
-                            GPU Number: <input name="gcpu" class="col-sm-12" type="number" min="0" step="1" value="{{ gpu }}"/>
+                            <label for="gpu" class="col-form-label">GPU Number</label>
+                            <input name="gpu" class="form-control" type="number" min="0" step="1" value="{{ gpu }}"/>
                           </div>
                           <div class="col">
                           {% set disk_size_parts = disk_size.split() %}
-                            Disk Size (GiB): <input name="disk_size" class="col-sm-12" type="number" min="0" step="0.01" value="{{ disk_size_parts[0] | float  }}"/>
+                            <label for="disk_size" class="col-form-label">Disk Size</label>
+                            <div class="d-flex align-items-center">
+                              <input name="disk_size" class="form-control me-1" type="number" min="0" step="0.01" value="{{ disk_size_parts[0] | float }}" required/>
+                              <select name="disk_unit" class="form-select" required>
+                                <option value="GB" {% if disk_size_parts[1] == "GB" %} selected {% endif %}>GB</option>
+                                <option value="GiB" {% if disk_size_parts[1] == "GiB" %} selected {% endif %}>GiB</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
 
