@@ -41,7 +41,7 @@ from app import utils, appdb, db
 from app.vault_info import VaultInfo
 from oauthlib.oauth2.rfc6749.errors import InvalidTokenError, TokenExpiredError, InvalidGrantError, MissingTokenError
 from werkzeug.exceptions import Forbidden
-from flask import Flask, json, render_template, request, redirect, url_for, flash, session, g, make_response
+from flask import Flask, json, render_template, request, redirect, send_file, url_for, flash, session, g, make_response
 from markupsafe import Markup
 from functools import wraps
 from urllib.parse import urlparse
@@ -1730,6 +1730,14 @@ def create_app(oidc_blueprint=None):
         return render_template('stats.html', infs=infs, vms=vms, cpus=cpus, mems=mems, labels=labels,
                                today=str(today), init_date=init_date or "", end_date=end_date or "",
                                cloud_hosts=cloud_hosts, clouds=clouds, active=active)
+
+    @app.route('/auth_file')
+    @authorized_with_valid_token
+    def get_auth_file():
+        access_token = oidc_blueprint.session.token['access_token']
+        auth_data = utils.getUserAuthData(access_token, cred, get_cred_id(), add_extra_auth=False)
+        buffer = io.BytesIO(auth_data.replace("\\n", "\n").encode())
+        return send_file(buffer, mimetype="text/plain", as_attachment=True, download_name="auth.dat")
 
     return app
 
